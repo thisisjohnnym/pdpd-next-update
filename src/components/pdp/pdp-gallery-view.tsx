@@ -57,6 +57,8 @@ type PdpGalleryPortraitSlideProps = {
   insetMargins?: boolean;
   shopTheLookId?: string;
   onOpenShopTheLook?: (lookId: string) => void;
+  reserveBottomCta?: boolean;
+  objectPosition?: string;
 };
 
 /** Immersive 4:5 portrait — full-bleed by default, optional 12px white inset */
@@ -68,6 +70,8 @@ function PdpGalleryPortraitSlide({
   insetMargins = false,
   shopTheLookId,
   onOpenShopTheLook,
+  reserveBottomCta = false,
+  objectPosition = "top",
 }: PdpGalleryPortraitSlideProps) {
   return (
     <section
@@ -76,6 +80,7 @@ function PdpGalleryPortraitSlide({
           ? "relative w-full shrink-0 bg-white p-3"
           : "relative w-full shrink-0 overflow-hidden bg-[#e9e9e9]"
       }
+      style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
         <Image
@@ -83,7 +88,8 @@ function PdpGalleryPortraitSlide({
           alt={alt}
           fill
           priority={priority}
-          className={`object-cover object-top ${scale}`}
+          className={`object-cover ${scale}`}
+          style={{ objectPosition }}
           sizes="100vw"
         />
 
@@ -138,14 +144,17 @@ export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }
             alt={slide.alt}
             priority={index === 0}
             scale={
-              slide.src.includes("interior-packed") ||
+              slide.scale ??
+              (slide.src.includes("interior-packed") ||
               slide.src.includes("interior-packed-bleed")
                 ? "scale-[1.12]"
-                : "scale-[1.08]"
+                : "scale-[1.08]")
             }
             shopTheLookId={slide.shopTheLookId}
             onOpenShopTheLook={setShopLookId}
             insetMargins={slide.insetMargins}
+            reserveBottomCta={index === PDP_GALLERY_SLIDES.length - 1}
+            objectPosition={slide.objectPosition}
           />,
         ];
       })}

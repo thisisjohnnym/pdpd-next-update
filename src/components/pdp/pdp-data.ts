@@ -20,6 +20,9 @@ export type PdpGalleryImmersiveSlide = {
   shopTheLookId?: string;
   /** 12px white inset — matches grid margin; only for select lifestyle shots */
   insetMargins?: boolean;
+  /** Image focal point within 4:5 crop */
+  objectPosition?: string;
+  scale?: string;
 };
 
 export type PdpGalleryEditorialSlide = {
@@ -37,7 +40,11 @@ export type PdpGallerySlide = PdpGalleryImmersiveSlide | PdpGalleryEditorialSlid
 export const PDP_GALLERY_HERO_FOLLOWUP_IMAGE =
   "/images/gallery/tabby-patio-pink-dress.png";
 
-/** Tabby 26 gallery — portrait, portrait, editorial break (+ heritage) */
+/** Product immersive — below details editorial */
+export const PDP_GALLERY_PRODUCT_IMMERSIVE =
+  "/images/gallery/tabby-product-immersive.png";
+
+/** Tabby 26 gallery — portrait, portrait, editorial, product immersive */
 export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
   {
     type: "immersive",
@@ -57,6 +64,13 @@ export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
     alt: "Tabby 26 front view with gold C clasp and chain strap",
     caption:
       "The details behind the icon – explore the quilting, craftsmanship, and signature finishes that make Tabby unmistakably Coach.",
+  },
+  {
+    type: "immersive",
+    src: PDP_GALLERY_PRODUCT_IMMERSIVE,
+    alt: "Tabby 26 black quilted shoulder bag with gold C clasp and chain strap",
+    objectPosition: "center 72%",
+    scale: "scale-100",
   },
 ];
 
