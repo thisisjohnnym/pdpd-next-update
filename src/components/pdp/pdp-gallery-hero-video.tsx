@@ -108,7 +108,7 @@ export function PdpGalleryHeroVideo({
         >
           <MaterialIcon
             name={isPlaying ? "pause" : "play_arrow"}
-            size={22}
+            size={24}
             className="text-neutral-900"
           />
         </button>

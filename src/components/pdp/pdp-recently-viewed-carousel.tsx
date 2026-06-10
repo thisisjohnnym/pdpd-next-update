@@ -77,7 +77,7 @@ export function PdpRecentlyViewedCarousel() {
                       className="font-extended mt-2 inline-flex items-center gap-0.5 text-[11px] tracking-[0.2px] text-black"
                     >
                       View again
-                      <MaterialIcon name="arrow_forward" size={16} className="text-black" />
+                      <MaterialIcon name="arrow_forward" size={18} className="text-black" />
                     </button>
                   </div>
                 </li>

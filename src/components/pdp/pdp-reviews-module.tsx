@@ -139,7 +139,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                   className="font-extended inline-flex shrink-0 items-center gap-1 rounded-full border border-neutral-300 px-3 py-2 text-xs tracking-[0.2px] text-black"
                 >
                   <span className="translate-y-[1.5px]">Write a review</span>
-                  <MaterialIcon name="edit" size={16} className="text-black" />
+                  <MaterialIcon name="edit" size={18} className="text-black" />
                 </button>
               </div>
 
