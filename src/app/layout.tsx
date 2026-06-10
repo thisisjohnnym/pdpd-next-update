@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -39,6 +39,12 @@ const helveticaNeueLTProExtended = localFont({
 export const metadata: Metadata = {
   title: "Coach Outlet",
   description: "Coach Outlet product detail page",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

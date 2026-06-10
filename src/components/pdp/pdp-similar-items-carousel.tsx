@@ -8,7 +8,12 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
+import {
+  pdpCarouselCard15Class,
+  pdpCarouselScrollClass,
+} from "./pdp-carousel";
 import { PDP_SIMILAR_ITEMS } from "./pdp-data";
+import { pdpType } from "./pdp-type";
 
 type PdpSimilarItemsCarouselProps = {
   onAddToBag: () => void;
@@ -35,11 +40,14 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
       className={pdpModuleSectionClass()}
     >
       <PageGrid fullWidth>
-        <GridItem mobile={12} desktop={24}>
+        <GridItem mobile={12} desktop={24} className="min-w-0 overflow-visible">
           <h2 className={pdpModuleHeadingClass()}>Similar items</h2>
 
           <ul
-            className="m-0 flex list-none gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory"
+            className={cn(
+              "m-0 flex list-none gap-3",
+              pdpCarouselScrollClass,
+            )}
             aria-label="Similar items"
           >
             {PDP_SIMILAR_ITEMS.map((item) => {
@@ -48,7 +56,7 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
               return (
                 <li
                   key={item.id}
-                  className="flex w-[148px] shrink-0 snap-start flex-col snap-always"
+                  className={cn("flex flex-col", pdpCarouselCard15Class)}
                 >
                   <div className="relative aspect-square w-full overflow-hidden bg-neutral-100">
                     <Image
@@ -56,14 +64,14 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
                       alt={item.imageAlt}
                       fill
                       className="object-cover object-center"
-                      sizes="148px"
+                      sizes="(max-width: 1023px) 66vw, 33vw"
                     />
                   </div>
 
-                  <p className="font-extended mt-3 line-clamp-2 text-xs leading-snug tracking-[0.2px] text-black">
+                  <p className={`font-extended mt-3 line-clamp-2 text-black ${pdpType.body}`}>
                     {item.name}
                   </p>
-                  <p className="font-extended mt-1 text-xs tracking-[0.2px] text-black">
+                  <p className={`font-extended mt-1 text-black ${pdpType.label}`}>
                     {item.price}
                   </p>
 
@@ -72,13 +80,14 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
                     onClick={() => handleAdd(item.id)}
                     disabled={added}
                     className={cn(
-                      "font-extended mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full py-2.5 text-xs tracking-[0.2px] transition-colors",
+                      "font-extended mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full py-3 transition-colors",
+                      pdpType.body,
                       added
                         ? "bg-neutral-100 text-neutral-500"
                         : "bg-black text-white",
                     )}
                   >
-                    <span className="translate-y-[1.5px]">
+                    <span>
                       {added ? "Added" : "Add to Bag"}
                     </span>
                     {!added ? (

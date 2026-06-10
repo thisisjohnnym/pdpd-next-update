@@ -14,6 +14,7 @@ import {
   type PdpBundleAddPayload,
   type PdpBundleItem,
 } from "./pdp-data";
+import { pdpType } from "./pdp-type";
 
 function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -33,7 +34,33 @@ type BundleRowProps = {
   onToggle: (id: string) => void;
 };
 
-function BundleRow({ item, selected, onToggle }: BundleRowProps) {
+function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
+  return (
+    <div className="flex items-center gap-3.5 border border-black bg-neutral-50 p-4 ring-1 ring-inset ring-black">
+      <span className="relative size-16 shrink-0 overflow-hidden bg-neutral-100">
+        <Image
+          src={item.imageSrc}
+          alt={item.imageAlt}
+          fill
+          className="object-cover object-center"
+          sizes="64px"
+        />
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className={`font-extended block text-black ${pdpType.body}`}>
+          {item.name}
+        </span>
+      </span>
+
+      <span className={`font-extended shrink-0 text-black ${pdpType.label}`}>
+        {formatPrice(item.price)}
+      </span>
+    </div>
+  );
+}
+
+function AddonBundleRow({ item, selected, onToggle }: BundleRowProps) {
   return (
     <button
       type="button"
@@ -70,17 +97,12 @@ function BundleRow({ item, selected, onToggle }: BundleRowProps) {
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="font-extended block text-xs leading-snug tracking-[0.2px] text-black">
+        <span className={`font-extended block text-black ${pdpType.body}`}>
           {item.name}
         </span>
-        {item.locked ? (
-          <span className="mt-0.5 block text-[11px] tracking-[0.2px] text-neutral-500">
-            This item
-          </span>
-        ) : null}
       </span>
 
-      <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black">
+      <span className={`font-extended shrink-0 text-black ${pdpType.label}`}>
         {formatPrice(item.price)}
       </span>
     </button>
@@ -129,6 +151,9 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
     });
   };
 
+  const primaryItem = PDP_BUNDLE_ITEMS.find((item) => item.locked);
+  const addonItems = PDP_BUNDLE_ITEMS.filter((item) => !item.locked);
+
   const handleAddBundle = () => {
     if (selectedItems.length === 0) {
       return;
@@ -153,19 +178,25 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
             <h2 className={pdpModuleHeadingClass({ lead: false })}>Build your bundle</h2>
 
             <div className="flex flex-col gap-3">
-              {PDP_BUNDLE_ITEMS.map((item) => (
-                <BundleRow
-                  key={item.id}
-                  item={item}
-                  selected={selectedIds.has(item.id)}
-                  onToggle={toggleItem}
-                />
-              ))}
+              {primaryItem ? <PrimaryBundleCard item={primaryItem} /> : null}
+
+              {addonItems.length ? (
+                <div className="flex flex-col gap-2">
+                  {addonItems.map((item) => (
+                    <AddonBundleRow
+                      key={item.id}
+                      item={item}
+                      selected={selectedIds.has(item.id)}
+                      onToggle={toggleItem}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
 
-            <div className="flex items-end justify-between gap-4 border-t border-neutral-200 pt-5">
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="font-extended m-0 text-xs tracking-[0.2px] text-neutral-500">
+                <p className={`font-extended m-0 text-neutral-500 ${pdpType.label}`}>
                   {justAdded
                     ? `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} added to bag`
                     : `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} selected`}
@@ -194,7 +225,7 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
                   : "bg-black text-white",
               )}
             >
-              <span className="translate-y-[1.5px]">
+              <span>
                 {justAdded
                   ? "Added to bag"
                   : `Add bundle to bag (${selectedItems.length})`}

@@ -27,23 +27,23 @@ export function pdpModuleSectionClass({
     first && "pt-12",
     !first &&
       rhythm === "compact" &&
-      "border-t border-neutral-100 pt-9 pb-4",
+      "pt-9 pb-4",
     !first &&
       rhythm === "default" &&
-      "border-t border-neutral-100 pt-16 pb-6",
+      "pt-16 pb-6",
     !first &&
       rhythm === "roomy" &&
-      "border-t border-neutral-100 pt-20 pb-8",
+      "pt-20 pb-8",
     !first &&
       rhythm === "break" &&
-      "border-t border-neutral-100 pt-24 pb-10",
+      "pt-24 pb-10",
   );
 }
 
-/** Module title — extra lead before content for clearer hierarchy */
+/** Module title — bold extended for section anchoring */
 export function pdpModuleHeadingClass({ lead = true }: { lead?: boolean } = {}) {
   return cn(
-    "font-extended m-0 text-base tracking-[0.2px] text-black",
+    "font-extended m-0 text-base font-bold tracking-[0.2px] text-black",
     lead && "mb-5",
   );
 }

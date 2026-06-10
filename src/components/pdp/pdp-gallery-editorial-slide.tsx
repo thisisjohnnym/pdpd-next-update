@@ -1,8 +1,10 @@
 import Image from "next/image";
 
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
+import { cn } from "@/lib/cn";
 
 import { BOTTOM_CTA_OFFSET } from "./pdp-gallery-view";
+import { pdpType } from "./pdp-type";
 
 type PdpGalleryEditorialSlideProps = {
   src: string;
@@ -10,6 +12,10 @@ type PdpGalleryEditorialSlideProps = {
   caption: string;
   secondarySrc?: string;
   secondaryAlt?: string;
+  learnMore?: {
+    label: string;
+    href: string;
+  };
   /** Extra bottom inset for the fixed add-to-bag bar */
   reserveBottomCta?: boolean;
 };
@@ -21,12 +27,13 @@ export function PdpGalleryEditorialSlide({
   caption,
   secondarySrc,
   secondaryAlt,
+  learnMore,
   reserveBottomCta = false,
 }: PdpGalleryEditorialSlideProps) {
   return (
     <section
       data-header-surface="light"
-      className="relative flex w-full shrink-0 flex-col bg-white pt-3 pb-3 lg:pt-5 lg:pb-5"
+      className="relative flex w-full shrink-0 flex-col bg-white py-3 lg:py-5"
       style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
     >
       <PageGrid fullWidth>
@@ -42,11 +49,29 @@ export function PdpGalleryEditorialSlide({
               />
             </div>
 
-            <p className="font-extended m-0 w-full text-xs leading-[1.35] tracking-[0.2px] text-black">
-              {caption}
-            </p>
+            <div
+              className={cn(
+                "flex w-full flex-col items-start gap-3",
+                learnMore && "pb-6 lg:pb-8",
+              )}
+            >
+              <p className={`font-extended m-0 w-full text-black ${pdpType.caption}`}>
+                {caption}
+              </p>
 
-            {secondarySrc && (
+              {learnMore ? (
+                <a
+                  href={learnMore.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full bg-neutral-100 px-4 py-2.5 text-sm tracking-[0.2px] text-black transition-colors active:bg-neutral-200/80"
+                >
+                  <span className="font-extended translate-y-px">{learnMore.label}</span>
+                </a>
+              ) : null}
+            </div>
+
+            {secondarySrc ? (
               <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
                 <Image
                   src={secondarySrc}
@@ -56,7 +81,7 @@ export function PdpGalleryEditorialSlide({
                   sizes="100vw"
                 />
               </div>
-            )}
+            ) : null}
           </div>
         </GridItem>
       </PageGrid>

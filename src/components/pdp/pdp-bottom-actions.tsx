@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 
 import { PdpColorSelector } from "./pdp-color-selector";
 import { PDP_COLORS } from "./pdp-data";
+import { useBrowserBottomInset } from "./use-browser-bottom-inset";
 
 const HERO_TOP_SCROLL = 32;
 
@@ -51,9 +52,13 @@ export function PdpBottomActions({
   onAddToBag,
 }: PdpBottomActionsProps) {
   const isHeroTop = useIsScrollAtTop();
+  const browserBottomInset = useBrowserBottomInset();
 
   return (
-    <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-30">
+    <footer
+      className="pointer-events-none fixed inset-x-0 z-30 transition-[bottom] duration-200 ease-out"
+      style={{ bottom: browserBottomInset }}
+    >
       <div
         aria-hidden
         className={cn(
@@ -90,7 +95,7 @@ export function PdpBottomActions({
                   : "border border-white/50 bg-white/75 backdrop-blur-md",
               )}
             >
-              <span className="translate-y-[1.5px]">Add to Bag</span>
+              <span>Add to Bag</span>
               <MaterialIcon name="add" size={20} className="text-neutral-900" />
             </button>
           </div>

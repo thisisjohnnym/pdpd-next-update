@@ -5,7 +5,6 @@ import Image from "next/image";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 
-import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PDP_GALLERY_MORE_PHOTOS } from "./pdp-data";
 
 const PREVIEW_COUNT = 3;
@@ -22,7 +21,7 @@ export function PdpGalleryViewMorePhotos({ onOpen }: PdpGalleryViewMorePhotosPro
   return (
     <section
       data-header-surface="light"
-      className={pdpModuleSectionClass({ first: true })}
+      className="relative w-full shrink-0 bg-white pt-5"
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
@@ -54,7 +53,7 @@ export function PdpGalleryViewMorePhotos({ onOpen }: PdpGalleryViewMorePhotosPro
 
             <span className="min-w-0 flex-1">
               <span className="block text-sm leading-tight text-neutral-900">
-                View more photos
+                View more media
               </span>
               {remaining > 0 ? (
                 <span className="mt-0.5 block text-xs text-neutral-500">

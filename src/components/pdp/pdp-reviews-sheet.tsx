@@ -246,7 +246,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
 
           <div className="flex flex-col gap-6">
             <section className="flex flex-col gap-2.5">
-              <p className="font-extended text-base tracking-[0.4px] text-black">
+              <p className="font-extended text-base font-bold tracking-[0.4px] text-black">
                 {PDP_REVIEWS_AI_SUMMARY.headline}
               </p>
               <p className="font-extended text-sm leading-[1.35] tracking-[0.2px] text-[#4a4a4a]">
@@ -266,7 +266,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
 
             <section className="flex flex-col gap-4 pt-1">
               <div className="flex items-center justify-between gap-4">
-                <p className="font-extended text-base tracking-[0.4px] text-black">
+                <p className="font-extended text-base font-bold tracking-[0.4px] text-black">
                   Customer photos
                 </p>
                 <button

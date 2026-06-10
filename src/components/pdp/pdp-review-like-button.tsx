@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
+import { pdpType } from "./pdp-type";
 import { cn } from "@/lib/cn";
 
 type PdpReviewLikeButtonProps = {
@@ -43,7 +44,7 @@ export function PdpReviewLikeButton({ initialLikes }: PdpReviewLikeButtonProps) 
           liked && "animate-heart-pop",
         )}
       />
-      <span className="font-extended text-[11px] tracking-[0.2px] text-neutral-600">
+      <span className={`font-extended text-neutral-600 ${pdpType.micro}`}>
         {count}
       </span>
     </button>

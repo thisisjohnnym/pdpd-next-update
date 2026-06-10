@@ -91,7 +91,7 @@ export function PdpOverlayHeader({ bagCount = 0 }: { bagCount?: number }) {
                     isLight ? "bg-white text-black" : "bg-black text-white",
                   )}
                 >
-                  <span className="translate-y-[1.5px]">
+                  <span>
                     {bagCount > 9 ? "9+" : bagCount}
                   </span>
                 </span>

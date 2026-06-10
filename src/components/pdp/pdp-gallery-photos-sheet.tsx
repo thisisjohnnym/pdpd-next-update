@@ -49,7 +49,7 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
     >
       <button
         type="button"
-        aria-label="Close photo gallery"
+        aria-label="Close media gallery"
         className="absolute inset-0 bg-black/45 transition-opacity"
         onClick={onClose}
         tabIndex={open ? 0 : -1}
@@ -73,7 +73,7 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
             id={titleId}
             className="font-extended m-0 text-xl tracking-[0.4px] text-black"
           >
-            All photos
+            All media
           </h2>
           <button
             type="button"

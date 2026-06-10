@@ -4,6 +4,7 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 
 import { BOTTOM_CTA_OFFSET } from "./pdp-gallery-view";
 import { PDP_PRODUCT } from "./pdp-data";
+import { pdpType } from "./pdp-type";
 import {
   isHeroOverlayVisible,
   useHeroScrollOpacity,
@@ -38,14 +39,14 @@ export function PdpGalleryProductHud() {
           <GridItem mobile={12} desktop={24}>
             <div className="font-extended flex items-start justify-between gap-4 tracking-[0.2px] text-white">
               <div className="flex min-w-0 flex-col gap-0.5">
-                <p className="text-base font-normal leading-tight text-white">
+                <p className="text-lg font-bold leading-tight text-white">
                   {PDP_PRODUCT.name}
                 </p>
-                <p className="text-xs font-normal leading-snug text-white/60">
+                <p className={`font-normal leading-snug text-white/60 ${pdpType.label}`}>
                   {PDP_PRODUCT.subtitle}
                 </p>
               </div>
-              <p className="shrink-0 pt-px text-sm font-normal leading-tight">
+              <p className="shrink-0 pt-px text-base font-bold leading-tight">
                 {PDP_PRODUCT.price}
               </p>
             </div>

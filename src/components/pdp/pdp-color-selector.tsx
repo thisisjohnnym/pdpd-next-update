@@ -144,7 +144,7 @@ function PdpColorDropup({
           color={selected}
           sizeClass="size-8 ring-2 ring-white/70 ring-offset-1 ring-offset-[#353535]"
         />
-        <span className="min-w-0 flex-1 translate-y-[1.5px] truncate text-left">
+        <span className="min-w-0 flex-1 truncate text-left">
           {selected.name}
         </span>
         <MaterialIcon

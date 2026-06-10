@@ -7,6 +7,14 @@ import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_HERO_VIDEO } from "./pdp-data";
 
+function videoMimeType(src: string) {
+  if (src.endsWith(".webm")) {
+    return "video/webm";
+  }
+
+  return "video/mp4";
+}
+
 type PdpGalleryHeroVideoProps = {
   className?: string;
   isActive?: boolean;
@@ -26,7 +34,9 @@ export function PdpGalleryHeroVideo({
 }: PdpGalleryHeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
+  const userMutedRef = useRef(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -83,6 +93,20 @@ export function PdpGalleryHeroVideo({
     video.pause();
   };
 
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    userMutedRef.current = !userMutedRef.current;
+    video.muted = userMutedRef.current;
+    setIsMuted(userMutedRef.current);
+  };
+
+  const controlButtonClass =
+    "flex size-11 items-center justify-center rounded-full border border-white/50 bg-white/75 text-neutral-900 backdrop-blur-md";
+
   return (
     <div className="relative size-full">
       <video
@@ -96,22 +120,43 @@ export function PdpGalleryHeroVideo({
         onClick={showControls ? togglePlayback : undefined}
         className={cn(className, showControls && "cursor-pointer")}
       >
-        <source src={src} type="video/webm" />
+        <source src={src} type={videoMimeType(src)} />
       </video>
 
       {showControls ? (
-        <button
-          type="button"
-          onClick={togglePlayback}
-          aria-label={isPlaying ? "Pause 360 video" : "Play 360 video"}
-          className="absolute bottom-4 right-4 flex size-11 items-center justify-center rounded-full border border-white/50 bg-white/75 text-neutral-900 backdrop-blur-md"
-        >
-          <MaterialIcon
-            name={isPlaying ? "pause" : "play_arrow"}
-            size={24}
-            className="text-neutral-900"
-          />
-        </button>
+        <div className="absolute bottom-4 right-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              toggleMute();
+            }}
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+            aria-pressed={!isMuted}
+            className={controlButtonClass}
+          >
+            <MaterialIcon
+              name={isMuted ? "volume_off" : "volume_up"}
+              size={24}
+              className="text-neutral-900"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              togglePlayback();
+            }}
+            aria-label={isPlaying ? "Pause video" : "Play video"}
+            className={controlButtonClass}
+          >
+            <MaterialIcon
+              name={isPlaying ? "pause" : "play_arrow"}
+              size={24}
+              className="text-neutral-900"
+            />
+          </button>
+        </div>
       ) : null}
     </div>
   );

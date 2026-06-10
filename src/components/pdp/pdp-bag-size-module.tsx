@@ -13,10 +13,6 @@ import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-secti
 export function PdpBagSizeModule() {
   const [activeId, setActiveId] = useState(PDP_BAG_SIZE.hotspots[0].id);
 
-  const activeHotspot =
-    PDP_BAG_SIZE.hotspots.find((hotspot) => hotspot.id === activeId) ??
-    PDP_BAG_SIZE.hotspots[0];
-
   return (
     <section
       data-header-surface="light"
@@ -28,13 +24,15 @@ export function PdpBagSizeModule() {
             <h2 className={pdpModuleHeadingClass({ lead: false })}>{PDP_BAG_SIZE.title}</h2>
 
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e9e9]">
-              <Image
-                src={PDP_BAG_SIZE.imageSrc}
-                alt={PDP_BAG_SIZE.imageAlt}
-                fill
-                className="object-contain object-bottom"
-                sizes="100vw"
-              />
+              <div className="absolute inset-x-0 top-0 bottom-[10%]">
+                <Image
+                  src={PDP_BAG_SIZE.imageSrc}
+                  alt={PDP_BAG_SIZE.imageAlt}
+                  fill
+                  className="object-contain object-bottom"
+                  sizes="100vw"
+                />
+              </div>
 
               {PDP_BAG_SIZE.hotspots.map((hotspot, index) => {
                 const isActive = activeId === hotspot.id;
@@ -85,29 +83,6 @@ export function PdpBagSizeModule() {
                 );
               })}
             </div>
-
-            <div className="flex flex-col gap-4 border border-neutral-200 bg-neutral-50 px-4 py-5">
-              <div>
-                <p className="font-extended text-sm tracking-[0.2px] text-black">
-                  {activeHotspot.title}
-                </p>
-                <p className="mt-1 text-xs leading-[1.35] tracking-[0.2px] text-neutral-600">
-                  {activeHotspot.body}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {activeHotspot.fits.map((item) => (
-                  <span
-                    key={item}
-                    className="font-extended rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] tracking-[0.2px] text-black"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
           </div>
         </GridItem>
       </PageGrid>

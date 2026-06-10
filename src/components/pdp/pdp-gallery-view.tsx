@@ -11,7 +11,6 @@ import { PdpGalleryProductHud } from "./pdp-gallery-product-hud";
 import { PdpGalleryViewMorePhotos } from "./pdp-gallery-view-more-photos";
 import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
-import { PdpBagSizeModule } from "./pdp-bag-size-module";
 import { PdpBundleModule } from "./pdp-bundle-module";
 import { PdpCompareModule } from "./pdp-compare-module";
 import { PdpProductSearchModule } from "./pdp-product-search-module";
@@ -25,11 +24,12 @@ import {
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
 } from "./pdp-data";
-import type { PdpBundleAddPayload, PdpProductHotspot } from "./pdp-data";
+import type { PdpBundleAddPayload, PdpInfluencerCredit, PdpProductHotspot } from "./pdp-data";
+import { pdpType } from "./pdp-type";
 
 /** Space for fixed bottom CTAs (54px button + pt-2.5 + pb) */
 export const BOTTOM_CTA_OFFSET =
-  "calc(54px + 0.625rem + max(30px, env(safe-area-inset-bottom, 0px)))";
+  "calc(54px + 0.625rem + max(30px, env(safe-area-inset-bottom, 0px)) + var(--pdp-browser-bottom-inset, 0px))";
 
 const GALLERY_CLASS = "w-full";
 
@@ -46,7 +46,7 @@ function PdpHeroSlide({
   onOpenReviews?: () => void;
 }) {
   return (
-    <section className="relative h-[100dvh] w-full shrink-0 overflow-hidden bg-[#e9e9e9]">
+    <section className="relative h-[100dvh] w-full shrink-0 overflow-hidden bg-black">
       <Image
         src={src}
         alt={alt}
@@ -73,6 +73,7 @@ type PdpGalleryPortraitSlideProps = {
   scale?: string;
   insetMargins?: boolean;
   shopTheLookId?: string;
+  influencer?: PdpInfluencerCredit;
   onOpenShopTheLook?: (lookId: string) => void;
   reserveBottomCta?: boolean;
   objectPosition?: string;
@@ -87,6 +88,7 @@ function PdpGalleryPortraitSlide({
   scale = "scale-100",
   insetMargins = false,
   shopTheLookId,
+  influencer,
   onOpenShopTheLook,
   reserveBottomCta = false,
   objectPosition = "top",
@@ -97,7 +99,7 @@ function PdpGalleryPortraitSlide({
       className={
         insetMargins
           ? "relative w-full shrink-0 bg-white p-3"
-          : "relative w-full shrink-0 overflow-hidden bg-[#e9e9e9]"
+          : "relative w-full shrink-0 overflow-hidden bg-black"
       }
       data-header-surface={insetMargins ? "light" : undefined}
       style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
@@ -115,15 +117,28 @@ function PdpGalleryPortraitSlide({
 
         {hotspots?.length ? <PdpProductHotspots hotspots={hotspots} /> : null}
 
+        {influencer ? (
+          <a
+            href={influencer.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`absolute bottom-4 left-4 flex items-center gap-1 rounded-full border border-white/40 bg-black/35 py-2 pl-3 pr-3.5 text-white backdrop-blur-md transition-colors active:bg-black/50 ${pdpType.label}`}
+            aria-label={`View ${influencer.handle} on ${influencer.platform === "tiktok" ? "TikTok" : "Instagram"}`}
+          >
+            <span className="font-extended translate-y-px">{influencer.handle}</span>
+            <MaterialIcon name="north_east" size={18} className="text-white/90" />
+          </a>
+        ) : null}
+
         {shopTheLookId && onOpenShopTheLook ? (
           <button
             type="button"
             onClick={() => onOpenShopTheLook(shopTheLookId)}
-            className="font-extended absolute bottom-4 left-4 flex items-center rounded-full border border-white/50 bg-white/75 py-2.5 pl-3 pr-4 text-xs tracking-[0.2px] text-neutral-900 backdrop-blur-md"
+            className={`absolute bottom-4 left-4 flex items-center rounded-full border border-white/50 bg-white/75 py-2.5 pl-3 pr-4 text-neutral-900 backdrop-blur-md ${pdpType.label}`}
           >
-            <span className="flex translate-y-[1.5px] items-center gap-1.5">
+            <span className="flex items-center gap-1.5">
               <MaterialIcon name="checkroom" size={18} className="text-neutral-900" />
-              Shop the look
+              <span className="font-extended translate-y-px">Shop the look</span>
             </span>
           </button>
         ) : null}
@@ -137,13 +152,11 @@ function PdpGalleryVideoSlide({
   src,
   poster,
   alt,
-  label = "360° view",
   reserveBottomCta = false,
 }: {
   src: string;
   poster?: string;
   alt: string;
-  label?: string;
   reserveBottomCta?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -172,7 +185,7 @@ function PdpGalleryVideoSlide({
   return (
     <section
       ref={sectionRef}
-      className="relative w-full shrink-0 overflow-hidden bg-[#e9e9e9]"
+      className="relative w-full shrink-0 overflow-hidden bg-black"
       style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
@@ -184,11 +197,6 @@ function PdpGalleryVideoSlide({
           showControls
           className="size-full object-cover object-center"
         />
-
-        <div className="font-extended pointer-events-none absolute bottom-4 left-4 flex translate-y-[1.5px] items-center gap-1.5 rounded-full border border-white/50 bg-white/75 py-2.5 pl-3 pr-4 text-xs tracking-[0.2px] text-neutral-900 backdrop-blur-md">
-          <MaterialIcon name="360" size={18} className="text-neutral-900" />
-          {label}
-        </div>
       </div>
     </section>
   );
@@ -229,6 +237,7 @@ export function PdpGalleryView({
               caption={slide.caption}
               secondarySrc={slide.secondarySrc}
               secondaryAlt={slide.secondaryAlt}
+              learnMore={slide.learnMore}
             />,
           ];
         }
@@ -240,7 +249,6 @@ export function PdpGalleryView({
               src={slide.src}
               poster={slide.poster}
               alt={slide.alt}
-              label={slide.label}
             />,
           ];
         }
@@ -259,6 +267,7 @@ export function PdpGalleryView({
                 : "scale-[1.08]")
             }
             shopTheLookId={slide.shopTheLookId}
+            influencer={slide.influencer}
             onOpenShopTheLook={setShopLookId}
             insetMargins={slide.insetMargins}
             objectPosition={slide.objectPosition}
@@ -271,7 +280,6 @@ export function PdpGalleryView({
       <PdpSimilarItemsCarousel onAddToBag={() => onAddSimilarToBag?.()} />
       <PdpCompareModule selectedColorId={selectedColorId} />
       <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
-      <PdpBagSizeModule />
       <PdpReviewsModule
         onReadAll={onOpenReviews}
         onWriteReview={onOpenReviews}

@@ -121,7 +121,7 @@ export function PdpAddToBagSheet({
             </span>
             <h2
               id={titleId}
-              className="font-extended translate-y-[1.5px] text-base tracking-[0.2px] text-black"
+              className="font-extended text-base tracking-[0.2px] text-black"
             >
               {isBundle ? "Bundle added to your bag" : "Added to your bag"}
             </h2>
@@ -215,13 +215,13 @@ export function PdpAddToBagSheet({
               onClick={onClose}
               className="font-extended flex h-12 min-w-0 flex-1 items-center justify-center rounded-full border border-neutral-300 text-sm tracking-[0.2px] text-black"
             >
-              <span className="translate-y-[1.5px]">Keep shopping</span>
+              <span>Keep shopping</span>
             </button>
             <button
               type="button"
               className="font-extended flex h-12 min-w-0 flex-1 items-center justify-center rounded-full bg-black text-sm tracking-[0.2px] text-white"
             >
-              <span className="translate-y-[1.5px]">Checkout</span>
+              <span>Checkout</span>
             </button>
           </div>
 
@@ -271,7 +271,7 @@ export function PdpAddToBagSheet({
                               : "border border-neutral-300 text-black",
                           )}
                         >
-                          <span className="translate-y-[2.5px]">
+                          <span>
                             {added ? "Added" : "Quick add"}
                           </span>
                           {!added ? (

@@ -1,6 +1,6 @@
 export const PDP_PRODUCT = {
   name: "Tabby 26",
-  subtitle: "Our staple shoulder bag with pillow quilting",
+  subtitle: "Our staple shoulder bag with pillow quilting.",
   price: "$575",
   imageSrc: "/images/gallery/tabby-product-immersive.png",
   imageAlt: "Tabby 26 black quilted shoulder bag with gold C clasp and chain strap",
@@ -146,7 +146,7 @@ export const PDP_BAG_SIZE = {
     {
       id: "main",
       x: 38,
-      y: 58,
+      y: 50,
       label: "Main compartment",
       title: "Main compartment",
       body: "Room for your everyday carry without feeling overstuffed.",
@@ -155,7 +155,7 @@ export const PDP_BAG_SIZE = {
     {
       id: "size",
       x: 48,
-      y: 50,
+      y: 42,
       label: "Bag size",
       title: "Tabby 26 dimensions",
       body: "Structured at a mid-size scale — roomy enough for daily essentials, compact enough for evenings out.",
@@ -164,7 +164,7 @@ export const PDP_BAG_SIZE = {
     {
       id: "pocket",
       x: 62,
-      y: 68,
+      y: 60,
       label: "Slip pocket",
       title: "Interior slip pocket",
       body: "Keep small items easy to grab on the go.",
@@ -181,10 +181,18 @@ export type PdpSimilarItem = {
   imageAlt: string;
 };
 
+export type PdpCompareMaterialSwatch = {
+  src: string;
+  alt: string;
+  objectPosition?: string;
+};
+
 export type PdpCompareItem = PdpSimilarItem & {
   size: string;
   strap: string;
+  /** Accessible label — paired with material swatch clip */
   material: string;
+  materialSwatch: PdpCompareMaterialSwatch;
   closure: string;
 };
 
@@ -205,6 +213,11 @@ export const PDP_COMPARE_SELECTED: PdpCompareItem = {
   size: '10" W x 6" H x 3" D',
   strap: "Chain & leather",
   material: "Quilted leather",
+  materialSwatch: {
+    src: "/images/gallery/tabby-angle.png",
+    alt: "Close-up of quilted leather texture",
+    objectPosition: "center 40%",
+  },
   closure: "C clasp turn-lock",
 };
 
@@ -219,6 +232,11 @@ export const PDP_COMPARE_OPTIONS: PdpCompareItem[] = [
     size: '8.5" W x 5" H x 2.5" D',
     strap: "Chain & leather",
     material: "Quilted leather",
+    materialSwatch: {
+      src: "/images/gallery/tabby-angle.png",
+      alt: "Close-up of quilted leather texture",
+      objectPosition: "center 40%",
+    },
     closure: "C clasp turn-lock",
   },
   {
@@ -230,6 +248,11 @@ export const PDP_COMPARE_OPTIONS: PdpCompareItem[] = [
     size: '11" W x 7" H x 3" D',
     strap: "Leather shoulder",
     material: "Soft pebbled leather",
+    materialSwatch: {
+      src: "/images/gallery/tabby-on-model-front.png",
+      alt: "Close-up of soft pebbled leather texture",
+      objectPosition: "center 72%",
+    },
     closure: "Magnetic snap",
   },
   {
@@ -241,6 +264,11 @@ export const PDP_COMPARE_OPTIONS: PdpCompareItem[] = [
     size: '9" W x 6" H x 2" D',
     strap: "Chain crossbody",
     material: "Smooth leather",
+    materialSwatch: {
+      src: "/images/gallery/tabby-front-charm.png",
+      alt: "Close-up of smooth leather texture",
+      objectPosition: "center 55%",
+    },
     closure: "Turn-lock clasp",
   },
   {
@@ -252,6 +280,11 @@ export const PDP_COMPARE_OPTIONS: PdpCompareItem[] = [
     size: '10.5" W x 6.5" H x 3" D',
     strap: "Chain & leather",
     material: "Pillow-quilted leather",
+    materialSwatch: {
+      src: "/images/gallery/tabby-back.png",
+      alt: "Close-up of pillow-quilted leather texture",
+      objectPosition: "center 35%",
+    },
     closure: "C clasp turn-lock",
   },
 ];
@@ -350,16 +383,16 @@ export const PDP_RECENTLY_VIEWED: PdpRecentlyViewedItem[] = [
   },
 ];
 
-/** Bottom-of-page product search — prompt + suggested terms */
+/** Bottom-of-page AI assistant — prompt + suggested starters */
 export const PDP_PRODUCT_SEARCH = {
   title: "Something else on your mind?",
-  placeholder: "Search bags, charms, wallets…",
+  placeholder: "Ask me anything — styling, sizing, gifts, similar bags…",
   suggestions: [
-    "Tabby bags",
-    "Crossbody bags",
-    "Bag charms",
-    "New arrivals",
-    "Shoulder bags",
+    "Show me more Tabby styles like this",
+    "What's a good crossbody for everyday?",
+    "What charms would look good on this bag?",
+    "What's new this season?",
+    "Help me find a shoulder bag for work",
   ],
 } as const;
 
@@ -370,11 +403,14 @@ export const PDP_GALLERY_HERO_IMAGE = "/images/gallery/hero-city-street.png";
 export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
   objectPosition: "center 46%",
   scale: 1.08,
-  translateY: "-5%",
+  translateY: "0%",
 } as const;
 
 /** Full-bleed rotating product video for Gallery tab */
 export const PDP_GALLERY_HERO_VIDEO = "/videos/gallery-360.webm";
+
+/** Product detail clip — follows the immersive hotspot slide */
+export const PDP_GALLERY_DETAIL_VIDEO = "/videos/tabby-detail.mp4";
 
 /** Match studio backdrop so letterboxing feels seamless */
 export const PDP_GALLERY_VIDEO_BG = "#e9e9e9";
@@ -414,11 +450,18 @@ export const PDP_PRODUCT_IMMERSIVE_HOTSPOTS: PdpProductHotspot[] = [
   },
 ];
 
+export type PdpInfluencerCredit = {
+  handle: string;
+  profileUrl: string;
+  platform: "instagram" | "tiktok";
+};
+
 export type PdpGalleryImmersiveSlide = {
   type: "immersive";
   src: string;
   alt: string;
   shopTheLookId?: string;
+  influencer?: PdpInfluencerCredit;
   /** 12px white inset — matches grid margin; only for select lifestyle shots */
   insetMargins?: boolean;
   /** Image focal point within 4:5 crop */
@@ -434,6 +477,10 @@ export type PdpGalleryEditorialSlide = {
   caption: string;
   secondarySrc?: string;
   secondaryAlt?: string;
+  learnMore?: {
+    label: string;
+    href: string;
+  };
 };
 
 export type PdpGalleryVideoSlide = {
@@ -441,7 +488,6 @@ export type PdpGalleryVideoSlide = {
   src: string;
   poster?: string;
   alt: string;
-  label?: string;
 };
 
 export type PdpGallerySlide =
@@ -464,13 +510,16 @@ export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
     src: PDP_GALLERY_HERO_VIDEO,
     poster: PDP_GALLERY_PRODUCT_IMMERSIVE,
     alt: "360° rotating view of Tabby 26 shoulder bag",
-    label: "360° view",
   },
   {
     type: "immersive",
     src: PDP_GALLERY_HERO_FOLLOWUP_IMAGE,
     alt: "Model in a pink tiered dress carrying Tabby 26 on a patio",
-    insetMargins: true,
+    influencer: {
+      handle: "@jordanlee",
+      profileUrl: "https://www.instagram.com/jordanlee/",
+      platform: "instagram",
+    },
   },
   {
     type: "immersive",
@@ -484,6 +533,10 @@ export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
     alt: "Tabby 26 front view with gold C clasp and chain strap",
     caption:
       "The details behind the icon – explore the quilting, craftsmanship, and signature finishes that make Tabby unmistakably Coach.",
+    learnMore: {
+      label: "Learn more",
+      href: "https://www.coach.com/shop/women/bags/shoulder-bags/tabby-shoulder-bag-26/CCZ47.html",
+    },
   },
   {
     type: "immersive",
@@ -492,6 +545,12 @@ export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
     objectPosition: "center 78%",
     scale: "scale-100",
     hotspots: PDP_PRODUCT_IMMERSIVE_HOTSPOTS,
+  },
+  {
+    type: "video",
+    src: PDP_GALLERY_DETAIL_VIDEO,
+    poster: PDP_GALLERY_PRODUCT_IMMERSIVE,
+    alt: "Tabby 26 shoulder bag detail video",
   },
 ];
 

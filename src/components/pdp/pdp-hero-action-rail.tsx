@@ -15,6 +15,14 @@ import {
 
 const LIKE_RED = "#FE2C55";
 const BURST_DURATION_MS = 650;
+const RAIL_ICON_SIZE = 28;
+
+function railIconStyle(filled = false): CSSProperties {
+  return {
+    fontSize: RAIL_ICON_SIZE,
+    fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${RAIL_ICON_SIZE}`,
+  };
+}
 
 const HEART_BURST_PARTICLES = [
   { angle: -90, distance: 32, size: 13, delay: 0 },
@@ -114,9 +122,10 @@ function RailAction({
         name={icon}
         size={26}
         filled={filled}
+        style={railIconStyle(filled)}
         className={cn("text-white", iconClassName)}
       />
-      <span className="font-extended text-[10px] leading-none tracking-[0.2px]">
+      <span className="font-extended text-[11px] leading-none tracking-[0.2px]">
         {label}
       </span>
     </button>
@@ -164,7 +173,7 @@ function LikeRailAction({ label, ariaLabel, liked, onToggle }: LikeRailActionPro
       aria-pressed={liked}
       className="flex flex-col items-center gap-1 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
     >
-      <span className="relative flex size-[26px] items-center justify-center overflow-visible">
+      <span className="relative flex size-7 items-center justify-center overflow-visible">
         {bursting ? (
           <span
             key={burstKey}
@@ -192,6 +201,7 @@ function LikeRailAction({ label, ariaLabel, liked, onToggle }: LikeRailActionPro
           name="favorite"
           size={26}
           filled={liked}
+          style={railIconStyle(liked)}
           className={cn(
             "relative z-10 transition-colors duration-200",
             liked ? "text-[#FE2C55]" : "text-white",
@@ -199,7 +209,7 @@ function LikeRailAction({ label, ariaLabel, liked, onToggle }: LikeRailActionPro
           )}
         />
       </span>
-      <span className="font-extended text-[10px] leading-none tracking-[0.2px]">
+      <span className="font-extended text-[11px] leading-none tracking-[0.2px]">
         {label}
       </span>
     </button>

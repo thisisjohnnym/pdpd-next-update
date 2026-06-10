@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { PdpProductHotspot } from "./pdp-data";
+import { pdpType } from "./pdp-type";
 
 type PdpProductHotspotsProps = {
   hotspots: PdpProductHotspot[];
@@ -84,10 +85,10 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
             transform: "translateY(calc(-100% - 1.75rem))",
           }}
         >
-          <p className="font-extended text-xs tracking-[0.2px] text-black">
+          <p className={`font-extended text-black ${pdpType.label}`}>
             {activeHotspot.title}
           </p>
-          <p className="mt-1 text-xs leading-[1.35] text-neutral-600">
+          <p className={`mt-1 text-neutral-600 ${pdpType.caption}`}>
             {activeHotspot.body}
           </p>
         </div>

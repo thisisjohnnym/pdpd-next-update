@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { PdpAddToBagSheet } from "./pdp-add-to-bag-sheet";
 import { PdpBottomActions } from "./pdp-bottom-actions";
+import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
 import { DEFAULT_COLOR_ID } from "./pdp-data";
 import { PdpGalleryView } from "./pdp-gallery-view";
 import { PdpOverlayHeader } from "./pdp-overlay-header";
@@ -41,6 +42,7 @@ export function PdpSocialView() {
 
   return (
     <div className="relative min-h-[100dvh] w-full bg-black">
+      <PdpBrowserChromeSync />
       <PdpGalleryView
         onOpenReviews={() => setReviewsOpen(true)}
         onAddSimilarToBag={handleQuickAddToBag}

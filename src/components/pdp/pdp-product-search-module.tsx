@@ -9,18 +9,17 @@ import { cn } from "@/lib/cn";
 import { BOTTOM_CTA_OFFSET } from "./pdp-gallery-view";
 import { PDP_PRODUCT_SEARCH } from "./pdp-data";
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
+import { pdpType } from "./pdp-type";
 
-/** Bottom search — prompt, input, and quick suggestion chips */
+/** Bottom AI prompt — conversational input, send, and starter chips */
 export function PdpProductSearchModule() {
   const [query, setQuery] = useState("");
+  const hasQuery = query.trim().length > 0;
 
   return (
     <section
       data-header-surface="light"
-      className={cn(
-        pdpModuleSectionClass({ variant: "muted", rhythm: "compact" }),
-        "border-neutral-200",
-      )}
+      className={pdpModuleSectionClass({ variant: "muted", rhythm: "compact" })}
       style={{ paddingBottom: BOTTOM_CTA_OFFSET }}
     >
       <PageGrid fullWidth>
@@ -31,27 +30,50 @@ export function PdpProductSearchModule() {
             </h2>
 
             <form
-              className="relative"
+              className="rounded-2xl bg-white p-3 shadow-sm"
               onSubmit={(event) => {
                 event.preventDefault();
               }}
             >
-              <label htmlFor="pdp-product-search" className="sr-only">
-                Search products
+              <label htmlFor="pdp-ai-prompt" className="sr-only">
+                Ask about products
               </label>
-              <MaterialIcon
-                name="search"
-                size={20}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"
-              />
-              <input
-                id="pdp-product-search"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={PDP_PRODUCT_SEARCH.placeholder}
-                className="font-extended w-full rounded-full border border-neutral-300 bg-white py-3 pl-10 pr-4 text-sm tracking-[0.2px] text-black outline-none placeholder:text-neutral-400 focus:border-black"
-              />
+
+              <div className="flex items-start gap-2.5">
+                <MaterialIcon
+                  name="auto_awesome"
+                  size={20}
+                  className="mt-0.5 shrink-0 text-black"
+                />
+                <textarea
+                  id="pdp-ai-prompt"
+                  rows={2}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={PDP_PRODUCT_SEARCH.placeholder}
+                  className="font-extended min-h-[3.25rem] w-full resize-none bg-transparent text-sm leading-[1.35] tracking-[0.2px] text-black outline-none placeholder:text-neutral-400"
+                />
+              </div>
+
+              <div className="mt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={!hasQuery}
+                  aria-label="Send prompt"
+                  className={cn(
+                    "flex size-9 items-center justify-center rounded-full transition-colors",
+                    hasQuery
+                      ? "bg-black text-white active:bg-neutral-800"
+                      : "bg-neutral-100 text-neutral-400",
+                  )}
+                >
+                  <MaterialIcon
+                    name="arrow_upward"
+                    size={20}
+                    className={hasQuery ? "text-white" : "text-neutral-400"}
+                  />
+                </button>
+              </div>
             </form>
 
             <div className="flex flex-wrap gap-2">
@@ -61,13 +83,14 @@ export function PdpProductSearchModule() {
                   type="button"
                   onClick={() => setQuery(term)}
                   className={cn(
-                    "font-extended rounded-full border px-3 py-1.5 text-xs tracking-[0.2px] transition-colors",
+                    "rounded-full px-3 py-1.5 transition-colors",
+                    pdpType.label,
                     query === term
-                      ? "border-black bg-black text-white"
-                      : "border-neutral-300 bg-white text-black active:bg-neutral-50",
+                      ? "bg-black text-white"
+                      : "bg-white text-black active:bg-neutral-50",
                   )}
                 >
-                  {term}
+                  <span className="font-extended translate-y-px">{term}</span>
                 </button>
               ))}
             </div>

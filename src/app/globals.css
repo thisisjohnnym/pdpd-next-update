@@ -39,6 +39,13 @@ body {
 
 .font-extended {
   font-family: var(--font-extended);
+  position: relative;
+  top: 2px;
+}
+
+/* Preserve transform-driven motion on extended labels */
+.font-extended[class*="animate-"] {
+  top: 0;
 }
 
 @media (min-width: 1024px) {
