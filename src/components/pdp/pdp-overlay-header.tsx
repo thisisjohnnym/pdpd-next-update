@@ -7,6 +7,10 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { useScrollNavVisibility } from "./use-scroll-nav-visibility";
+import {
+  isHeroOverlayVisible,
+  useHeroScrollOpacity,
+} from "./use-hero-scroll-opacity";
 
 const LOGO_WIDTH = 640;
 const LOGO_HEIGHT = 72;
@@ -17,6 +21,8 @@ const LOGO_WIDTH_PX = (LOGO_WIDTH / LOGO_HEIGHT) * LOGO_HEIGHT_PX;
 
 export function PdpOverlayHeader() {
   const visible = useScrollNavVisibility();
+  const gradientOpacity = useHeroScrollOpacity();
+  const showGradient = isHeroOverlayVisible(gradientOpacity);
 
   return (
     <header
@@ -27,8 +33,10 @@ export function PdpOverlayHeader() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[calc(env(safe-area-inset-top,0px)+7rem)] bg-gradient-to-b from-white/90 via-white/45 to-transparent backdrop-blur-lg"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[calc(env(safe-area-inset-top,0px)+7rem)] bg-gradient-to-b from-white/90 via-white/45 to-transparent backdrop-blur-lg transition-opacity duration-300"
         style={{
+          opacity: gradientOpacity,
+          visibility: showGradient ? "visible" : "hidden",
           WebkitMaskImage:
             "linear-gradient(to bottom, black 30%, rgba(0,0,0,0.65) 55%, transparent 100%)",
           maskImage:

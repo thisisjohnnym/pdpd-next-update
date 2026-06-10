@@ -68,8 +68,8 @@ export const PDP_GALLERY_SLIDES: PdpGallerySlide[] = [
   {
     type: "immersive",
     src: PDP_GALLERY_PRODUCT_IMMERSIVE,
-    alt: "Tabby 26 black quilted shoulder bag with gold C clasp and chain strap",
-    objectPosition: "center 72%",
+    alt: "Tabby 26 black quilted shoulder bag with gold C clasp, chain strap, and cherry charm",
+    objectPosition: "center 78%",
     scale: "scale-100",
   },
 ];
