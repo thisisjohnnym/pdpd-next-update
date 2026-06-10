@@ -25,6 +25,7 @@ export function PdpGalleryEditorialSlide({
 }: PdpGalleryEditorialSlideProps) {
   return (
     <section
+      data-header-surface="light"
       className="relative flex w-full shrink-0 flex-col bg-white pt-3 pb-3 lg:pt-5 lg:pb-5"
       style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
     >

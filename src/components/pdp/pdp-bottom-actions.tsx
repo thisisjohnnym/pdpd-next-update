@@ -56,8 +56,12 @@ export function PdpBottomActions({
     <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-30">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[calc(max(30px,env(safe-area-inset-bottom,0px))+6.5rem)] bg-gradient-to-t from-white/90 via-white/45 to-transparent backdrop-blur-lg"
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-[calc(max(30px,env(safe-area-inset-bottom,0px))+6.5rem)] bg-gradient-to-t from-white/90 via-white/45 to-transparent backdrop-blur-lg transition-opacity duration-300",
+          isHeroTop ? "opacity-0" : "opacity-100",
+        )}
         style={{
+          visibility: isHeroTop ? "hidden" : "visible",
           WebkitMaskImage:
             "linear-gradient(to top, black 35%, rgba(0,0,0,0.6) 62%, transparent 100%)",
           maskImage:

@@ -15,6 +15,7 @@ import {
   PDP_REVIEWS_SUMMARY,
   type PdpFeaturedReview,
 } from "./pdp-data";
+import { PdpReviewLikeButton } from "./pdp-review-like-button";
 
 type PdpReviewsSheetProps = {
   open: boolean;
@@ -89,24 +90,27 @@ function CustomerReviewCard({ review }: { review: PdpFeaturedReview }) {
           {review.photos.map((photo) => (
             <div
               key={photo.src}
-              className="relative h-20 w-20 shrink-0 overflow-hidden bg-neutral-100"
+              className="relative size-28 shrink-0 overflow-hidden bg-neutral-100"
             >
               <Image
                 src={photo.src}
                 alt={photo.alt}
                 fill
                 className="object-cover object-center"
-                sizes="80px"
+                sizes="112px"
               />
             </div>
           ))}
         </div>
       ) : null}
 
-      <p className="text-xs tracking-[0.2px] text-neutral-500">
-        {review.author} · {review.date}
-        {review.verified ? " · Verified buyer" : ""}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 text-xs tracking-[0.2px] text-neutral-500">
+          {review.author} · {review.date}
+          {review.verified ? " · Verified buyer" : ""}
+        </p>
+        <PdpReviewLikeButton initialLikes={review.likes} />
+      </div>
     </article>
   );
 }
@@ -172,8 +176,16 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           open ? "translate-y-0" : "translate-y-full",
         )}
       >
-        <div className="shrink-0 px-2.5 pb-0 pt-2.5">
+        <div className="relative shrink-0 px-2.5 pb-0 pt-2.5">
           <div className="mx-auto mb-[30px] h-[3px] w-[50px] rounded-full bg-black/70" />
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full text-neutral-900"
+          >
+            <MaterialIcon name="close" size={24} />
+          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,env(safe-area-inset-bottom))]">

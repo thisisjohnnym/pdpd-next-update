@@ -100,3 +100,18 @@ body {
 .animate-hotspot-pulse {
   animation: hotspot-pulse 2.4s ease-in-out infinite;
 }
+
+@keyframes hotspot-ring-ripple {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.75);
+    opacity: 0;
+  }
+}
+
+.animate-hotspot-ring-ripple {
+  animation: hotspot-ring-ripple 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}

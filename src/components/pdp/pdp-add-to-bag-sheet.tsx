@@ -8,16 +8,27 @@ import { cn } from "@/lib/cn";
 
 import {
   PDP_BAG_UPSELLS,
+  PDP_BUNDLE_DISCOUNT,
   PDP_COLORS,
   PDP_PRODUCT,
+  type PdpBundleAddPayload,
 } from "./pdp-data";
+
+type BagConfirmation =
+  | { type: "product" }
+  | { type: "bundle"; payload: PdpBundleAddPayload };
 
 type PdpAddToBagSheetProps = {
   open: boolean;
   onClose: () => void;
   selectedColorId: string;
   onQuickAdd?: () => void;
+  confirmation?: BagConfirmation;
 };
+
+function formatPrice(amount: number): string {
+  return `$${amount.toLocaleString("en-US")}`;
+}
 
 /** Bottom tray — add-to-bag confirmation, checkout, and quick-add upsells */
 export function PdpAddToBagSheet({
@@ -25,12 +36,20 @@ export function PdpAddToBagSheet({
   onClose,
   selectedColorId,
   onQuickAdd,
+  confirmation = { type: "product" },
 }: PdpAddToBagSheetProps) {
   const titleId = useId();
   const [quickAddedIds, setQuickAddedIds] = useState<Set<string>>(new Set());
 
   const selectedColor =
     PDP_COLORS.find((color) => color.id === selectedColorId) ?? PDP_COLORS[0];
+
+  const isBundle = confirmation.type === "bundle";
+  const bundle = isBundle ? confirmation.payload : null;
+  const hasDiscount =
+    bundle !== null && bundle.subtotal > bundle.total;
+  const savings =
+    bundle !== null ? bundle.subtotal - bundle.total : 0;
 
   useEffect(() => {
     if (!open) {
@@ -98,39 +117,97 @@ export function PdpAddToBagSheet({
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,env(safe-area-inset-bottom))]">
           <div className="flex items-center gap-2 pb-4">
             <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-black">
-              <MaterialIcon name="check" size={16} className="text-white" />
+              <MaterialIcon name="check" size={18} className="text-white" />
             </span>
             <h2
               id={titleId}
               className="font-extended translate-y-[1.5px] text-base tracking-[0.2px] text-black"
             >
-              Added to your bag
+              {isBundle ? "Bundle added to your bag" : "Added to your bag"}
             </h2>
           </div>
 
-          <div className="flex items-center gap-3.5 rounded-lg bg-[#f2f2f2] px-3 py-4">
-            <div className="relative size-[88px] shrink-0 overflow-hidden bg-neutral-100">
-              <Image
-                src={PDP_PRODUCT.imageSrc}
-                alt={PDP_PRODUCT.imageAlt}
-                fill
-                className="object-cover object-center"
-                sizes="88px"
-              />
-            </div>
+          {isBundle && bundle ? (
+            <div className="flex flex-col gap-3 rounded-lg bg-[#f2f2f2] px-3 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-extended text-base tracking-[0.2px] text-black">
+                    Your bundle
+                  </p>
+                  <p className="mt-1 text-xs tracking-[0.2px] text-neutral-600">
+                    {bundle.items.length} item
+                    {bundle.items.length === 1 ? "" : "s"}
+                    {hasDiscount
+                      ? ` · ${Math.round(PDP_BUNDLE_DISCOUNT * 100)}% bundle savings applied`
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end">
+                  {hasDiscount ? (
+                    <span className="text-xs tracking-[0.2px] text-neutral-400 line-through">
+                      {formatPrice(bundle.subtotal)}
+                    </span>
+                  ) : null}
+                  <span className="font-extended text-base tracking-[0.2px] text-black">
+                    {formatPrice(bundle.total)}
+                  </span>
+                  {hasDiscount ? (
+                    <span className="mt-0.5 text-[11px] tracking-[0.2px] text-neutral-600">
+                      You saved {formatPrice(savings)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="font-extended text-base tracking-[0.2px] text-black">
-                {PDP_PRODUCT.name}
-              </p>
-              <p className="mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                {selectedColor.name} · {PDP_PRODUCT.subtitle}
-              </p>
-              <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
-                {PDP_PRODUCT.price}
-              </p>
+              <ul className="flex flex-col gap-2 border-t border-neutral-200 pt-3">
+                {bundle.items.map((item) => (
+                  <li key={item.id} className="flex items-center gap-3">
+                    <div className="relative size-14 shrink-0 overflow-hidden bg-neutral-100">
+                      <Image
+                        src={item.imageSrc}
+                        alt={item.imageAlt}
+                        fill
+                        className="object-cover object-center"
+                        sizes="56px"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+                        {item.name}
+                      </p>
+                    </div>
+                    <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black">
+                      {formatPrice(item.price)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3.5 rounded-lg bg-[#f2f2f2] px-3 py-4">
+              <div className="relative size-[88px] shrink-0 overflow-hidden bg-neutral-100">
+                <Image
+                  src={PDP_PRODUCT.imageSrc}
+                  alt={PDP_PRODUCT.imageAlt}
+                  fill
+                  className="object-cover object-center"
+                  sizes="88px"
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="font-extended text-base tracking-[0.2px] text-black">
+                  {PDP_PRODUCT.name}
+                </p>
+                <p className="mt-1 text-xs tracking-[0.2px] text-neutral-600">
+                  {selectedColor.name} · {PDP_PRODUCT.subtitle}
+                </p>
+                <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
+                  {PDP_PRODUCT.price}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2 py-4">
             <button
@@ -148,68 +225,70 @@ export function PdpAddToBagSheet({
             </button>
           </div>
 
-          <section className="flex flex-col gap-1.5 pt-3">
-            <p className="font-extended text-sm tracking-[0.2px] text-black">
-              Complete the look
-            </p>
+          {!isBundle ? (
+            <section className="flex flex-col gap-1.5 pt-3">
+              <p className="font-extended text-sm tracking-[0.2px] text-black">
+                Complete the look
+              </p>
 
-            <ul className="flex flex-col">
-              {PDP_BAG_UPSELLS.map((item) => {
-                const added = quickAddedIds.has(item.id);
+              <ul className="flex flex-col">
+                {PDP_BAG_UPSELLS.map((item) => {
+                  const added = quickAddedIds.has(item.id);
 
-                return (
-                  <li
-                    key={item.id}
-                    className="border-t border-neutral-200 first:border-t-0"
-                  >
-                    <div className="flex items-center gap-3 py-3">
-                      <div className="relative size-20 shrink-0 overflow-hidden bg-neutral-100">
-                        <Image
-                          src={item.imageSrc}
-                          alt={item.imageAlt}
-                          fill
-                          className="object-cover object-center"
-                          sizes="80px"
-                        />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
-                          {item.name}
-                        </p>
-                        <p className="mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                          {item.price}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleQuickAdd(item.id)}
-                        disabled={added}
-                        className={cn(
-                          "font-extended inline-flex shrink-0 items-center justify-center gap-1 rounded-full px-3.5 py-2 text-xs tracking-[0.2px] transition-colors",
-                          added
-                            ? "bg-neutral-100 text-neutral-500"
-                            : "border border-neutral-300 text-black",
-                        )}
-                      >
-                        <span className="translate-y-[2.5px]">
-                          {added ? "Added" : "Quick add"}
-                        </span>
-                        {!added ? (
-                          <MaterialIcon
-                            name="add"
-                            size={18}
-                            className="text-black"
+                  return (
+                    <li
+                      key={item.id}
+                      className="border-t border-neutral-200 first:border-t-0"
+                    >
+                      <div className="flex items-center gap-3 py-3">
+                        <div className="relative size-20 shrink-0 overflow-hidden bg-neutral-100">
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            fill
+                            className="object-cover object-center"
+                            sizes="80px"
                           />
-                        ) : null}
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+                            {item.name}
+                          </p>
+                          <p className="mt-1 text-xs tracking-[0.2px] text-neutral-600">
+                            {item.price}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleQuickAdd(item.id)}
+                          disabled={added}
+                          className={cn(
+                            "font-extended inline-flex shrink-0 items-center justify-center gap-1 rounded-full px-3.5 py-2 text-xs tracking-[0.2px] transition-colors",
+                            added
+                              ? "bg-neutral-100 text-neutral-500"
+                              : "border border-neutral-300 text-black",
+                          )}
+                        >
+                          <span className="translate-y-[2.5px]">
+                            {added ? "Added" : "Quick add"}
+                          </span>
+                          {!added ? (
+                            <MaterialIcon
+                              name="add"
+                              size={18}
+                              className="text-black"
+                            />
+                          ) : null}
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

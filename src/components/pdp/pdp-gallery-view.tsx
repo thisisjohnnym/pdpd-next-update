@@ -6,16 +6,26 @@ import { useEffect, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { PdpGalleryEditorialSlide } from "./pdp-gallery-editorial-slide";
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
+import { PdpGalleryPhotosSheet } from "./pdp-gallery-photos-sheet";
 import { PdpGalleryProductHud } from "./pdp-gallery-product-hud";
+import { PdpGalleryViewMorePhotos } from "./pdp-gallery-view-more-photos";
 import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
+import { PdpBagSizeModule } from "./pdp-bag-size-module";
+import { PdpBundleModule } from "./pdp-bundle-module";
+import { PdpCompareModule } from "./pdp-compare-module";
+import { PdpProductSearchModule } from "./pdp-product-search-module";
+import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
+import { PdpReviewsModule } from "./pdp-reviews-module";
+import { PdpSimilarItemsCarousel } from "./pdp-similar-items-carousel";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
 import {
   PDP_GALLERY_HERO_IMAGE,
+  PDP_GALLERY_HERO_IMAGE_FOCUS,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
 } from "./pdp-data";
-import type { PdpProductHotspot } from "./pdp-data";
+import type { PdpBundleAddPayload, PdpProductHotspot } from "./pdp-data";
 
 /** Space for fixed bottom CTAs (54px button + pt-2.5 + pb) */
 export const BOTTOM_CTA_OFFSET =
@@ -42,7 +52,11 @@ function PdpHeroSlide({
         alt={alt}
         fill
         priority={priority}
-        className="object-cover object-center"
+        className="object-cover"
+        style={{
+          objectPosition: PDP_GALLERY_HERO_IMAGE_FOCUS.objectPosition,
+          transform: `scale(${PDP_GALLERY_HERO_IMAGE_FOCUS.scale}) translateY(${PDP_GALLERY_HERO_IMAGE_FOCUS.translateY})`,
+        }}
         sizes="100vw"
       />
 
@@ -85,6 +99,7 @@ function PdpGalleryPortraitSlide({
           ? "relative w-full shrink-0 bg-white p-3"
           : "relative w-full shrink-0 overflow-hidden bg-[#e9e9e9]"
       }
+      data-header-surface={insetMargins ? "light" : undefined}
       style={reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined}
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
@@ -179,8 +194,19 @@ function PdpGalleryVideoSlide({
   );
 }
 
-export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }) {
+export function PdpGalleryView({
+  onOpenReviews,
+  onAddSimilarToBag,
+  onAddBundle,
+  selectedColorId,
+}: {
+  onOpenReviews?: () => void;
+  onAddSimilarToBag?: () => void;
+  onAddBundle?: (payload: PdpBundleAddPayload) => void;
+  selectedColorId: string;
+}) {
   const [shopLookId, setShopLookId] = useState<string | null>(null);
+  const [photosOpen, setPhotosOpen] = useState(false);
   const activeShopLook = shopLookId ? PDP_SHOP_THE_LOOK[shopLookId] ?? null : null;
 
   return (
@@ -188,14 +214,12 @@ export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }
     <div className={GALLERY_CLASS}>
       <PdpHeroSlide
         src={PDP_GALLERY_HERO_IMAGE}
-        alt="Model wearing Tabby 26 shoulder bag with grey sweater and light-wash jeans"
+        alt="Model in a black leather jacket and polka-dot dress carrying Tabby 26 on a city street"
         priority
         onOpenReviews={onOpenReviews}
       />
 
       {PDP_GALLERY_SLIDES.flatMap((slide, index) => {
-        const isLastSlide = index === PDP_GALLERY_SLIDES.length - 1;
-
         if (slide.type === "editorial") {
           return [
             <PdpGalleryEditorialSlide
@@ -205,7 +229,6 @@ export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }
               caption={slide.caption}
               secondarySrc={slide.secondarySrc}
               secondaryAlt={slide.secondaryAlt}
-              reserveBottomCta={isLastSlide}
             />,
           ];
         }
@@ -218,7 +241,6 @@ export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }
               poster={slide.poster}
               alt={slide.alt}
               label={slide.label}
-              reserveBottomCta={isLastSlide}
             />,
           ];
         }
@@ -239,14 +261,25 @@ export function PdpGalleryView({ onOpenReviews }: { onOpenReviews?: () => void }
             shopTheLookId={slide.shopTheLookId}
             onOpenShopTheLook={setShopLookId}
             insetMargins={slide.insetMargins}
-            reserveBottomCta={isLastSlide}
             objectPosition={slide.objectPosition}
             hotspots={slide.hotspots}
           />,
         ];
       })}
 
+      <PdpGalleryViewMorePhotos onOpen={() => setPhotosOpen(true)} />
+      <PdpSimilarItemsCarousel onAddToBag={() => onAddSimilarToBag?.()} />
+      <PdpCompareModule selectedColorId={selectedColorId} />
+      <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+      <PdpBagSizeModule />
+      <PdpReviewsModule
+        onReadAll={onOpenReviews}
+        onWriteReview={onOpenReviews}
+      />
+      <PdpRecentlyViewedCarousel />
+      <PdpProductSearchModule />
     </div>
+    <PdpGalleryPhotosSheet open={photosOpen} onClose={() => setPhotosOpen(false)} />
     <PdpShopTheLookSheet
       look={activeShopLook}
       open={shopLookId !== null}
