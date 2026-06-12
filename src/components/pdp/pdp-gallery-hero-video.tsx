@@ -107,7 +107,7 @@ export function PdpGalleryHeroVideo({
   };
 
   const controlButtonClass =
-    "flex size-11 items-center justify-center rounded-full border border-white/50 bg-white/75 text-neutral-900 backdrop-blur-md";
+    "flex size-9 items-center justify-center rounded-full border border-white/50 bg-white/75 text-neutral-900 backdrop-blur-md";
 
   return (
     <div className="relative size-full">
@@ -126,7 +126,7 @@ export function PdpGalleryHeroVideo({
       </video>
 
       {showControls ? (
-        <div className="absolute bottom-4 right-4 flex items-center gap-2">
+        <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
           {showMuteControl ? (
             <button
               type="button"
@@ -140,7 +140,7 @@ export function PdpGalleryHeroVideo({
             >
               <MaterialIcon
                 name={isMuted ? "volume_off" : "volume_up"}
-                size={24}
+                size={18}
                 className="text-neutral-900"
               />
             </button>
@@ -156,7 +156,7 @@ export function PdpGalleryHeroVideo({
           >
             <MaterialIcon
               name={isPlaying ? "pause" : "play_arrow"}
-              size={24}
+              size={18}
               className="text-neutral-900"
             />
           </button>

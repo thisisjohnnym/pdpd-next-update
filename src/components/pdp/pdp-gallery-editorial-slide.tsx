@@ -1,18 +1,11 @@
-"use client";
-
 import Image from "next/image";
 
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { getPdpSignatureSound } from "./pdp-data";
-import { PdpGalleryImageUtilityRail } from "./pdp-gallery-image-utility-rail";
-import { PdpGallerySoundPlayOverlay } from "./pdp-gallery-sound-play-overlay";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
 import { BOTTOM_CTA_OFFSET, SCREEN_HEIGHT_STYLE } from "./pdp-viewport-chrome";
 import { pdpType } from "./pdp-type";
-import { useGallerySlideSoundLifecycle } from "./use-gallery-slide-sound";
-import type { useSignatureSound } from "./use-signature-sound";
 
 type PdpGalleryEditorialSlideProps = {
   src: string;
@@ -25,8 +18,6 @@ type PdpGalleryEditorialSlideProps = {
     label: string;
     href: string;
   };
-  signatureSoundId?: string;
-  gallerySoundControl: ReturnType<typeof useSignatureSound>;
   /** Full-viewport snap panel (experimental) */
   panelScroll?: boolean;
   isLastPanel?: boolean;
@@ -43,20 +34,12 @@ export function PdpGalleryEditorialSlide({
   secondarySrc,
   secondaryAlt,
   learnMore,
-  signatureSoundId,
-  gallerySoundControl,
   panelScroll = false,
   isLastPanel = false,
   reserveBottomCta = false,
 }: PdpGalleryEditorialSlideProps) {
-  const signatureSound = signatureSoundId
-    ? getPdpSignatureSound(signatureSoundId)
-    : undefined;
-  const sectionRef = useGallerySlideSoundLifecycle(signatureSound?.id, gallerySoundControl);
-
   return (
     <section
-      ref={sectionRef}
       data-header-surface="light"
       className={cn(
         "relative flex w-full shrink-0 flex-col bg-white",
@@ -99,15 +82,6 @@ export function PdpGalleryEditorialSlide({
                 style={{ objectPosition }}
                 sizes="(max-width: 1023px) 78vw, 42vw"
               />
-
-              {signatureSound ? (
-                <PdpGalleryImageUtilityRail>
-                  <PdpGallerySoundPlayOverlay
-                    sound={signatureSound}
-                    soundControl={gallerySoundControl}
-                  />
-                </PdpGalleryImageUtilityRail>
-              ) : null}
             </div>
 
             <div

@@ -5,12 +5,11 @@ import Image from "next/image";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { BOTTOM_CTA_OFFSET } from "./pdp-gallery-view";
-import { PDP_GALLERY_PRODUCT_DETAIL_COLLAGE } from "./pdp-data";
+import { PDP_GALLERY_PRODUCT_DETAIL_COLLAGE, PDP_STUDIO_BACKDROP_CLASS } from "./pdp-data";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
+import { PDP_PANEL_SCROLL } from "./pdp-panel-scroll";
+import { BOTTOM_CTA_OFFSET } from "./pdp-viewport-chrome";
 import { SCREEN_HEIGHT_STYLE } from "./pdp-viewport-chrome";
-
-const COLLAGE_GAP_CLASS = "gap-2";
 
 function CollageImage({
   src,
@@ -30,7 +29,7 @@ function CollageImage({
       src={src}
       alt={alt}
       fill
-      className="object-contain object-center"
+      className="object-cover"
       style={{ objectPosition: objectPosition ?? "center" }}
       sizes={sizes}
       priority={priority}
@@ -39,8 +38,8 @@ function CollageImage({
 }
 
 /**
- * Wireframe layout — full-width portrait block on top, two equal squares below.
- * Bottom squares are 1:1 and span the full width (minus gutter) so edges align.
+ * Product detail collage — native 9:16 studio shots in a flush grid:
+ * full-width hero, two matching portraits below (no square crop on portrait assets).
  */
 export function PdpGalleryProductCollage({
   isLastPanel = false,
@@ -49,11 +48,60 @@ export function PdpGalleryProductCollage({
 }) {
   const { hero, secondary } = PDP_GALLERY_PRODUCT_DETAIL_COLLAGE;
 
+  const collageGrid = (
+    <div className={cn("grid w-full grid-cols-2", PDP_STUDIO_BACKDROP_CLASS)}>
+      <div
+        className={cn(
+          "relative col-span-2 aspect-[9/16] overflow-hidden",
+          PDP_STUDIO_BACKDROP_CLASS,
+        )}
+      >
+        <CollageImage
+          src={hero.src}
+          alt={hero.alt}
+          objectPosition={hero.objectPosition}
+          sizes="100vw"
+          priority
+        />
+      </div>
+
+      {secondary.map((tile) => (
+        <div
+          key={tile.src}
+          className={cn("relative aspect-[9/16] overflow-hidden", PDP_STUDIO_BACKDROP_CLASS)}
+        >
+          <CollageImage
+            src={tile.src}
+            alt={tile.alt}
+            objectPosition={tile.objectPosition}
+            sizes="50vw"
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  if (!PDP_PANEL_SCROLL) {
+    return (
+      <section
+        data-header-surface="light"
+        className={cn(
+          "relative w-full shrink-0 overflow-hidden",
+          PDP_STUDIO_BACKDROP_CLASS,
+          galleryPanelClassName(isLastPanel),
+        )}
+      >
+        {collageGrid}
+      </section>
+    );
+  }
+
   return (
     <section
       data-header-surface="light"
       className={cn(
-        "relative flex w-full shrink-0 flex-col overflow-hidden bg-[#ececec]",
+        "relative flex w-full shrink-0 flex-col overflow-hidden",
+        PDP_STUDIO_BACKDROP_CLASS,
         galleryPanelClassName(isLastPanel),
       )}
       style={{
@@ -65,35 +113,9 @@ export function PdpGalleryProductCollage({
         <GridItem
           mobile={12}
           desktop={24}
-          className="flex h-full min-h-0 flex-col px-3 pt-3"
+          className="flex h-full min-h-0 flex-col"
         >
-          <div className={cn("flex h-full min-h-0 w-full flex-col", COLLAGE_GAP_CLASS)}>
-            <div className="relative min-h-0 w-full flex-1 overflow-hidden bg-[#ececec]">
-              <CollageImage
-                src={hero.src}
-                alt={hero.alt}
-                objectPosition={hero.objectPosition}
-                sizes="100vw"
-                priority
-              />
-            </div>
-
-            <div className={cn("grid w-full shrink-0 grid-cols-2", COLLAGE_GAP_CLASS)}>
-              {secondary.map((tile) => (
-                <div
-                  key={tile.src}
-                  className="relative aspect-square w-full overflow-hidden bg-[#ececec]"
-                >
-                  <CollageImage
-                    src={tile.src}
-                    alt={tile.alt}
-                    objectPosition={tile.objectPosition}
-                    sizes="50vw"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <div className="flex h-full min-h-0 w-full flex-col">{collageGrid}</div>
         </GridItem>
       </PageGrid>
     </section>

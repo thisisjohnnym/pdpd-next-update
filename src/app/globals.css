@@ -137,6 +137,62 @@ body {
   animation: hotspot-ring-ripple 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
+/* Leather aging — discrete time slider */
+.pdp-aging-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 0;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #000 0%,
+    #000 var(--pdp-aging-progress, 0%),
+    #d4d4d4 var(--pdp-aging-progress, 0%),
+    #d4d4d4 100%
+  );
+  cursor: pointer;
+}
+
+.pdp-aging-slider:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 4px;
+}
+
+.pdp-aging-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.pdp-aging-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: #000;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.pdp-aging-slider::-moz-range-track {
+  height: 2px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.pdp-aging-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: #000;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
 /* Hero load-in — photo first, then chrome fades into place */
 @keyframes pdp-hero-photo-reveal {
   from {
@@ -324,6 +380,12 @@ body {
     inset 0 1px 0 rgb(255 255 255 / 0.16),
     inset 0 -1px 0 rgb(0 0 0 / 0.12);
   color: #fff;
+}
+
+/* Bottom bar color pill — no border or inset highlight */
+.pdp-glass-dark.pdp-glass--flat {
+  border: none;
+  box-shadow: none;
 }
 
 .pdp-glass-light {

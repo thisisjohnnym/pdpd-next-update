@@ -9,6 +9,10 @@ type PdpProductHotspotsProps = {
   hotspots: PdpProductHotspot[];
 };
 
+const CARD_OFFSET = "1.75rem";
+/** Hotspots above this line flip the card downward so it stays in frame */
+const CARD_FLIP_BELOW_THRESHOLD = 28;
+
 /** Keep the info card inside the image frame */
 function getCardLeftPercent(x: number) {
   const cardHalfWidth = 42;
@@ -18,6 +22,14 @@ function getCardLeftPercent(x: number) {
     inset,
     Math.min(x - cardHalfWidth, 100 - cardHalfWidth * 2 - inset),
   );
+}
+
+function getCardTransform(y: number) {
+  if (y < CARD_FLIP_BELOW_THRESHOLD) {
+    return `translateY(${CARD_OFFSET})`;
+  }
+
+  return `translateY(calc(-100% - ${CARD_OFFSET}))`;
 }
 
 /** Tappable detail markers on product photography */
@@ -61,15 +73,15 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
                 event.stopPropagation();
                 handleToggle(hotspot.id);
               }}
-              className="relative flex size-9 items-center justify-center"
+              className="relative flex size-11 items-center justify-center"
             >
               <span
                 aria-hidden
-                className="absolute size-9 animate-hotspot-pulse rounded-full border-2 border-white/35 bg-white/45 shadow-[0_0_0_6px_rgba(255,255,255,0.1)]"
+                className="absolute size-11 animate-hotspot-pulse rounded-full border-2 border-white/35 bg-white/45 shadow-[0_0_0_8px_rgba(255,255,255,0.12)]"
               />
               <span
                 aria-hidden
-                className="relative size-3 rounded-full border-2 border-white bg-white shadow-[0_2px_6px_rgba(0,0,0,0.22)]"
+                className="relative size-4 rounded-full border-2 border-white bg-white shadow-[0_2px_8px_rgba(0,0,0,0.24)]"
               />
             </button>
           </div>
@@ -82,7 +94,7 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
           style={{
             left: `${getCardLeftPercent(activeHotspot.x)}%`,
             top: `${activeHotspot.y}%`,
-            transform: "translateY(calc(-100% - 1.75rem))",
+            transform: getCardTransform(activeHotspot.y),
           }}
         >
           <p className={`font-extended text-black ${pdpType.label}`}>

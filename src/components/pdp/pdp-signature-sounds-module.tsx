@@ -7,13 +7,7 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PDP_SIGNATURE_SOUNDS, type PdpSignatureSound } from "./pdp-data";
-import {
-  EXPERIENCE_PANEL_GRID_CLASS,
-  EXPERIENCE_PANEL_HEADER_CLASS,
-  EXPERIENCE_PANEL_ITEM_CLASS,
-  experiencePanelSectionProps,
-} from "./pdp-experience-panel";
-import { pdpModuleHeadingClass } from "./pdp-module-section";
+import { pdpModuleHeadingClass, pdpModuleSectionClass } from "./pdp-module-section";
 import { pdpType } from "./pdp-type";
 import { useSignatureSound } from "./use-signature-sound";
 
@@ -33,10 +27,8 @@ function SignatureSoundRow({
       aria-pressed={active}
       aria-label={active ? `Stop ${sound.label}` : sound.label}
       className={cn(
-        "group flex w-full items-center gap-2.5 border p-2.5 text-left transition-colors duration-200",
-        active
-          ? "border-black bg-neutral-50"
-          : "border-neutral-200 bg-white active:bg-neutral-50",
+        "group flex w-full min-h-[4.75rem] items-center gap-3 border-0 px-3 py-4 text-left transition-colors duration-200",
+        active ? "bg-neutral-100" : "bg-white active:bg-neutral-50",
       )}
     >
       <span className="relative size-12 shrink-0 overflow-hidden bg-neutral-100">
@@ -84,32 +76,24 @@ function SignatureSoundRow({
 }
 
 /** Tap-to-hear product sounds — turnlock, zipper, bag opening */
-export function PdpSignatureSoundsModule({
-  isLastPanel = false,
-}: {
-  isLastPanel?: boolean;
-}) {
-  const { title, intro, sounds } = PDP_SIGNATURE_SOUNDS;
+export function PdpSignatureSoundsModule() {
+  const { title, sounds } = PDP_SIGNATURE_SOUNDS;
   const { toggle, isActive } = useSignatureSound();
-  const panel = experiencePanelSectionProps(isLastPanel);
 
   return (
-    <section data-header-surface="light" className={panel.className} style={panel.style}>
-      <PageGrid fullWidth className={EXPERIENCE_PANEL_GRID_CLASS}>
-        <GridItem
-          mobile={12}
-          desktop={24}
-          className={cn(EXPERIENCE_PANEL_ITEM_CLASS, "justify-center")}
-        >
-          <div className="flex w-full min-h-0 flex-col gap-3">
-            <div className={EXPERIENCE_PANEL_HEADER_CLASS}>
-              <h2 className={pdpModuleHeadingClass({ lead: false })}>
-                {title}
-              </h2>
-              <p className={`m-0 text-neutral-600 ${pdpType.caption}`}>{intro}</p>
-            </div>
+    <section
+      data-header-surface="light"
+      className={cn(
+        pdpModuleSectionClass({ variant: "muted", rhythm: "roomy" }),
+        "pb-20",
+      )}
+    >
+      <PageGrid fullWidth>
+        <GridItem mobile={12} desktop={24}>
+          <div className="flex flex-col gap-5">
+            <h2 className={pdpModuleHeadingClass({ lead: false })}>{title}</h2>
 
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-3">
               {sounds.map((sound) => (
                 <li key={sound.id}>
                   <SignatureSoundRow

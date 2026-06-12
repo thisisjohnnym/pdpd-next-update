@@ -34,3 +34,7 @@ export const pdpReviewPhotoCardClass =
 /** UGC story cards — ~1.2 across with context footer, gap-2 */
 export const pdpUgcStoryCardClass =
   "w-[calc((100vw-1.25rem)/1.2)] lg:w-[calc((100vw-2.25rem)/2.4)]";
+
+/** TikTok-style UGC video tiles — ~1.1 across with next clip peek, gap-2 */
+export const pdpUgcVideoCardClass =
+  "w-[calc((100vw-1.25rem)/1.1)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/2.2)]";

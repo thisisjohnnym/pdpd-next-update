@@ -513,6 +513,9 @@ export const PDP_GALLERY_SHOWCASE_VIDEO = "/videos/soft-tabby-showcase.webm";
 /** Match studio backdrop so letterboxing feels seamless */
 export const PDP_GALLERY_VIDEO_BG = "#e9e9e9";
 
+/** Tailwind class for studio product photography frames */
+export const PDP_STUDIO_BACKDROP_CLASS = "bg-[#e9e9e9]";
+
 export type PdpProductHotspot = {
   id: string;
   /** Horizontal position within the image frame (0–100) */
@@ -564,16 +567,16 @@ export type PdpGalleryImmersiveSlide = {
   influencer?: PdpInfluencerCredit;
   /** 12px white inset — matches grid margin; only for select lifestyle shots */
   insetMargins?: boolean;
-  /** Image focal point within 4:5 crop */
+  /** Image focal point within frame crop */
   objectPosition?: string;
+  /** Frame ratio — 9:16 for tall on-model portraits; 4:5 default */
+  aspect?: "4/5" | "9/16";
   scale?: string;
   /** Panel scroll — fit full studio frame without cropping */
   panelContain?: boolean;
   /** Header icon contrast when this frame is active */
   headerSurface?: "light" | "dark";
   hotspots?: PdpProductHotspot[];
-  /** Tap-to-hear product sound layered on this still */
-  signatureSoundId?: string;
 };
 
 export type PdpGalleryEditorialSlide = {
@@ -588,7 +591,6 @@ export type PdpGalleryEditorialSlide = {
     label: string;
     href: string;
   };
-  signatureSoundId?: string;
 };
 
 export type PdpGalleryVideoSlide = {
@@ -630,6 +632,10 @@ export type PdpGalleryUgcContextSlide = {
   type: "ugc-context";
 };
 
+export type PdpGalleryUgcVideosSlide = {
+  type: "ugc-videos";
+};
+
 export type PdpGalleryProductCollageSlide = {
   type: "product-collage";
 };
@@ -651,6 +657,7 @@ export type PdpGallerySlide =
   | PdpGalleryBagStoriesSlide
   | PdpGalleryStrapSimulationSlide
   | PdpGalleryUgcContextSlide
+  | PdpGalleryUgcVideosSlide
   | PdpGalleryProductCollageSlide;
 
 /** Back, angle, and gusset — one collage panel in the product scroll */
@@ -658,17 +665,17 @@ export const PDP_GALLERY_PRODUCT_DETAIL_COLLAGE = {
   hero: {
     src: "/images/gallery/tabby-leather-back.png",
     alt: "Tabby Shoulder Bag 26 straight back view with zip pocket and leather straps",
-    objectPosition: "center 58%",
+    objectPosition: "center center",
   },
   secondary: [
     {
       src: "/images/gallery/tabby-leather-back-angle.png",
       alt: "Tabby Shoulder Bag 26 back view at an angle showing pebbled leather and zip pocket",
-      objectPosition: "center 62%",
+      objectPosition: "center 55%",
     },
     {
-      src: "/images/gallery/tabby-leather-side-gusset.png",
-      alt: "Tabby Shoulder Bag 26 side view showing accordion gussets and gold C clasp",
+      src: "/images/gallery/tabby-leather-detail-hardware.png",
+      alt: "Close-up of Tabby Shoulder Bag 26 gold C clasp and glovetanned leather",
       objectPosition: "center center",
     },
   ] satisfies PdpGalleryProductCollageTile[],
@@ -710,7 +717,7 @@ export const PDP_GALLERY_ON_MODEL_FULL_DENIM_SLIDE: PdpGalleryImmersiveSlide = {
   src: "/images/gallery/tabby-leather-on-model-trench.png",
   alt: "Model wearing Tabby Shoulder Bag 26 with a tan trench coat and plaid mini skirt",
   objectPosition: "center top",
-  signatureSoundId: "tabby-turnlock",
+  aspect: "9/16",
 };
 
 /** Interior open — fourth frame below hero */
@@ -719,7 +726,6 @@ export const PDP_GALLERY_INTERIOR_OPEN_SLIDE: PdpGalleryImmersiveSlide = {
   src: "/images/gallery/tabby-leather-interior-open.png",
   alt: "Tabby Shoulder Bag 26 interior open showing accordion compartments and gold hardware",
   objectPosition: "center center",
-  signatureSoundId: "tabby-bag-open",
 };
 
 /** Capacity editorial break — lifestyle carry */
@@ -730,7 +736,6 @@ export const PDP_GALLERY_CAPACITY_EDITORIAL_SLIDE: PdpGalleryEditorialSlide = {
   objectPosition: "center center",
   caption:
     "Three compartments — room for the whole day, never overstuffed.",
-  signatureSoundId: "tabby-zipper",
 };
 
 /** Craftsmanship editorial break — glovetanned leather story */
@@ -740,7 +745,6 @@ export const PDP_GALLERY_EDITORIAL_SLIDE: PdpGalleryEditorialSlide = {
   alt: "Close-up of Tabby Shoulder Bag 26 full-grain leather and gold C clasp hardware",
   caption:
     "Glovetanned full-grain leather with signature hardware — soft, rich, and made to last.",
-  signatureSoundId: "tabby-turnlock",
 };
 
 /** Standard studio product photography — front, detail collage, hardware */
@@ -752,14 +756,12 @@ export const PDP_GALLERY_PRODUCT_SHOTS: PdpGallerySlide[] = [
     objectPosition: "center 78%",
     scale: "scale-100",
   },
-  { type: "product-collage" },
   {
     type: "immersive",
     src: "/images/gallery/tabby-leather-detail-hardware.png",
     alt: "Close-up of Tabby Shoulder Bag 26 full-grain leather, gold C clasp, and accordion interior",
     objectPosition: "center center",
     hotspots: PDP_PRODUCT_IMMERSIVE_HOTSPOTS,
-    signatureSoundId: "tabby-turnlock",
   },
 ];
 
@@ -789,7 +791,6 @@ export const PDP_GALLERY_MEDIA_SLIDES: PdpGallerySlide[] = [
     src: "/images/gallery/tabby-leather-on-model-trench.png",
     alt: "Model wearing Tabby Shoulder Bag 26 with a tan trench coat and plaid mini skirt",
     shopTheLookId: "trench-daytime",
-    signatureSoundId: "tabby-turnlock",
   },
   {
     type: "video",
@@ -798,6 +799,7 @@ export const PDP_GALLERY_MEDIA_SLIDES: PdpGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 highlight montage",
     aspect: "9/16",
   },
+  { type: "ugc-videos" },
   ...PDP_GALLERY_PRODUCT_SHOTS,
   {
     type: "immersive",
@@ -811,6 +813,7 @@ export const PDP_GALLERY_EXPERIENCE_SLIDES: PdpGallerySlide[] = [
   { type: "material-exploration" },
   { type: "leather-aging" },
   { type: "weight-feel" },
+  { type: "signature-sounds" },
   { type: "bag-stories" },
   { type: "strap-simulation" },
 ];
@@ -1220,9 +1223,9 @@ export const PDP_MATERIAL_EXPLORATION = {
     "Drag across the leather to reveal grain, stitching, edge paint, and burnishing.",
   hint: "Drag anywhere to zoom",
   overview: {
-    src: "/images/gallery/tabby-leather-back-angle.png",
-    alt: "Tabby Shoulder Bag 26 leather surface for touch exploration",
-    objectPosition: "center 58%",
+    src: "/images/gallery/tabby-leather-detail-hardware.png",
+    alt: "Close-up of Tabby Shoulder Bag 26 glovetanned full-grain leather with gold C clasp hardware",
+    objectPosition: "center center",
   },
   zones: [
     {
@@ -1432,6 +1435,38 @@ export const PDP_LEATHER_AGING = {
   ] satisfies PdpLeatherAgingStage[],
 } as const;
 
+export type PdpLeatherCleanerProduct = {
+  id: string;
+  name: string;
+  detail: string;
+  price: number;
+  imageSrc: string;
+  imageAlt: string;
+};
+
+/** Coach leather care — lower-priority add-on pair for glovetanned bags */
+export const PDP_LEATHER_CLEANER = {
+  title: "Leather care",
+  products: [
+    {
+      id: "coach-leather-cleaner",
+      name: "Leather Cleaner",
+      detail: "Removes surface dirt without stripping natural oils.",
+      price: 16,
+      imageSrc: "/images/gallery/tabby-leather-detail-hardware.png",
+      imageAlt: "Coach Leather Cleaner for glovetanned leather",
+    },
+    {
+      id: "coach-leather-moisturizer",
+      name: "Leather Moisturizer",
+      detail: "Conditions pebbled leather to stay soft and resist drying.",
+      price: 22,
+      imageSrc: "/images/gallery/tabby-leather-back.png",
+      imageAlt: "Coach Leather Moisturizer for full-grain leather bags",
+    },
+  ] satisfies PdpLeatherCleanerProduct[],
+} as const;
+
 export type PdpWeightFeelEntry = {
   id: string;
   label: string;
@@ -1505,8 +1540,6 @@ export type PdpSignatureSound = {
 /** Product sounds — turnlock, zipper, opening (replace audio with studio recordings) */
 export const PDP_SIGNATURE_SOUNDS = {
   title: "Signature sounds",
-  intro:
-    "Not generic sounds. Product sounds — the click of the clasp, the pull of the zipper, the open of the bag.",
   sounds: [
     {
       id: "tabby-turnlock",
@@ -1537,10 +1570,6 @@ export const PDP_SIGNATURE_SOUNDS = {
     },
   ] satisfies PdpSignatureSound[],
 } as const;
-
-export function getPdpSignatureSound(id: string): PdpSignatureSound | undefined {
-  return PDP_SIGNATURE_SOUNDS.sounds.find((sound) => sound.id === id);
-}
 
 /** Moment #5 — brand heritage */
 export const PDP_HERITAGE_STORY = {
@@ -1665,6 +1694,60 @@ export type PdpUgcStory = {
   quote?: string;
   verified?: boolean;
 };
+
+export type PdpUgcVideo = {
+  id: string;
+  src: string;
+  poster: string;
+  alt: string;
+  /** TikTok-style handle */
+  handle: string;
+  /** Short lifestyle tag on the clip */
+  context: string;
+  verified?: boolean;
+};
+
+/** Swipeable UGC clips in the gallery — TikTok-style vertical videos */
+export const PDP_UGC_VIDEO_CAROUSEL = {
+  title: "On TikTok",
+  videos: [
+    {
+      id: "ugc-leather-detail",
+      src: "/videos/tabby-detail.mp4",
+      poster: "/images/gallery/tabby-leather-detail-hardware.png",
+      alt: "Customer close-up of Tabby glovetanned leather and gold hardware",
+      handle: "@stylebyjess",
+      context: "Leather detail",
+      verified: true,
+    },
+    {
+      id: "ugc-coffee-run",
+      src: "/videos/soft-tabby-showcase.webm",
+      poster: "/images/reviews/ugc-coffee-run.png",
+      alt: "Customer styling Tabby Shoulder Bag 26 for a weekend coffee run",
+      handle: "@jordanl.bk",
+      context: "Saturday coffee run",
+      verified: true,
+    },
+    {
+      id: "ugc-city-commute",
+      src: "/videos/what-fits-inside.webm",
+      poster: "/images/reviews/ugc-on-street.png",
+      alt: "Customer carrying Tabby through a city commute",
+      handle: "@alexr.nyc",
+      context: "City commute",
+      verified: true,
+    },
+    {
+      id: "ugc-creator-fit",
+      src: "/videos/gallery-360.webm",
+      poster: "/images/gallery/mode22.png",
+      alt: "Creator crossbody styling with Tabby Shoulder Bag 26",
+      handle: "@tabbyfits",
+      context: "How I wear it",
+    },
+  ] satisfies PdpUgcVideo[],
+} as const;
 
 /** UGC with context — who's wearing it, how, and where */
 export const PDP_UGC_CONTEXT = {

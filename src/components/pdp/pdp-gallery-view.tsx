@@ -23,24 +23,24 @@ import { PdpSimilarItemsCarousel } from "./pdp-similar-items-carousel";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
 import { PdpLeatherAgingModule } from "./pdp-leather-aging-module";
+import { PdpLeatherCleanerModule } from "./pdp-leather-cleaner-module";
 import { PdpBagStoriesModule } from "./pdp-bag-stories-module";
 import { PdpStrapSimulationModule } from "./pdp-strap-simulation-module";
 import { PdpWeightFeelModule } from "./pdp-weight-feel-module";
 import { galleryImageUtilityIconClass } from "./pdp-gallery-image-utility";
 import { PdpGalleryImageUtilityRail } from "./pdp-gallery-image-utility-rail";
-import { PdpGallerySoundPlayOverlay } from "./pdp-gallery-sound-play-overlay";
 import { PdpMaterialStoryModule } from "./pdp-material-story-module";
+import { PdpSignatureSoundsModule } from "./pdp-signature-sounds-module";
+import { PdpUgcVideoCarouselModule } from "./pdp-ugc-video-carousel-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
-  getPdpSignatureSound,
   PDP_GALLERY_HERO_IMAGE,
   PDP_GALLERY_HERO_IMAGE_FOCUS,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
+  PDP_STUDIO_BACKDROP_CLASS,
   PDP_STRAP_OPTIONS,
 } from "./pdp-data";
-import { useGallerySlideSoundLifecycle } from "./use-gallery-slide-sound";
-import { useSignatureSound } from "./use-signature-sound";
 import type { PdpBundleAddPayload, PdpInfluencerCredit, PdpProductHotspot } from "./pdp-data";
 import { pdpType } from "./pdp-type";
 import {
@@ -130,8 +130,7 @@ type PdpGalleryPortraitSlideProps = {
   isLastPanel?: boolean;
   panelContain?: boolean;
   headerSurface?: "light" | "dark";
-  signatureSoundId?: string;
-  gallerySoundControl: ReturnType<typeof useSignatureSound>;
+  aspect?: "4/5" | "9/16";
 };
 
 /** Immersive 4:5 portrait — full-bleed by default, optional 12px white inset */
@@ -152,19 +151,13 @@ function PdpGalleryPortraitSlide({
   isLastPanel = false,
   panelContain = false,
   headerSurface,
-  signatureSoundId,
-  gallerySoundControl,
+  aspect = "4/5",
 }: PdpGalleryPortraitSlideProps) {
   const panel = PDP_PANEL_SCROLL;
   const fitContain = panel && panelContain;
-  const signatureSound = signatureSoundId
-    ? getPdpSignatureSound(signatureSoundId)
-    : undefined;
-  const sectionRef = useGallerySlideSoundLifecycle(signatureSound?.id, gallerySoundControl);
 
   return (
     <section
-      ref={sectionRef}
       className={cn(
         "relative w-full shrink-0 overflow-hidden",
         panel
@@ -191,7 +184,11 @@ function PdpGalleryPortraitSlide({
         className={cn(
           panel
             ? PANEL_MEDIA_FRAME_CLASS
-            : "relative aspect-[4/5] w-full overflow-hidden bg-white",
+            : cn(
+                "relative w-full overflow-hidden",
+                aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
+                insetMargins ? "bg-white" : PDP_STUDIO_BACKDROP_CLASS,
+              ),
         )}
       >
         <div className={panel ? PANEL_MEDIA_FILL_CLASS : "relative size-full"}>
@@ -226,24 +223,16 @@ function PdpGalleryPortraitSlide({
           </a>
         ) : null}
 
-        {signatureSound || (shopTheLookId && onOpenShopTheLook) ? (
+        {shopTheLookId && onOpenShopTheLook ? (
           <PdpGalleryImageUtilityRail>
-            {shopTheLookId && onOpenShopTheLook ? (
-              <button
-                type="button"
-                onClick={() => onOpenShopTheLook(shopTheLookId)}
-                aria-label="Shop the look"
-                className={galleryImageUtilityIconClass()}
-              >
-                <MaterialIcon name="checkroom" size={20} className="text-neutral-900" />
-              </button>
-            ) : null}
-            {signatureSound ? (
-              <PdpGallerySoundPlayOverlay
-                sound={signatureSound}
-                soundControl={gallerySoundControl}
-              />
-            ) : null}
+            <button
+              type="button"
+              onClick={() => onOpenShopTheLook(shopTheLookId)}
+              aria-label="Shop the look"
+              className={galleryImageUtilityIconClass()}
+            >
+              <MaterialIcon name="checkroom" size={20} className="text-neutral-900" />
+            </button>
           </PdpGalleryImageUtilityRail>
         ) : null}
 
@@ -365,7 +354,6 @@ export function PdpGalleryView({
   const [strapOptionsId, setStrapOptionsId] = useState<string | null>(null);
   const [photosOpen, setPhotosOpen] = useState(false);
   const galleryEndRef = useRef<HTMLDivElement>(null);
-  const gallerySoundControl = useSignatureSound();
   const lastPanelSlideIndex = getLastGalleryPanelSlideIndex(PDP_GALLERY_SLIDES);
   const activeShopLook = shopLookId ? PDP_SHOP_THE_LOOK[shopLookId] ?? null : null;
   const activeStrapOptions = strapOptionsId
@@ -406,9 +394,13 @@ export function PdpGalleryView({
                 learnMore={slide.learnMore}
                 panelScroll={PDP_PANEL_SCROLL}
                 isLastPanel={isLastPanel}
-                signatureSoundId={slide.signatureSoundId}
-                gallerySoundControl={gallerySoundControl}
               />,
+            ];
+          }
+
+          if (slide.type === "signature-sounds") {
+            return [
+              <PdpSignatureSoundsModule key={`signature-sounds-${index}`} />,
             ];
           }
 
@@ -481,6 +473,15 @@ export function PdpGalleryView({
             ];
           }
 
+          if (slide.type === "ugc-videos") {
+            return [
+              <PdpUgcVideoCarouselModule
+                key={`ugc-videos-${index}`}
+                isLastPanel={isLastPanel}
+              />,
+            ];
+          }
+
           if (slide.type !== "immersive") {
             return [];
           }
@@ -511,8 +512,7 @@ export function PdpGalleryView({
               isLastPanel={isLastPanel}
               panelContain={slide.panelContain}
               headerSurface={slide.headerSurface}
-              signatureSoundId={slide.signatureSoundId}
-              gallerySoundControl={gallerySoundControl}
+              aspect={slide.aspect}
             />,
           ];
         })}
@@ -531,6 +531,9 @@ export function PdpGalleryView({
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light">
         <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="light">
+        <PdpLeatherCleanerModule onQuickAdd={() => onAddSimilarToBag?.()} />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light">
         <PdpReviewsModule

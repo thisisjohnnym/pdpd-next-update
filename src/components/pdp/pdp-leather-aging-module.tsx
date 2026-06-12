@@ -1,20 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
-import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { PDP_LEATHER_AGING } from "./pdp-data";
+import { PDP_LEATHER_AGING, PDP_STUDIO_BACKDROP_CLASS } from "./pdp-data";
 import {
-  EXPERIENCE_PANEL_BODY_CLASS,
-  EXPERIENCE_PANEL_GRID_CLASS,
-  EXPERIENCE_PANEL_ITEM_CLASS,
   EXPERIENCE_PANEL_MEDIA_CLASS,
   experiencePanelSectionProps,
 } from "./pdp-experience-panel";
-import { pdpType } from "./pdp-type";
 
 /** Leather aging simulator — patina, softening, and wear over time */
 export function PdpLeatherAgingModule({
@@ -24,8 +19,11 @@ export function PdpLeatherAgingModule({
 }) {
   const { image, stages } = PDP_LEATHER_AGING;
   const panel = experiencePanelSectionProps(isLastPanel);
+  const maxIndex = stages.length - 1;
   const [stageIndex, setStageIndex] = useState(0);
   const stage = stages[stageIndex]!;
+  const sliderProgress =
+    maxIndex > 0 ? (stageIndex / maxIndex) * 100 : 0;
 
   const imageFilter = useMemo(
     () =>
@@ -35,83 +33,90 @@ export function PdpLeatherAgingModule({
 
   return (
     <section data-header-surface="light" className={panel.className} style={panel.style}>
-      <PageGrid fullWidth className={EXPERIENCE_PANEL_GRID_CLASS}>
-        <GridItem mobile={12} desktop={24} className={EXPERIENCE_PANEL_ITEM_CLASS}>
-          <div className={EXPERIENCE_PANEL_BODY_CLASS}>
-            <div className={cn(EXPERIENCE_PANEL_MEDIA_CLASS, "bg-neutral-900")}>
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                className="object-cover transition-[filter] duration-500 ease-out"
-                style={{
-                  objectPosition: image.objectPosition ?? "center",
-                  filter: imageFilter,
-                }}
-                sizes="100vw"
-              />
+      <div className={cn(EXPERIENCE_PANEL_MEDIA_CLASS, PDP_STUDIO_BACKDROP_CLASS)}>
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          className="object-cover scale-[1.06] transition-[filter] duration-500 ease-out"
+          style={{
+            objectPosition: image.objectPosition ?? "center",
+            filter: imageFilter,
+          }}
+          sizes="100vw"
+        />
 
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-                style={{
-                  opacity: stage.visual.patinaOpacity,
-                  background: stage.visual.patinaGradient,
-                }}
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-                style={{
-                  opacity: stage.visual.wearOpacity,
-                  background: stage.visual.wearGradient,
-                }}
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-                style={{
-                  opacity: stage.visual.softenOpacity,
-                  backdropFilter: `blur(${stage.visual.softenBlur}px)`,
-                  WebkitBackdropFilter: `blur(${stage.visual.softenBlur}px)`,
-                  maskImage: stage.visual.softenMask,
-                  WebkitMaskImage: stage.visual.softenMask,
-                }}
-              />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+          style={{
+            opacity: stage.visual.patinaOpacity,
+            background: stage.visual.patinaGradient,
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+          style={{
+            opacity: stage.visual.wearOpacity,
+            background: stage.visual.wearGradient,
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+          style={{
+            opacity: stage.visual.softenOpacity,
+            backdropFilter: `blur(${stage.visual.softenBlur}px)`,
+            WebkitBackdropFilter: `blur(${stage.visual.softenBlur}px)`,
+            maskImage: stage.visual.softenMask,
+            WebkitMaskImage: stage.visual.softenMask,
+          }}
+        />
+      </div>
 
-              <div
-                className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/60 via-black/25 to-transparent px-3 pb-3 pt-16"
+      <div className="shrink-0 px-3 pt-4 pb-1">
+        <div className="flex flex-col gap-4" aria-live="polite">
+          <input
+            type="range"
+            min={0}
+            max={maxIndex}
+            step={1}
+            value={stageIndex}
+            onChange={(event) => setStageIndex(Number(event.target.value))}
+            aria-valuemin={0}
+            aria-valuemax={maxIndex}
+            aria-valuenow={stageIndex}
+            aria-valuetext={stage.label}
+            aria-label="Leather aging over time"
+            className="pdp-aging-slider py-2"
+            style={
+              {
+                "--pdp-aging-progress": `${sliderProgress}%`,
+              } as CSSProperties
+            }
+          />
+
+          <div className="flex items-start justify-between gap-6 px-0.5">
+            {stages.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setStageIndex(index)}
+                aria-current={stageIndex === index ? "step" : undefined}
+                className={cn(
+                  "font-extended min-w-0 text-center text-[10px] tracking-[0.2px] transition-colors",
+                  stageIndex === index
+                    ? "text-black"
+                    : "text-neutral-500 hover:text-black",
+                )}
               >
-                <div className="mb-2.5 grid grid-cols-3 gap-1" aria-live="polite">
-                  {stages.map((item, index) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setStageIndex(index)}
-                      aria-pressed={stageIndex === index}
-                      className={cn(
-                        "font-extended rounded-lg px-1 py-1.5 text-center text-[10px] tracking-[0.2px] transition-colors",
-                        stageIndex === index
-                          ? "bg-white text-black"
-                          : "bg-black/40 text-white/90 backdrop-blur-sm hover:bg-black/55",
-                      )}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div aria-hidden className="pointer-events-none">
-                  <p className="font-extended text-[11px] tracking-[0.2px] text-white/90">
-                    {stage.timeline}
-                  </p>
-                  <p className={`mt-0.5 text-white/75 ${pdpType.micro}`}>{stage.summary}</p>
-                </div>
-              </div>
-            </div>
+                {item.label}
+              </button>
+            ))}
           </div>
-        </GridItem>
-      </PageGrid>
+        </div>
+      </div>
     </section>
   );
 }

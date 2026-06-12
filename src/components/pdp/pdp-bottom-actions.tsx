@@ -41,9 +41,7 @@ export function PdpBottomActions({
     <div
       className={cn(
         "pdp-hero-bottom-enter transition-[gap,padding] duration-300 ease-out",
-        docked
-          ? "grid w-full grid-cols-2 gap-0 divide-x divide-white/20"
-          : "flex gap-1",
+        docked ? "grid w-full grid-cols-2 gap-0" : "flex gap-1",
       )}
     >
       <PdpColorSelector
@@ -61,8 +59,8 @@ export function PdpBottomActions({
         className={cn(
           "font-extended flex w-full min-w-0 items-center justify-center text-center leading-none tracking-[0.2px] transition-[border-radius] duration-300",
           docked
-            ? "h-[54px] rounded-none border-0 bg-white px-4 text-sm text-neutral-950"
-            : "pdp-glass-light h-12 flex-1 rounded-full px-3.5 text-xs",
+            ? "h-[54px] rounded-none border-0 bg-white px-4 text-sm text-neutral-950 shadow-none"
+            : "pdp-glass-light h-12 flex-1 rounded-full border-0 px-3.5 text-xs shadow-none",
         )}
       >
         <span className="translate-y-px">Add to Bag</span>
