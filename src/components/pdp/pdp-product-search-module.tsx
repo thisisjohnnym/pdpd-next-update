@@ -17,20 +17,30 @@ import { pdpType } from "./pdp-type";
 function ConciergeResponse({
   prompt,
   userQuery,
+  flat = false,
 }: {
   prompt: PdpAiConciergePrompt | null;
   userQuery: string;
+  flat?: boolean;
 }) {
   const response = prompt?.response ?? PDP_AI_CONCIERGE.fallbackResponse;
   const highlights = prompt?.response.highlights;
 
   return (
     <div
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm"
+      className={cn(
+        "flex flex-col gap-4 border border-neutral-200 bg-white p-3",
+        flat ? "shadow-none" : "rounded-2xl shadow-sm",
+      )}
       aria-live="polite"
     >
       <div className="flex items-start gap-2.5">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-black text-white">
+        <span
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center bg-black text-white",
+            !flat && "rounded-full",
+          )}
+        >
           <MaterialIcon name="auto_awesome" size={18} className="text-white" />
         </span>
         <div className="min-w-0 flex-1">
@@ -49,7 +59,10 @@ function ConciergeResponse({
           {highlights.map((highlight) => (
             <li
               key={highlight}
-              className="font-extended rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] tracking-[0.2px] text-neutral-700"
+              className={cn(
+                "font-extended bg-neutral-100 px-2.5 py-1 text-[10px] tracking-[0.2px] text-neutral-700",
+                !flat && "rounded-full",
+              )}
             >
               {highlight}
             </li>
@@ -85,14 +98,32 @@ function ConciergeResponse({
   );
 }
 
-/** AI Concierge — experiential prompts with inline styling answers */
-export function PdpAiConciergeModule() {
+type PdpAiConciergePanelProps = {
+  /** Suffix for form field ids when multiple panels could mount */
+  idSuffix?: string;
+  showTitle?: boolean;
+  onClose?: () => void;
+  className?: string;
+  /** Square corners — for embedded discovery card */
+  variant?: "default" | "flat";
+};
+
+/** Inline AI Concierge — form, prompts, and responses without page section wrapper */
+export function PdpAiConciergePanel({
+  idSuffix = "",
+  showTitle = true,
+  onClose,
+  className,
+  variant = "default",
+}: PdpAiConciergePanelProps) {
+  const flat = variant === "flat";
   const { title, placeholder, prompts, fallbackResponse } = PDP_AI_CONCIERGE;
   const [query, setQuery] = useState("");
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
   const [showResponse, setShowResponse] = useState(false);
 
+  const promptFieldId = `pdp-ai-prompt${idSuffix}`;
   const hasQuery = query.trim().length > 0;
   const activePrompt =
     prompts.find((prompt) => prompt.id === activePromptId) ?? null;
@@ -124,120 +155,157 @@ export function PdpAiConciergeModule() {
   );
 
   return (
+    <div className={cn("flex flex-col gap-4", className)}>
+      {showTitle ? (
+        <div className="flex items-center justify-between gap-2">
+          <h3 className={pdpModuleHeadingClass({ lead: false, size: "sm" })}>
+            {title}
+          </h3>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className={`font-extended shrink-0 text-neutral-500 ${pdpType.micro}`}
+            >
+              Close
+            </button>
+          ) : null}
+        </div>
+      ) : onClose ? (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className={`font-extended text-neutral-500 ${pdpType.micro}`}
+          >
+            Close
+          </button>
+        </div>
+      ) : null}
+
+      <form
+        className={cn(
+          "bg-white p-3",
+          flat ? "border border-neutral-200" : "rounded-2xl shadow-sm",
+        )}
+        onSubmit={handleSubmit}
+      >
+        <label htmlFor={promptFieldId} className="sr-only">
+          Ask the AI Concierge
+        </label>
+
+        <div className="flex items-start gap-2.5">
+          <MaterialIcon
+            name="auto_awesome"
+            size={20}
+            className="mt-0.5 shrink-0 text-black"
+          />
+          <textarea
+            id={promptFieldId}
+            rows={2}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={placeholder}
+            className="font-extended min-h-[3.25rem] w-full resize-none bg-transparent text-sm leading-[1.35] tracking-[0.2px] text-black outline-none placeholder:text-neutral-400"
+          />
+        </div>
+
+        <div className="mt-2 flex justify-end">
+          <button
+            type="submit"
+            disabled={!hasQuery}
+            aria-label="Send prompt"
+            className={cn(
+              "flex size-9 items-center justify-center transition-colors",
+              flat ? "rounded-none" : "rounded-full",
+              hasQuery
+                ? "bg-black text-white active:bg-neutral-800"
+                : "bg-neutral-100 text-neutral-400",
+            )}
+          >
+            <MaterialIcon
+              name="arrow_upward"
+              size={20}
+              className={hasQuery ? "text-white" : "text-neutral-400"}
+            />
+          </button>
+        </div>
+      </form>
+
+      <div className="flex flex-col gap-2">
+        <p className={`font-extended m-0 text-neutral-500 ${pdpType.micro}`}>
+          Try asking
+        </p>
+        {prompts.map((prompt) => {
+          const isActive = activePromptId === prompt.id && showResponse;
+
+          return (
+            <button
+              key={prompt.id}
+              type="button"
+              onClick={() => runPrompt(prompt)}
+              aria-pressed={isActive}
+              className={cn(
+                "flex w-full items-start gap-3 border p-3 text-left transition-colors duration-200",
+                isActive
+                  ? "border-black bg-white shadow-sm"
+                  : "border-neutral-200 bg-white active:bg-neutral-50",
+              )}
+            >
+              <span
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center transition-colors",
+                  isActive ? "bg-black text-white" : "bg-neutral-100 text-neutral-600",
+                )}
+              >
+                <MaterialIcon name={prompt.icon} size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="font-extended block text-[10px] tracking-[0.2px] text-neutral-500">
+                  {prompt.category}
+                </span>
+                <span className="font-extended mt-1 block text-sm leading-snug tracking-[0.2px] text-black">
+                  {prompt.question}
+                </span>
+              </span>
+              <MaterialIcon
+                name="chevron_right"
+                size={20}
+                className={cn(
+                  "mt-1 shrink-0 transition-colors",
+                  isActive ? "text-black" : "text-neutral-300",
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      {showResponse ? (
+        <ConciergeResponse
+          prompt={activePrompt}
+          userQuery={submittedQuery ?? ""}
+          flat={flat}
+        />
+      ) : (
+        <p className={`m-0 text-neutral-500 ${pdpType.micro}`}>
+          {fallbackResponse.body}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** AI Concierge — experiential prompts with inline styling answers */
+export function PdpAiConciergeModule() {
+  return (
     <section
       data-header-surface="light"
       className={pdpModuleSectionClass({ variant: "muted", rhythm: "compact" })}
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <div className="flex flex-col gap-5">
-            <h2 className={pdpModuleHeadingClass({ lead: false })}>{title}</h2>
-
-            <form
-              className="rounded-2xl bg-white p-3 shadow-sm"
-              onSubmit={handleSubmit}
-            >
-              <label htmlFor="pdp-ai-prompt" className="sr-only">
-                Ask the AI Concierge
-              </label>
-
-              <div className="flex items-start gap-2.5">
-                <MaterialIcon
-                  name="auto_awesome"
-                  size={20}
-                  className="mt-0.5 shrink-0 text-black"
-                />
-                <textarea
-                  id="pdp-ai-prompt"
-                  rows={2}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={placeholder}
-                  className="font-extended min-h-[3.25rem] w-full resize-none bg-transparent text-sm leading-[1.35] tracking-[0.2px] text-black outline-none placeholder:text-neutral-400"
-                />
-              </div>
-
-              <div className="mt-2 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={!hasQuery}
-                  aria-label="Send prompt"
-                  className={cn(
-                    "flex size-9 items-center justify-center rounded-full transition-colors",
-                    hasQuery
-                      ? "bg-black text-white active:bg-neutral-800"
-                      : "bg-neutral-100 text-neutral-400",
-                  )}
-                >
-                  <MaterialIcon
-                    name="arrow_upward"
-                    size={20}
-                    className={hasQuery ? "text-white" : "text-neutral-400"}
-                  />
-                </button>
-              </div>
-            </form>
-
-            <div className="flex flex-col gap-2">
-              <p className={`font-extended m-0 text-neutral-500 ${pdpType.micro}`}>
-                Try asking
-              </p>
-              {prompts.map((prompt) => {
-                const isActive = activePromptId === prompt.id && showResponse;
-
-                return (
-                  <button
-                    key={prompt.id}
-                    type="button"
-                    onClick={() => runPrompt(prompt)}
-                    aria-pressed={isActive}
-                    className={cn(
-                      "flex w-full items-start gap-3 border p-3 text-left transition-colors duration-200",
-                      isActive
-                        ? "border-black bg-white shadow-sm"
-                        : "border-neutral-200 bg-white active:bg-neutral-50",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex size-9 shrink-0 items-center justify-center transition-colors",
-                        isActive ? "bg-black text-white" : "bg-neutral-100 text-neutral-600",
-                      )}
-                    >
-                      <MaterialIcon name={prompt.icon} size={18} />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="font-extended block text-[10px] tracking-[0.2px] text-neutral-500">
-                        {prompt.category}
-                      </span>
-                      <span className="font-extended mt-1 block text-sm leading-snug tracking-[0.2px] text-black">
-                        {prompt.question}
-                      </span>
-                    </span>
-                    <MaterialIcon
-                      name="chevron_right"
-                      size={20}
-                      className={cn(
-                        "mt-1 shrink-0 transition-colors",
-                        isActive ? "text-black" : "text-neutral-300",
-                      )}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-
-            {showResponse ? (
-              <ConciergeResponse
-                prompt={activePrompt}
-                userQuery={submittedQuery ?? ""}
-              />
-            ) : (
-              <p className={`m-0 text-neutral-500 ${pdpType.micro}`}>
-                {fallbackResponse.body}
-              </p>
-            )}
-          </div>
+          <PdpAiConciergePanel />
         </GridItem>
       </PageGrid>
     </section>

@@ -16,10 +16,8 @@ import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
 import { PdpBundleModule } from "./pdp-bundle-module";
 import { PdpCompareModule } from "./pdp-compare-module";
-import { PdpAiConciergeModule } from "./pdp-product-search-module";
-import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
+import { PdpShoppingDiscoveryModule } from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
-import { PdpSimilarItemsCarousel } from "./pdp-similar-items-carousel";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
 import { PdpLeatherAgingModule } from "./pdp-leather-aging-module";
@@ -27,11 +25,10 @@ import { PdpLeatherCleanerModule } from "./pdp-leather-cleaner-module";
 import { PdpBagStoriesModule } from "./pdp-bag-stories-module";
 import { PdpStrapSimulationModule } from "./pdp-strap-simulation-module";
 import { PdpWeightFeelModule } from "./pdp-weight-feel-module";
-import { galleryImageUtilityIconClass } from "./pdp-gallery-image-utility";
-import { PdpGalleryImageUtilityRail } from "./pdp-gallery-image-utility-rail";
-import { PdpMaterialStoryModule } from "./pdp-material-story-module";
+import { PdpGalleryDragZoomImage } from "./pdp-gallery-drag-zoom-image";
 import { PdpSignatureSoundsModule } from "./pdp-signature-sounds-module";
 import { PdpUgcVideoCarouselModule } from "./pdp-ugc-video-carousel-module";
+import { PdpAsSeenOnModule } from "./pdp-as-seen-on-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
   PDP_GALLERY_HERO_IMAGE,
@@ -131,6 +128,7 @@ type PdpGalleryPortraitSlideProps = {
   panelContain?: boolean;
   headerSurface?: "light" | "dark";
   aspect?: "4/5" | "9/16";
+  dragZoom?: boolean;
 };
 
 /** Immersive 4:5 portrait — full-bleed by default, optional 12px white inset */
@@ -152,6 +150,7 @@ function PdpGalleryPortraitSlide({
   panelContain = false,
   headerSurface,
   aspect = "4/5",
+  dragZoom = false,
 }: PdpGalleryPortraitSlideProps) {
   const panel = PDP_PANEL_SCROLL;
   const fitContain = panel && panelContain;
@@ -192,20 +191,32 @@ function PdpGalleryPortraitSlide({
         )}
       >
         <div className={panel ? PANEL_MEDIA_FILL_CLASS : "relative size-full"}>
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            priority={priority}
-            loading={panel ? "eager" : undefined}
-            className={cn(
-              panel && !fitContain && PANEL_MEDIA_COVER_CLASS,
-              fitContain ? "object-contain" : "object-cover",
-              scale,
-            )}
-            style={{ objectPosition }}
-            sizes="100vw"
-          />
+          {dragZoom ? (
+            <PdpGalleryDragZoomImage
+              src={src}
+              alt={alt}
+              priority={priority}
+              objectPosition={objectPosition}
+              scale={scale}
+              fitContain={fitContain}
+              panel={panel}
+            />
+          ) : (
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              priority={priority}
+              loading={panel ? "eager" : undefined}
+              className={cn(
+                panel && !fitContain && PANEL_MEDIA_COVER_CLASS,
+                fitContain ? "object-contain" : "object-cover",
+                scale,
+              )}
+              style={{ objectPosition }}
+              sizes="100vw"
+            />
+          )}
         </div>
 
         {hotspots?.length ? <PdpProductHotspots hotspots={hotspots} /> : null}
@@ -224,16 +235,23 @@ function PdpGalleryPortraitSlide({
         ) : null}
 
         {shopTheLookId && onOpenShopTheLook ? (
-          <PdpGalleryImageUtilityRail>
-            <button
-              type="button"
-              onClick={() => onOpenShopTheLook(shopTheLookId)}
-              aria-label="Shop the look"
-              className={galleryImageUtilityIconClass()}
+          <button
+            type="button"
+            onClick={() => onOpenShopTheLook(shopTheLookId)}
+            aria-label="Shop the look"
+            className={cn(
+              "absolute bottom-4 left-3 z-10 flex items-center gap-1.5 rounded-full border border-white/55 bg-white/80 py-1.5 pl-1.5 pr-3.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95 lg:left-5",
+              pdpType.label,
+            )}
+          >
+            <span
+              aria-hidden
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/90"
             >
               <MaterialIcon name="checkroom" size={20} className="text-neutral-900" />
-            </button>
-          </PdpGalleryImageUtilityRail>
+            </span>
+            <span className="font-extended">(Shop the look)</span>
+          </button>
         ) : null}
 
         {strapOptionsId &&
@@ -256,6 +274,7 @@ function PdpGalleryVideoSlide({
   alt,
   showMuteControl = true,
   aspect = "4/5",
+  caption,
   reserveBottomCta = false,
   isLastPanel = false,
 }: {
@@ -264,6 +283,7 @@ function PdpGalleryVideoSlide({
   alt: string;
   showMuteControl?: boolean;
   aspect?: "4/5" | "9/16";
+  caption?: string;
   reserveBottomCta?: boolean;
   isLastPanel?: boolean;
 }) {
@@ -329,6 +349,18 @@ function PdpGalleryVideoSlide({
               PDP_PANEL_SCROLL && PANEL_MEDIA_COVER_CLASS,
             )}
           />
+          {caption ? (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black/55 via-black/20 to-transparent px-4 pb-8 pt-[calc(env(safe-area-inset-top,0px)+3.25rem)]"
+            >
+              <p
+                className={`font-extended m-0 text-center text-white ${pdpType.caption}`}
+              >
+                {caption}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
@@ -404,15 +436,6 @@ export function PdpGalleryView({
             ];
           }
 
-          if (slide.type === "material-exploration") {
-            return [
-              <PdpMaterialStoryModule
-                key={`material-exploration-${index}`}
-                isLastPanel={isLastPanel}
-              />,
-            ];
-          }
-
           if (slide.type === "leather-aging") {
             return [
               <PdpLeatherAgingModule
@@ -468,6 +491,7 @@ export function PdpGalleryView({
                 alt={slide.alt}
                 showMuteControl={slide.showMuteControl}
                 aspect={slide.aspect}
+                caption={slide.caption}
                 isLastPanel={isLastPanel}
               />,
             ];
@@ -477,6 +501,15 @@ export function PdpGalleryView({
             return [
               <PdpUgcVideoCarouselModule
                 key={`ugc-videos-${index}`}
+                isLastPanel={isLastPanel}
+              />,
+            ];
+          }
+
+          if (slide.type === "as-seen-on") {
+            return [
+              <PdpAsSeenOnModule
+                key={`as-seen-on-${index}`}
                 isLastPanel={isLastPanel}
               />,
             ];
@@ -513,6 +546,7 @@ export function PdpGalleryView({
               panelContain={slide.panelContain}
               headerSurface={slide.headerSurface}
               aspect={slide.aspect}
+              dragZoom={slide.dragZoom}
             />,
           ];
         })}
@@ -520,21 +554,7 @@ export function PdpGalleryView({
         <PdpGalleryViewMorePhotos onOpen={() => setPhotosOpen(true)} />
       </div>
 
-      <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpSimilarItemsCarousel onAddToBag={() => onAddSimilarToBag?.()} />
-      </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpCompareModule
-          selectedColorId={selectedColorId}
-          onAddToBag={() => onAddSimilarToBag?.()}
-        />
-      </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
-      </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpLeatherCleanerModule onQuickAdd={() => onAddSimilarToBag?.()} />
-      </PdpScrollReveal>
+      {/* Ecommerce — after desire + function gallery scroll */}
       <PdpScrollReveal className="w-full shrink-0" surface="light">
         <PdpReviewsModule
           onReadAll={onOpenReviews}
@@ -542,10 +562,16 @@ export function PdpGalleryView({
         />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpRecentlyViewedCarousel />
+        <PdpCompareModule onAddToBag={() => onAddSimilarToBag?.()} />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light">
-        <PdpAiConciergeModule />
+        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="light">
+        <PdpShoppingDiscoveryModule onAddToBag={() => onAddSimilarToBag?.()} />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="light">
+        <PdpLeatherCleanerModule onQuickAdd={() => onAddSimilarToBag?.()} />
       </PdpScrollReveal>
     </div>
     <PdpGalleryPhotosSheet open={photosOpen} onClose={() => setPhotosOpen(false)} />

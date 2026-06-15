@@ -22,6 +22,8 @@ type PdpColorSelectorProps = {
   flush?: boolean;
   /** Slightly smaller floating bottom-bar pill */
   compactPill?: boolean;
+  /** Thumbnail + chevron only — saves space in stacked bottom bar */
+  iconOnly?: boolean;
 };
 
 /** Swatch assets are full product shots — zoom to bag body so color fills the circle */
@@ -65,7 +67,11 @@ function PdpColorDropup({
   onSelect,
   flush = false,
   compact = false,
-}: Pick<PdpColorSelectorProps, "colors" | "selectedId" | "onSelect" | "flush" | "compact">) {
+  iconOnly = false,
+}: Pick<
+  PdpColorSelectorProps,
+  "colors" | "selectedId" | "onSelect" | "flush" | "compact" | "iconOnly"
+>) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected =
@@ -151,17 +157,20 @@ function PdpColorDropup({
           flush
             ? "pdp-glass-dark pdp-glass--flat justify-center gap-2 rounded-none px-3"
             : cn(
-                "pdp-glass-dark pdp-glass--flat justify-between rounded-full px-3",
+                "pdp-glass-dark pdp-glass--flat rounded-full px-3",
+                iconOnly ? "justify-center gap-1.5" : "justify-between",
                 compact ? "gap-2" : "gap-2.5",
               ),
         )}
       >
-        <span className="flex min-w-0 items-center gap-2">
+        <span className={cn("flex min-w-0 items-center", iconOnly ? "gap-0" : "gap-2")}>
           <ColorSwatchButton
             color={selected}
             sizeClass={compact ? "size-7" : "size-8"}
           />
-          <span className="truncate">{selected.name}</span>
+          {!iconOnly ? (
+            <span className="truncate">{selected.name}</span>
+          ) : null}
         </span>
         <MaterialIcon
           name={open ? "expand_less" : "expand_more"}
@@ -182,6 +191,7 @@ export function PdpColorSelector({
   inline = false,
   flush = false,
   compactPill = false,
+  iconOnly = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
@@ -195,6 +205,7 @@ export function PdpColorSelector({
         onSelect={onSelect}
         flush={flush}
         compact={dropupCompact}
+        iconOnly={iconOnly}
       />
     );
   }

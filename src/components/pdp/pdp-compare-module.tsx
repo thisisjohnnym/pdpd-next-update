@@ -9,165 +9,129 @@ import { cn } from "@/lib/cn";
 
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
 import {
-  pdpCarouselScrollClass,
-  pdpCompareCarouselCardClass,
-} from "./pdp-carousel";
-import {
-  PDP_COLORS,
-  PDP_COMPARE_CATEGORIES,
-  PDP_COMPARE_OPTIONS,
   PDP_COMPARE_SELECTED,
+  PDP_FAMILY_COMPARE_ALTERNATIVES,
+  type PdpCompareDifferenceRow,
   type PdpCompareItem,
+  type PdpFamilyCompareAlternative,
 } from "./pdp-data";
 import { pdpType } from "./pdp-type";
 
-const CARD_WIDTH_CLASS = pdpCompareCarouselCardClass;
-
-type CompareItemView = PdpCompareItem & {
+type CompareProductCardProps = {
+  item: PdpCompareItem | PdpFamilyCompareAlternative;
   selected?: boolean;
-  colorLabel?: string;
+  onCycle?: () => void;
+  cycleLabel?: string;
 };
 
-function buildCompareItems(colorLabel: string): CompareItemView[] {
-  return [
-    {
-      ...PDP_COMPARE_SELECTED,
-      selected: true,
-      colorLabel,
-    },
-    ...PDP_COMPARE_OPTIONS,
-  ];
-}
-
-type CompareColumnProps = {
-  item: CompareItemView;
-  /** Pinned column — stays fixed while alternatives scroll underneath */
-  pinned?: boolean;
-  added?: boolean;
-  onAddToBag?: () => void;
-};
-
-function CompareColumn({
+function CompareProductCard({
   item,
-  pinned = false,
-  added = false,
-  onAddToBag,
-}: CompareColumnProps) {
+  selected = false,
+  onCycle,
+  cycleLabel,
+}: CompareProductCardProps) {
+  const interactive = Boolean(onCycle);
+
   return (
-    <article
+    <button
+      type="button"
+      onClick={onCycle}
+      disabled={!interactive}
       className={cn(
-        "flex shrink-0 snap-start flex-col snap-always",
-        CARD_WIDTH_CLASS,
-        pinned &&
-          "sticky left-0 z-10 bg-white shadow-[6px_0_16px_-8px_rgba(0,0,0,0.18)]",
+        "flex min-w-0 flex-1 flex-col border bg-white text-left transition-colors",
+        selected
+          ? "border-black ring-1 ring-inset ring-black"
+          : "border-neutral-200",
+        interactive && "cursor-pointer hover:border-neutral-400",
+        !interactive && "cursor-default",
       )}
+      aria-label={
+        interactive
+          ? `${item.name}. ${cycleLabel ?? "Show next bag in family"}`
+          : item.name
+      }
     >
-      <div
-        className={cn(
-          "relative w-full overflow-hidden bg-neutral-100",
-          item.selected && "ring-1 ring-inset ring-black",
-        )}
-        style={{ aspectRatio: "4 / 5" }}
-      >
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
         <Image
           src={item.imageSrc}
           alt={item.imageAlt}
           fill
           className="object-cover object-center"
-          sizes="(max-width: 1023px) 66vw, 33vw"
+          sizes="40vw"
         />
       </div>
-
-      <p className={`font-extended mt-1.5 line-clamp-1 text-black ${pdpType.label}`}>
-        {item.name}
-      </p>
-      <p className={`font-extended text-black ${pdpType.micro}`}>
-        {item.price}
-      </p>
-      <p
-        className={cn(
-          "text-neutral-500",
-          pdpType.micro,
-          !item.colorLabel && "invisible",
-        )}
-      >
-        {item.colorLabel ?? "—"}
-      </p>
-
-      <div className="mt-2 flex flex-col border-t border-neutral-200">
-        {PDP_COMPARE_CATEGORIES.map((category, index) => (
-          <div
-            key={category.id}
-            className={cn(
-              "border-neutral-200 py-1.5",
-              index > 0 && "border-t",
-            )}
-          >
-            <p className={`mb-0.5 text-neutral-500 ${pdpType.micro}`}>
-              {category.label}
-            </p>
-            {category.id === "material" ? (
-              <div className="relative h-8 w-full overflow-hidden rounded-sm bg-neutral-100">
-                <Image
-                  src={item.materialSwatch.src}
-                  alt={item.materialSwatch.alt}
-                  fill
-                  className="object-cover scale-[3.25]"
-                  style={{
-                    objectPosition: item.materialSwatch.objectPosition ?? "center",
-                  }}
-                  sizes="(max-width: 1023px) 66vw, 33vw"
-                />
-                <span className="sr-only">{item.material}</span>
-              </div>
-            ) : (
-              <p className={`font-extended line-clamp-2 text-black ${pdpType.label}`}>
-                {item[category.id]}
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {onAddToBag ? (
-        <button
-          type="button"
-          onClick={onAddToBag}
-          disabled={added}
+      <div className="flex flex-col gap-0.5 px-2.5 py-2">
+        <p
           className={cn(
-            "mt-2 inline-flex w-full items-center justify-center gap-1 rounded-full py-2.5 transition-colors",
-            pdpType.micro,
-            added
-              ? "bg-neutral-100 text-neutral-500"
-              : "bg-black text-white",
+            "font-extended line-clamp-2 text-sm tracking-[0.2px] text-black",
+            pdpType.label,
           )}
         >
-          <span className="font-extended -translate-y-px">
-            {added ? "Added" : "Add to Bag"}
-          </span>
-          {!added ? (
-            <MaterialIcon name="add" size={18} className="text-white" />
-          ) : null}
-        </button>
-      ) : null}
-    </article>
+          {item.name}
+        </p>
+        <p className={cn("font-extended text-neutral-600", pdpType.micro)}>
+          {item.price}
+        </p>
+        {interactive && cycleLabel ? (
+          <p className={`mt-0.5 text-neutral-500 ${pdpType.micro}`}>{cycleLabel}</p>
+        ) : null}
+      </div>
+    </button>
+  );
+}
+
+function DifferenceRow({ row }: { row: PdpCompareDifferenceRow }) {
+  const isSelectedWin = row.advantage === "selected";
+  const isAlternativeWin = row.advantage === "alternative";
+  const isPrice = row.variant === "price";
+
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-neutral-200 py-2.5 last:border-b-0">
+      <span className={`text-neutral-500 ${pdpType.micro}`}>{row.label}</span>
+      <span
+        className={cn(
+          "font-extended inline-flex items-center gap-1 text-sm tracking-[0.2px]",
+          isSelectedWin && "text-black",
+          isAlternativeWin && "text-neutral-700",
+          !isSelectedWin && !isAlternativeWin && !isPrice && "text-neutral-700",
+          isPrice && "text-neutral-700",
+        )}
+      >
+        {row.display}
+        {isSelectedWin ? (
+          <MaterialIcon
+            name="check"
+            size={18}
+            className="text-black"
+            aria-hidden
+          />
+        ) : null}
+      </span>
+    </div>
   );
 }
 
 type PdpCompareModuleProps = {
-  selectedColorId: string;
   onAddToBag?: () => void;
 };
 
-/** Horizontal compare carousel — current item + alternatives with four spec categories */
+/** Family compare — one alternative at a time with key differences and AI browsing assist */
 export function PdpCompareModule({
-  selectedColorId,
   onAddToBag,
 }: PdpCompareModuleProps) {
+  const [alternativeIndex, setAlternativeIndex] = useState(0);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const selectedColor =
-    PDP_COLORS.find((color) => color.id === selectedColorId) ?? PDP_COLORS[0];
-  const [selectedItem, ...alternativeItems] = buildCompareItems(selectedColor.name);
+
+  const selected = PDP_COMPARE_SELECTED;
+  const selectedShortName = selected.shortName ?? selected.name;
+  const alternativeCount = PDP_FAMILY_COMPARE_ALTERNATIVES.length;
+  const alternative =
+    PDP_FAMILY_COMPARE_ALTERNATIVES[alternativeIndex] ??
+    PDP_FAMILY_COMPARE_ALTERNATIVES[0];
+
+  const cycleAlternative = () => {
+    setAlternativeIndex((current) => (current + 1) % alternativeCount);
+  };
 
   const handleAdd = (id: string) => {
     setAddedIds((current) => {
@@ -186,29 +150,104 @@ export function PdpCompareModule({
       className={pdpModuleSectionClass({ rhythm: "compact" })}
     >
       <PageGrid fullWidth>
-        <GridItem mobile={12} desktop={24} className="min-w-0 overflow-visible">
-          <h2 className={cn(pdpModuleHeadingClass({ lead: false }), "mb-3")}>
-            Compare
+        <GridItem mobile={12} desktop={24} className="min-w-0">
+          <h2 className={cn(pdpModuleHeadingClass({ lead: false }), "mb-4")}>
+            Tabby family
           </h2>
 
-          <div
-            className={cn("flex gap-2", pdpCarouselScrollClass)}
-            aria-label="Compare bags"
-          >
-            <CompareColumn
-              item={selectedItem}
-              pinned
-              added={addedIds.has(selectedItem.id)}
-              onAddToBag={() => handleAdd(selectedItem.id)}
-            />
-            {alternativeItems.map((item) => (
-              <CompareColumn
-                key={item.id}
-                item={item}
-                added={addedIds.has(item.id)}
-                onAddToBag={() => handleAdd(item.id)}
+          <div className="flex items-stretch gap-2">
+            <CompareProductCard item={selected} selected />
+            <div className="flex shrink-0 flex-col items-center justify-center gap-1 px-0.5">
+              <MaterialIcon
+                name="compare_arrows"
+                size={20}
+                className="text-neutral-400"
+                aria-hidden
               />
-            ))}
+            </div>
+            <CompareProductCard
+              item={alternative}
+              onCycle={cycleAlternative}
+              cycleLabel={`${alternativeIndex + 1} of ${alternativeCount} · tap for next`}
+            />
+          </div>
+
+          <div className="mt-5">
+            <p
+              className={cn(
+                "mb-2 font-extended text-[10px] uppercase tracking-[0.6px] text-neutral-500",
+              )}
+            >
+              Key differences
+            </p>
+            <div className="border border-neutral-200 bg-white px-3 py-1">
+              {alternative.differences.map((row) => (
+                <DifferenceRow key={row.id} row={row} />
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="mt-4 border border-neutral-200 bg-neutral-50 px-3 py-3"
+            aria-live="polite"
+          >
+            <div className="flex items-start gap-2.5">
+              <span className="flex size-8 shrink-0 items-center justify-center bg-black text-white">
+                <MaterialIcon
+                  name="auto_awesome"
+                  size={18}
+                  className="text-white"
+                  aria-hidden
+                />
+              </span>
+              <div className="min-w-0">
+                <p className="font-extended text-sm tracking-[0.2px] text-black">
+                  {alternative.aiInsight.title}
+                </p>
+                <p className={`mt-1 text-neutral-700 ${pdpType.caption}`}>
+                  {alternative.aiInsight.body}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleAdd(selected.id)}
+              disabled={addedIds.has(selected.id)}
+              className={cn(
+                "inline-flex min-w-0 flex-1 items-center justify-center px-3 py-3 transition-colors",
+                pdpType.micro,
+                addedIds.has(selected.id)
+                  ? "bg-neutral-100 text-neutral-500"
+                  : "bg-black text-white",
+              )}
+            >
+              <span className="font-extended truncate">
+                {addedIds.has(selected.id)
+                  ? "Added"
+                  : `Add ${selectedShortName}`}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd(alternative.id)}
+              disabled={addedIds.has(alternative.id)}
+              className={cn(
+                "inline-flex min-w-0 flex-1 items-center justify-center border px-3 py-3 transition-colors",
+                pdpType.micro,
+                addedIds.has(alternative.id)
+                  ? "border-neutral-200 bg-neutral-100 text-neutral-500"
+                  : "border-neutral-300 bg-white text-black hover:border-neutral-400",
+              )}
+            >
+              <span className="font-extended truncate">
+                {addedIds.has(alternative.id)
+                  ? "Added"
+                  : `Add ${alternative.shortName}`}
+              </span>
+            </button>
           </div>
         </GridItem>
       </PageGrid>
