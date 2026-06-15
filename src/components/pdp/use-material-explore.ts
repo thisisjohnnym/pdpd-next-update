@@ -43,10 +43,13 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
   const isExploringRef = useRef(false);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPointerIdRef = useRef<number | null>(null);
+  const activePointerIdRef = useRef<number | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const lastPointerPosRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<ExplorePosition | null>(null);
   const [containerSize, setContainerSize] = useState<ContainerSize>({ width: 0, height: 0 });
   const [isExploring, setIsExploring] = useState(false);
+  const [isPendingHold, setIsPendingHold] = useState(false);
   const [pointerType, setPointerType] = useState<React.PointerEvent["pointerType"] | null>(
     null,
   );
@@ -78,7 +81,34 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
 
     pendingPointerIdRef.current = null;
     touchStartRef.current = null;
+    lastPointerPosRef.current = null;
+    setIsPendingHold(false);
   }, []);
+
+  const resetExplore = useCallback(
+    (target?: HTMLDivElement | null, pointerId?: number) => {
+      clearTouchHold();
+
+      if (
+        target &&
+        pointerId !== undefined &&
+        target.hasPointerCapture(pointerId)
+      ) {
+        try {
+          target.releasePointerCapture(pointerId);
+        } catch {
+          /* pointer already released */
+        }
+      }
+
+      activePointerIdRef.current = null;
+      isExploringRef.current = false;
+      setIsExploring(false);
+      setPointerType(null);
+      setPosition(null);
+    },
+    [clearTouchHold],
+  );
 
   const beginExplore = useCallback(
     (
@@ -88,40 +118,57 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
       clientX: number,
       clientY: number,
     ) => {
+      clearTouchHold();
+
       try {
         target.setPointerCapture(pointerId);
       } catch {
-        /* pointer may have lifted before hold completed */
+        return false;
       }
 
+      activePointerIdRef.current = pointerId;
       isExploringRef.current = true;
       setPointerType(type);
       setIsExploring(true);
-      updatePosition(clientX, clientY);    },
-    [updatePosition],
+      updatePosition(clientX, clientY);
+      return true;
+    },
+    [clearTouchHold, updatePosition],
   );
 
   const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {      if (event.pointerType === "touch") {
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (isExploringRef.current) {
+        resetExplore(event.currentTarget, activePointerIdRef.current ?? undefined);
+      }
+
+      if (event.pointerType === "touch") {
         touchStartRef.current = { x: event.clientX, y: event.clientY };
+        lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
         pendingPointerIdRef.current = event.pointerId;
+        setIsPendingHold(true);
 
         const target = event.currentTarget;
         const pointerId = event.pointerId;
-        const startX = event.clientX;
-        const startY = event.clientY;
 
         holdTimerRef.current = setTimeout(() => {
           holdTimerRef.current = null;
 
-          if (pendingPointerIdRef.current !== pointerId) {            return;
-          }          beginExplore(target, pointerId, "touch", startX, startY);
+          if (pendingPointerIdRef.current !== pointerId) {
+            return;
+          }
+
+          const pos = lastPointerPosRef.current ?? touchStartRef.current;
+          if (!pos) {
+            return;
+          }
+
+          beginExplore(target, pointerId, "touch", pos.x, pos.y);
         }, TOUCH_HOLD_MS);
 
         return;
       }
 
-      event.currentTarget.setPointerCapture(event.pointerId);
       beginExplore(
         event.currentTarget,
         event.pointerId,
@@ -130,7 +177,7 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
         event.clientY,
       );
     },
-    [beginExplore],
+    [beginExplore, resetExplore],
   );
 
   const handleContextMenu = useCallback(
@@ -152,14 +199,21 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
           const dx = event.clientX - start.x;
           const dy = event.clientY - start.y;
 
-          if (Math.abs(dy) > SCROLL_CANCEL_PX && Math.abs(dy) > Math.abs(dx)) {            clearTouchHold();
+          if (Math.abs(dy) > SCROLL_CANCEL_PX && Math.abs(dy) > Math.abs(dx)) {
+            resetExplore();
+            return;
           }
         }
 
+        lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
         return;
       }
 
       if (!isExploringRef.current) {
+        return;
+      }
+
+      if (activePointerIdRef.current !== event.pointerId) {
         return;
       }
 
@@ -169,27 +223,47 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
 
       updatePosition(event.clientX, event.clientY);
     },
-    [clearTouchHold, updatePosition],
+    [resetExplore, updatePosition],
   );
 
   const handlePointerEnd = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      const hadCapture = event.currentTarget.hasPointerCapture(event.pointerId);
-      clearTouchHold();
+      const isActivePointer =
+        activePointerIdRef.current === event.pointerId ||
+        pendingPointerIdRef.current === event.pointerId;
 
-      if (hadCapture) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
+      if (!isActivePointer) {
+        return;
       }
 
-      const stillExploring = isExploringRef.current;
-      isExploringRef.current = false;
-      setIsExploring(false);
-      setPointerType(null);
-      setPosition(null);    },
-    [clearTouchHold],
+      resetExplore(event.currentTarget, event.pointerId);
+    },
+    [resetExplore],
   );
 
-  useEffect(() => clearTouchHold, [clearTouchHold]);
+  const handleLostPointerCapture = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) {
+        return;
+      }
+
+      resetExplore();
+    },
+    [resetExplore],
+  );
+
+  useEffect(() => {
+    const onWindowBlur = () => {
+      resetExplore(containerRef.current);
+    };
+
+    window.addEventListener("blur", onWindowBlur);
+
+    return () => {
+      window.removeEventListener("blur", onWindowBlur);
+      resetExplore(containerRef.current);
+    };
+  }, [resetExplore]);
 
   const activeZone = position
     ? getActiveZone(position.xPct, position.yPct, zones)
@@ -200,11 +274,13 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
     position,
     containerSize,
     isExploring,
+    isPendingHold,
     activeZone,
     pointerType,
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    handleLostPointerCapture,
     handleContextMenu,
   };
 }

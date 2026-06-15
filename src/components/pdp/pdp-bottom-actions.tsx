@@ -74,7 +74,7 @@ export function PdpBottomActions({
           className="shrink-0 text-white"
           aria-hidden
         />
-        <span className="translate-y-px text-[11px] text-white">
+        <span className="translate-y-px text-[12px] text-white">
           Add to bag
         </span>
       </button>

@@ -13,6 +13,7 @@ import {
   pdpCarouselCard15Class,
   pdpCarouselImageClass,
   pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
 } from "./pdp-carousel";
 import { PDP_SIMILAR_ITEMS } from "./pdp-data";
 import { pdpType } from "./pdp-type";
@@ -45,13 +46,14 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <PdpModuleHeading>Similar items</PdpModuleHeading>
 
-          <ul
-            className={cn(
-              "m-0 flex list-none gap-3",
-              pdpCarouselScrollClass,
-            )}
-            aria-label="Similar items"
-          >
+          <div className={pdpCarouselScrollWrapClass}>
+            <ul
+              className={cn(
+                "m-0 flex list-none gap-3",
+                pdpCarouselScrollClass,
+              )}
+              aria-label="Similar items"
+            >
             {PDP_SIMILAR_ITEMS.map((item) => {
               const added = addedIds.has(item.id);
 
@@ -108,6 +110,7 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
               );
             })}
           </ul>
+          </div>
         </GridItem>
       </PageGrid>
     </section>

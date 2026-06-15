@@ -8,7 +8,9 @@ import { cn } from "@/lib/cn";
 
 import {
   pdpCarouselImageClass,
+  pdpCarouselInsetScrollClass,
   pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
   pdpUgcStoryCardClass,
 } from "./pdp-carousel";
 import { PdpModuleHeading } from "./pdp-module-heading";
@@ -66,7 +68,7 @@ function ReviewCard({ review }: { review: PdpFeaturedReview }) {
       </p>
 
       {review.photos?.length ? (
-        <div className="flex touch-pan-y gap-2 overflow-x-auto overscroll-x-contain pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className={cn("flex", pdpCarouselInsetScrollClass, "pt-1")}>
           {review.photos.map((photo) => (
             <div
               key={photo.src}
@@ -156,15 +158,17 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                 In real life
               </PdpTextReveal>
 
-              <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
-                {PDP_UGC_REVIEW_STORIES.map((story) => (
-                  <PdpUgcStoryCard
-                    key={story.id}
-                    story={story}
-                    className={pdpUgcStoryCardClass}
-                    imageSizes="72vw"
-                  />
-                ))}
+              <div className={pdpCarouselScrollWrapClass}>
+                <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
+                  {PDP_UGC_REVIEW_STORIES.map((story) => (
+                    <PdpUgcStoryCard
+                      key={story.id}
+                      story={story}
+                      className={pdpUgcStoryCardClass}
+                      imageSizes="72vw"
+                    />
+                  ))}
+                </div>
               </div>
             </section>
 

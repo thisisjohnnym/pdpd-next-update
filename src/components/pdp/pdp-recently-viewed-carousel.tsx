@@ -9,6 +9,7 @@ import {
   pdpCarouselCard15Class,
   pdpCarouselImageClass,
   pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
 } from "./pdp-carousel";
 import { PDP_RECENTLY_VIEWED, PDP_RECENTLY_VIEWED_SECTION } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
@@ -27,26 +28,24 @@ export function PdpRecentlyViewedCarousel() {
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <PdpModuleHeading>{PDP_RECENTLY_VIEWED_SECTION.eyebrow}</PdpModuleHeading>
 
-          <ul
-            className={cn(
-              "m-0 flex list-none gap-2",
-              pdpCarouselScrollClass,
-            )}
-            aria-label="Recently viewed items"
-          >
-            {PDP_RECENTLY_VIEWED.map((item, index) => (
-              <li
-                key={item.id}
-                className={cn("flex flex-col", pdpCarouselCard15Class)}
-              >
-                <div
-                  className="group relative w-full"
-                  onPointerDown={(event) => {                  }}
+          <div className={pdpCarouselScrollWrapClass}>
+            <ul
+              className={cn(
+                "m-0 flex list-none gap-2",
+                pdpCarouselScrollClass,
+              )}
+              aria-label="Recently viewed items"
+            >
+              {PDP_RECENTLY_VIEWED.map((item, index) => (
+                <li
+                  key={item.id}
+                  className={cn("flex flex-col", pdpCarouselCard15Class)}
                 >
-                  <div
-                    className="relative w-full overflow-hidden bg-neutral-100"
-                    style={{ aspectRatio: "4 / 5" }}
-                  >
+                  <div className="group relative w-full">
+                    <div
+                      className="relative w-full overflow-hidden bg-neutral-100"
+                      style={{ aspectRatio: "4 / 5" }}
+                    >
                     <Image
                       src={item.imageSrc}
                       alt={item.imageAlt}
@@ -83,7 +82,8 @@ export function PdpRecentlyViewedCarousel() {
                 </PdpTextLinkCta>
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
         </GridItem>
       </PageGrid>
     </section>

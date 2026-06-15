@@ -892,12 +892,12 @@ export const PDP_PRODUCT_SEARCH = {
   suggestions: PDP_AI_CONCIERGE.prompts.map((prompt) => prompt.question),
 } as const;
 
-/** Gallery hero — on-model lifestyle, navy bomber + Tabby shoulder bag */
-export const PDP_GALLERY_HERO_IMAGE = "/images/gallery/hero-model-bomber.png";
+/** Gallery hero — on-model lifestyle, camel trench + Tabby shoulder bag */
+export const PDP_GALLERY_HERO_IMAGE = "/images/gallery/hero-model-trench-street.jpg";
 
 /** Hero framing — centered portrait; slight upward bias keeps face + bag above bottom chrome */
 export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
-  objectPosition: "center 38%",
+  objectPosition: "center 40%",
   scale: 1,
   translateY: "0%",
 } as const;
@@ -912,10 +912,10 @@ export const PDP_GALLERY_WHAT_FITS_INSIDE_VIDEO = "/videos/what-fits-inside.webm
 export const PDP_GALLERY_SHOWCASE_VIDEO = "/videos/soft-tabby-showcase.webm";
 
 /** Match studio backdrop so letterboxing feels seamless */
-export const PDP_GALLERY_VIDEO_BG = "#e9e9e9";
+export const PDP_GALLERY_VIDEO_BG = "#eeeeee";
 
 /** Tailwind class for studio product photography frames */
-export const PDP_STUDIO_BACKDROP_CLASS = "bg-[#e9e9e9]";
+export const PDP_STUDIO_BACKDROP_CLASS = "bg-pdp-surface-grey";
 
 export type PdpProductHotspot = {
   id: string;
@@ -2005,7 +2005,7 @@ export const PDP_WEIGHT_FEEL = {
     src: "/images/gallery/tabby-weight-lift.png",
     alt: "Tabby Shoulder Bag 26 in black leather with gold C clasp and detachable straps on a light gray background",
     objectPosition: "center 70%",
-    backgroundColor: "#dedede",
+    backgroundColor: "#eeeeee",
   },
   liftedImage: {
     src: "/images/gallery/tabby-weight-lift-lifted.jpg",

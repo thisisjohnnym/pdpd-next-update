@@ -7,6 +7,7 @@ import { PdpAsSeenOnCard } from "./pdp-as-seen-on-card";
 import {
   pdpAsSeenOnAvatarItemClass,
   pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
 } from "./pdp-carousel";
 import { PDP_AS_SEEN_ON } from "./pdp-data";
 import { PdpTextReveal } from "./pdp-text-reveal";
@@ -31,7 +32,7 @@ export function PdpAsSeenOnModule({
       )}
     >
       <PageGrid fullWidth>
-        <GridItem mobile={12} desktop={24}>
+        <GridItem mobile={12} desktop={24} className="min-w-0">
           <div className="flex flex-col gap-2">
             <PdpTextReveal
               as="p"
@@ -40,15 +41,17 @@ export function PdpAsSeenOnModule({
               {title}
             </PdpTextReveal>
 
-            <div className={cn(pdpCarouselScrollClass, "flex gap-3")}>
-              {celebrities.map((celebrity) => (
-                <PdpAsSeenOnCard
-                  key={celebrity.id}
-                  celebrity={celebrity}
-                  variant="avatar"
-                  className={pdpAsSeenOnAvatarItemClass}
-                />
-              ))}
+            <div className={pdpCarouselScrollWrapClass}>
+              <div className={cn(pdpCarouselScrollClass, "flex gap-3")}>
+                {celebrities.map((celebrity) => (
+                  <PdpAsSeenOnCard
+                    key={celebrity.id}
+                    celebrity={celebrity}
+                    variant="avatar"
+                    className={pdpAsSeenOnAvatarItemClass}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </GridItem>

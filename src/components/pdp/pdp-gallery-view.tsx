@@ -435,7 +435,7 @@ export function PdpGalleryView({
     <>
     <PdpHeroSlide
       src={PDP_GALLERY_HERO_IMAGE}
-      alt="Model in navy bomber with shearling collar carrying Tabby Shoulder Bag 26 over the shoulder"
+      alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
       priority
       onOpenReviews={onOpenReviews}
       isLastPanel={lastPanelSlideIndex === -1}

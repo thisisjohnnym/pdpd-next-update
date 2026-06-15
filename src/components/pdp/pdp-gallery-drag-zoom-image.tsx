@@ -41,13 +41,16 @@ export function PdpGalleryDragZoomImage({
     position,
     containerSize,
     isExploring,
+    isPendingHold,
     pointerType,
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    handleLostPointerCapture,
     handleContextMenu,
   } = useMaterialExplore([]);
 
+  const touchLocked = isExploring || isPendingHold;
   const magnifiedWidth = containerSize.width * MAGNIFICATION;
   const magnifiedHeight = containerSize.height * MAGNIFICATION;
   const lensImageLeft =
@@ -75,13 +78,14 @@ export function PdpGalleryDragZoomImage({
       ref={containerRef}
       className={cn(
         "pdp-material-explore relative size-full select-none",
-        isExploring ? "touch-none" : "touch-pan-y",
+        touchLocked ? "touch-none" : "touch-pan-y",
         className,
       )}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
+      onLostPointerCapture={handleLostPointerCapture}
       onContextMenu={handleContextMenu}
       role="img"
       aria-label={alt}

@@ -40,7 +40,7 @@ export function PdpWeightFeelModule({
   const showLiftedAsset = isHolding && progress > 0;
   const surfaceColor = showLiftedAsset
     ? (liftedImage.backgroundColor ?? "#f5ece7")
-    : (image.backgroundColor ?? "#dedede");
+    : (image.backgroundColor ?? "#eeeeee");
 
   return (
     <section data-header-surface="light" className={panel.className} style={panel.style}>

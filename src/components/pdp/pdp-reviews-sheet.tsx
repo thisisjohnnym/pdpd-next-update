@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 
 import {
   pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
   pdpUgcStoryCardClass,
 } from "./pdp-carousel";
 import {
@@ -285,15 +286,17 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
                 </PdpTextLinkCta>
               </div>
 
-              <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
-                {PDP_UGC_REVIEW_STORIES.map((story) => (
-                  <PdpUgcStoryCard
-                    key={story.id}
-                    story={story}
-                    className={pdpUgcStoryCardClass}
-                    imageSizes="72vw"
-                  />
-                ))}
+              <div className={pdpCarouselScrollWrapClass}>
+                <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
+                  {PDP_UGC_REVIEW_STORIES.map((story) => (
+                    <PdpUgcStoryCard
+                      key={story.id}
+                      story={story}
+                      className={pdpUgcStoryCardClass}
+                      imageSizes="72vw"
+                    />
+                  ))}
+                </div>
               </div>
             </section>
 

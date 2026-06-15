@@ -8,7 +8,8 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import {
-  pdpCarouselCard15Class,
+  pdpCarouselBlockClass,
+  pdpCarouselCard15Gap2Class,
   pdpCarouselImageClass,
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
@@ -53,8 +54,8 @@ export function PdpShoppingDiscoveryModule({
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <div className="flex flex-col gap-6">
-            <div>
+          <div className={cn("flex flex-col gap-6", pdpCarouselBlockClass)}>
+            <div className={pdpCarouselBlockClass}>
               <PdpModuleHeading>{PDP_MORE_LIKE_THIS.eyebrow}</PdpModuleHeading>
               <div className={pdpCarouselScrollWrapClass}>
                 <ul
@@ -70,7 +71,7 @@ export function PdpShoppingDiscoveryModule({
                     return (
                       <li
                         key={item.id}
-                        className={cn("flex flex-col", pdpCarouselCard15Class)}
+                        className={cn("flex flex-col", pdpCarouselCard15Gap2Class)}
                       >
                         <div
                           className="relative w-full overflow-hidden bg-neutral-100"

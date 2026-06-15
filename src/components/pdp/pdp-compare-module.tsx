@@ -11,6 +11,7 @@ import { PdpComparePickerSheet } from "./pdp-compare-picker-sheet";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { pdpModuleSectionClass } from "./pdp-module-section";
+import { PdpTextLinkCta } from "./pdp-text-link-cta";
 import {
   PDP_COMPARE_SELECTED,
   PDP_FAMILY_COMPARE_ALTERNATIVES,
@@ -224,10 +225,18 @@ export function PdpCompareModule({
 
             {!insightDismissed ? (
               <PdpAiInsightCard
-                size="xs"
+                variant="minimal"
                 title={alternative.aiInsight.title}
                 body={alternative.aiInsight.body}
-                onDismiss={() => setInsightDismissed(true)}
+                footer={
+                  <PdpTextLinkCta
+                    type="button"
+                    onClick={() => setInsightDismissed(true)}
+                    className={pdpType.micro}
+                  >
+                    Got it
+                  </PdpTextLinkCta>
+                }
                 ariaLive="polite"
               />
             ) : null}

@@ -23,7 +23,7 @@ export function PdpBagSizeModule() {
         <GridItem mobile={12} desktop={24}>
           <PdpModuleHeading>{PDP_BAG_SIZE.title}</PdpModuleHeading>
 
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e9e9]">
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-pdp-surface-grey">
               <div className="absolute inset-x-0 top-0 bottom-[10%]">
                 <Image
                   src={PDP_BAG_SIZE.imageSrc}
