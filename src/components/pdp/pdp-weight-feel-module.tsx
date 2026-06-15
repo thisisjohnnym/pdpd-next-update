@@ -64,11 +64,13 @@ export function PdpWeightFeelModule({
             )}
           >
             <Image
+              key={image.src}
               src={image.src}
               alt={image.alt}
               fill
               priority
-              className="pointer-events-none object-contain px-6 py-4"
+              unoptimized
+              className="pointer-events-none object-cover px-2 py-2"
               style={{ objectPosition: image.objectPosition ?? "center center" }}
               sizes="100vw"
               draggable={false}

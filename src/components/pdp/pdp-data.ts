@@ -934,7 +934,7 @@ export const PDP_PRODUCT_IMMERSIVE_HOTSPOTS: PdpProductHotspot[] = [
     x: 44,
     y: 66,
     title: "The iconic C",
-    body: "Inspired by a turn-lock from Coach archives, the sculpted C clasp became Tabby's signature when the silhouette returned in 2018.",
+    body: "Archival turn-lock DNA — the sculpted C clasp has defined Tabby since 2018.",
   },
   {
     id: "full-grain-leather",
@@ -2002,9 +2002,9 @@ export const PDP_WEIGHT_FEEL = {
   holdMs: 720,
   hapticPattern: [14, 36, 18, 52, 22],
   image: {
-    src: "/images/gallery/tabby-weight-lift-press-hold.jpg",
+    src: "/images/gallery/tabby-weight-lift-hand-hold.jpg",
     alt: "Hand lifting Tabby Shoulder Bag 26 by the strap — black leather with gold C clasp on a light gray background",
-    objectPosition: "center center",
+    objectPosition: "center 42%",
     backgroundColor: "#eeeeee",
   },
   liftedImage: {

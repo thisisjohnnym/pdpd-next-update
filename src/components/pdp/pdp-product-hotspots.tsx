@@ -14,7 +14,7 @@ const CARD_FLIP_BELOW_THRESHOLD = 28;
 
 /** Keep the info card inside the image frame */
 function getCardLeftPercent(x: number) {
-  const cardHalfWidth = 42;
+  const cardHalfWidth = 34;
   const inset = 4;
 
   return Math.max(
@@ -105,17 +105,17 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
 
       {activeHotspot ? (
         <div
-          className="pointer-events-none absolute z-30 w-[min(17rem,calc(100%-1.5rem))] rounded-xl border border-white/50 bg-white/90 px-3 py-2.5 shadow-[0_4px_24px_rgba(0,0,0,0.12)] backdrop-blur-md"
+          className="pointer-events-none absolute z-30 w-[min(13.5rem,calc(100%-1.5rem))] rounded-lg border border-white/50 bg-white/90 px-2.5 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
           style={{
             left: `${getCardLeftPercent(activeHotspot.x)}%`,
             top: `${activeHotspot.y}%`,
             transform: getCardTransform(activeHotspot.y),
           }}
         >
-          <p className="font-extended text-sm font-bold leading-snug tracking-[0.2px] text-black">
+          <p className="font-extended text-[13px] font-bold leading-tight tracking-[0.2px] text-black">
             {activeHotspot.title}
           </p>
-          <p className="mt-1 font-extended text-[13px] leading-[1.35] tracking-[0.2px] text-neutral-600">
+          <p className="mt-0.5 line-clamp-2 font-extended text-[11px] leading-snug tracking-[0.2px] text-neutral-600">
             {activeHotspot.body}
           </p>
         </div>
