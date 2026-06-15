@@ -48,7 +48,7 @@ function CompareProductCard({
           >
             <MaterialIcon
               name="swap_horiz"
-              size={16}
+              size={18}
               className="shrink-0 text-black"
               aria-hidden
             />

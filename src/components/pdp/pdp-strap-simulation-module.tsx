@@ -41,7 +41,6 @@ export function PdpStrapSimulationModule({
     <section data-header-surface="light" className={panel.className} style={panel.style}>
       <div className={cn(EXPERIENCE_PANEL_MEDIA_CLASS, "bg-white")}>
         {modes.map((mode, index) => {
-          const fit = mode.image.fit ?? "cover";
           const isActive = index === activeIndex;
 
           return (
@@ -57,10 +56,7 @@ export function PdpStrapSimulationModule({
                 src={mode.image.src}
                 alt={isActive ? mode.image.alt : ""}
                 fill
-                className={cn(
-                  "object-center",
-                  fit === "contain" ? "object-contain" : "object-cover scale-[1.08]",
-                )}
+                className="object-cover object-center scale-[1.08]"
                 style={{ objectPosition: mode.image.objectPosition ?? "center" }}
                 sizes="100vw"
                 priority={index === 0}
@@ -130,7 +126,7 @@ export function PdpStrapSimulationModule({
                         : `Add · ${mode.priceLabel}`}
                     </span>
                     {!optionAdded ? (
-                      <MaterialIcon name="add" size={16} className="shrink-0 text-black" />
+                      <MaterialIcon name="add" size={18} className="shrink-0 text-black" />
                     ) : null}
                   </button>
                 ) : null}
