@@ -8,6 +8,7 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import {
   PDP_BUNDLE_DISCOUNT,
@@ -180,7 +181,7 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
           <PdpModuleHeading>Build your bundle</PdpModuleHeading>
 
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-4">
+            <PdpRevealItem className="flex flex-col gap-4">
               {primaryItem ? <PrimaryBundleCard item={primaryItem} /> : null}
 
               {addonItems.length ? (
@@ -193,20 +194,25 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
                     Add to your bundle
                   </p>
                   <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200">
-                    {addonItems.map((item) => (
-                      <AddonBundleRow
+                    {addonItems.map((item, index) => (
+                      <PdpRevealItem
                         key={item.id}
-                        item={item}
-                        selected={selectedIds.has(item.id)}
-                        onToggle={toggleItem}
-                      />
+                        as="div"
+                        delay={index * 70}
+                      >
+                        <AddonBundleRow
+                          item={item}
+                          selected={selectedIds.has(item.id)}
+                          onToggle={toggleItem}
+                        />
+                      </PdpRevealItem>
                     ))}
                   </div>
                 </div>
               ) : null}
-            </div>
+            </PdpRevealItem>
 
-            <div className="flex items-end justify-between gap-4">
+            <PdpRevealItem delay={280} className="flex items-end justify-between gap-4">
               <div>
                 <p className={`font-extended m-0 text-neutral-500 ${pdpType.label}`}>
                   {justAdded
@@ -224,8 +230,9 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
                   </span>
                 </div>
               </div>
-            </div>
+            </PdpRevealItem>
 
+            <PdpRevealItem delay={350}>
             <button
               type="button"
               onClick={handleAddBundle}
@@ -243,6 +250,7 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
                   : `Add bundle to bag (${selectedItems.length})`}
               </span>
             </button>
+            </PdpRevealItem>
           </div>
         </GridItem>
       </PageGrid>

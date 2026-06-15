@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -11,6 +11,7 @@ import { PdpColorSelector } from "./pdp-color-selector";
 import { PDP_COLORS } from "./pdp-data";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { pdpPressableSolidClass } from "./pdp-type";
+import { useAtbShimmer } from "./use-atb-shimmer";
 import { useBottomBarDocked } from "./use-bottom-bar-docked";
 
 type PdpBottomActionsProps = {
@@ -30,6 +31,10 @@ export function PdpBottomActions({
 }: PdpBottomActionsProps) {
   const [mounted, setMounted] = useState(false);
   const { docked, frostOpacity } = useBottomBarDocked();
+  const atbRef = useRef<HTMLButtonElement>(null);
+  const shimmerRef = useRef<HTMLSpanElement>(null);
+
+  useAtbShimmer(atbRef, shimmerRef, { enabled: !suppressed });
 
   useEffect(() => {
     setMounted(true);
@@ -58,23 +63,29 @@ export function PdpBottomActions({
       />
 
       <button
+        ref={atbRef}
         type="button"
         onClick={onAddToBag}
         className={cn(
-          "font-extended flex min-w-0 items-center justify-center gap-2 bg-black text-center leading-none transition-[border-radius,background-color,transform] duration-300 active:bg-neutral-800",
+          "font-extended relative isolate flex min-w-0 items-center justify-center gap-2 overflow-hidden bg-black text-center leading-none transition-[border-radius,background-color,transform] duration-300 active:bg-neutral-800",
           pdpPressableSolidClass,
           docked
             ? "h-[54px] w-full rounded-none border-0 px-4 shadow-none"
             : "h-12 w-full rounded-full border-0 px-3 shadow-none",
         )}
       >
+        <span
+          ref={shimmerRef}
+          aria-hidden
+          className="pdp-atb-shimmer pointer-events-none absolute inset-y-[-25%] left-0 w-[36%] -skew-x-[20deg] bg-gradient-to-r from-transparent via-white/45 to-transparent opacity-0 will-change-transform"
+        />
         <MaterialIcon
           name="shopping_bag"
           size={18}
-          className="shrink-0 text-white"
+          className="relative z-[1] shrink-0 text-white"
           aria-hidden
         />
-        <span className="translate-y-px text-[12px] text-white">
+        <span className="relative z-[1] translate-y-px text-[12px] text-white">
           Add to bag
         </span>
       </button>

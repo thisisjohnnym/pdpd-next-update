@@ -22,7 +22,7 @@ export function PdpModuleHeading({
   children,
   size = "lg",
   className,
-  delay = 120,
+  delay = 60,
   spacing = "lead",
 }: PdpModuleHeadingProps) {
   return (

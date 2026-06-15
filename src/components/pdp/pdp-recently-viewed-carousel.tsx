@@ -13,6 +13,7 @@ import {
 } from "./pdp-carousel";
 import { PDP_RECENTLY_VIEWED, PDP_RECENTLY_VIEWED_SECTION } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
@@ -28,7 +29,7 @@ export function PdpRecentlyViewedCarousel() {
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <PdpModuleHeading>{PDP_RECENTLY_VIEWED_SECTION.eyebrow}</PdpModuleHeading>
 
-          <div className={pdpCarouselScrollWrapClass}>
+          <PdpRevealItem className={pdpCarouselScrollWrapClass}>
             <ul
               className={cn(
                 "m-0 flex list-none gap-2",
@@ -83,7 +84,7 @@ export function PdpRecentlyViewedCarousel() {
               </li>
             ))}
             </ul>
-          </div>
+          </PdpRevealItem>
         </GridItem>
       </PageGrid>
     </section>

@@ -83,9 +83,8 @@ function galleryScrollReveal(
   return (
     <PdpScrollReveal
       key={key}
-      className="w-full shrink-0"
       variant={options.variant ?? "subtle"}
-      surface={options.surface ?? "light"}
+      surface={options.surface ?? "transparent"}
       lazyMount
     >
       {child}

@@ -14,6 +14,7 @@ import {
   pdpUgcStoryCardClass,
 } from "./pdp-carousel";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import { PdpReviewLikeButton } from "./pdp-review-like-button";
@@ -115,7 +116,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <div className="flex w-full flex-col gap-8">
-            <div className="flex flex-col gap-4">
+            <PdpRevealItem className="flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">
                 <PdpModuleHeading spacing="none">Reviews</PdpModuleHeading>
                 <PdpTextLinkCta
@@ -139,8 +140,9 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                   </p>
                 </div>
               </div>
-            </div>
+            </PdpRevealItem>
 
+            <PdpRevealItem delay={140}>
             <PdpAiInsightCard
               variant="minimal"
               eyebrow={PDP_REVIEWS_AI_SUMMARY.attribution}
@@ -148,8 +150,9 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
               title={PDP_REVIEWS_AI_SUMMARY.headline}
               body={PDP_REVIEWS_AI_SUMMARY.body}
             />
+            </PdpRevealItem>
 
-            <section className="flex flex-col gap-4">
+            <PdpRevealItem as="section" delay={210} className="flex flex-col gap-4">
               <PdpTextReveal
                 as="p"
                 delay={80}
@@ -170,21 +173,25 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                   ))}
                 </div>
               </div>
-            </section>
+            </PdpRevealItem>
 
-            <section className="flex flex-col">
-              {pageReviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+            <PdpRevealItem as="section" delay={280} className="flex flex-col">
+              {pageReviews.map((review, index) => (
+                <PdpRevealItem key={review.id} as="div" delay={index * 70}>
+                  <ReviewCard review={review} />
+                </PdpRevealItem>
               ))}
-            </section>
+            </PdpRevealItem>
 
-            <PdpTextLinkCta
-              type="button"
-              onClick={onReadAll}
-              className={cn("self-start", pdpType.body)}
-            >
-              Read all {PDP_COMMENTS_SUMMARY.count} reviews
-            </PdpTextLinkCta>
+            <PdpRevealItem delay={140}>
+              <PdpTextLinkCta
+                type="button"
+                onClick={onReadAll}
+                className={cn("self-start", pdpType.body)}
+              >
+                Read all {PDP_COMMENTS_SUMMARY.count} reviews
+              </PdpTextLinkCta>
+            </PdpRevealItem>
           </div>
         </GridItem>
       </PageGrid>

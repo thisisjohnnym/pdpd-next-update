@@ -19,6 +19,7 @@ import {
   PDP_SHOPPING_ASSISTANT_PROMPT,
 } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PdpAiConciergePanel } from "./pdp-product-search-module";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
@@ -55,8 +56,9 @@ export function PdpShoppingDiscoveryModule({
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <div className={cn("flex flex-col gap-6", pdpCarouselBlockClass)}>
-            <div className={pdpCarouselBlockClass}>
-              <PdpModuleHeading>{PDP_MORE_LIKE_THIS.eyebrow}</PdpModuleHeading>
+            <PdpModuleHeading>{PDP_MORE_LIKE_THIS.eyebrow}</PdpModuleHeading>
+
+            <PdpRevealItem className={pdpCarouselBlockClass}>
               <div className={pdpCarouselScrollWrapClass}>
                 <ul
                   className={cn(
@@ -122,16 +124,19 @@ export function PdpShoppingDiscoveryModule({
                   })}
                 </ul>
               </div>
-            </div>
+            </PdpRevealItem>
 
             {assistantOpen ? (
+              <PdpRevealItem delay={140}>
               <PdpAiConciergePanel
                 idSuffix="-discovery"
                 showTitle={false}
                 variant="flat"
                 onClose={() => setAssistantOpen(false)}
               />
+              </PdpRevealItem>
             ) : (
+              <PdpRevealItem delay={140}>
               <PdpAiInsightCard
                 variant="minimal"
                 title={PDP_SHOPPING_ASSISTANT_PROMPT.title}
@@ -146,6 +151,7 @@ export function PdpShoppingDiscoveryModule({
                   </PdpTextLinkCta>
                 }
               />
+              </PdpRevealItem>
             )}
           </div>
         </GridItem>

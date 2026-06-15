@@ -542,54 +542,35 @@ html.font-extended {
     transform: none;
   }
 
-  .pdp-scroll-reveal__inner {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .pdp-text-reveal {
+  .pdp-scroll-reveal__inner,
+  .pdp-text-reveal,
+  .pdp-reveal-item {
     opacity: 1;
     transform: none;
     filter: none;
-    transition: none;
   }
 
   .pdp-pressable:active:not(:disabled) {
     transform: none;
     opacity: 1;
   }
+
+  .pdp-atb-shimmer {
+    display: none;
+  }
 }
 
-/* Scroll reveal — luxurious module entrance (hero uses separate load-in) */
-:root {
-  --pdp-reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --pdp-reveal-module-duration: 1.65s;
-  --pdp-reveal-subtle-duration: 1.35s;
-  --pdp-reveal-text-duration: 1.25s;
-  --pdp-reveal-text-blur-duration: 1.4s;
-}
-
-/* Scroll reveal — inner layer fades in; outer shell matches surface to avoid color flashes */
+/* Scroll reveal — inner shell stays in document flow; only targets fade in */
 .pdp-scroll-reveal__inner {
-  opacity: 0;
-  transform: translate3d(0, 3.25rem, 0) scale(0.972);
-  transition:
-    opacity var(--pdp-reveal-module-duration) var(--pdp-reveal-ease),
-    transform var(--pdp-reveal-module-duration) var(--pdp-reveal-ease);
   backface-visibility: hidden;
-  will-change: opacity, transform;
 }
 
-.pdp-scroll-reveal--subtle .pdp-scroll-reveal__inner {
-  transform: translate3d(0, 2rem, 0) scale(0.988);
-  transition:
-    opacity var(--pdp-reveal-subtle-duration) var(--pdp-reveal-ease),
-    transform var(--pdp-reveal-subtle-duration) var(--pdp-reveal-ease);
+.pdp-scroll-reveal--module .pdp-scroll-reveal__inner:not(.pdp-scroll-reveal__inner--revealed) {
+  opacity: 0;
 }
 
-.pdp-scroll-reveal--subtle .pdp-scroll-reveal__inner--visible {
-  transform: translate3d(0, 0, 0) scale(1);
+.pdp-scroll-reveal__inner--revealed {
+  opacity: 1;
 }
 
 /* Floating bottom pills — heavy frosted glass */
@@ -832,34 +813,17 @@ html.pdp-panel-scroll {
   scroll-snap-stop: normal;
 }
 
-.pdp-scroll-reveal__inner--visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-}
-
-/* Nested text waits for the section shell — avoids stacked opacity fades */
-.pdp-scroll-reveal__inner:not(.pdp-scroll-reveal__inner--visible) .pdp-text-reveal {
+/* Scroll text + blocks — GSAP-driven; hidden until timeline runs */
+.pdp-text-reveal,
+.pdp-reveal-item {
   opacity: 0;
-  transform: translate3d(0, 1.625rem, 0);
-  filter: blur(8px);
-  transition: none;
-}
-
-/* Scroll text — lighter fade + rise for headings and copy */
-.pdp-text-reveal {
-  opacity: 0;
-  transform: translate3d(0, 1.625rem, 0);
-  filter: blur(8px);
-  transition:
-    opacity var(--pdp-reveal-text-duration) var(--pdp-reveal-ease),
-    transform var(--pdp-reveal-text-duration) var(--pdp-reveal-ease),
-    filter var(--pdp-reveal-text-blur-duration) var(--pdp-reveal-ease);
+  transform: translate3d(0, 1rem, 0);
+  filter: blur(5px);
   backface-visibility: hidden;
-  will-change: opacity, transform, filter;
 }
 
-.pdp-text-reveal--visible {
+.pdp-reveal-target--revealed {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
-  filter: blur(0);
+  transform: none;
+  filter: none;
 }

@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { PdpComparePickerSheet } from "./pdp-compare-picker-sheet";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
 import {
@@ -175,7 +176,7 @@ export function PdpCompareModule({
           <PdpModuleHeading>Compare the family</PdpModuleHeading>
 
           <div className="flex flex-col gap-4">
-            <div
+            <PdpRevealItem
               className="grid grid-cols-2 items-stretch gap-2"
               aria-label="Compare Tabby family bags"
             >
@@ -215,15 +216,18 @@ export function PdpCompareModule({
                   variant="secondary"
                 />
               </article>
-            </div>
+            </PdpRevealItem>
 
+            <PdpRevealItem delay={140}>
             <div className="flex flex-col divide-y divide-neutral-200 border-y border-neutral-200">
               {keyDifferences.map((row) => (
                 <DifferenceRow key={row.id} row={row} />
               ))}
             </div>
+            </PdpRevealItem>
 
             {!insightDismissed ? (
+              <PdpRevealItem delay={210}>
               <PdpAiInsightCard
                 variant="minimal"
                 title={alternative.aiInsight.title}
@@ -239,6 +243,7 @@ export function PdpCompareModule({
                 }
                 ariaLive="polite"
               />
+              </PdpRevealItem>
             ) : null}
           </div>
         </GridItem>
