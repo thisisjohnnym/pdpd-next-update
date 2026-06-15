@@ -7,7 +7,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
+import { pdpModuleSectionClass, pdpModuleHeadingClass, pdpModuleHeadingLeadClass } from "./pdp-module-section";
 import {
   pdpCarouselCard15Class,
   pdpCarouselScrollClass,
@@ -41,7 +41,14 @@ export function PdpSimilarItemsCarousel({ onAddToBag }: PdpSimilarItemsCarouselP
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <h2 className={pdpModuleHeadingClass()}>Similar items</h2>
+          <h2
+            className={cn(
+              pdpModuleHeadingClass({ lead: false }),
+              pdpModuleHeadingLeadClass(),
+            )}
+          >
+            Similar items
+          </h2>
 
           <ul
             className={cn(

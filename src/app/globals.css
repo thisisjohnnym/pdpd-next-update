@@ -317,6 +317,22 @@ body {
   animation-delay: 1060ms;
 }
 
+/* Drag-to-zoom — suppress iOS image long-press callout (Copy / Save) */
+.pdp-material-explore {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.pdp-material-explore img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  user-select: none;
+}
+
 @keyframes pdp-material-lens-pulse {
   0%,
   100% {
@@ -329,6 +345,22 @@ body {
 
 .pdp-material-lens > div:first-child {
   animation: pdp-material-lens-pulse 2.8s ease-in-out infinite;
+}
+
+/* Weight & feel — suppress iOS image long-press callout (Copy / Save) */
+.pdp-weight-lift {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.pdp-weight-lift img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Weight & feel — press-and-hold lift */

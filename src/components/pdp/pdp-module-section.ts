@@ -44,7 +44,7 @@ export function pdpModuleHeadingLeadClass() {
 export function pdpPageHeadingClass({ lead = true }: { lead?: boolean } = {}) {
   return cn(
     "font-extended m-0 text-xl font-normal tracking-[0.4px] text-black",
-    lead && "mb-5",
+    lead && "mb-4",
   );
 }
 

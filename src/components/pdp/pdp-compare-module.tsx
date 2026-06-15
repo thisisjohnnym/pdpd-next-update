@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
@@ -103,16 +103,27 @@ function DifferenceRow({ row }: { row: PdpCompareDifferenceRow }) {
 type PdpCompareModuleProps = {
   selectedColorId?: string;
   onAddToBag?: () => void;
+  onPickerOpenChange?: (open: boolean) => void;
 };
 
 /** Tabby family — side-by-side compare + picker tray for swapping the right bag */
 export function PdpCompareModule({
   selectedColorId,
   onAddToBag,
+  onPickerOpenChange,
 }: PdpCompareModuleProps) {
   const [alternativeIndex, setAlternativeIndex] = useState(0);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [insightDismissed, setInsightDismissed] = useState(false);
+
+  useEffect(() => {
+    onPickerOpenChange?.(pickerOpen);
+  }, [onPickerOpenChange, pickerOpen]);
+
+  useEffect(() => {
+    setInsightDismissed(false);
+  }, [alternativeIndex]);
 
   const selected = PDP_COMPARE_SELECTED;
   const selectedShortName = selected.shortName ?? selected.name;
@@ -188,29 +199,39 @@ export function PdpCompareModule({
               </div>
             </div>
 
-            <div
-              className="rounded-2xl bg-neutral-50 px-3.5 py-3.5"
-              aria-live="polite"
-            >
-              <div className="flex items-start gap-2.5">
-                <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black text-white">
-                  <MaterialIcon
-                    name="auto_awesome"
-                    size={18}
-                    className="text-white"
-                    aria-hidden
-                  />
-                </span>
-                <div className="min-w-0">
-                  <p className="font-extended text-sm tracking-[0.2px] text-black">
-                    {alternative.aiInsight.title}
-                  </p>
-                  <p className={`mt-1 text-neutral-700 ${pdpType.caption}`}>
-                    {alternative.aiInsight.body}
-                  </p>
+            {!insightDismissed ? (
+              <div
+                className="relative rounded-xl bg-neutral-50 px-2.5 py-2 pr-8"
+                aria-live="polite"
+              >
+                <button
+                  type="button"
+                  onClick={() => setInsightDismissed(true)}
+                  aria-label="Dismiss recommendation"
+                  className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full text-neutral-500 transition-colors active:bg-neutral-200/80"
+                >
+                  <MaterialIcon name="close" size={16} />
+                </button>
+                <div className="flex items-start gap-2">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-black text-white">
+                    <MaterialIcon
+                      name="auto_awesome"
+                      size={14}
+                      className="text-white"
+                      aria-hidden
+                    />
+                  </span>
+                  <div className="min-w-0">
+                    <p className={`font-extended text-black ${pdpType.micro}`}>
+                      {alternative.aiInsight.title}
+                    </p>
+                    <p className={`mt-0.5 text-neutral-600 ${pdpType.micro}`}>
+                      {alternative.aiInsight.body}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="flex gap-2">
               <button

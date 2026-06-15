@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -27,6 +28,11 @@ export function PdpComparePickerSheet({
   onSelect,
 }: PdpComparePickerSheetProps) {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -55,7 +61,11 @@ export function PdpComparePickerSheet({
     onClose();
   };
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300",
@@ -158,6 +168,7 @@ export function PdpComparePickerSheet({
           </ul>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

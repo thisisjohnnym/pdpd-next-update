@@ -42,6 +42,7 @@ export function PdpGalleryDragZoomImage({
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    handleContextMenu,
   } = useMaterialExplore([]);
 
   const magnifiedWidth = containerSize.width * MAGNIFICATION;
@@ -66,6 +67,7 @@ export function PdpGalleryDragZoomImage({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
+      onContextMenu={handleContextMenu}
       role="img"
       aria-label={alt}
     >
@@ -79,7 +81,7 @@ export function PdpGalleryDragZoomImage({
           panel && !fitContain && PANEL_MEDIA_COVER_CLASS,
           fitContain ? "object-contain" : "object-cover",
           scale,
-          "transition-[filter] duration-300",
+          "pointer-events-none transition-[filter] duration-300",
           isExploring
             ? "brightness-[0.88] saturate-[0.82]"
             : "brightness-100 saturate-100",
@@ -129,7 +131,7 @@ export function PdpGalleryDragZoomImage({
                 alt=""
                 width={magnifiedWidth}
                 height={magnifiedHeight}
-                className="size-full object-cover"
+                className="pointer-events-none size-full object-cover"
                 style={{ objectPosition }}
                 sizes={`${Math.round(magnifiedWidth)}px`}
                 draggable={false}

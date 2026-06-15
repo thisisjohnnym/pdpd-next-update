@@ -375,6 +375,7 @@ export function PdpGalleryView({
   onAddBundle,
   onQuickAddStrap,
   onStrapOptionsOpenChange,
+  onComparePickerOpenChange,
   selectedColorId,
 }: {
   onOpenReviews?: () => void;
@@ -382,6 +383,7 @@ export function PdpGalleryView({
   onAddBundle?: (payload: PdpBundleAddPayload) => void;
   onQuickAddStrap?: (optionId: string) => void;
   onStrapOptionsOpenChange?: (open: boolean) => void;
+  onComparePickerOpenChange?: (open: boolean) => void;
   selectedColorId: string;
 }) {
   const [shopLookId, setShopLookId] = useState<string | null>(null);
@@ -558,6 +560,7 @@ export function PdpGalleryView({
         <PdpCompareModule
           selectedColorId={selectedColorId}
           onAddToBag={() => onAddSimilarToBag?.()}
+          onPickerOpenChange={onComparePickerOpenChange}
         />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light">

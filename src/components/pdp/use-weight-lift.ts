@@ -55,6 +55,11 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
+      // Block iOS long-press image callout (Copy / Save) so press-and-hold lift works.
+      if (event.pointerType === "touch") {
+        event.preventDefault();
+      }
+
       event.currentTarget.setPointerCapture(event.pointerId);
       isHoldingRef.current = true;
       liftedRef.current = false;
@@ -66,6 +71,13 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
       rafRef.current = requestAnimationFrame(tick);
     },
     [cancelAnimation, tick],
+  );
+
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+    },
+    [],
   );
 
   const handlePointerEnd = useCallback(
@@ -92,5 +104,6 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
     revealed,
     handlePointerDown,
     handlePointerEnd,
+    handleContextMenu,
   };
 }

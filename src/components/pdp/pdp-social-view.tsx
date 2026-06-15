@@ -20,6 +20,7 @@ export function PdpSocialView() {
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [bagSheetOpen, setBagSheetOpen] = useState(false);
   const [strapOptionsOpen, setStrapOptionsOpen] = useState(false);
+  const [comparePickerOpen, setComparePickerOpen] = useState(false);
   const [bagCount, setBagCount] = useState(0);
   const [bagConfirmation, setBagConfirmation] = useState<BagConfirmation>({
     type: "product",
@@ -53,6 +54,7 @@ export function PdpSocialView() {
         onAddBundle={handleAddBundle}
         onQuickAddStrap={() => handleQuickAddToBag()}
         onStrapOptionsOpenChange={setStrapOptionsOpen}
+        onComparePickerOpenChange={setComparePickerOpen}
         selectedColorId={selectedColorId}
       />
 
@@ -61,7 +63,7 @@ export function PdpSocialView() {
         selectedColorId={selectedColorId}
         onColorSelect={setSelectedColorId}
         onAddToBag={handleAddToBag}
-        suppressed={reviewsOpen || bagSheetOpen || strapOptionsOpen}
+        suppressed={reviewsOpen || bagSheetOpen || strapOptionsOpen || comparePickerOpen}
       />
       <PdpReviewsSheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} />
       <PdpAddToBagSheet

@@ -61,12 +61,24 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      // Block iOS long-press image callout (Copy / Save) so drag-to-zoom works.
+      if (event.pointerType === "touch") {
+        event.preventDefault();
+      }
+
       event.currentTarget.setPointerCapture(event.pointerId);
       isExploringRef.current = true;
       setIsExploring(true);
       updatePosition(event.clientX, event.clientY);
     },
     [updatePosition],
+  );
+
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+    },
+    [],
   );
 
   const handlePointerMove = useCallback(
@@ -106,5 +118,6 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    handleContextMenu,
   };
 }

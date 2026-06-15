@@ -174,11 +174,11 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <div className="flex flex-col gap-6">
-            <h2 className={cn(pdpModuleHeadingClass({ lead: false }), pdpModuleHeadingLeadClass())}>
-              Build your bundle
-            </h2>
+          <h2 className={cn(pdpModuleHeadingClass({ lead: false }), pdpModuleHeadingLeadClass())}>
+            Build your bundle
+          </h2>
 
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               {primaryItem ? <PrimaryBundleCard item={primaryItem} /> : null}
 

@@ -93,27 +93,25 @@ export function PdpLeatherCleanerModule({
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <div className="flex flex-col gap-5">
-            <h2
-              className={cn(
-                pdpModuleHeadingClass({ lead: false }),
-                pdpModuleHeadingLeadClass(),
-              )}
-            >
-              {title}
-            </h2>
+          <h2
+            className={cn(
+              pdpModuleHeadingClass({ lead: false }),
+              pdpModuleHeadingLeadClass(),
+            )}
+          >
+            {title}
+          </h2>
 
-            <div className="border border-neutral-200 bg-white p-4">
-              <div className="grid grid-cols-2 gap-4">
-                {products.map((product) => (
-                  <LeatherCleanerCard
-                    key={product.id}
-                    product={product}
-                    added={addedIds.has(product.id)}
-                    onAdd={() => handleAdd(product.id)}
-                  />
-                ))}
-              </div>
+          <div className="border border-neutral-200 bg-white p-4">
+            <div className="grid grid-cols-2 gap-4">
+              {products.map((product) => (
+                <LeatherCleanerCard
+                  key={product.id}
+                  product={product}
+                  added={addedIds.has(product.id)}
+                  onAdd={() => handleAdd(product.id)}
+                />
+              ))}
             </div>
           </div>
         </GridItem>

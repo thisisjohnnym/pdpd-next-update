@@ -28,7 +28,7 @@ export function PdpWeightFeelModule({
   const { hint, holdMs, image, reveal, hapticPattern } = PDP_WEIGHT_FEEL;
   const panel = experiencePanelSectionProps(isLastPanel);
 
-  const { progress, lifted, revealed, handlePointerDown, handlePointerEnd } =
+  const { progress, lifted, revealed, handlePointerDown, handlePointerEnd, handleContextMenu } =
     useWeightLift({
       holdMs,
       onLift: () => triggerLiftHaptic(hapticPattern),
@@ -49,6 +49,7 @@ export function PdpWeightFeelModule({
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
+        onContextMenu={handleContextMenu}
       >
         <div
           aria-hidden
@@ -61,7 +62,7 @@ export function PdpWeightFeelModule({
             src={image.src}
             alt={image.alt}
             fill
-            className="object-cover scale-[1.06]"
+            className="pointer-events-none object-cover scale-[1.06]"
             style={{ objectPosition: image.objectPosition ?? "center 62%" }}
             sizes="100vw"
             draggable={false}

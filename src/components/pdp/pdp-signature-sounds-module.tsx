@@ -7,7 +7,7 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PDP_SIGNATURE_SOUNDS, type PdpSignatureSound } from "./pdp-data";
-import { pdpModuleHeadingClass, pdpModuleSectionClass } from "./pdp-module-section";
+import { pdpModuleHeadingClass, pdpModuleSectionClass, pdpModuleHeadingLeadClass } from "./pdp-module-section";
 import { pdpType } from "./pdp-type";
 import { useSignatureSound } from "./use-signature-sound";
 
@@ -90,21 +90,26 @@ export function PdpSignatureSoundsModule() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <div className="flex flex-col gap-5">
-            <h2 className={pdpModuleHeadingClass({ lead: false })}>{title}</h2>
+          <h2
+            className={cn(
+              pdpModuleHeadingClass({ lead: false }),
+              pdpModuleHeadingLeadClass(),
+            )}
+          >
+            {title}
+          </h2>
 
-            <ul className="flex flex-col gap-3">
-              {sounds.map((sound) => (
-                <li key={sound.id}>
-                  <SignatureSoundRow
-                    sound={sound}
-                    active={isActive(sound.id)}
-                    onToggle={() => toggle(sound.id, sound.audioSrc)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="flex flex-col gap-3">
+            {sounds.map((sound) => (
+              <li key={sound.id}>
+                <SignatureSoundRow
+                  sound={sound}
+                  active={isActive(sound.id)}
+                  onToggle={() => toggle(sound.id, sound.audioSrc)}
+                />
+              </li>
+            ))}
+          </ul>
         </GridItem>
       </PageGrid>
     </section>
