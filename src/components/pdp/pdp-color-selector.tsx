@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import type { PdpColor } from "./pdp-data";
+import { PdpColorSheet } from "./pdp-color-sheet";
 import { getColorChromeForeground } from "./pdp-color-chrome";
-import { pdpPressableClass, pdpPressableIconClass, pdpPressableSolidClass } from "./pdp-type";
+import { pdpPressableIconClass, pdpPressableSolidClass } from "./pdp-type";
 
 type PdpColorSelectorProps = {
   colors: PdpColor[];
@@ -26,6 +27,8 @@ type PdpColorSelectorProps = {
   compactPill?: boolean;
   /** Thumbnail + chevron only — saves space in stacked bottom bar */
   iconOnly?: boolean;
+  /** Fires when the inline color tray opens or closes */
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** Swatch assets are full product shots — zoom to bag body so color fills the circle */
@@ -70,107 +73,44 @@ function PdpColorDropup({
   flush = false,
   compact = false,
   iconOnly = false,
+  onOpenChange,
 }: Pick<
   PdpColorSelectorProps,
-  "colors" | "selectedId" | "onSelect" | "flush" | "compact" | "iconOnly"
+  | "colors"
+  | "selectedId"
+  | "onSelect"
+  | "flush"
+  | "compact"
+  | "iconOnly"
+  | "onOpenChange"
 >) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
   const selected =
     colors.find((color) => color.id === selectedId) ?? colors[0];
 
-  useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
-
-  const handleSelect = (id: string) => {
-    onSelect(id);
-    setOpen(false);
+  const setSheetOpen = (next: boolean) => {
+    setOpen(next);
+    onOpenChange?.(next);
   };
 
   const chromeForeground = getColorChromeForeground(selected.chromeSample);
 
   return (
-    <div ref={rootRef} className="relative min-w-0 w-full">
-      {open && (
-        <div
-          className="absolute inset-x-0 bottom-[calc(100%+0.375rem)] flex max-h-[min(50vh,16rem)] flex-col overflow-hidden rounded-2xl pdp-glass-dark"
-        >
-          <ul
-            role="listbox"
-            aria-label="Select color"
-            className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain py-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {colors.map((color) => {
-              const isSelected = color.id === selectedId;
-
-              return (
-                <li key={color.id} role="presentation">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    onClick={() => handleSelect(color.id)}
-                    className={`font-extended flex w-full items-center gap-3 px-3 py-2.5 text-left text-xs tracking-[0.2px] text-white transition-colors pdp-pressable ${
-                      isSelected ? "bg-white/10" : "hover:bg-white/5"
-                    }`}
-                  >
-                    <ColorSwatchButton
-                      color={color}
-                      sizeClass="size-8"
-                    />
-                    <span className="min-w-0 flex-1 truncate">{color.name}</span>
-                    {isSelected && (
-                      <MaterialIcon
-                        name="check"
-                        size={18}
-                        className="shrink-0 text-white"
-                      />
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="shrink-0 border-t border-white/10 px-3 py-2">
-            <button
-              type="button"
-              className="font-extended flex w-full items-center justify-between gap-2 py-1 text-left text-xs tracking-[0.2px] text-white transition-colors active:text-white/80 pdp-pressable"
-            >
-              <span className="underline decoration-white/35 underline-offset-[3px]">
-                Customize
-              </span>
-              <MaterialIcon name="arrow_forward" size={18} className="shrink-0 text-white/80" />
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="relative min-w-0 w-full">
+      <PdpColorSheet
+        colors={colors}
+        selectedId={selectedId}
+        open={open}
+        onClose={() => setSheetOpen(false)}
+        onSelect={onSelect}
+      />
 
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Color: ${selected.name}. Choose another color.`}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setSheetOpen(!open)}
         className={cn(
           "font-extended flex w-full items-center overflow-hidden tracking-[0.2px] transition-[border-radius,background-color,color] duration-300",
           pdpPressableSolidClass,
@@ -222,6 +162,7 @@ export function PdpColorSelector({
   flush = false,
   compactPill = false,
   iconOnly = false,
+  onOpenChange,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
@@ -236,6 +177,7 @@ export function PdpColorSelector({
         flush={flush}
         compact={dropupCompact}
         iconOnly={iconOnly}
+        onOpenChange={onOpenChange}
       />
     );
   }

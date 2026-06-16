@@ -18,8 +18,26 @@ type ContainerSize = {
 
 /** Touch hold duration before zoom lens activates */
 const TOUCH_HOLD_MS = 400;
-/** Movement before hold completes — treat as vertical scroll, cancel zoom */
+/** Defer scroll lock until hold intent is clear — quick swipes can still scroll */
+const HOLD_LOCK_MS = 80;
+/** Movement before hold commits — treat as vertical scroll, cancel zoom */
 const SCROLL_CANCEL_PX = 12;
+
+function lockTouchTarget(target: HTMLDivElement) {
+  target.classList.add("touch-none");
+  target.style.touchAction = "none";
+}
+
+function unlockTouchTarget(target: HTMLDivElement) {
+  target.classList.remove("touch-none");
+  target.style.removeProperty("touch-action");
+}
+
+function triggerExploreHaptic() {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate(12);
+  }
+}
 
 function getActiveZone(
   xPct: number,
@@ -41,15 +59,20 @@ function getActiveZone(
 export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isExploringRef = useRef(false);
+  const isPendingHoldRef = useRef(false);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPointerIdRef = useRef<number | null>(null);
   const activePointerIdRef = useRef<number | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastPointerPosRef = useRef<{ x: number; y: number } | null>(null);
+  const holdStartMsRef = useRef<number | null>(null);
+  const holdRafRef = useRef<number | null>(null);
   const [position, setPosition] = useState<ExplorePosition | null>(null);
   const [containerSize, setContainerSize] = useState<ContainerSize>({ width: 0, height: 0 });
   const [isExploring, setIsExploring] = useState(false);
   const [isPendingHold, setIsPendingHold] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [holdAnchor, setHoldAnchor] = useState<{ x: number; y: number } | null>(null);
   const [pointerType, setPointerType] = useState<React.PointerEvent["pointerType"] | null>(
     null,
   );
@@ -73,7 +96,74 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
     });
   }, []);
 
+  const cancelHoldAnimation = useCallback(() => {
+    if (holdRafRef.current !== null) {
+      cancelAnimationFrame(holdRafRef.current);
+      holdRafRef.current = null;
+    }
+  }, []);
+
+  const updateHoldAnchor = useCallback((clientX: number, clientY: number) => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
+    setHoldAnchor({
+      x: Math.max(0, Math.min(clientX - rect.left, rect.width)),
+      y: Math.max(0, Math.min(clientY - rect.top, rect.height)),
+    });
+  }, []);
+
+  const ensurePendingLock = useCallback((target: HTMLDivElement, pointerId: number) => {
+    if (target.classList.contains("touch-none")) {
+      return;
+    }
+
+    lockTouchTarget(target);
+
+    try {
+      target.setPointerCapture(pointerId);
+    } catch {
+      /* pointer may have lifted */
+    }
+  }, []);
+
+  const tickHoldProgress = useCallback(
+    function runTick(now: number) {
+      if (!isPendingHoldRef.current || holdStartMsRef.current === null) {
+        return;
+      }
+
+      const elapsed = now - holdStartMsRef.current;
+      const nextProgress = Math.min(elapsed / TOUCH_HOLD_MS, 1);
+      setHoldProgress(nextProgress);
+
+      if (
+        elapsed >= HOLD_LOCK_MS &&
+        pendingPointerIdRef.current !== null &&
+        containerRef.current
+      ) {
+        ensurePendingLock(containerRef.current, pendingPointerIdRef.current);
+      }
+
+      if (nextProgress < 1 && isPendingHoldRef.current) {
+        holdRafRef.current = requestAnimationFrame(runTick);
+      }
+    },
+    [ensurePendingLock],
+  );
+
+  const startHoldProgress = useCallback(() => {
+    cancelHoldAnimation();
+    setHoldProgress(0);
+    holdRafRef.current = requestAnimationFrame(tickHoldProgress);
+  }, [cancelHoldAnimation, tickHoldProgress]);
+
   const clearTouchHold = useCallback(() => {
+    cancelHoldAnimation();
+
     if (holdTimerRef.current !== null) {
       clearTimeout(holdTimerRef.current);
       holdTimerRef.current = null;
@@ -82,23 +172,32 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
     pendingPointerIdRef.current = null;
     touchStartRef.current = null;
     lastPointerPosRef.current = null;
+    holdStartMsRef.current = null;
+    isPendingHoldRef.current = false;
+    setHoldProgress(0);
+    setHoldAnchor(null);
     setIsPendingHold(false);
-  }, []);
+  }, [cancelHoldAnimation]);
 
   const resetExplore = useCallback(
     (target?: HTMLDivElement | null, pointerId?: number) => {
+      const container = target ?? containerRef.current;
       clearTouchHold();
 
       if (
-        target &&
+        container &&
         pointerId !== undefined &&
-        target.hasPointerCapture(pointerId)
+        container.hasPointerCapture(pointerId)
       ) {
         try {
-          target.releasePointerCapture(pointerId);
+          container.releasePointerCapture(pointerId);
         } catch {
           /* pointer already released */
         }
+      }
+
+      if (container) {
+        unlockTouchTarget(container);
       }
 
       activePointerIdRef.current = null;
@@ -119,10 +218,12 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
       clientY: number,
     ) => {
       clearTouchHold();
+      lockTouchTarget(target);
 
       try {
         target.setPointerCapture(pointerId);
       } catch {
+        unlockTouchTarget(target);
         return false;
       }
 
@@ -131,6 +232,11 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
       setPointerType(type);
       setIsExploring(true);
       updatePosition(clientX, clientY);
+
+      if (type === "touch") {
+        triggerExploreHaptic();
+      }
+
       return true;
     },
     [clearTouchHold, updatePosition],
@@ -143,13 +249,17 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
       }
 
       if (event.pointerType === "touch") {
-        touchStartRef.current = { x: event.clientX, y: event.clientY };
-        lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
-        pendingPointerIdRef.current = event.pointerId;
-        setIsPendingHold(true);
-
         const target = event.currentTarget;
         const pointerId = event.pointerId;
+
+        holdStartMsRef.current = performance.now();
+        touchStartRef.current = { x: event.clientX, y: event.clientY };
+        lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
+        pendingPointerIdRef.current = pointerId;
+        isPendingHoldRef.current = true;
+        setIsPendingHold(true);
+        updateHoldAnchor(event.clientX, event.clientY);
+        startHoldProgress();
 
         holdTimerRef.current = setTimeout(() => {
           holdTimerRef.current = null;
@@ -177,7 +287,7 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
         event.clientY,
       );
     },
-    [beginExplore, resetExplore],
+    [beginExplore, resetExplore, startHoldProgress, updateHoldAnchor],
   );
 
   const handleContextMenu = useCallback(
@@ -198,14 +308,35 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
         if (start) {
           const dx = event.clientX - start.x;
           const dy = event.clientY - start.y;
+          const holdElapsedMs =
+            holdStartMsRef.current === null
+              ? 0
+              : performance.now() - holdStartMsRef.current;
 
           if (Math.abs(dy) > SCROLL_CANCEL_PX && Math.abs(dy) > Math.abs(dx)) {
-            resetExplore();
+            resetExplore(event.currentTarget, event.pointerId);
+            return;
+          }
+
+          if (holdElapsedMs >= HOLD_LOCK_MS) {
+            ensurePendingLock(event.currentTarget, event.pointerId);
+            event.preventDefault();
+          }
+
+          if (holdElapsedMs >= TOUCH_HOLD_MS) {
+            beginExplore(
+              event.currentTarget,
+              event.pointerId,
+              "touch",
+              event.clientX,
+              event.clientY,
+            );
             return;
           }
         }
 
         lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
+        updateHoldAnchor(event.clientX, event.clientY);
         return;
       }
 
@@ -223,7 +354,7 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
 
       updatePosition(event.clientX, event.clientY);
     },
-    [resetExplore, updatePosition],
+    [beginExplore, ensurePendingLock, resetExplore, updateHoldAnchor, updatePosition],
   );
 
   const handlePointerEnd = useCallback(
@@ -243,14 +374,19 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
 
   const handleLostPointerCapture = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (activePointerIdRef.current !== event.pointerId) {
+      if (
+        activePointerIdRef.current !== event.pointerId &&
+        pendingPointerIdRef.current !== event.pointerId
+      ) {
         return;
       }
 
-      resetExplore();
+      resetExplore(event.currentTarget, event.pointerId);
     },
     [resetExplore],
   );
+
+  useEffect(() => () => cancelHoldAnimation(), [cancelHoldAnimation]);
 
   useEffect(() => {
     const onWindowBlur = () => {
@@ -275,6 +411,8 @@ export function useMaterialExplore(zones: readonly PdpMaterialExploreZone[]) {
     containerSize,
     isExploring,
     isPendingHold,
+    holdProgress,
+    holdAnchor,
     activeZone,
     pointerType,
     handlePointerDown,

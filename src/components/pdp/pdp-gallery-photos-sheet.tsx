@@ -1,11 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
-import { cn } from "@/lib/cn";
 
+import {
+  pdpBottomSheetBackdropClass,
+  pdpBottomSheetOverlayClass,
+  pdpBottomSheetPanelClass,
+} from "./pdp-bottom-sheet";
 import { PDP_GALLERY_MORE_PHOTOS } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 
@@ -17,6 +22,11 @@ type PdpGalleryPhotosSheetProps = {
 /** Bottom sheet — full product photo grid */
 export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetProps) {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -40,18 +50,19 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
     };
   }, [onClose, open]);
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
-      className={cn(
-        "fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300",
-        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-      )}
+      className={pdpBottomSheetOverlayClass({ open })}
       aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close media gallery"
-        className="absolute inset-0 bg-black/45 transition-opacity"
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
         tabIndex={open ? 0 : -1}
       />
@@ -60,10 +71,7 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={cn(
-          "font-extended relative flex max-h-[88dvh] w-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out",
-          open ? "translate-y-0" : "translate-y-full",
-        )}
+        className={pdpBottomSheetPanelClass({ open, maxHeight: "88dvh" })}
       >
         <div className="shrink-0 px-2.5 pb-0 pt-2.5">
           <div className="mx-auto mb-4 h-[3px] w-[50px] rounded-full bg-black/70" />
@@ -92,13 +100,14 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
                   alt={photo.alt}
                   fill
                   className="object-cover object-center"
-                  sizes="(max-width: 430px) 50vw, 215px"
+                  sizes="50vw"
                 />
               </li>
             ))}
           </ul>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

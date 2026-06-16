@@ -4,8 +4,6 @@ import { useEffect } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { BOTTOM_CTA_OFFSET } from "./pdp-gallery-view";
-
 type PdpToastProps = {
   message: string;
   open: boolean;
@@ -36,13 +34,17 @@ export function PdpToast({
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      className={cn(
-        "pointer-events-none fixed inset-x-0 z-40 flex justify-center px-4 transition-opacity duration-300",
-        open ? "opacity-100" : "opacity-0",
-      )}
-      style={{ bottom: `calc(${BOTTOM_CTA_OFFSET} + 0.75rem)` }}
+      className="pointer-events-none fixed inset-x-0 top-[calc(var(--pdp-safe-area-top)+3.5rem)] z-40 flex justify-center px-4"
     >
-      <p className="font-extended rounded-full px-4 py-2.5 text-xs tracking-[0.2px] pdp-glass-light--cta">
+      <p
+        className={cn(
+          "font-extended rounded-full px-4 py-2.5 text-xs tracking-[0.2px] pdp-glass-light--cta pdp-toast",
+          "transition-[opacity,transform] duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform",
+          open
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-[140%] opacity-0",
+        )}
+      >
         {message}
       </p>
     </div>

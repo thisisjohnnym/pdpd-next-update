@@ -32,8 +32,9 @@ import { PdpUgcVideoCarouselModule } from "./pdp-ugc-video-carousel-module";
 import { PdpAsSeenOnModule } from "./pdp-as-seen-on-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
-  PDP_GALLERY_HERO_IMAGE,
   PDP_GALLERY_HERO_IMAGE_FOCUS,
+  PDP_GALLERY_IMMERSIVE_HERO_POSTER,
+  PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
   PDP_STUDIO_BACKDROP_CLASS,
@@ -92,22 +93,46 @@ function galleryScrollReveal(
   );
 }
 
-/** Hero only — full-screen immersive, edge-to-edge under device safe areas */
+/** Hero only — full-screen immersive video, edge-to-edge under device safe areas */
 function PdpHeroSlide({
-  src,
+  videoSrc,
+  poster,
   alt,
-  priority = false,
   onOpenReviews,
   isLastPanel = false,
 }: {
-  src: string;
+  videoSrc: string;
+  poster?: string;
   alt: string;
-  priority?: boolean;
   onOpenReviews?: () => void;
   isLastPanel?: boolean;
 }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsActive(entry.isIntersecting && entry.intersectionRatio >= 0.25);
+      },
+      { threshold: [0, 0.25, 0.5] },
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       className={cn(
         HERO_IMMERSIVE_CLASS,
         "shrink-0",
@@ -116,16 +141,19 @@ function PdpHeroSlide({
     >
       <div className={HERO_IMMERSIVE_MEDIA_CLASS}>
         <div className={PANEL_MEDIA_FILL_CLASS}>
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            priority={priority}
-            className="pdp-hero-photo-reveal pdp-gallery-panel__cover object-cover object-center"
+          <PdpGalleryHeroVideo
+            src={videoSrc}
+            poster={poster}
+            ariaLabel={alt}
+            isActive={isActive}
+            preload="auto"
+            showControls={false}
+            showMuteControl={false}
+            tapToTogglePlayback
+            className="pdp-hero-photo-reveal pdp-gallery-panel__cover size-full object-cover object-center"
             style={{
               objectPosition: PDP_GALLERY_HERO_IMAGE_FOCUS.objectPosition,
             }}
-            sizes="100vw"
           />
         </div>
       </div>
@@ -433,9 +461,9 @@ export function PdpGalleryView({
   return (
     <>
     <PdpHeroSlide
-      src={PDP_GALLERY_HERO_IMAGE}
+      videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
+      poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
       alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
-      priority
       onOpenReviews={onOpenReviews}
       isLastPanel={lastPanelSlideIndex === -1}
     />
@@ -498,7 +526,7 @@ export function PdpGalleryView({
               galleryScrollReveal(
                 `weight-feel-${index}`,
                 <PdpWeightFeelModule isLastPanel={isLastPanel} />,
-                { variant: "rise" },
+                { variant: "subtle" },
               ),
             ];
           }

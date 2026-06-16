@@ -112,7 +112,7 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
             transform: getCardTransform(activeHotspot.y),
           }}
         >
-          <p className="font-extended text-[13px] font-bold leading-tight tracking-[0.2px] text-black">
+          <p className="font-extended text-[13px] font-normal leading-tight tracking-[0.2px] text-black">
             {activeHotspot.title}
           </p>
           <p className="mt-0.5 line-clamp-2 font-extended text-[11px] leading-snug tracking-[0.2px] text-neutral-600">

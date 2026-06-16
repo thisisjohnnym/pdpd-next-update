@@ -1,11 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
+import {
+  pdpBottomSheetBackdropClass,
+  pdpBottomSheetOverlayClass,
+  pdpBottomSheetPanelClass,
+} from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 
@@ -18,6 +24,11 @@ type PdpShopTheLookSheetProps = {
 /** Bottom sheet — outfit pieces from an on-model gallery photo */
 export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheetProps) {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -41,22 +52,19 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
     };
   }, [onClose, open]);
 
-  if (!look) {
+  if (!look || !mounted) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
-      className={cn(
-        "fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300",
-        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-      )}
+      className={pdpBottomSheetOverlayClass({ open })}
       aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close shop the look"
-        className="absolute inset-0 bg-black/45 transition-opacity"
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
         tabIndex={open ? 0 : -1}
       />
@@ -65,10 +73,7 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={cn(
-          "font-extended relative flex max-h-[85dvh] w-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out",
-          open ? "translate-y-0" : "translate-y-full",
-        )}
+        className={pdpBottomSheetPanelClass({ open })}
       >
         <div className="shrink-0 px-2.5 pb-0 pt-2.5">
           <div className="mx-auto mb-6 h-[3px] w-[50px] rounded-full bg-black/70" />
@@ -118,6 +123,7 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
           </ul>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

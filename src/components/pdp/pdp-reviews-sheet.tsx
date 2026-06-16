@@ -1,10 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
+
+import {
+  pdpBottomSheetBackdropClass,
+  pdpBottomSheetOverlayClass,
+  pdpBottomSheetPanelClass,
+} from "./pdp-bottom-sheet";
 
 import {
   pdpCarouselScrollClass,
@@ -92,6 +99,106 @@ function RatingBreakdownRow({
   );
 }
 
+function RatingBreakdownInfo({ active }: { active: boolean }) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipId = useId();
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (!active) {
+      setOpen(false);
+    }
+  }, [active]);
+
+  useEffect(() => {
+    if (!open) {
+      setPosition(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const button = buttonRef.current;
+      if (!button) {
+        return;
+      }
+
+      const rect = button.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 8,
+        left: rect.left + rect.width / 2,
+      });
+    };
+
+    updatePosition();
+
+    const close = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (
+        buttonRef.current?.contains(target) ||
+        document.getElementById(tooltipId)?.contains(target)
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    document.addEventListener("pointerdown", close);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+      document.removeEventListener("pointerdown", close);
+    };
+  }, [open, tooltipId]);
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-controls={tooltipId}
+        aria-label={open ? "Hide rating breakdown" : "Show rating breakdown"}
+        className="flex size-5 shrink-0 items-center justify-center text-neutral-500"
+      >
+        <MaterialIcon name="info" size={18} className="text-neutral-500" />
+      </button>
+
+      {open && position
+        ? createPortal(
+            <div
+              id={tooltipId}
+              role="tooltip"
+              style={{
+                top: position.top,
+                left: position.left,
+                transform: "translateX(-50%)",
+              }}
+              className="fixed z-[60] w-[min(17rem,calc(100vw-2rem))] rounded-lg border border-neutral-200 bg-[#f2f2f2] px-3 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
+            >
+              <div className="flex flex-col gap-3">
+                {PDP_REVIEWS_RATING_BREAKDOWN.map((row) => (
+                  <RatingBreakdownRow
+                    key={row.stars}
+                    stars={row.stars}
+                    percent={row.percent}
+                  />
+                ))}
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
 function CustomerReviewCard({ review }: { review: PdpFeaturedReview }) {
   return (
     <article className="flex flex-col gap-2 border-t border-neutral-200 py-4">
@@ -133,21 +240,18 @@ function CustomerReviewCard({ review }: { review: PdpFeaturedReview }) {
 /** Bottom sheet — bag reviews pulled up from comments rail */
 export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
   const titleId = useId();
-  const breakdownId = useId();
-  const [breakdownOpen, setBreakdownOpen] = useState(false);
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { average } = PDP_REVIEWS_SUMMARY;
   const reviewCount = PDP_COMMENTS_SUMMARY.count;
 
   useEffect(() => {
-    if (open) {
-      setHasBeenOpen(true);
-    }
-  }, [open]);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!open) {
-      setBreakdownOpen(false);
+    if (open) {
+      setHasBeenOpen(true);
     }
   }, [open]);
 
@@ -173,18 +277,19 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
     };
   }, [open, onClose]);
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
-      className={cn(
-        "fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300",
-        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-      )}
+      className={pdpBottomSheetOverlayClass({ open })}
       aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close reviews"
-        className="absolute inset-0 bg-black/45 transition-opacity"
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
         tabIndex={open ? 0 : -1}
       />
@@ -193,10 +298,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={cn(
-          "font-extended relative flex max-h-[92dvh] w-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out",
-          open ? "translate-y-0" : "translate-y-full",
-        )}
+        className={pdpBottomSheetPanelClass({ open, maxHeight: "92dvh" })}
       >
         <div className="relative shrink-0 px-2.5 pb-0 pt-2.5">
           <div className="mx-auto mb-[30px] h-[3px] w-[50px] rounded-full bg-black/70" />
@@ -229,40 +331,10 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
                   <p className="font-extended text-sm tracking-[0.2px] text-black">
                     {reviewCount} Reviews
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => setBreakdownOpen((current) => !current)}
-                    aria-expanded={breakdownOpen}
-                    aria-controls={breakdownId}
-                    aria-label={
-                      breakdownOpen
-                        ? "Hide rating breakdown"
-                        : "Show rating breakdown"
-                    }
-                    className="flex size-5 shrink-0 items-center justify-center text-neutral-500"
-                  >
-                    <MaterialIcon name="info" size={18} className="text-neutral-500" />
-                  </button>
+                  <RatingBreakdownInfo active={open} />
                 </div>
               </div>
             </div>
-
-            <section
-              id={breakdownId}
-              hidden={!breakdownOpen}
-              className={cn(
-                "flex w-full flex-col gap-3 rounded-lg bg-[#f2f2f2] px-3 py-4 transition-opacity duration-200",
-                breakdownOpen ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {PDP_REVIEWS_RATING_BREAKDOWN.map((row) => (
-                <RatingBreakdownRow
-                  key={row.stars}
-                  stars={row.stars}
-                  percent={row.percent}
-                />
-              ))}
-            </section>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -310,6 +382,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           ) : null}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

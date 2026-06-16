@@ -51,7 +51,7 @@ function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="font-extended text-base font-bold leading-snug tracking-[0.2px] text-black">
+          <p className="font-extended text-base font-normal leading-snug tracking-[0.2px] text-black">
             {item.name}
           </p>
         </div>

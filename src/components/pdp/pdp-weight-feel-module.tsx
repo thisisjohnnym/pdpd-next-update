@@ -10,7 +10,6 @@ import {
   EXPERIENCE_PANEL_MEDIA_CLASS,
   experiencePanelSectionProps,
 } from "./pdp-experience-panel";
-import { PdpTextReveal } from "./pdp-text-reveal";
 import { useWeightLift } from "./use-weight-lift";
 
 function triggerLiftHaptic(pattern: readonly number[]) {
@@ -124,11 +123,11 @@ export function PdpWeightFeelModule({
           <div className="relative flex size-[4.25rem] items-center justify-center">
             <span
               aria-hidden
-              className="pdp-weight-lift__ring pdp-weight-lift__ring--outer pointer-events-none absolute size-[4.25rem] rounded-full border border-white/80"
+              className="pdp-weight-lift__ring pdp-weight-lift__ring--outer pointer-events-none absolute size-[4.25rem] rounded-full border border-neutral-400/55"
             />
             <span
               aria-hidden
-              className="pdp-weight-lift__ring pointer-events-none absolute size-[3.25rem] rounded-full border border-white"
+              className="pdp-weight-lift__ring pointer-events-none absolute size-[3.25rem] rounded-full border border-neutral-500/65"
             />
             <span
               className={cn(
@@ -172,7 +171,7 @@ export function PdpWeightFeelModule({
           </div>
           <div
             aria-live="polite"
-            className="min-h-[3.5rem] px-2 text-center"
+            className="min-h-[2.75rem] px-2 text-center"
           >
             {showLiftedAsset ? (
               <>
@@ -183,13 +182,14 @@ export function PdpWeightFeelModule({
                   {reveal.subline}
                 </p>
               </>
+            ) : isHolding ? (
+              <p className="font-extended text-center text-xs tracking-[0.2px] text-neutral-900">
+                Keep holding…
+              </p>
             ) : (
-              <PdpTextReveal
-                as="span"
-                className="font-extended text-center text-[11px] tracking-[0.2px] text-neutral-600"
-              >
-                {isHolding ? "Keep holding…" : hint}
-              </PdpTextReveal>
+              <p className="pdp-weight-lift__hint font-extended text-center text-[11px] uppercase tracking-[0.14em] text-neutral-900">
+                {hint}
+              </p>
             )}
           </div>
         </div>

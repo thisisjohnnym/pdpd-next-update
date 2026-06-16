@@ -902,6 +902,12 @@ export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
   translateY: "0%",
 } as const;
 
+/** Immersive hero — full-bleed 9:16 on-model lifestyle video */
+export const PDP_GALLERY_IMMERSIVE_HERO_VIDEO = "/videos/tabby-hero.mp4";
+
+/** Poster while immersive hero video buffers */
+export const PDP_GALLERY_IMMERSIVE_HERO_POSTER = PDP_GALLERY_HERO_IMAGE;
+
 /** Full-bleed rotating product video for Gallery tab */
 export const PDP_GALLERY_HERO_VIDEO = "/videos/soft-tabby-360.webm";
 
@@ -1998,7 +2004,7 @@ export const PDP_WEIGHT_FEEL = {
   title: "Weight & feel",
   intro:
     "Hard to picture on a screen. Press and hold to lift — feel what everyday carry is like.",
-  hint: "Press & hold to lift",
+  hint: "Press and hold to lift",
   holdMs: 720,
   hapticPattern: [14, 36, 18, 52, 22],
   image: {

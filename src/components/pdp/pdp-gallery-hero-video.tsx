@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -17,6 +17,7 @@ function videoMimeType(src: string) {
 
 type PdpGalleryHeroVideoProps = {
   className?: string;
+  style?: CSSProperties;
   isActive?: boolean;
   src?: string;
   poster?: string;
@@ -26,10 +27,13 @@ type PdpGalleryHeroVideoProps = {
   preload?: "auto" | "metadata" | "none";
   /** UGC rails — video layer ignores touch so vertical page scroll works */
   passThroughTouch?: boolean;
+  /** Tap video surface to pause/play — hero immersive */
+  tapToTogglePlayback?: boolean;
 };
 
 export function PdpGalleryHeroVideo({
   className,
+  style,
   isActive = true,
   src = PDP_GALLERY_HERO_VIDEO,
   poster,
@@ -38,12 +42,15 @@ export function PdpGalleryHeroVideo({
   showMuteControl = true,
   preload = "none",
   passThroughTouch = false,
+  tapToTogglePlayback = false,
 }: PdpGalleryHeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
   const userMutedRef = useRef(true);
+  const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [playbackHint, setPlaybackHint] = useState<"play" | "pause" | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -82,6 +89,30 @@ export function PdpGalleryHeroVideo({
     }
   }, [isActive]);
 
+  useEffect(() => {
+    return () => {
+      if (hintTimeoutRef.current !== null) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const flashPlaybackHint = (hint: "play" | "pause") => {
+    if (!tapToTogglePlayback) {
+      return;
+    }
+
+    if (hintTimeoutRef.current !== null) {
+      clearTimeout(hintTimeoutRef.current);
+    }
+
+    setPlaybackHint(hint);
+    hintTimeoutRef.current = setTimeout(() => {
+      setPlaybackHint(null);
+      hintTimeoutRef.current = null;
+    }, 650);
+  };
+
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) {
@@ -93,11 +124,13 @@ export function PdpGalleryHeroVideo({
       void video.play().catch(() => {
         /* ignored */
       });
+      flashPlaybackHint("play");
       return;
     }
 
     userPausedRef.current = true;
     video.pause();
+    flashPlaybackHint("pause");
   };
 
   const toggleMute = () => {
@@ -114,6 +147,9 @@ export function PdpGalleryHeroVideo({
   const controlButtonClass =
     "flex size-8 items-center justify-center text-white transition-opacity active:opacity-75";
 
+  const canTapVideo =
+    !passThroughTouch && (tapToTogglePlayback || showControls);
+
   return (
     <div className={cn("relative size-full", passThroughTouch && "touch-pan-y")}>
       <video
@@ -124,15 +160,31 @@ export function PdpGalleryHeroVideo({
         preload={preload}
         poster={poster}
         aria-label={ariaLabel}
-        onClick={showControls && !passThroughTouch ? togglePlayback : undefined}
+        onClick={canTapVideo ? togglePlayback : undefined}
+        style={style}
         className={cn(
           className,
-          showControls && !passThroughTouch && "cursor-pointer",
+          canTapVideo && "cursor-pointer",
           passThroughTouch && "pointer-events-none",
         )}
       >
         <source src={src} type={videoMimeType(src)} />
       </video>
+
+      {playbackHint ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"
+        >
+          <span className="flex size-[4.25rem] items-center justify-center rounded-full bg-black/40 backdrop-blur-sm animate-[pdp-playback-hint_650ms_ease-out_both]">
+            <MaterialIcon
+              name={playbackHint === "play" ? "play_arrow" : "pause"}
+              size={26}
+              className="text-white"
+            />
+          </span>
+        </div>
+      ) : null}
 
       {showControls ? (
         <div className="pointer-events-auto absolute bottom-3 right-3 z-[2] flex items-center gap-1.5">

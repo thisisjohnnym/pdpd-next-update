@@ -291,7 +291,7 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
       />
     </div>
     <PdpToast
-      message="Saved to your wishlist"
+      message="Saved to your bookmarks"
       open={saveToastOpen}
       onClose={() => setSaveToastOpen(false)}
     />

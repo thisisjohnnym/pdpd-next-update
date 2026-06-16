@@ -15,6 +15,7 @@ import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpUgcVideoCard } from "./pdp-ugc-video-card";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { PdpTextReveal } from "./pdp-text-reveal";
 import {
   loopCarouselItems,
   useInfiniteCenteredCarousel,
@@ -43,15 +44,17 @@ export function PdpUgcVideoCarouselModule() {
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <div className="flex items-end justify-between gap-3">
             <PdpModuleHeading spacing="none">{title}</PdpModuleHeading>
-            <PdpTextLinkCta
-              as="a"
-              href={followCta.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn("shrink-0", pdpType.label)}
-            >
-              {followCta.label}
-            </PdpTextLinkCta>
+            <PdpTextReveal as="div" delay={100} className="shrink-0">
+              <PdpTextLinkCta
+                as="a"
+                href={followCta.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={pdpType.label}
+              >
+                {followCta.label}
+              </PdpTextLinkCta>
+            </PdpTextReveal>
           </div>
         </GridItem>
       </PageGrid>

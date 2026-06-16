@@ -90,10 +90,6 @@ html.font-extended {
   top: auto;
 }
 
-.font-extended.font-bold {
-  font-weight: 700;
-}
-
 /* Preserve transform-driven motion on extended labels */
 .font-extended[class*="animate-"] {
   top: 0;
@@ -238,7 +234,29 @@ html.font-extended {
   cursor: pointer;
 }
 
-/* Hero load-in — photo first, then chrome fades into place */
+/* Hero load-in — media first, then chrome fades into place */
+@keyframes pdp-playback-hint {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+
+  18% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
 @keyframes pdp-hero-photo-reveal {
   from {
     transform: scale(1.08);
@@ -504,6 +522,10 @@ html.font-extended {
   animation: pdp-weight-lift-ring-ripple 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
+.pdp-weight-lift__hint {
+  text-shadow: 0 0 12px rgb(255 255 255 / 0.65);
+}
+
 .pdp-strap-track:focus-visible {
   outline: 2px solid #171717;
   outline-offset: 3px;
@@ -542,6 +564,12 @@ html.font-extended {
     transform: none;
   }
 
+  [class*="animate-[pdp-playback-hint"] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .pdp-scroll-reveal__inner,
   .pdp-text-reveal,
   .pdp-reveal-item {
@@ -557,6 +585,10 @@ html.font-extended {
 
   .pdp-atb-shimmer {
     display: none;
+  }
+
+  .pdp-toast {
+    transform: none !important;
   }
 }
 
