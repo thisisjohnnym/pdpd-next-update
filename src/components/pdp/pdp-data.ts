@@ -2685,8 +2685,8 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     likes: 21_200,
     photos: [
       {
-        src: "/images/reviews/comment-cat.gif",
-        alt: "Funny cat GIF uploaded with review",
+        src: "/images/reviews/comment-cat.webp",
+        alt: "Nyan Cat uploaded with review",
       },
     ],
   },

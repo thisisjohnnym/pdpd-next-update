@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import {
-  useCallback,
-  useEffect,
   useId,
   useRef,
   useState,
@@ -70,132 +68,21 @@ export type PdpReviewCommentData = Pick<
 };
 
 const INITIAL_VISIBLE_REPLIES = 2;
-const THREAD_SPINE_X = 9;
-const THREAD_BRANCH_END_X = 21;
-const THREAD_BRANCH_Y_OFFSET = 17;
 
 function isAnimatedCommentMedia(src: string) {
-  return /\.gif($|\?)/i.test(src);
-}
-
-function buildReplyThreadPath(
-  container: HTMLElement,
-  replyElements: HTMLElement[],
-) {
-  if (!replyElements.length) {
-    return "";
-  }
-
-  const containerTop = container.getBoundingClientRect().top;
-  const segments: string[] = [];
-  let spineCursorY = 12;
-
-  replyElements.forEach((element, index) => {
-    const branchY =
-      element.getBoundingClientRect().top - containerTop + THREAD_BRANCH_Y_OFFSET;
-    const approachY = Math.max(spineCursorY + 4, branchY - 8);
-
-    segments.push(`M ${THREAD_SPINE_X} ${spineCursorY}`);
-
-    segments.push(
-      `C ${THREAD_SPINE_X + 1.5} ${spineCursorY + (approachY - spineCursorY) * 0.35}, ${THREAD_SPINE_X - 1.5} ${approachY - 2}, ${THREAD_SPINE_X} ${approachY}`,
-    );
-
-    segments.push(
-      `C ${THREAD_SPINE_X} ${branchY - 2}, ${THREAD_SPINE_X + 6} ${branchY + 1}, ${THREAD_BRANCH_END_X} ${branchY + 2}`,
-    );
-
-    spineCursorY = branchY + 10;
-  });
-
-  return segments.join(" ");
+  return /\.(?:gif|webp)($|\?)/i.test(src);
 }
 
 function ReplyThread({
-  replyIds,
   children,
   footer,
 }: {
-  replyIds: string[];
-  children: (registerReply: (id: string, node: HTMLDivElement | null) => void) => ReactNode;
+  children: ReactNode;
   footer?: ReactNode;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const replyRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const observerRef = useRef<ResizeObserver | null>(null);
-  const [path, setPath] = useState("");
-
-  const updatePath = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const replyElements = replyIds
-      .map((id) => replyRefs.current.get(id))
-      .filter((element): element is HTMLDivElement => Boolean(element));
-
-    setPath(buildReplyThreadPath(container, replyElements));
-  }, [replyIds]);
-
-  const registerReply = useCallback(
-    (id: string, node: HTMLDivElement | null) => {
-      const previous = replyRefs.current.get(id);
-
-      if (previous && observerRef.current) {
-        observerRef.current.unobserve(previous);
-      }
-
-      if (node) {
-        replyRefs.current.set(id, node);
-        observerRef.current?.observe(node);
-        updatePath();
-        return;
-      }
-
-      replyRefs.current.delete(id);
-      updatePath();
-    },
-    [updatePath],
-  );
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const observer = new ResizeObserver(updatePath);
-    observerRef.current = observer;
-    observer.observe(container);
-    replyRefs.current.forEach((element) => observer.observe(element));
-    updatePath();
-
-    return () => {
-      observer.disconnect();
-      observerRef.current = null;
-    };
-  }, [replyIds, updatePath]);
-
   return (
-    <div ref={containerRef} className="relative ml-4 pl-7">
-      {path ? (
-        <svg
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 w-7 overflow-visible text-neutral-200"
-        >
-          <path
-            d={path}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : null}
-
-      {children(registerReply)}
+    <div className="ml-4 border-l border-neutral-200 pl-4">
+      {children}
       {footer}
     </div>
   );
@@ -269,7 +156,7 @@ function CommentRow({
         {hasPhoto && photos?.[0] ? (
           <div className="relative mt-2 size-24 overflow-hidden bg-neutral-100">
             {isAnimatedCommentMedia(photos[0].src) ? (
-              // GIF — native img keeps animation; Next/Image optimization can flatten frames
+              // Animated GIF/WebP — native img keeps animation; Next/Image can flatten frames
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photos[0].src}
@@ -377,7 +264,6 @@ export function PdpReviewComment({
 
       {replies.length > 0 ? (
         <ReplyThread
-          replyIds={visibleReplies.map((reply) => reply.id)}
           footer={
             <>
               {hiddenReplyCount > 0 && !repliesExpanded ? (
@@ -385,7 +271,7 @@ export function PdpReviewComment({
                   type="button"
                   onClick={() => setRepliesExpanded(true)}
                   className={cn(
-                    "relative flex items-center gap-2 py-2 pl-0 text-neutral-500",
+                    "flex items-center gap-2 py-2 text-neutral-500",
                     pdpType.micro,
                     pdpPressableClass,
                   )}
@@ -399,7 +285,7 @@ export function PdpReviewComment({
                   type="button"
                   onClick={() => setRepliesExpanded(false)}
                   className={cn(
-                    "relative flex items-center gap-2 py-2 pl-0 text-neutral-500",
+                    "flex items-center gap-2 py-2 text-neutral-500",
                     pdpType.micro,
                     pdpPressableClass,
                   )}
@@ -410,25 +296,19 @@ export function PdpReviewComment({
             </>
           }
         >
-          {(registerReply) =>
-            visibleReplies.map((reply) => (
-              <div
-                key={reply.id}
-                ref={(node) => registerReply(reply.id, node)}
-                className="relative"
-              >
-                <CommentRow
-                  author={reply.author}
-                  quote={reply.quote}
-                  date={reply.date}
-                  verified={reply.verified}
-                  likes={reply.likes}
-                  variant={variant}
-                  isReply
-                />
-              </div>
-            ))
-          }
+          {visibleReplies.map((reply) => (
+            <div key={reply.id}>
+              <CommentRow
+                author={reply.author}
+                quote={reply.quote}
+                date={reply.date}
+                verified={reply.verified}
+                likes={reply.likes}
+                variant={variant}
+                isReply
+              />
+            </div>
+          ))}
         </ReplyThread>
       ) : null}
     </article>
