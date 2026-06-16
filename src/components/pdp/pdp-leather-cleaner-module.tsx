@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { PDP_LEATHER_CLEANER, type PdpLeatherCleanerProduct } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { pdpModuleSectionClass } from "./pdp-module-section";
-import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass } from "./pdp-type";
+import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 
 function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -57,10 +57,13 @@ function LeatherCleanerCard({
             added ? pdpStrokeCtaMutedClass : pdpStrokeCtaClass,
           )}
         >
-          <span className="translate-y-px">{added ? "Added" : "Add"}</span>
-          {!added ? (
-            <MaterialIcon name="add" size={18} className="shrink-0 text-black" />
-          ) : null}
+          <span className={pdpAddIconLabelClass}>{added ? "Added" : "Add"}</span>
+          <MaterialIcon
+            name="add"
+            size={18}
+            className={cn("shrink-0", added ? "invisible" : "text-black")}
+            aria-hidden={added}
+          />
         </button>
       </div>
     </article>

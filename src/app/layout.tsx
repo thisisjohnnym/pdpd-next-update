@@ -59,7 +59,7 @@ export default function RootLayout({
       lang="en"
       className={`${helveticaNeueLTPro.variable} ${helveticaNeueLTProExtended.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-white font-sans text-neutral-900">
+      <body className="min-h-full bg-black font-sans text-neutral-900">
         {children}
       </body>
     </html>

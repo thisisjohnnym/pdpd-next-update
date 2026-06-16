@@ -7,8 +7,6 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import {
-  pdpBottomSheetBackdropClass,
-  pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
 } from "./pdp-bottom-sheet";
 
@@ -43,6 +41,7 @@ import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpUgcStoryCard } from "./pdp-ugc-story-card";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { useBodyScrollLock, useVisualViewportFrame } from "./use-visual-viewport-frame";
 
 type PdpReviewsSheetProps = {
   open: boolean;
@@ -181,6 +180,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userComments, setUserComments] = useState<PdpReviewCommentData[]>([]);
+  const viewportFrame = useVisualViewportFrame(open);
   const { average } = PDP_REVIEWS_SUMMARY;
   const reviewCount = PDP_COMMENTS_SUMMARY.count;
 
@@ -203,13 +203,12 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
     }
   }, [open]);
 
+  useBodyScrollLock(open);
+
   useEffect(() => {
     if (!open) {
       return;
     }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -220,7 +219,6 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, onClose]);
@@ -231,23 +229,41 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
+      className={cn(
+        "fixed inset-0 z-50 transition-opacity duration-300",
+        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+      )}
       aria-hidden={!open}
     >
-      <button
-        type="button"
-        aria-label="Close reviews"
-        className={pdpBottomSheetBackdropClass()}
-        onClick={onClose}
-        tabIndex={open ? 0 : -1}
-      />
+      {/* Covers the layout viewport so hero/content cannot show through the keyboard */}
+      <div className="absolute inset-0 bg-black/45" aria-hidden />
 
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open, maxHeight: "92dvh" })}
+        className="absolute flex flex-col justify-end"
+        style={{
+          top: viewportFrame.top,
+          left: viewportFrame.left,
+          width: viewportFrame.width,
+          height: viewportFrame.height,
+        }}
       >
+        <button
+          type="button"
+          aria-label="Close reviews"
+          className="absolute inset-0"
+          onClick={onClose}
+          tabIndex={open ? 0 : -1}
+        />
+
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          className={cn(
+            pdpBottomSheetPanelClass({ open, maxHeight: "92dvh" }),
+            "relative z-[1] max-h-full min-h-0",
+          )}
+        >
         <div className="relative shrink-0 px-2.5 pb-0 pt-2.5">
           <div className="mx-auto mb-[30px] h-[3px] w-[50px] rounded-full bg-black/70" />
           <button
@@ -338,9 +354,14 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           </div>
 
           {hasBeenOpen ? (
-            <PdpReviewCommentBox onPost={handlePostComment} pinned />
+            <PdpReviewCommentBox
+              onPost={handlePostComment}
+              pinned
+              keyboardOpen={viewportFrame.keyboardLikelyOpen}
+            />
           ) : null}
         </div>
+      </div>
       </div>
     </div>,
     document.body,

@@ -14,7 +14,7 @@ import {
   pdpBottomSheetPanelClass,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
-import { pdpType } from "./pdp-type";
+import { pdpAddIconLabelClass, pdpType } from "./pdp-type";
 
 type PdpStrapOptionsSheetProps = {
   set: PdpStrapOptionsSet | null;
@@ -163,10 +163,13 @@ export function PdpStrapOptionsSheet({
                         : "bg-black text-white",
                     )}
                   >
-                    <span>{added ? "Added" : "Add"}</span>
-                    {!added ? (
-                      <MaterialIcon name="add" size={18} className="shrink-0 text-white" />
-                    ) : null}
+                    <span className={pdpAddIconLabelClass}>{added ? "Added" : "Add"}</span>
+                    <MaterialIcon
+                      name="add"
+                      size={18}
+                      className={cn("shrink-0", added ? "invisible" : "text-white")}
+                      aria-hidden={added}
+                    />
                   </button>
                 </li>
               );

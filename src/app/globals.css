@@ -72,6 +72,10 @@ body {
   padding-bottom: var(--pdp-safe-area-bottom);
 }
 
+.pdp-safe-area-main--no-top {
+  padding-top: 0;
+}
+
 .pdp-grid-item {
   grid-column: var(--grid-column-mobile, span var(--grid-span-mobile, 12));
   min-width: 0;
@@ -81,6 +85,13 @@ body {
   font-family: var(--font-extended);
   position: relative;
   top: 2px;
+}
+
+/* Inline with Material add icon — cancel extended face nudge */
+.pdp-add-icon-label {
+  top: 0;
+  transform: translateY(-2px);
+  line-height: 1;
 }
 
 /* Root layout — never offset the document; font-extended nudge is for labels only */
@@ -822,7 +833,7 @@ html.pdp-panel-scroll {
   height: var(--pdp-immersive-height, 100svh);
 }
 
-/* Edge-to-edge opt-out — breaks out of SafeAreaMain; media under Dynamic Island */
+/* Edge-to-edge — full viewport bleed; media draws under Dynamic Island / status bar */
 .pdp-edge-to-edge,
 .pdp-hero-immersive {
   position: relative;
@@ -830,27 +841,17 @@ html.pdp-panel-scroll {
   width: 100%;
   max-width: none;
   margin: 0;
-  margin-top: calc(-1 * var(--pdp-safe-area-top));
-  margin-bottom: calc(-1 * var(--pdp-safe-area-bottom));
   padding: 0;
   overflow: hidden;
   background: #000;
-  min-height: calc(
-    var(--pdp-immersive-height, 100svh) + var(--pdp-safe-area-top) +
-      var(--pdp-safe-area-bottom)
-  );
-  height: calc(
-    var(--pdp-immersive-height, 100svh) + var(--pdp-safe-area-top) +
-      var(--pdp-safe-area-bottom)
-  );
+  min-height: var(--pdp-immersive-height, 100svh);
+  height: var(--pdp-immersive-height, 100svh);
 }
 
 .pdp-edge-to-edge__media,
 .pdp-hero-immersive__media {
   position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  top: calc(-1 * var(--pdp-safe-area-top));
+  inset: 0;
   overflow: hidden;
   background: #000;
 }
@@ -907,4 +908,16 @@ html.pdp-panel-scroll {
   opacity: 1;
   transform: none;
   filter: none;
+}
+
+/* Comment composer — 16px input prevents iOS Safari focus zoom */
+.pdp-comment-composer {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.pdp-comment-composer__input {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }

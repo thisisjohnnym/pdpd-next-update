@@ -366,6 +366,8 @@ type PdpReviewCommentBoxProps = {
   className?: string;
   /** Pinned to bottom of a sheet — border-top + safe area padding */
   pinned?: boolean;
+  /** iOS keyboard visible — tighten bottom padding */
+  keyboardOpen?: boolean;
 };
 
 /** Instagram-style comment composer */
@@ -373,6 +375,7 @@ export function PdpReviewCommentBox({
   onPost,
   className,
   pinned = false,
+  keyboardOpen = false,
 }: PdpReviewCommentBoxProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -391,12 +394,21 @@ export function PdpReviewCommentBox({
     inputRef.current?.focus();
   };
 
+  const handleFocus = () => {
+    requestAnimationFrame(() => {
+      inputRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  };
+
   return (
     <div
       className={cn(
         "bg-white",
         pinned
-          ? "shrink-0 border-t border-neutral-200 px-3 pb-[max(12px,var(--pdp-safe-area-bottom))] pt-3"
+          ? cn(
+              "pdp-comment-composer shrink-0 border-t border-neutral-200 px-3 pt-3",
+              keyboardOpen ? "pb-2" : "pb-[max(12px,var(--pdp-safe-area-bottom))]",
+            )
           : "border-t border-neutral-200 pt-4",
         className,
       )}
@@ -409,8 +421,14 @@ export function PdpReviewCommentBox({
           ref={inputRef}
           id={inputId}
           type="text"
+          inputMode="text"
+          enterKeyHint="send"
+          autoComplete="off"
+          autoCorrect="on"
+          autoCapitalize="sentences"
           value={text}
           onChange={(event) => setText(event.target.value)}
+          onFocus={handleFocus}
           onKeyDown={(event) => {
             if (event.key === "Enter" && canPost) {
               event.preventDefault();
@@ -419,9 +437,10 @@ export function PdpReviewCommentBox({
           }}
           placeholder="Add a comment..."
           className={cn(
-            "relative top-0 min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 pt-3 pb-2",
-            "font-extended text-sm leading-normal tracking-[0.2px] text-black outline-none",
+            "pdp-comment-composer__input min-h-11 min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2.5",
+            "font-extended text-base leading-normal tracking-[0.2px] text-black outline-none",
             "placeholder:text-neutral-400 focus:border-neutral-400",
+            "[touch-action:manipulation] [-webkit-tap-highlight-color:transparent]",
           )}
         />
         <button
@@ -429,7 +448,7 @@ export function PdpReviewCommentBox({
           onClick={handlePost}
           disabled={!canPost}
           className={cn(
-            "shrink-0 font-extended text-sm tracking-[0.2px] transition-opacity",
+            "shrink-0 font-extended text-base leading-none tracking-[0.2px] transition-opacity",
             canPost
               ? "text-[#0095F6] active:opacity-70"
               : "pointer-events-none text-neutral-300",

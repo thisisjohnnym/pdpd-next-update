@@ -62,12 +62,12 @@ function HeartBurstParticle({ rise, sway, size, delay, spin }: HeartBurstParticl
     const animation = particle.animate(
       [
         {
-          transform: "translate(-50%, -50%) scale(0.2) rotate(0deg)",
-          opacity: 0,
+          transform: "translate(-50%, -50%) scale(0.35) rotate(0deg)",
+          opacity: 0.85,
           offset: 0,
         },
         {
-          transform: `translate(calc(-50% + ${sway * 0.35}px), calc(-50% - 10px)) scale(1.25) rotate(${spin * 0.25}deg)`,
+          transform: `translate(calc(-50% + ${sway * 0.35}px), calc(-50% + 2px)) scale(1.15) rotate(${spin * 0.25}deg)`,
           opacity: 1,
           offset: 0.18,
         },
@@ -93,7 +93,7 @@ function HeartBurstParticle({ rise, sway, size, delay, spin }: HeartBurstParticl
   return (
     <span
       ref={particleRef}
-      className="pointer-events-none absolute left-1/2 top-1/2 will-change-transform"
+      className="pointer-events-none absolute left-1/2 top-[54%] will-change-transform"
       style={{ color: LIKE_RED } as CSSProperties}
     >
       <MaterialIcon
@@ -212,7 +212,7 @@ function LikeRailAction({
           <span
             key={burstKey}
             aria-hidden
-            className="pointer-events-none absolute bottom-2 left-1/2 h-36 w-28 -translate-x-1/2 overflow-visible"
+            className="pointer-events-none absolute inset-0 overflow-visible"
           >
             {HEART_BURST_PARTICLES.map((particle, index) => (
               <HeartBurstParticle

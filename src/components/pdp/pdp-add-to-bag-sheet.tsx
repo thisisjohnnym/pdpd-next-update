@@ -21,7 +21,7 @@ import {
   type PdpBundleAddPayload,
 } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
-import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass } from "./pdp-type";
+import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 
 type BagConfirmation =
   | { type: "product" }
@@ -292,16 +292,15 @@ export function PdpAddToBagSheet({
                               : pdpStrokeCtaClass,
                           )}
                         >
-                          <span className="translate-y-px">
+                          <span className={pdpAddIconLabelClass}>
                             {added ? "Added" : "Quick add"}
                           </span>
-                          {!added ? (
-                            <MaterialIcon
-                              name="add"
-                              size={18}
-                              className="text-black"
-                            />
-                          ) : null}
+                          <MaterialIcon
+                            name="add"
+                            size={18}
+                            className={cn("shrink-0", added ? "invisible" : "text-black")}
+                            aria-hidden={added}
+                          />
                         </button>
                       </div>
                     </li>

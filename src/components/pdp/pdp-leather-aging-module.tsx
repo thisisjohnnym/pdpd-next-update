@@ -11,7 +11,7 @@ import {
   EXPERIENCE_PANEL_MEDIA_CLASS,
   experiencePanelSectionProps,
 } from "./pdp-experience-panel";
-import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass } from "./pdp-type";
+import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 
 const AGING_TITLE_MIN_HEIGHT_CLASS = "min-h-7";
@@ -81,10 +81,13 @@ function AgingCareUpsellRow({
             added ? pdpStrokeCtaMutedClass : pdpStrokeCtaClass,
           )}
         >
-          <span className="translate-y-px">{added ? "Added" : "Add"}</span>
-          {!added ? (
-            <MaterialIcon name="add" size={18} className="text-black" />
-          ) : null}
+          <span className={pdpAddIconLabelClass}>{added ? "Added" : "Add"}</span>
+          <MaterialIcon
+            name="add"
+            size={18}
+            className={cn("shrink-0", added ? "invisible" : "text-black")}
+            aria-hidden={added}
+          />
         </button>
       </div>
   );

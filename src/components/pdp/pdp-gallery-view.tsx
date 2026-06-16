@@ -95,7 +95,7 @@ function galleryScrollReveal(
 }
 
 /** Hero only — full-screen immersive video, edge-to-edge under device safe areas */
-function PdpHeroSlide({
+export function PdpGalleryHero({
   videoSrc,
   poster,
   alt,
@@ -437,6 +437,7 @@ export function PdpGalleryView({
   onStrapOptionsOpenChange,
   onComparePickerOpenChange,
   selectedColorId,
+  omitHero = false,
 }: {
   onOpenReviews?: () => void;
   onAddSimilarToBag?: () => void;
@@ -445,6 +446,7 @@ export function PdpGalleryView({
   onStrapOptionsOpenChange?: (open: boolean) => void;
   onComparePickerOpenChange?: (open: boolean) => void;
   selectedColorId: string;
+  omitHero?: boolean;
 }) {
   const [shopLookId, setShopLookId] = useState<string | null>(null);
   const [strapOptionsId, setStrapOptionsId] = useState<string | null>(null);
@@ -464,13 +466,15 @@ export function PdpGalleryView({
 
   return (
     <>
-    <PdpHeroSlide
-      videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
-      poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
-      alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
-      onOpenReviews={onOpenReviews}
-      isLastPanel={lastPanelSlideIndex === -1}
-    />
+    {!omitHero ? (
+      <PdpGalleryHero
+        videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
+        poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
+        alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
+        onOpenReviews={onOpenReviews}
+        isLastPanel={lastPanelSlideIndex === -1}
+      />
+    ) : null}
 
     <div className={GALLERY_CLASS} style={GALLERY_SCROLL_PAD}>
       <div className={GALLERY_MEDIA_STACK_CLASS}>

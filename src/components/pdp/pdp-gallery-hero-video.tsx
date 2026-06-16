@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { videoDecoderRegistry } from "./pdp-decoder-registry";
 import { PDP_GALLERY_HERO_VIDEO } from "./pdp-data";
 import {
+  computePriorityHeroShouldPlay,
   computeShouldPlay,
   getActiveVideoPreload,
   getInactiveVideoPreload,
@@ -80,21 +81,29 @@ export function PdpGalleryHeroVideo({
   const lowPowerBlocksAutoplay = lowPowerMode && !priorityAutoplay;
 
   const manualPlaybackRequired =
-    lowPowerBlocksAutoplay ||
-    autoplayRestricted ||
-    !network.autoplayAllowed ||
-    network.saveData;
+    !priorityAutoplay &&
+    (lowPowerBlocksAutoplay ||
+      autoplayRestricted ||
+      !network.autoplayAllowed ||
+      network.saveData);
 
-  const shouldPlay = computeShouldPlay({
-    isActive,
-    isVisible: lifecycle.isVisible,
-    isFrozen: lifecycle.isFrozen,
-    lowPowerMode: lowPowerBlocksAutoplay,
-    saveData: network.saveData,
-    autoplayAllowed: network.autoplayAllowed,
-    userPaused: userPaused,
-    autoplayRestricted: manualPlaybackRequired && !userStarted,
-  });
+  const shouldPlay = priorityAutoplay
+    ? computePriorityHeroShouldPlay({
+        isActive,
+        isVisible: lifecycle.isVisible,
+        isFrozen: lifecycle.isFrozen,
+        userPaused,
+      })
+    : computeShouldPlay({
+        isActive,
+        isVisible: lifecycle.isVisible,
+        isFrozen: lifecycle.isFrozen,
+        lowPowerMode: lowPowerBlocksAutoplay,
+        saveData: network.saveData,
+        autoplayAllowed: network.autoplayAllowed,
+        userPaused: userPaused,
+        autoplayRestricted: manualPlaybackRequired && !userStarted,
+      });
 
   const videoSources = resolveVideoSources(src);
 
@@ -116,6 +125,13 @@ export function PdpGalleryHeroVideo({
 
   useEffect(() => {
     if (isActive) {
+      if (priorityAutoplay) {
+        videoDecoderRegistry.register(resolvedDecoderId);
+        setIsMounted(true);
+        videoDecoderRegistry.setState(resolvedDecoderId, "ACTIVE");
+        return;
+      }
+
       if (videoDecoderRegistry.register(resolvedDecoderId)) {
         setIsMounted(true);
         videoDecoderRegistry.setState(resolvedDecoderId, "ACTIVE");
@@ -136,7 +152,7 @@ export function PdpGalleryHeroVideo({
     return () => {
       window.clearTimeout(unloadTimer);
     };
-  }, [isActive, resolvedDecoderId]);
+  }, [isActive, resolvedDecoderId, priorityAutoplay]);
 
   useEffect(() => {
     if (isMounted || !isActive) {
@@ -167,14 +183,14 @@ export function PdpGalleryHeroVideo({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !isMounted || userStarted) {
+    if (!video || !isMounted || userStarted || priorityAutoplay) {
       return;
     }
 
-    if (manualPlaybackRequired || poster) {
+    if (manualPlaybackRequired) {
       video.load();
     }
-  }, [isMounted, manualPlaybackRequired, userStarted, poster, src]);
+  }, [isMounted, manualPlaybackRequired, userStarted, priorityAutoplay, src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -231,6 +247,34 @@ export function PdpGalleryHeroVideo({
       setAutoplayRestricted(true);
     }
   };
+
+  useEffect(() => {
+    if (!priorityAutoplay || !isMounted || !shouldPlay) {
+      return;
+    }
+
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    const tryPlay = () => {
+      if (!mountedRef.current || userPausedRef.current) {
+        return;
+      }
+
+      void video.play().catch(onPlayRejected);
+    };
+
+    tryPlay();
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("canplay", tryPlay);
+    };
+  }, [priorityAutoplay, isMounted, shouldPlay, src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -335,12 +379,20 @@ export function PdpGalleryHeroVideo({
 
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
-  const showLandingPoster = Boolean(poster) && !isReady;
+  const showLandingPoster = Boolean(poster) && !isReady && !priorityAutoplay;
   const showFrozenPlayOverlay =
-    isActive && !isPlaying && manualPlaybackRequired && (isReady || Boolean(poster));
+    isActive &&
+    !isPlaying &&
+    manualPlaybackRequired &&
+    !priorityAutoplay &&
+    (isReady || Boolean(poster));
   const effectivePreload = (() => {
+    if (priorityAutoplay && isActive) {
+      return "auto";
+    }
+
     if (manualPlaybackRequired && !userStarted) {
-      if (priorityAutoplay || poster) {
+      if (poster) {
         return getActiveVideoPreload(network);
       }
 
@@ -428,7 +480,7 @@ export function PdpGalleryHeroVideo({
         className={cn(
           className,
           "transition-opacity duration-300",
-          isReady ? "opacity-100" : "opacity-0",
+          priorityAutoplay || isReady ? "opacity-100" : "opacity-0",
           canTapVideo && "cursor-pointer",
           passThroughTouch && "pointer-events-none",
           allowHorizontalPan && !passThroughTouch && "[touch-action:pan-x_pan-y]",

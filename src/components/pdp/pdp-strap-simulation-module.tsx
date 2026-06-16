@@ -12,7 +12,7 @@ import {
   type PdpStrapSimulationMode,
 } from "./pdp-data";
 import { resolveStrapSimulationPreview } from "./pdp-strap-simulation-preview";
-import { pdpPressableClass, pdpPressableSolidClass } from "./pdp-type";
+import { pdpAddIconLabelClass, pdpPressableClass, pdpPressableSolidClass } from "./pdp-type";
 import { experiencePanelSectionProps } from "./pdp-experience-panel";
 
 const STRAP_PREVIEW_MEDIA_CLASS = "relative aspect-[4/3] w-full overflow-hidden";
@@ -149,16 +149,15 @@ function BuildPickerRow({
                         : "bg-black text-white active:bg-neutral-800",
                     )}
                   >
-                    <span className="font-extended translate-y-px">
+                    <span className={pdpAddIconLabelClass}>
                       {added ? "Added" : "Add"}
                     </span>
-                    {!added ? (
-                      <MaterialIcon
-                        name="add"
-                        size={18}
-                        className="shrink-0 text-white"
-                      />
-                    ) : null}
+                    <MaterialIcon
+                      name="add"
+                      size={18}
+                      className={cn("shrink-0", added ? "invisible" : "text-white")}
+                      aria-hidden={added}
+                    />
                   </button>
                 </div>
               ) : null}

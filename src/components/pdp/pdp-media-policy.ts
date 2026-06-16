@@ -25,6 +25,16 @@ export function computeShouldPlay(input: MediaPlaybackInput): boolean {
   );
 }
 
+/** Above-the-fold hero — always attempt muted autoplay when the page is active */
+export function computePriorityHeroShouldPlay(input: {
+  isActive: boolean;
+  isVisible: boolean;
+  isFrozen: boolean;
+  userPaused: boolean;
+}): boolean {
+  return input.isActive && input.isVisible && !input.isFrozen && !input.userPaused;
+}
+
 export function computeShouldRun(input: { isVisible: boolean; isFrozen: boolean }): boolean {
   return input.isVisible && !input.isFrozen;
 }
