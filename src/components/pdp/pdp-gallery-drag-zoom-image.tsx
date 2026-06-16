@@ -7,11 +7,11 @@ import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_DRAG_ZOOM_HINT } from "./pdp-data";
 import { PANEL_MEDIA_COVER_CLASS } from "./pdp-viewport-chrome";
-import { useMaterialExplore } from "./use-material-explore";
+import { useDragZoomLens } from "./use-drag-zoom-lens";
 
 const LENS_SIZE = 132;
 const MAGNIFICATION = 2.75;
-/** Lift lens above touch point so the thumb does not cover the magnified area */
+/** Lift lens above the thumb so the magnified area stays visible */
 const TOUCH_LENS_OFFSET_Y = 96;
 const HOLD_RING_SIZE = 56;
 const HOLD_RING_RADIUS = 18;
@@ -28,7 +28,7 @@ type PdpGalleryDragZoomImageProps = {
   className?: string;
 };
 
-/** Drag-to-zoom lens — studio product shots */
+/** Press-and-hold magnifier lens for studio product shots */
 export function PdpGalleryDragZoomImage({
   src,
   alt,
@@ -41,10 +41,10 @@ export function PdpGalleryDragZoomImage({
 }: PdpGalleryDragZoomImageProps) {
   const {
     containerRef,
-    position,
+    lensPosition,
     containerSize,
-    isExploring,
-    isPendingHold,
+    isZooming,
+    isHolding,
     holdProgress,
     holdAnchor,
     pointerType,
@@ -53,23 +53,23 @@ export function PdpGalleryDragZoomImage({
     handlePointerEnd,
     handleLostPointerCapture,
     handleContextMenu,
-  } = useMaterialExplore([]);
+  } = useDragZoomLens();
 
-  const touchLocked = isExploring || isPendingHold;
+  const touchLocked = isZooming;
   const magnifiedWidth = containerSize.width * MAGNIFICATION;
   const magnifiedHeight = containerSize.height * MAGNIFICATION;
   const lensImageLeft =
-    position && magnifiedWidth > 0
-      ? LENS_SIZE / 2 - position.x * MAGNIFICATION
+    lensPosition && magnifiedWidth > 0
+      ? LENS_SIZE / 2 - lensPosition.x * MAGNIFICATION
       : 0;
   const lensImageTop =
-    position && magnifiedHeight > 0
-      ? LENS_SIZE / 2 - position.y * MAGNIFICATION
+    lensPosition && magnifiedHeight > 0
+      ? LENS_SIZE / 2 - lensPosition.y * MAGNIFICATION
       : 0;
 
   const lensOffsetY = pointerType === "touch" ? TOUCH_LENS_OFFSET_Y : 0;
-  const lensLeft = position?.x ?? 0;
-  const lensTop = position ? position.y - lensOffsetY : 0;
+  const lensLeft = lensPosition?.x ?? 0;
+  const lensTop = lensPosition ? lensPosition.y - lensOffsetY : 0;
 
   return (
     <div
@@ -100,16 +100,14 @@ export function PdpGalleryDragZoomImage({
           fitContain ? "object-contain" : "object-cover",
           scale,
           "pointer-events-none transition-[filter] duration-300",
-          isExploring
-            ? "brightness-[0.88] saturate-[0.82]"
-            : "brightness-100 saturate-100",
+          isZooming ? "brightness-[0.88] saturate-[0.82]" : "brightness-100 saturate-100",
         )}
         style={{ objectPosition }}
         sizes="100vw"
         draggable={false}
       />
 
-      {isPendingHold && holdAnchor ? (
+      {isHolding && holdAnchor ? (
         <div
           aria-hidden
           className="pointer-events-none absolute z-[3]"
@@ -157,27 +155,27 @@ export function PdpGalleryDragZoomImage({
         </div>
       ) : null}
 
-      {!isExploring ? (
+      {!isZooming ? (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/55 via-black/20 to-transparent px-4 pb-4 pt-10"
         >
-          {!isPendingHold ? (
+          {!isHolding ? (
             <MaterialIcon name="search" size={18} className="text-white/90" />
           ) : null}
           <span
             aria-live="polite"
             className={cn(
               "font-extended tracking-[0.2px] text-white/90",
-              isPendingHold ? "text-xs" : "text-[11px]",
+              isHolding ? "text-xs" : "text-[11px]",
             )}
           >
-            {isPendingHold ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
+            {isHolding ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
           </span>
         </div>
       ) : null}
 
-      {position && magnifiedWidth > 0 ? (
+      {lensPosition && magnifiedWidth > 0 ? (
         <div
           aria-hidden
           className="pdp-material-lens pointer-events-none absolute z-10"
