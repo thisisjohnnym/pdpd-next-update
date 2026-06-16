@@ -37,6 +37,8 @@ type PdpGalleryHeroVideoProps = {
   decoderId?: string;
   /** Poster frame while the first video frame buffers */
   poster?: string;
+  /** Above-the-fold hero — attempt muted autoplay even when low-power heuristics apply */
+  priorityAutoplay?: boolean;
 };
 
 export function PdpGalleryHeroVideo({
@@ -54,6 +56,7 @@ export function PdpGalleryHeroVideo({
   tapToTogglePlayback = false,
   decoderId,
   poster,
+  priorityAutoplay = false,
 }: PdpGalleryHeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
@@ -74,14 +77,19 @@ export function PdpGalleryHeroVideo({
   const [playbackHint, setPlaybackHint] = useState<"play" | "pause" | null>(null);
   const [isMounted, setIsMounted] = useState(true);
 
+  const lowPowerBlocksAutoplay = lowPowerMode && !priorityAutoplay;
+
   const manualPlaybackRequired =
-    lowPowerMode || autoplayRestricted || !network.autoplayAllowed || network.saveData;
+    lowPowerBlocksAutoplay ||
+    autoplayRestricted ||
+    !network.autoplayAllowed ||
+    network.saveData;
 
   const shouldPlay = computeShouldPlay({
     isActive,
     isVisible: lifecycle.isVisible,
     isFrozen: lifecycle.isFrozen,
-    lowPowerMode,
+    lowPowerMode: lowPowerBlocksAutoplay,
     saveData: network.saveData,
     autoplayAllowed: network.autoplayAllowed,
     userPaused: userPaused,
@@ -147,7 +155,7 @@ export function PdpGalleryHeroVideo({
   }, [resolvedDecoderId]);
 
   useEffect(() => {
-    if (!lowPowerMode && network.autoplayAllowed) {
+    if ((!lowPowerMode || priorityAutoplay) && network.autoplayAllowed) {
       return;
     }
 
@@ -155,7 +163,18 @@ export function PdpGalleryHeroVideo({
     userPausedRef.current = false;
     setUserStarted(false);
     videoRef.current?.pause();
-  }, [lowPowerMode, network.autoplayAllowed]);
+  }, [lowPowerMode, network.autoplayAllowed, priorityAutoplay]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isMounted || userStarted) {
+      return;
+    }
+
+    if (manualPlaybackRequired || poster) {
+      video.load();
+    }
+  }, [isMounted, manualPlaybackRequired, userStarted, poster, src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -203,6 +222,16 @@ export function PdpGalleryHeroVideo({
     };
   }, [src, isMounted]);
 
+  const onPlayRejected = () => {
+    if (!mountedRef.current) {
+      return;
+    }
+
+    if (!priorityAutoplay) {
+      setAutoplayRestricted(true);
+    }
+  };
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isMounted) {
@@ -221,14 +250,10 @@ export function PdpGalleryHeroVideo({
     }
 
     void video.play().catch(() => {
-      if (!mountedRef.current) {
-        return;
-      }
-
-      setAutoplayRestricted(true);
+      onPlayRejected();
       video.pause();
     });
-  }, [shouldPlay, isActive, isMounted, src, userPaused]);
+  }, [shouldPlay, isActive, isMounted, src, userPaused, priorityAutoplay]);
 
   useEffect(() => {
     if (!lifecycle.isVisible || !shouldPlay) {
@@ -240,14 +265,8 @@ export function PdpGalleryHeroVideo({
       return;
     }
 
-    void video.play().catch(() => {
-      if (!mountedRef.current) {
-        return;
-      }
-
-      setAutoplayRestricted(true);
-    });
-  }, [lifecycle.isVisible, shouldPlay]);
+    void video.play().catch(onPlayRejected);
+  }, [lifecycle.isVisible, shouldPlay, priorityAutoplay]);
 
   useEffect(() => {
     return () => {
@@ -316,10 +335,15 @@ export function PdpGalleryHeroVideo({
 
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
+  const showLandingPoster = Boolean(poster) && !isReady;
   const showFrozenPlayOverlay =
-    isActive && isReady && !isPlaying && manualPlaybackRequired;
+    isActive && !isPlaying && manualPlaybackRequired && (isReady || Boolean(poster));
   const effectivePreload = (() => {
     if (manualPlaybackRequired && !userStarted) {
+      if (priorityAutoplay || poster) {
+        return getActiveVideoPreload(network);
+      }
+
       return getManualPlaybackPreload(network);
     }
 
@@ -372,7 +396,15 @@ export function PdpGalleryHeroVideo({
           (allowHorizontalPan ? "[touch-action:pan-x_pan-y]" : "touch-pan-y"),
       )}
     >
-      {!isReady ? (
+      {showLandingPoster ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[1] bg-cover bg-center"
+          style={{ backgroundImage: `url(${poster})` }}
+        />
+      ) : null}
+
+      {!isReady && !poster ? (
         <div
           aria-hidden
           className={cn(

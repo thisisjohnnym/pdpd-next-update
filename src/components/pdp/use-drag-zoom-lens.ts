@@ -10,97 +10,61 @@ type Phase = "idle" | "zooming";
 
 type CloseReason = "pointerup" | "pointercancel" | "lostpointercapture" | "blur" | "unmount" | "recapture-failed";
 
-// #region agent log
-const DEBUG_ENDPOINT =
-  "http://127.0.0.1:7537/ingest/35eb6e96-1045-4a5b-88fc-3b5c0a772d96";
-const DEBUG_SESSION = "434f04";
+/** Ref-counted body scroll lock — prevents page scroll while the lens is active */
+let pageScrollLockCount = 0;
+let pageScrollLockY = 0;
 
-function debugLog(
-  location: string,
-  message: string,
-  data: Record<string, unknown>,
-  hypothesisId?: string,
-) {
-  fetch(DEBUG_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Debug-Session-Id": DEBUG_SESSION,
-    },
-    body: JSON.stringify({
-      sessionId: DEBUG_SESSION,
-      location,
-      message,
-      data,
-      hypothesisId,
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-}
-
-function describeElement(el: EventTarget | null) {
-  if (!el || !(el instanceof Element)) {
-    return null;
+function lockPageScroll() {
+  if (typeof document === "undefined") {
+    return;
   }
-  return {
-    tag: el.tagName,
-    className: el.className?.toString?.() ?? "",
-    id: el.id || undefined,
-  };
-}
 
-function readTouchAction(el: HTMLElement | null) {
-  if (!el) {
-    return null;
+  if (pageScrollLockCount++ > 0) {
+    return;
   }
-  return getComputedStyle(el).touchAction;
+
+  pageScrollLockY = window.scrollY;
+  const { body } = document;
+  const html = document.documentElement;
+
+  body.style.position = "fixed";
+  body.style.top = `-${pageScrollLockY}px`;
+  body.style.left = "0";
+  body.style.right = "0";
+  body.style.width = "100%";
+  body.style.overflow = "hidden";
+  html.style.overflow = "hidden";
+  html.classList.add("pdp-drag-zoom-scroll-lock");
 }
 
-function readOverflow(el: Element) {
-  const style = getComputedStyle(el);
-  return style.overflow;
-}
-
-function readScrollLocked() {
-  const bodyOverflow = readOverflow(document.body);
-  const htmlOverflow = readOverflow(document.documentElement);
-  return (
-    bodyOverflow === "hidden" ||
-    htmlOverflow === "hidden" ||
-    document.body.style.overflow === "hidden" ||
-    document.documentElement.style.overflow === "hidden"
-  );
-}
-
-function ancestorChain(el: HTMLElement | null, depth = 5) {
-  const chain: string[] = [];
-  let node: HTMLElement | null = el;
-  for (let i = 0; i < depth && node; i += 1) {
-    const style = getComputedStyle(node);
-    chain.push(
-      `${node.tagName.toLowerCase()}${node.className ? `.${String(node.className).split(/\s+/).slice(0, 2).join(".")}` : ""}{ta:${style.touchAction},oy:${style.overflowY},snap:${style.scrollSnapType}}`,
-    );
-    node = node.parentElement;
+function unlockPageScroll() {
+  if (typeof document === "undefined") {
+    return;
   }
-  return chain;
-}
 
-function serializePointerEvent(event: React.PointerEvent<HTMLDivElement>) {
-  return {
-    pointerId: event.pointerId,
-    pointerType: event.pointerType,
-    clientX: event.clientX,
-    clientY: event.clientY,
-    button: event.button,
-    buttons: event.buttons,
-    cancelable: event.cancelable,
-    defaultPrevented: event.defaultPrevented,
-    isPrimary: event.isPrimary,
-    pressure: event.pressure,
-    target: describeElement(event.target),
-  };
+  if (pageScrollLockCount === 0) {
+    return;
+  }
+
+  if (--pageScrollLockCount > 0) {
+    return;
+  }
+
+  const scrollY = pageScrollLockY;
+  const { body } = document;
+  const html = document.documentElement;
+
+  body.style.position = "";
+  body.style.top = "";
+  body.style.left = "";
+  body.style.right = "";
+  body.style.width = "";
+  body.style.overflow = "";
+  html.style.overflow = "";
+  html.classList.remove("pdp-drag-zoom-scroll-lock");
+
+  window.scrollTo(0, scrollY);
 }
-// #endregion
 
 function localPoint(clientX: number, clientY: number, rect: DOMRect): Point {
   return {
@@ -130,7 +94,7 @@ export function useDragZoomLens() {
   const containerRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<Phase>("idle");
   const pointerIdRef = useRef<number | null>(null);
-  const lastMoveClientRef = useRef<Point | null>(null);
+  const pageScrollLockedRef = useRef(false);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [lensPosition, setLensPosition] = useState<LensPosition | null>(null);
@@ -162,11 +126,18 @@ export function useDragZoomLens() {
     });
   }, []);
 
-  const release = useCallback(
-    (target?: HTMLDivElement | null, pointerId?: number, reason: CloseReason = "pointerup") => {
-      const el = target ?? containerRef.current;
-      const wasZooming = phaseRef.current === "zooming";
+  const unlockPageScrollIfNeeded = useCallback(() => {
+    if (!pageScrollLockedRef.current) {
+      return;
+    }
 
+    pageScrollLockedRef.current = false;
+    unlockPageScroll();
+  }, []);
+
+  const release = useCallback(
+    (target?: HTMLDivElement | null, pointerId?: number, _reason: CloseReason = "pointerup") => {
+      const el = target ?? containerRef.current;
       const pid = pointerId ?? pointerIdRef.current;
       const hadCapture = Boolean(el && pid !== null && el.hasPointerCapture(pid));
 
@@ -182,32 +153,14 @@ export function useDragZoomLens() {
         restoreGestureScroll(el);
       }
 
-      if (wasZooming) {
-        // #region agent log
-        debugLog(
-          "use-drag-zoom-lens.ts:release",
-          "zoom closed",
-          {
-            reason,
-            wasZooming,
-            hadPointerCapture: hadCapture,
-            pointerId: pid,
-            phase: phaseRef.current,
-            scrollY: window.scrollY,
-            containerTouchAction: readTouchAction(containerRef.current),
-          },
-          reason === "lostpointercapture" ? "B" : undefined,
-        );
-        // #endregion
-      }
+      unlockPageScrollIfNeeded();
 
       pointerIdRef.current = null;
-      lastMoveClientRef.current = null;
       setPhaseSafe("idle");
       setLensPosition(null);
       setPointerType(null);
     },
-    [setPhaseSafe],
+    [setPhaseSafe, unlockPageScrollIfNeeded],
   );
 
   const activateZoom = useCallback(
@@ -229,30 +182,6 @@ export function useDragZoomLens() {
       setPointerType(type);
       setPhaseSafe("zooming");
       updateLens(clientX, clientY);
-      lastMoveClientRef.current = { x: clientX, y: clientY };
-
-      const hasCapture = target.hasPointerCapture(pointerId);
-      // #region agent log
-      debugLog(
-        "use-drag-zoom-lens.ts:activateZoom",
-        "zoom became active",
-        {
-          zoomActive: true,
-          scrollLocked: readScrollLocked(),
-          hasPointerCapture: hasCapture,
-          pointerId,
-          pointerType: type,
-          bodyOverflow: readOverflow(document.body),
-          documentElementOverflow: readOverflow(document.documentElement),
-          containerTouchAction: readTouchAction(target),
-          containerInlineTouchAction: target.style.touchAction || null,
-          containerClassList: target.className,
-          scrollY: window.scrollY,
-          ancestorChain: ancestorChain(target),
-        },
-        "D",
-      );
-      // #endregion
 
       if (type === "touch") {
         exploreHaptic();
@@ -273,27 +202,16 @@ export function useDragZoomLens() {
       }
 
       const target = event.currentTarget;
+
+      // Lock page scroll synchronously — must run before the browser applies pan-y
+      // from the initial touch (scroll can jump before the first pointermove).
+      lockPageScroll();
+      pageScrollLockedRef.current = true;
       lockGestureScroll(target);
 
-      const container = containerRef.current;
-      // #region agent log
-      debugLog(
-        "use-drag-zoom-lens.ts:handlePointerDown",
-        "pointerdown",
-        {
-          timestamp: Date.now(),
-          pointerType: event.pointerType,
-          pointerId: event.pointerId,
-          target: describeElement(event.target),
-          scrollY: window.scrollY,
-          containerTouchAction: readTouchAction(container),
-          containerInlineTouchAction: target.style.touchAction || null,
-          phase: phaseRef.current,
-          ancestorChain: ancestorChain(container),
-        },
-        "D",
-      );
-      // #endregion
+      if (event.pointerType === "touch" && event.cancelable) {
+        event.preventDefault();
+      }
 
       activateZoom(target, event.pointerId, event.pointerType, event.clientX, event.clientY);
     },
@@ -306,72 +224,11 @@ export function useDragZoomLens() {
         return;
       }
 
-      const scrollYBefore = window.scrollY;
-      const last = lastMoveClientRef.current;
-      const deltaX = last ? event.clientX - last.x : 0;
-      const deltaY = last ? event.clientY - last.y : 0;
-      const cancelable = event.cancelable;
-      let preventDefaultCalled = false;
-
-      if (cancelable) {
+      if (event.cancelable) {
         event.preventDefault();
-        preventDefaultCalled = true;
       }
 
-      const scrollYAfterSync = window.scrollY;
-      const hasCapture = event.currentTarget.hasPointerCapture(event.pointerId);
-
-      // #region agent log
-      debugLog(
-        "use-drag-zoom-lens.ts:handlePointerMove",
-        "pointermove while zooming",
-        {
-          deltaX,
-          deltaY,
-          scrollYBefore,
-          scrollYAfter: scrollYAfterSync,
-          scrollDelta: scrollYAfterSync - scrollYBefore,
-          hasPointerCapture: hasCapture,
-          cancelable,
-          preventDefaultCalled,
-          pointerId: event.pointerId,
-          pointerType: event.pointerType,
-          containerTouchAction: readTouchAction(event.currentTarget),
-          ancestorChain: scrollYAfterSync !== scrollYBefore ? ancestorChain(event.currentTarget) : undefined,
-        },
-        scrollYAfterSync !== scrollYBefore ? "A" : preventDefaultCalled ? "C" : "B",
-      );
-      // #endregion
-
-      lastMoveClientRef.current = { x: event.clientX, y: event.clientY };
       updateLens(event.clientX, event.clientY);
-
-      requestAnimationFrame(() => {
-        if (phaseRef.current !== "zooming") {
-          return;
-        }
-        const scrollYAfterFrame = window.scrollY;
-        if (scrollYAfterFrame !== scrollYBefore) {
-          // #region agent log
-          debugLog(
-            "use-drag-zoom-lens.ts:handlePointerMove:rAF",
-            "scroll changed after zoom move",
-            {
-              scrollYBefore,
-              scrollYAfterSync,
-              scrollYAfterFrame,
-              scrollDeltaFrame: scrollYAfterFrame - scrollYBefore,
-              deltaX,
-              deltaY,
-              hasPointerCapture: event.currentTarget.hasPointerCapture(event.pointerId),
-              preventDefaultCalled,
-              ancestorChain: ancestorChain(event.currentTarget),
-            },
-            "A",
-          );
-          // #endregion
-        }
-      });
     },
     [updateLens],
   );
@@ -389,24 +246,6 @@ export function useDragZoomLens() {
 
   const handlePointerCancel = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      // #region agent log
-      debugLog(
-        "use-drag-zoom-lens.ts:handlePointerCancel",
-        "pointercancel",
-        {
-          event: serializePointerEvent(event),
-          zoomState: {
-            phase: phaseRef.current,
-            pointerId: pointerIdRef.current,
-            hasPointerCapture: event.currentTarget.hasPointerCapture(event.pointerId),
-            scrollY: window.scrollY,
-            containerTouchAction: readTouchAction(event.currentTarget),
-          },
-        },
-        "B",
-      );
-      // #endregion
-
       if (pointerIdRef.current !== event.pointerId) {
         return;
       }
@@ -420,22 +259,6 @@ export function useDragZoomLens() {
 
   const handleLostPointerCapture = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      // #region agent log
-      debugLog(
-        "use-drag-zoom-lens.ts:handleLostPointerCapture",
-        "lostpointercapture",
-        {
-          event: serializePointerEvent(event),
-          zoomState: {
-            phase: phaseRef.current,
-            pointerId: pointerIdRef.current,
-            scrollY: window.scrollY,
-          },
-        },
-        "B",
-      );
-      // #endregion
-
       if (pointerIdRef.current !== event.pointerId) {
         return;
       }
@@ -448,6 +271,24 @@ export function useDragZoomLens() {
   const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
   }, []);
+
+  useEffect(() => {
+    if (phase !== "zooming") {
+      return;
+    }
+
+    const blockScrollGesture = (event: Event) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener("touchmove", blockScrollGesture, { capture: true, passive: false });
+    document.addEventListener("wheel", blockScrollGesture, { capture: true, passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", blockScrollGesture, { capture: true });
+      document.removeEventListener("wheel", blockScrollGesture, { capture: true });
+    };
+  }, [phase]);
 
   useEffect(() => {
     const onBlur = () => release(containerRef.current, undefined, "blur");

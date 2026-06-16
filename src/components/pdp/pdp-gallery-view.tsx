@@ -34,6 +34,7 @@ import { PdpAsSeenOnModule } from "./pdp-as-seen-on-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
   PDP_GALLERY_HERO_IMAGE_FOCUS,
+  PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
@@ -96,11 +97,13 @@ function galleryScrollReveal(
 /** Hero only — full-screen immersive video, edge-to-edge under device safe areas */
 function PdpHeroSlide({
   videoSrc,
+  poster,
   alt,
   onOpenReviews,
   isLastPanel = false,
 }: {
   videoSrc: string;
+  poster: string;
   alt: string;
   onOpenReviews?: () => void;
   isLastPanel?: boolean;
@@ -141,9 +144,11 @@ function PdpHeroSlide({
         <div className={PANEL_MEDIA_FILL_CLASS}>
           <PdpGalleryHeroVideo
             src={videoSrc}
+            poster={poster}
             ariaLabel={alt}
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
+            priorityAutoplay
             skeletonTone="dark"
             showControls={false}
             showMuteControl={false}
@@ -461,6 +466,7 @@ export function PdpGalleryView({
     <>
     <PdpHeroSlide
       videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
+      poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
       alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
       onOpenReviews={onOpenReviews}
       isLastPanel={lastPanelSlideIndex === -1}

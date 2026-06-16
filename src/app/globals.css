@@ -466,6 +466,11 @@ html.font-extended {
   touch-action: none;
 }
 
+html.pdp-drag-zoom-scroll-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .pdp-material-explore img {
   -webkit-touch-callout: none;
   -webkit-user-drag: none;
