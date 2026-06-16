@@ -6,7 +6,7 @@ import { SafeAreaMain } from "@/components/layout/safe-area-main";
 import { PdpAddToBagSheet } from "./pdp-add-to-bag-sheet";
 import { PdpBottomActions } from "./pdp-bottom-actions";
 import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
-import { DEFAULT_COLOR_ID, PDP_GALLERY_IMMERSIVE_HERO_POSTER, PDP_GALLERY_IMMERSIVE_HERO_VIDEO } from "./pdp-data";
+import { DEFAULT_COLOR_ID, PDP_GALLERY_IMMERSIVE_HERO_VIDEO } from "./pdp-data";
 import { PdpGalleryHero, PdpGalleryView } from "./pdp-gallery-view";
 import { PdpNavMenu } from "./pdp-nav-menu";
 import { PdpOverlayHeader } from "./pdp-overlay-header";
@@ -58,7 +58,6 @@ export function PdpSocialView() {
           />
           <PdpGalleryHero
             videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
-            poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
             alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
             onOpenReviews={() => setReviewsOpen(true)}
           />

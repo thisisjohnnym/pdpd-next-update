@@ -1017,9 +1017,6 @@ export const PDP_PRODUCT_SEARCH = {
   suggestions: PDP_AI_CONCIERGE.prompts.map((prompt) => prompt.question),
 } as const;
 
-/** Gallery hero — on-model lifestyle, camel trench + Tabby shoulder bag */
-export const PDP_GALLERY_HERO_IMAGE = "/images/gallery/hero-model-trench-street.jpg";
-
 /** Hero framing — centered portrait; slight upward bias keeps face + bag above bottom chrome */
 export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
   objectPosition: "center 40%",
@@ -1029,9 +1026,6 @@ export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
 
 /** Immersive hero — full-bleed 9:16 on-model lifestyle video */
 export const PDP_GALLERY_IMMERSIVE_HERO_VIDEO = "/videos/tabby-hero.mp4";
-
-/** Poster while immersive hero video buffers */
-export const PDP_GALLERY_IMMERSIVE_HERO_POSTER = PDP_GALLERY_HERO_IMAGE;
 
 /** Full-bleed rotating product video for Gallery tab */
 export const PDP_GALLERY_HERO_VIDEO = "/videos/soft-tabby-360.webm";

@@ -368,6 +368,8 @@ type PdpReviewCommentBoxProps = {
   pinned?: boolean;
   /** iOS keyboard visible — tighten bottom padding */
   keyboardOpen?: boolean;
+  /** Keep focus in the field after posting — off when the sheet closes */
+  refocusAfterPost?: boolean;
 };
 
 /** Instagram-style comment composer */
@@ -376,6 +378,7 @@ export function PdpReviewCommentBox({
   className,
   pinned = false,
   keyboardOpen = false,
+  refocusAfterPost = true,
 }: PdpReviewCommentBoxProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -391,7 +394,11 @@ export function PdpReviewCommentBox({
 
     onPost?.(trimmed);
     setText("");
-    inputRef.current?.focus();
+    if (refocusAfterPost) {
+      inputRef.current?.focus();
+    } else {
+      inputRef.current?.blur();
+    }
   };
 
   const handleFocus = () => {

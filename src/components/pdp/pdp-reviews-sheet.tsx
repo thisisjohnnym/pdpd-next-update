@@ -191,6 +191,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
 
   const handlePostComment = (text: string) => {
     setUserComments((current) => [createUserComment(text), ...current]);
+    onClose();
   };
 
   const allComments = sortCommentsByLikes([
@@ -364,6 +365,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
             <PdpReviewCommentBox
               onPost={handlePostComment}
               pinned
+              refocusAfterPost={false}
               keyboardOpen={viewportFrame.keyboardLikelyOpen}
             />
           ) : null}

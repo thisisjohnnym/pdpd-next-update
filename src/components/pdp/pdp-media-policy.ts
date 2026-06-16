@@ -25,14 +25,16 @@ export function computeShouldPlay(input: MediaPlaybackInput): boolean {
   );
 }
 
-/** Above-the-fold hero — always attempt muted autoplay when the page is active */
-export function computePriorityHeroShouldPlay(input: {
-  isActive: boolean;
-  isVisible: boolean;
-  isFrozen: boolean;
-  userPaused: boolean;
-}): boolean {
-  return input.isActive && input.isVisible && !input.isFrozen && !input.userPaused;
+/** Above-the-fold hero — same playback policy as computeShouldPlay (respects low power) */
+export function computePriorityHeroShouldPlay(
+  input: Omit<MediaPlaybackInput, "autoplayRestricted"> & {
+    autoplayRestricted?: boolean;
+  },
+): boolean {
+  return computeShouldPlay({
+    ...input,
+    autoplayRestricted: input.autoplayRestricted ?? false,
+  });
 }
 
 export function computeShouldRun(input: { isVisible: boolean; isFrozen: boolean }): boolean {

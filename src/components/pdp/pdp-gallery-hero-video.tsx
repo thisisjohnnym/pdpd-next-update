@@ -38,7 +38,7 @@ type PdpGalleryHeroVideoProps = {
   decoderId?: string;
   /** Poster frame while the first video frame buffers */
   poster?: string;
-  /** Above-the-fold hero — attempt muted autoplay even when low-power heuristics apply */
+  /** Above-the-fold hero — aggressive preload and decoder priority; autoplay still respects low power */
   priorityAutoplay?: boolean;
 };
 
@@ -66,7 +66,7 @@ export function PdpGalleryHeroVideo({
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
-  const { lifecycle, lowPowerMode, network } = usePdpRuntime();
+  const { lifecycle, lowPowerMode, network, reducedMotion } = usePdpRuntime();
   const resolvedDecoderId = decoderId ?? src;
 
   const [autoplayRestricted, setAutoplayRestricted] = useState(false);
@@ -75,30 +75,48 @@ export function PdpGalleryHeroVideo({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false);
   const [playbackHint, setPlaybackHint] = useState<"play" | "pause" | null>(null);
   const [isMounted, setIsMounted] = useState(true);
 
-  const lowPowerBlocksAutoplay = lowPowerMode && !priorityAutoplay;
-
   const manualPlaybackRequired =
     !priorityAutoplay &&
-    (lowPowerBlocksAutoplay ||
+    (lowPowerMode ||
       autoplayRestricted ||
       !network.autoplayAllowed ||
       network.saveData);
 
+  const priorityHeroNeedsManualPlay =
+    priorityAutoplay &&
+    (lowPowerMode ||
+      autoplayRestricted ||
+      !network.autoplayAllowed ||
+      network.saveData);
+
+  const canAutoplayPriorityHero = computePriorityHeroShouldPlay({
+    isActive,
+    isVisible: lifecycle.isVisible,
+    isFrozen: lifecycle.isFrozen,
+    lowPowerMode,
+    saveData: network.saveData,
+    autoplayAllowed: network.autoplayAllowed,
+    userPaused,
+    autoplayRestricted,
+  });
+
   const shouldPlay = priorityAutoplay
-    ? computePriorityHeroShouldPlay({
-        isActive,
-        isVisible: lifecycle.isVisible,
-        isFrozen: lifecycle.isFrozen,
-        userPaused,
-      })
+    ? canAutoplayPriorityHero ||
+      (userStarted &&
+        !userPaused &&
+        isActive &&
+        lifecycle.isVisible &&
+        !lifecycle.isFrozen)
     : computeShouldPlay({
         isActive,
         isVisible: lifecycle.isVisible,
         isFrozen: lifecycle.isFrozen,
-        lowPowerMode: lowPowerBlocksAutoplay,
+        lowPowerMode,
         saveData: network.saveData,
         autoplayAllowed: network.autoplayAllowed,
         userPaused: userPaused,
@@ -109,6 +127,7 @@ export function PdpGalleryHeroVideo({
 
   useEffect(() => {
     mountedRef.current = true;
+    setIsClientReady(true);
     return () => {
       mountedRef.current = false;
     };
@@ -116,6 +135,7 @@ export function PdpGalleryHeroVideo({
 
   useEffect(() => {
     setIsReady(false);
+    setPreviewVisible(false);
     setAutoplayRestricted(false);
     userStartedRef.current = false;
     userPausedRef.current = false;
@@ -171,7 +191,7 @@ export function PdpGalleryHeroVideo({
   }, [resolvedDecoderId]);
 
   useEffect(() => {
-    if ((!lowPowerMode || priorityAutoplay) && network.autoplayAllowed) {
+    if (!lowPowerMode && network.autoplayAllowed) {
       return;
     }
 
@@ -179,7 +199,7 @@ export function PdpGalleryHeroVideo({
     userPausedRef.current = false;
     setUserStarted(false);
     videoRef.current?.pause();
-  }, [lowPowerMode, network.autoplayAllowed, priorityAutoplay]);
+  }, [lowPowerMode, network.autoplayAllowed]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -223,29 +243,46 @@ export function PdpGalleryHeroVideo({
       }
     };
 
+    const markPreviewFrame = () => {
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || previewVisible) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (mountedRef.current) {
+            setPreviewVisible(true);
+          }
+        });
+      });
+    };
+
     for (const type of ["playing", "loadeddata", "canplay"] as const) {
       video.addEventListener(type, markReady);
     }
 
+    video.addEventListener("loadeddata", markPreviewFrame);
+
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       markReady();
+      markPreviewFrame();
     }
 
     return () => {
       for (const type of ["playing", "loadeddata", "canplay"] as const) {
         video.removeEventListener(type, markReady);
       }
+
+      video.removeEventListener("loadeddata", markPreviewFrame);
     };
-  }, [src, isMounted]);
+  }, [src, isMounted, isClientReady]);
 
   const onPlayRejected = () => {
     if (!mountedRef.current) {
       return;
     }
 
-    if (!priorityAutoplay) {
-      setAutoplayRestricted(true);
-    }
+    setAutoplayRestricted(true);
   };
 
   useEffect(() => {
@@ -274,7 +311,7 @@ export function PdpGalleryHeroVideo({
       video.removeEventListener("loadeddata", tryPlay);
       video.removeEventListener("canplay", tryPlay);
     };
-  }, [priorityAutoplay, isMounted, shouldPlay, src]);
+  }, [priorityAutoplay, isMounted, isClientReady, shouldPlay, src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -297,7 +334,7 @@ export function PdpGalleryHeroVideo({
       onPlayRejected();
       video.pause();
     });
-  }, [shouldPlay, isActive, isMounted, src, userPaused, priorityAutoplay]);
+  }, [shouldPlay, isActive, isMounted, isClientReady, src, userPaused, priorityAutoplay]);
 
   useEffect(() => {
     if (!lifecycle.isVisible || !shouldPlay) {
@@ -379,13 +416,18 @@ export function PdpGalleryHeroVideo({
 
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
+  const showBlurReveal = priorityAutoplay && !poster;
+  const isRevealed =
+    showBlurReveal && !reducedMotion ? isPlaying && isReady : isReady;
+
   const showLandingPoster = Boolean(poster) && !isReady && !priorityAutoplay;
   const showFrozenPlayOverlay =
     isActive &&
     !isPlaying &&
-    manualPlaybackRequired &&
-    !priorityAutoplay &&
-    (isReady || Boolean(poster));
+    !userStarted &&
+    (priorityHeroNeedsManualPlay ||
+      (manualPlaybackRequired && !priorityAutoplay && (isReady || Boolean(poster))));
+
   const effectivePreload = (() => {
     if (priorityAutoplay && isActive) {
       return "auto";
@@ -414,6 +456,44 @@ export function PdpGalleryHeroVideo({
     return preload;
   })();
 
+  const heroBlackout = showBlurReveal && (!isClientReady || !previewVisible);
+
+  const videoClassName = cn(
+    className,
+    showBlurReveal
+      ? cn(
+          "pdp-hero-video-blur-stage__media size-full object-cover object-center",
+          previewVisible && "is-visible",
+        )
+      : cn(
+          "transition-opacity duration-300",
+          priorityAutoplay || isReady ? "opacity-100" : "opacity-0",
+        ),
+    canTapVideo && "cursor-pointer",
+    passThroughTouch && "pointer-events-none",
+    allowHorizontalPan && !passThroughTouch && "[touch-action:pan-x_pan-y]",
+  );
+
+  const videoElement = (
+    <video
+      ref={videoRef}
+      key={src}
+      loop
+      muted
+      playsInline
+      preload={effectivePreload}
+      poster={priorityAutoplay ? undefined : poster}
+      aria-label={ariaLabel}
+      onClick={canTapVideo ? togglePlayback : undefined}
+      style={style}
+      className={videoClassName}
+    >
+      {videoSources.map((source) => (
+        <source key={source.src} src={source.src} type={source.type} />
+      ))}
+    </video>
+  );
+
   const playbackOverlayIcon = playbackHint ?? (showFrozenPlayOverlay ? "play" : null);
 
   if (!isMounted) {
@@ -422,7 +502,7 @@ export function PdpGalleryHeroVideo({
         aria-hidden
         className={cn(
           "relative size-full",
-          !poster && "motion-safe:animate-pulse",
+          !poster && !priorityAutoplay && "motion-safe:animate-pulse",
           skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900",
           className,
         )}
@@ -456,7 +536,7 @@ export function PdpGalleryHeroVideo({
         />
       ) : null}
 
-      {!isReady && !poster ? (
+      {!isReady && !poster && !showBlurReveal ? (
         <div
           aria-hidden
           className={cn(
@@ -466,35 +546,27 @@ export function PdpGalleryHeroVideo({
         />
       ) : null}
 
-      <video
-        ref={videoRef}
-        key={src}
-        loop
-        muted
-        playsInline
-        preload={effectivePreload}
-        poster={poster}
-        aria-label={ariaLabel}
-        onClick={canTapVideo ? togglePlayback : undefined}
-        style={style}
-        className={cn(
-          className,
-          "transition-opacity duration-300",
-          priorityAutoplay || isReady ? "opacity-100" : "opacity-0",
-          canTapVideo && "cursor-pointer",
-          passThroughTouch && "pointer-events-none",
-          allowHorizontalPan && !passThroughTouch && "[touch-action:pan-x_pan-y]",
-        )}
-      >
-        {videoSources.map((source) => (
-          <source key={source.src} src={source.src} type={source.type} />
-        ))}
-      </video>
+      {heroBlackout ? (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[2] bg-neutral-900" />
+      ) : null}
+
+      {showBlurReveal ? (
+        <div
+          className={cn(
+            "pdp-hero-video-blur-stage",
+            isRevealed && "is-revealed",
+          )}
+        >
+          {isClientReady ? videoElement : null}
+        </div>
+      ) : (
+        videoElement
+      )}
 
       {playbackOverlayIcon ? (
         <div
           className={cn(
-            "absolute inset-0 z-[1] flex items-center justify-center",
+            "absolute inset-0 z-[3] flex items-center justify-center",
             showFrozenPlayOverlay && "pointer-events-auto",
             playbackHint && "pointer-events-none",
           )}
