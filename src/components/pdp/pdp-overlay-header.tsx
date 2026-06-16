@@ -36,7 +36,13 @@ function CoachCMark({ className }: { className?: string }) {
   );
 }
 
-export function PdpOverlayHeader({ bagCount = 0 }: { bagCount?: number }) {
+export function PdpOverlayHeader({
+  bagCount = 0,
+  onOpenMenu,
+}: {
+  bagCount?: number;
+  onOpenMenu?: () => void;
+}) {
   const headerRef = useRef<HTMLElement>(null);
   const visible = useScrollNavVisibility();
   const foreground = useHeaderContrast(headerRef);
@@ -60,6 +66,7 @@ export function PdpOverlayHeader({ bagCount = 0 }: { bagCount?: number }) {
             <button
               type="button"
               aria-label="Open menu"
+              onClick={onOpenMenu}
               className={cn(
                 "flex items-center justify-self-start transition-colors duration-300",
                 pdpPressableIconClass,
@@ -95,21 +102,25 @@ export function PdpOverlayHeader({ bagCount = 0 }: { bagCount?: number }) {
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
             >
-              <MaterialIcon name="shopping_bag" size={HEADER_ICON_SIZE} />
-              {bagCount > 0 ? (
-                <span
-                  key={bagCount}
-                  aria-hidden
-                  className={cn(
-                    "font-extended animate-bag-badge-pop absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none tracking-[0.2px] transition-colors duration-300",
-                    isLight ? "bg-white text-black" : "bg-black text-white",
-                  )}
-                >
-                  <span>
+              <span className="relative inline-flex items-center justify-center">
+                <MaterialIcon
+                  name="shopping_bag"
+                  size={HEADER_ICON_SIZE}
+                  filled={bagCount > 0}
+                />
+                {bagCount > 0 ? (
+                  <span
+                    key={bagCount}
+                    aria-hidden
+                    className={cn(
+                      "font-extended animate-bag-badge-pop absolute -right-1.5 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.5 text-[9px] leading-none tracking-[0.2px] transition-colors duration-300",
+                      isLight ? "bg-white text-black" : "bg-black text-white",
+                    )}
+                  >
                     {bagCount > 9 ? "9+" : bagCount}
                   </span>
-                </span>
-              ) : null}
+                ) : null}
+              </span>
             </button>
           </div>
         </GridItem>

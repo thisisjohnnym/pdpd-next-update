@@ -18,6 +18,7 @@ import { PdpBundleModule } from "./pdp-bundle-module";
 import { PdpCompareModule } from "./pdp-compare-module";
 import { PdpShoppingDiscoveryModule } from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
+import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
 import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
@@ -665,6 +666,9 @@ export function PdpGalleryView({
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="muted" lazyMount reserveMinHeight="24dvh">
         <PdpRecentlyViewedCarousel />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="28dvh">
+        <PdpCoachPremiumModule />
       </PdpScrollReveal>
     </div>
     <PdpGalleryPhotosSheet open={photosOpen} onClose={() => setPhotosOpen(false)} />

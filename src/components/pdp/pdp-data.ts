@@ -723,6 +723,39 @@ export const PDP_SHOPPING_ASSISTANT_PROMPT = {
   cta: "Open shopping assistant",
 } as const;
 
+export type PdpCoachPremiumPerk = {
+  id: string;
+  label: string;
+  icon: string;
+  /** Renders the Instagram-style verified badge beside the label */
+  showVerifiedBadge?: boolean;
+};
+
+export const PDP_COACH_PREMIUM = {
+  title: "Coach Premium",
+  body: "A membership for devoted Coach fans — unlock perks across shopping, shipping, and community.",
+  cta: "Sign up",
+  toast: "Coach Premium sign-up is coming soon.",
+  perks: [
+    {
+      id: "deals",
+      label: "First access to deals and drops",
+      icon: "bolt",
+    },
+    {
+      id: "shipping",
+      label: "Priority shipping on every order",
+      icon: "local_shipping",
+    },
+    {
+      id: "verified",
+      label: "Blue checkmark on your comments",
+      icon: "verified",
+      showVerifiedBadge: true,
+    },
+  ] satisfies PdpCoachPremiumPerk[],
+} as const;
+
 export type PdpRecentlyViewedItem = PdpSimilarItem & {
   viewedLabel: string;
 };

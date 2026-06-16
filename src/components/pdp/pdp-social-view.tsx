@@ -8,6 +8,7 @@ import { PdpBottomActions } from "./pdp-bottom-actions";
 import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
 import { DEFAULT_COLOR_ID } from "./pdp-data";
 import { PdpGalleryView } from "./pdp-gallery-view";
+import { PdpNavMenu } from "./pdp-nav-menu";
 import { PdpOverlayHeader } from "./pdp-overlay-header";
 import { PdpReviewsSheet } from "./pdp-reviews-sheet";
 import type { PdpBundleAddPayload } from "./pdp-data";
@@ -18,6 +19,7 @@ type BagConfirmation =
 
 export function PdpSocialView() {
   const [selectedColorId, setSelectedColorId] = useState(DEFAULT_COLOR_ID);
+  const [navOpen, setNavOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [bagSheetOpen, setBagSheetOpen] = useState(false);
   const [strapOptionsOpen, setStrapOptionsOpen] = useState(false);
@@ -46,7 +48,10 @@ export function PdpSocialView() {
   return (
     <div className="relative min-h-svh w-full overflow-x-clip bg-black">
       <PdpBrowserChromeSync />
-      <PdpOverlayHeader bagCount={bagCount} />
+      <PdpOverlayHeader
+        bagCount={bagCount}
+        onOpenMenu={() => setNavOpen(true)}
+      />
       <SafeAreaMain className="bg-black">
         <PdpGalleryView
           onOpenReviews={() => setReviewsOpen(true)}
@@ -62,8 +67,15 @@ export function PdpSocialView() {
         selectedColorId={selectedColorId}
         onColorSelect={setSelectedColorId}
         onAddToBag={handleAddToBag}
-        suppressed={reviewsOpen || bagSheetOpen || strapOptionsOpen || comparePickerOpen}
+        suppressed={
+          navOpen ||
+          reviewsOpen ||
+          bagSheetOpen ||
+          strapOptionsOpen ||
+          comparePickerOpen
+        }
       />
+      <PdpNavMenu open={navOpen} onClose={() => setNavOpen(false)} />
       <PdpReviewsSheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} />
       <PdpAddToBagSheet
         open={bagSheetOpen}
