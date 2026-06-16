@@ -31,9 +31,12 @@ import {
 } from "./pdp-data";
 import {
   createUserComment,
+  mapReviewToComment,
   PdpReviewComment,
   PdpReviewCommentBox,
+  PdpReviewCommentsSection,
   PdpStarRating,
+  sortCommentsByLikes,
   type PdpReviewCommentData,
 } from "./pdp-review-comment";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
@@ -185,19 +188,10 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
     setUserComments((current) => [createUserComment(text), ...current]);
   };
 
-  const allComments: PdpReviewCommentData[] = [
+  const allComments = sortCommentsByLikes([
     ...userComments,
-    ...PDP_CUSTOMER_REVIEWS.map((review) => ({
-      id: review.id,
-      quote: review.quote,
-      author: review.author,
-      date: review.date,
-      verified: review.verified,
-      photos: review.photos,
-      likes: review.likes,
-      rating: review.rating,
-    })),
-  ];
+    ...PDP_CUSTOMER_REVIEWS.map(mapReviewToComment),
+  ]);
 
   useEffect(() => {
     setMounted(true);
@@ -270,7 +264,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3">
           {hasBeenOpen ? (
           <>
-          <div className="flex flex-col items-start gap-3 pb-6 pt-0">
+          <div className="flex flex-col items-start gap-3 pb-4 pt-0">
             <h2 id={titleId} className={pdpSheetHeadingClass()}>
               Comments
             </h2>
@@ -292,51 +286,49 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-6">
-            <PdpAiInsightCard
-              variant="minimal"
-              eyebrow={PDP_REVIEWS_AI_SUMMARY.attribution}
-              eyebrowPosition="below"
-              title={PDP_REVIEWS_AI_SUMMARY.headline}
-              body={PDP_REVIEWS_AI_SUMMARY.body}
-            />
+          <PdpAiInsightCard
+            variant="minimal"
+            size="compact"
+            className="pb-4"
+            eyebrow={PDP_REVIEWS_AI_SUMMARY.attribution}
+            eyebrowPosition="below"
+            title={PDP_REVIEWS_AI_SUMMARY.headline}
+            body={PDP_REVIEWS_AI_SUMMARY.body}
+          />
 
-            <section className="flex flex-col gap-2 pt-1">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-col gap-1">
-                  <p className={pdpModuleHeadingClass({ lead: false, size: "sm" })}>
-                    In real life
-                  </p>
-                </div>
-                <PdpTextLinkCta type="button" className={cn("shrink-0", pdpType.body)}>
-                  View all
-                </PdpTextLinkCta>
+          <PdpReviewCommentsSection bleed className="pb-2">
+            {allComments.map((comment) => (
+              <PdpReviewComment
+                key={comment.id}
+                comment={comment}
+                variant="full"
+              />
+            ))}
+          </PdpReviewCommentsSection>
+
+          <div className="flex flex-col gap-2 border-t border-neutral-200 pt-6">
+            <div className="flex items-start justify-between gap-4">
+              <p className={cn(pdpModuleHeadingClass({ lead: false, size: "sm" }), "text-neutral-600")}>
+                In real life
+              </p>
+              <PdpTextLinkCta type="button" className={cn("shrink-0", pdpType.label)}>
+                View all
+              </PdpTextLinkCta>
+            </div>
+
+            <div className={pdpCarouselScrollWrapClass}>
+              <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
+                {PDP_UGC_REVIEW_STORIES.map((story) => (
+                  <PdpUgcStoryCard
+                    key={story.id}
+                    story={story}
+                    size="compact"
+                    className={pdpUgcStoryCardCompactClass}
+                    imageSizes="30vw"
+                  />
+                ))}
               </div>
-
-              <div className={pdpCarouselScrollWrapClass}>
-                <div className={cn("flex gap-2", pdpCarouselScrollClass)}>
-                  {PDP_UGC_REVIEW_STORIES.map((story) => (
-                    <PdpUgcStoryCard
-                      key={story.id}
-                      story={story}
-                      size="compact"
-                      className={pdpUgcStoryCardCompactClass}
-                      imageSizes="30vw"
-                    />
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="divide-y divide-neutral-200 pb-4 pt-2">
-              {allComments.map((comment) => (
-                <PdpReviewComment
-                  key={comment.id}
-                  comment={comment}
-                  variant="full"
-                />
-              ))}
-            </section>
+            </div>
           </div>
           </>
           ) : null}

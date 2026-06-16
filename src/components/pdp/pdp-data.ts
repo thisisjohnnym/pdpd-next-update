@@ -2530,7 +2530,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     author: "Maren K.",
     date: "Oct 12, 2025",
     verified: true,
-    likes: 42,
+    likes: 21_200,
   },
   {
     id: "jules",
@@ -2539,7 +2539,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     author: "Jules T.",
     date: "Sep 28, 2025",
     verified: true,
-    likes: 28,
+    likes: 9_400,
   },
   {
     id: "priya",
@@ -2548,7 +2548,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     author: "Priya S.",
     date: "Sep 14, 2025",
     verified: true,
-    likes: 56,
+    likes: 25_700,
     photos: [
       {
         src: "/images/reviews/ugc-pillow-tabby-ombre.png",
@@ -2562,7 +2562,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "C clasp feels so good. Pocket could be bigger but still obsessed 🤍",
     author: "Elena R.",
     date: "Aug 30, 2025",
-    verified: true,
     likes: 19,
   },
   {
@@ -2571,7 +2570,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Phone, wallet, keys, sunglasses — all in, still looks sleek 👏",
     author: "Danielle M.",
     date: "Aug 18, 2025",
-    verified: true,
     likes: 34,
   },
   {
@@ -2580,7 +2578,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Black goes with literally everything 🖤 soft leather too",
     author: "Sofia L.",
     date: "Jul 22, 2025",
-    verified: true,
     likes: 21,
   },
   {
@@ -2590,7 +2587,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     author: "Hannah W.",
     date: "Jul 9, 2025",
     verified: true,
-    likes: 47,
+    likes: 15_800,
   },
   {
     id: "taylor",
@@ -2598,7 +2595,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Classic Tabby vibes, easy strap swap shoulder ↔ crossbody 👌",
     author: "Taylor B.",
     date: "Jun 25, 2025",
-    verified: true,
     likes: 15,
   },
   {
@@ -2607,7 +2603,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Downsized from a tote and this is the one for errands 🙌",
     author: "Nicole A.",
     date: "Jun 3, 2025",
-    verified: true,
     likes: 38,
   },
   {
@@ -2616,7 +2611,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Gold hardware on black leather? Stunning ✨",
     author: "Rachel P.",
     date: "May 19, 2025",
-    verified: true,
     likes: 31,
   },
   {
@@ -2625,7 +2619,6 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Packaged beautifully, strap length is perfect on me (5'6\") 📦",
     author: "Amanda C.",
     date: "May 2, 2025",
-    verified: true,
     likes: 12,
   },
   {
@@ -2634,10 +2627,105 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     quote: "Default going-out bag now. Coffee run to dinner 🥂",
     author: "Lily H.",
     date: "Apr 14, 2025",
-    verified: true,
     likes: 26,
   },
 ];
+
+export type PdpReviewReply = {
+  id: string;
+  author: string;
+  quote: string;
+  date: string;
+  likes: number;
+  verified?: boolean;
+};
+
+/** Nested replies keyed by parent review id */
+export const PDP_REVIEW_REPLIES: Record<string, PdpReviewReply[]> = {
+  maren: [
+    {
+      id: "maren-r1",
+      author: "Sofia L.",
+      quote: "Does the strap adjust easily?",
+      date: "Oct 12, 2025",
+      likes: 6,
+    },
+    {
+      id: "maren-r2",
+      author: "Coach",
+      quote: "Yes — two drop lengths on the chain strap 🖤",
+      date: "Oct 12, 2025",
+      likes: 18,
+      verified: true,
+    },
+    {
+      id: "maren-r3",
+      author: "Jules T.",
+      quote: "Second this. I swap to crossbody every weekend.",
+      date: "Oct 13, 2025",
+      likes: 4,
+      verified: true,
+    },
+    {
+      id: "maren-r4",
+      author: "Maren K.",
+      quote: "@Jules the cherry chain for nights out 🍒",
+      date: "Oct 13, 2025",
+      likes: 9,
+      verified: true,
+    },
+    {
+      id: "maren-r5",
+      author: "Nicole A.",
+      quote: "Adding to cart rn",
+      date: "Oct 13, 2025",
+      likes: 3,
+    },
+    {
+      id: "maren-r6",
+      author: "Taylor B.",
+      quote: "How smooth is the zipper day to day?",
+      date: "Oct 14, 2025",
+      likes: 2,
+    },
+    {
+      id: "maren-r7",
+      author: "Hannah W.",
+      quote: "No snagging — lining feels durable too",
+      date: "Oct 14, 2025",
+      likes: 7,
+    },
+    {
+      id: "maren-r8",
+      author: "Elena R.",
+      quote: "The quilting hits different in person ✨",
+      date: "Oct 14, 2025",
+      likes: 5,
+    },
+    {
+      id: "maren-r9",
+      author: "Rachel P.",
+      quote: "Need this in black ASAP",
+      date: "Oct 15, 2025",
+      likes: 4,
+    },
+    {
+      id: "maren-r10",
+      author: "Priya S.",
+      quote: "Black was back in stock last week 👀",
+      date: "Oct 15, 2025",
+      likes: 11,
+      verified: true,
+    },
+    {
+      id: "maren-r11",
+      author: "Amanda C.",
+      quote: "Same size as the 20? Asking for my sister",
+      date: "Oct 16, 2025",
+      likes: 2,
+    },
+  ],
+};
 
 export const PDP_FEATURED_REVIEWS = PDP_CUSTOMER_REVIEWS.slice(0, 2);
 

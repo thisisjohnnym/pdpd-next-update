@@ -18,9 +18,12 @@ import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpUgcStoryCard } from "./pdp-ugc-story-card";
 import {
   createUserComment,
+  mapReviewToComment,
   PdpReviewComment,
   PdpReviewCommentBox,
+  PdpReviewCommentsSection,
   PdpStarRating,
+  sortCommentsByLikes,
   type PdpReviewCommentData,
 } from "./pdp-review-comment";
 import { pdpType } from "./pdp-type";
@@ -50,19 +53,10 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
     setUserComments((current) => [createUserComment(text), ...current]);
   };
 
-  const allComments: PdpReviewCommentData[] = [
+  const allComments = sortCommentsByLikes([
     ...userComments,
-    ...pageReviews.map((review) => ({
-      id: review.id,
-      quote: review.quote,
-      author: review.author,
-      date: review.date,
-      verified: review.verified,
-      photos: review.photos,
-      likes: review.likes,
-      rating: review.rating,
-    })),
-  ];
+    ...pageReviews.map(mapReviewToComment),
+  ]);
 
   return (
     <section
@@ -101,6 +95,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
             <PdpRevealItem delay={140}>
             <PdpAiInsightCard
               variant="minimal"
+              size="compact"
               eyebrow={PDP_REVIEWS_AI_SUMMARY.attribution}
               eyebrowPosition="below"
               title={PDP_REVIEWS_AI_SUMMARY.headline}
@@ -133,13 +128,13 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
             </PdpRevealItem>
 
             <PdpRevealItem as="section" delay={280} className="flex flex-col">
-              <div className="divide-y divide-neutral-200">
+              <PdpReviewCommentsSection>
                 {allComments.map((comment, index) => (
                   <PdpRevealItem key={comment.id} as="div" delay={index * 50}>
                     <PdpReviewComment comment={comment} variant="compact" />
                   </PdpRevealItem>
                 ))}
-              </div>
+              </PdpReviewCommentsSection>
 
               <PdpReviewCommentBox onPost={handlePostComment} />
             </PdpRevealItem>

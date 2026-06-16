@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatLikeCount } from "@/lib/format-like-count";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { pdpType, pdpPressableClass } from "./pdp-type";
 import { cn } from "@/lib/cn";
@@ -54,7 +55,7 @@ export function PdpReviewLikeButton({
           )}
         />
         <span className={`font-extended text-neutral-600 ${pdpType.micro}`}>
-          {count}
+          {formatLikeCount(count)}
         </span>
       </button>
     );
@@ -89,7 +90,7 @@ export function PdpReviewLikeButton({
       </button>
       {count > 0 ? (
         <span className={`font-extended text-center text-neutral-800 ${pdpType.micro}`}>
-          {count}
+          {formatLikeCount(count)}
         </span>
       ) : null}
     </div>

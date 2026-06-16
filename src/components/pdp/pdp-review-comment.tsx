@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -9,7 +9,11 @@ import { cn } from "@/lib/cn";
 import { pdpCarouselImageClass } from "./pdp-carousel";
 import { PdpReviewLikeButton } from "./pdp-review-like-button";
 import { pdpPressableClass, pdpType } from "./pdp-type";
-import type { PdpFeaturedReview } from "./pdp-data";
+import {
+  PDP_REVIEW_REPLIES,
+  type PdpFeaturedReview,
+  type PdpReviewReply,
+} from "./pdp-data";
 
 type StarSize = 18 | 20;
 
@@ -55,7 +59,105 @@ export type PdpReviewCommentData = Pick<
   "id" | "quote" | "author" | "date" | "verified" | "photos" | "likes"
 > & {
   rating?: number;
+  replies?: PdpReviewReply[];
 };
+
+const INITIAL_VISIBLE_REPLIES = 2;
+
+type CommentRowProps = {
+  author: string;
+  quote: string;
+  date: string;
+  verified?: boolean;
+  likes: number;
+  photos?: PdpFeaturedReview["photos"];
+  variant: "compact" | "full";
+  isReply?: boolean;
+};
+
+function CommentRow({
+  author,
+  quote,
+  date,
+  verified,
+  likes,
+  photos,
+  variant,
+  isReply = false,
+}: CommentRowProps) {
+  const [expanded, setExpanded] = useState(false);
+  const hasPhoto = Boolean(photos?.length);
+  const clampLines = variant === "compact" ? 2 : expanded ? undefined : 2;
+  const canExpand = variant === "full" && quote.length > 80 && !expanded;
+
+  return (
+    <div className={cn("flex gap-2", isReply ? "py-2" : "py-3")}>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1">
+          <p className={`text-black ${pdpType.label}`}>{author}</p>
+          {verified ? (
+            <MaterialIcon
+              name="verified"
+              size={18}
+              filled
+              className="shrink-0 text-[#0095F6]"
+              style={{ fontSize: 11 }}
+              aria-label="Verified buyer"
+              ariaHidden={false}
+            />
+          ) : null}
+        </div>
+
+        <p
+          className={cn(
+            `mt-0.5 text-black ${pdpType.body}`,
+            clampLines === 2 && "line-clamp-2",
+          )}
+        >
+          {quote}
+          {canExpand ? (
+            <>
+              {" "}
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className={cn("text-neutral-500", pdpPressableClass)}
+              >
+                more
+              </button>
+            </>
+          ) : null}
+        </p>
+
+        {hasPhoto && photos?.[0] ? (
+          <div className="relative mt-2 size-24 overflow-hidden bg-neutral-100">
+            <Image
+              src={photos[0].src}
+              alt={photos[0].alt}
+              fill
+              className={cn("object-cover object-center", pdpCarouselImageClass)}
+              sizes="96px"
+            />
+          </div>
+        ) : null}
+
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            type="button"
+            className={cn("text-neutral-500", pdpType.micro, pdpPressableClass)}
+          >
+            Reply
+          </button>
+          <span className={`text-neutral-400 ${pdpType.micro}`}>
+            {formatRelativeCommentDate(date)}
+          </span>
+        </div>
+      </div>
+
+      <PdpReviewLikeButton initialLikes={likes} layout="stacked" />
+    </div>
+  );
+}
 
 type PdpReviewCommentProps = {
   comment: PdpReviewCommentData;
@@ -97,83 +199,123 @@ function formatRelativeCommentDate(dateLabel: string) {
   return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-/** Instagram-style comment — username above text, heart on the right */
+/** Instagram-style comment — username above text, optional reply thread */
 export function PdpReviewComment({
   comment,
   variant = "compact",
 }: PdpReviewCommentProps) {
-  const [expanded, setExpanded] = useState(false);
-  const hasPhoto = Boolean(comment.photos?.length);
-  const clampLines = variant === "compact" ? 2 : expanded ? undefined : 2;
-  const canExpand = variant === "full" && comment.quote.length > 80 && !expanded;
+  const [repliesExpanded, setRepliesExpanded] = useState(false);
+  const replies = comment.replies ?? [];
+  const hiddenReplyCount = Math.max(replies.length - INITIAL_VISIBLE_REPLIES, 0);
+  const visibleReplies = repliesExpanded
+    ? replies
+    : replies.slice(0, INITIAL_VISIBLE_REPLIES);
 
   return (
-    <article className="flex gap-2 py-3">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1">
-          <p className="font-extended font-semibold tracking-[0.2px] text-black">
-            {comment.author}
-          </p>
-          {comment.verified ? (
-            <MaterialIcon
-              name="verified"
-              size={18}
-              className="shrink-0 text-neutral-300 opacity-70"
-              style={{ fontSize: 11 }}
-              aria-label="Verified buyer"
-              ariaHidden={false}
+    <article>
+      <CommentRow
+        author={comment.author}
+        quote={comment.quote}
+        date={comment.date}
+        verified={comment.verified}
+        likes={comment.likes}
+        photos={comment.photos}
+        variant={variant}
+      />
+
+      {replies.length > 0 ? (
+        <div className="pl-4">
+          {visibleReplies.map((reply) => (
+            <CommentRow
+              key={reply.id}
+              author={reply.author}
+              quote={reply.quote}
+              date={reply.date}
+              verified={reply.verified}
+              likes={reply.likes}
+              variant={variant}
+              isReply
             />
+          ))}
+
+          {hiddenReplyCount > 0 && !repliesExpanded ? (
+            <button
+              type="button"
+              onClick={() => setRepliesExpanded(true)}
+              className={cn(
+                "flex items-center gap-2 py-2 text-neutral-500",
+                pdpType.micro,
+                pdpPressableClass,
+              )}
+            >
+              <span className="h-px w-6 bg-neutral-300" aria-hidden />
+              View {hiddenReplyCount} more replies
+            </button>
+          ) : null}
+
+          {repliesExpanded && replies.length > INITIAL_VISIBLE_REPLIES ? (
+            <button
+              type="button"
+              onClick={() => setRepliesExpanded(false)}
+              className={cn(
+                "flex items-center gap-2 py-2 text-neutral-500",
+                pdpType.micro,
+                pdpPressableClass,
+              )}
+            >
+              <span className="h-px w-6 bg-neutral-300" aria-hidden />
+              Hide replies
+            </button>
           ) : null}
         </div>
-
-        <p
-          className={cn(
-            `mt-0.5 text-black ${pdpType.caption}`,
-            clampLines === 2 && "line-clamp-2",
-          )}
-        >
-          {comment.quote}
-          {canExpand ? (
-            <>
-              {" "}
-              <button
-                type="button"
-                onClick={() => setExpanded(true)}
-                className={cn("text-neutral-500", pdpPressableClass)}
-              >
-                more
-              </button>
-            </>
-          ) : null}
-        </p>
-
-        {hasPhoto && comment.photos?.[0] ? (
-          <div className="relative mt-2 size-[4.5rem] overflow-hidden bg-neutral-100">
-            <Image
-              src={comment.photos[0].src}
-              alt={comment.photos[0].alt}
-              fill
-              className={cn("object-cover object-center", pdpCarouselImageClass)}
-              sizes="72px"
-            />
-          </div>
-        ) : null}
-
-        <div className="mt-2 flex items-center gap-3">
-          <button
-            type="button"
-            className={cn("text-neutral-500", pdpType.micro, pdpPressableClass)}
-          >
-            Reply
-          </button>
-          <span className={`text-neutral-400 ${pdpType.micro}`}>
-            {formatRelativeCommentDate(comment.date)}
-          </span>
-        </div>
-      </div>
-
-      <PdpReviewLikeButton initialLikes={comment.likes} layout="stacked" />
+      ) : null}
     </article>
+  );
+}
+
+export function mapReviewToComment(review: PdpFeaturedReview): PdpReviewCommentData {
+  return {
+    id: review.id,
+    quote: review.quote,
+    author: review.author,
+    date: review.date,
+    verified: review.verified,
+    photos: review.photos,
+    likes: review.likes,
+    rating: review.rating,
+    replies: PDP_REVIEW_REPLIES[review.id],
+  };
+}
+
+export function sortCommentsByLikes(
+  comments: PdpReviewCommentData[],
+): PdpReviewCommentData[] {
+  return [...comments].sort((a, b) => b.likes - a.likes);
+}
+
+type PdpReviewCommentsSectionProps = {
+  children: ReactNode;
+  className?: string;
+  /** Bleed dividers to sheet edges */
+  bleed?: boolean;
+};
+
+/** Comment thread list with dividers */
+export function PdpReviewCommentsSection({
+  children,
+  className,
+  bleed = false,
+}: PdpReviewCommentsSectionProps) {
+  return (
+    <section
+      className={cn(
+        "divide-y divide-neutral-200",
+        bleed ? "-mx-3 px-3" : "",
+        className,
+      )}
+    >
+      {children}
+    </section>
   );
 }
 
@@ -235,8 +377,9 @@ export function PdpReviewCommentBox({
           }}
           placeholder="Add a comment..."
           className={cn(
-            "min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-black outline-none placeholder:text-neutral-400 focus:border-neutral-400",
-            pdpType.caption,
+            "relative top-0 min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 pt-3 pb-2",
+            "font-extended text-sm leading-normal tracking-[0.2px] text-black outline-none",
+            "placeholder:text-neutral-400 focus:border-neutral-400",
           )}
         />
         <button
