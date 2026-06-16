@@ -2,13 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import type { PdpUgcVideo } from "./pdp-data";
-import { pdpCarouselImageClass } from "./pdp-carousel";
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
 import { pdpType } from "./pdp-type";
 
@@ -69,27 +66,17 @@ export function PdpUgcVideoCard({
         {mounted ? (
           <PdpGalleryHeroVideo
             src={video.src}
-            poster={video.poster}
             ariaLabel={video.alt}
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
+            skeletonTone="dark"
             passThroughTouch
             showControls
             showMuteControl
             className="size-full object-cover object-center"
           />
-        ) : video.poster ? (
-          <Image
-            src={video.poster}
-            alt=""
-            fill
-            aria-hidden
-            className={cn("object-cover object-center", pdpCarouselImageClass)}
-            sizes="72vw"
-            loading="lazy"
-          />
         ) : (
-          <div aria-hidden className="size-full bg-neutral-900" />
+          <div aria-hidden className="absolute inset-0 animate-pulse bg-neutral-900" />
         )}
 
         <div className="pointer-events-none absolute bottom-3 left-3 z-[1] max-w-[calc(100%-5.5rem)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">

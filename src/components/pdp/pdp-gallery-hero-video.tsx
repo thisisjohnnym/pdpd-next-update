@@ -20,11 +20,12 @@ type PdpGalleryHeroVideoProps = {
   style?: CSSProperties;
   isActive?: boolean;
   src?: string;
-  poster?: string;
   ariaLabel?: string;
   showControls?: boolean;
   showMuteControl?: boolean;
   preload?: "auto" | "metadata" | "none";
+  /** Pulse skeleton while the first frame buffers — no poster image */
+  skeletonTone?: "dark" | "light";
   /** UGC rails — video layer ignores touch so vertical page scroll works */
   passThroughTouch?: boolean;
   /** Tap video surface to pause/play — hero immersive */
@@ -36,11 +37,11 @@ export function PdpGalleryHeroVideo({
   style,
   isActive = true,
   src = PDP_GALLERY_HERO_VIDEO,
-  poster,
   ariaLabel = "360° product view of Tabby Shoulder Bag 26",
   showControls = false,
   showMuteControl = true,
   preload = "none",
+  skeletonTone = "dark",
   passThroughTouch = false,
   tapToTogglePlayback = false,
 }: PdpGalleryHeroVideoProps) {
@@ -50,7 +51,12 @@ export function PdpGalleryHeroVideo({
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [playbackHint, setPlaybackHint] = useState<"play" | "pause" | null>(null);
+
+  useEffect(() => {
+    setIsReady(false);
+  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -70,6 +76,33 @@ export function PdpGalleryHeroVideo({
       video.removeEventListener("pause", syncPlaying);
     };
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    const markReady = () => {
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        setIsReady(true);
+      }
+    };
+
+    for (const type of ["playing", "loadeddata", "canplay"] as const) {
+      video.addEventListener(type, markReady);
+    }
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      markReady();
+    }
+
+    return () => {
+      for (const type of ["playing", "loadeddata", "canplay"] as const) {
+        video.removeEventListener(type, markReady);
+      }
+    };
+  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -152,18 +185,29 @@ export function PdpGalleryHeroVideo({
 
   return (
     <div className={cn("relative size-full", passThroughTouch && "touch-pan-y")}>
+      {!isReady ? (
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-0 z-[1] animate-pulse",
+            skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900",
+          )}
+        />
+      ) : null}
+
       <video
         ref={videoRef}
         loop
         muted
         playsInline
         preload={preload}
-        poster={poster}
         aria-label={ariaLabel}
         onClick={canTapVideo ? togglePlayback : undefined}
         style={style}
         className={cn(
           className,
+          "transition-opacity duration-300",
+          isReady ? "opacity-100" : "opacity-0",
           canTapVideo && "cursor-pointer",
           passThroughTouch && "pointer-events-none",
         )}

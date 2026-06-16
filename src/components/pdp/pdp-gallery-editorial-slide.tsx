@@ -125,10 +125,10 @@ export function PdpGalleryEditorialSlide({
               {videoSrc ? (
                 <PdpGalleryHeroVideo
                   src={videoSrc}
-                  poster={src}
                   ariaLabel={alt}
                   isActive={isActive}
                   preload={isActive ? "auto" : "metadata"}
+                  skeletonTone="light"
                   showControls
                   showMuteControl={showMuteControl}
                   className="size-full object-cover object-center"
