@@ -128,7 +128,7 @@ function BuildPickerRow({
                         {added ? "Added" : `Add ${option.priceLabel}`}
                       </span>
                       {!added ? (
-                        <MaterialIcon name="add" size={16} className="shrink-0 text-black" />
+                        <MaterialIcon name="add" size={18} className="shrink-0 text-black" />
                       ) : null}
                     </button>
                   ) : null
