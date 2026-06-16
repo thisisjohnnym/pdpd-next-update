@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -16,7 +15,7 @@ import {
 import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
-  pdpUgcStoryCardClass,
+  pdpUgcStoryCardCompactClass,
 } from "./pdp-carousel";
 import {
   pdpModuleHeadingClass,
@@ -29,9 +28,14 @@ import {
   PDP_REVIEWS_AI_SUMMARY,
   PDP_REVIEWS_RATING_BREAKDOWN,
   PDP_REVIEWS_SUMMARY,
-  type PdpFeaturedReview,
 } from "./pdp-data";
-import { PdpReviewLikeButton } from "./pdp-review-like-button";
+import {
+  createUserComment,
+  PdpReviewComment,
+  PdpReviewCommentBox,
+  PdpStarRating,
+  type PdpReviewCommentData,
+} from "./pdp-review-comment";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpUgcStoryCard } from "./pdp-ugc-story-card";
 import { pdpType } from "./pdp-type";
@@ -41,37 +45,6 @@ type PdpReviewsSheetProps = {
   open: boolean;
   onClose: () => void;
 };
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div
-      className="flex items-center gap-1"
-      aria-label={`${rating.toFixed(1)} out of 5 stars`}
-    >
-      {Array.from({ length: 5 }, (_, index) => {
-        const fill = Math.min(Math.max(rating - index, 0), 1);
-
-        return (
-          <span key={index} className="relative inline-flex size-4 shrink-0">
-            <MaterialIcon
-              name="star"
-              size={18}
-              className="text-neutral-300"
-            />
-            {fill > 0 ? (
-              <span
-                className="absolute inset-y-0 left-0 overflow-hidden"
-                style={{ width: `${fill * 100}%` }}
-              >
-                <MaterialIcon name="star" size={18} filled className="text-black" />
-              </span>
-            ) : null}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 function RatingBreakdownRow({
   stars,
@@ -199,51 +172,32 @@ function RatingBreakdownInfo({ active }: { active: boolean }) {
   );
 }
 
-function CustomerReviewCard({ review }: { review: PdpFeaturedReview }) {
-  return (
-    <article className="flex flex-col gap-2 border-t border-neutral-200 py-4">
-      <StarRating rating={review.rating} />
-      <p className="font-extended text-sm leading-[1.35] tracking-[0.2px] text-[#4a4a4a]">
-        {review.quote}
-      </p>
-
-      {review.photos?.length ? (
-        <div className="flex gap-2 overflow-x-auto overscroll-x-contain pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {review.photos.map((photo) => (
-            <div
-              key={photo.src}
-              className="relative size-28 shrink-0 overflow-hidden bg-neutral-100"
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                className="object-cover object-center"
-                sizes="112px"
-              />
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex items-center justify-between gap-3">
-        <p className="font-extended min-w-0 text-xs tracking-[0.2px] text-neutral-500">
-          {review.author} · {review.date}
-          {review.verified ? " · Verified buyer" : ""}
-        </p>
-        <PdpReviewLikeButton initialLikes={review.likes} />
-      </div>
-    </article>
-  );
-}
-
 /** Bottom sheet — bag reviews pulled up from comments rail */
 export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
   const titleId = useId();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userComments, setUserComments] = useState<PdpReviewCommentData[]>([]);
   const { average } = PDP_REVIEWS_SUMMARY;
   const reviewCount = PDP_COMMENTS_SUMMARY.count;
+
+  const handlePostComment = (text: string) => {
+    setUserComments((current) => [createUserComment(text), ...current]);
+  };
+
+  const allComments: PdpReviewCommentData[] = [
+    ...userComments,
+    ...PDP_CUSTOMER_REVIEWS.map((review) => ({
+      id: review.id,
+      quote: review.quote,
+      author: review.author,
+      date: review.date,
+      verified: review.verified,
+      photos: review.photos,
+      likes: review.likes,
+      rating: review.rating,
+    })),
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -312,12 +266,13 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3">
           {hasBeenOpen ? (
           <>
-          <div className="flex flex-col items-start gap-3 pb-6">
+          <div className="flex flex-col items-start gap-3 pb-6 pt-0">
             <h2 id={titleId} className={pdpSheetHeadingClass()}>
-              Reviews
+              Comments
             </h2>
 
             <div className="flex items-center gap-2.5">
@@ -326,7 +281,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
               </p>
               <div className="h-8 w-px bg-[#e1e1e1]" aria-hidden />
               <div className="flex flex-col gap-1">
-                <StarRating rating={average} />
+                <PdpStarRating rating={average} />
                 <div className="flex items-center gap-1">
                   <p className="font-extended text-sm tracking-[0.2px] text-black">
                     {reviewCount} Reviews
@@ -346,7 +301,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
               body={PDP_REVIEWS_AI_SUMMARY.body}
             />
 
-            <section className="flex flex-col gap-4 pt-1">
+            <section className="flex flex-col gap-2 pt-1">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-1">
                   <p className={pdpModuleHeadingClass({ lead: false, size: "sm" })}>
@@ -364,21 +319,31 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
                     <PdpUgcStoryCard
                       key={story.id}
                       story={story}
-                      className={pdpUgcStoryCardClass}
-                      imageSizes="72vw"
+                      size="compact"
+                      className={pdpUgcStoryCardCompactClass}
+                      imageSizes="30vw"
                     />
                   ))}
                 </div>
               </div>
             </section>
 
-            <section className="flex flex-col pt-2">
-              {PDP_CUSTOMER_REVIEWS.map((review) => (
-                <CustomerReviewCard key={review.id} review={review} />
+            <section className="divide-y divide-neutral-200 pb-4 pt-2">
+              {allComments.map((comment) => (
+                <PdpReviewComment
+                  key={comment.id}
+                  comment={comment}
+                  variant="full"
+                />
               ))}
             </section>
           </div>
           </>
+          ) : null}
+          </div>
+
+          {hasBeenOpen ? (
+            <PdpReviewCommentBox onPost={handlePostComment} pinned />
           ) : null}
         </div>
       </div>

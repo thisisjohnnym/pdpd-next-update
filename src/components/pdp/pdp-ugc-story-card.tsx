@@ -10,6 +10,8 @@ import { pdpType } from "./pdp-type";
 type PdpUgcStoryCardProps = {
   story: PdpUgcStory;
   variant?: "carousel" | "overlay";
+  /** Smaller square tiles — reviews “In real life” rail */
+  size?: "default" | "compact";
   className?: string;
   imageSizes?: string;
 };
@@ -18,6 +20,7 @@ type PdpUgcStoryCardProps = {
 export function PdpUgcStoryCard({
   story,
   variant = "carousel",
+  size = "default",
   className,
   imageSizes = "48vw",
 }: PdpUgcStoryCardProps) {
@@ -55,7 +58,12 @@ export function PdpUgcStoryCard({
         className,
       )}
     >
-      <div className="relative aspect-[4/5] w-full bg-neutral-100">
+      <div
+        className={cn(
+          "relative w-full bg-neutral-100",
+          size === "compact" ? "aspect-square" : "aspect-[4/5]",
+        )}
+      >
         <Image
           src={story.src}
           alt={story.alt}
@@ -66,21 +74,35 @@ export function PdpUgcStoryCard({
         />
       </div>
 
-      <div className="flex flex-col gap-1 p-2">
-        <p className="font-extended text-xs tracking-[0.2px] text-black">
+      <div className={cn("flex flex-col", size === "compact" ? "gap-0.5 p-1.5" : "gap-1 p-2")}>
+        <p
+          className={cn(
+            "font-extended tracking-[0.2px] text-black",
+            size === "compact" ? "text-[10px] leading-tight" : "text-xs",
+          )}
+        >
           {story.wearer}
           {story.verified ? (
             <MaterialIcon
               name="verified"
               size={18}
-              className="ml-1 inline-block align-middle text-neutral-700"
+              className={cn(
+                "inline-block align-middle text-neutral-300 opacity-70",
+                size === "compact" ? "ml-0.5" : "ml-1",
+              )}
+              style={{ fontSize: size === "compact" ? 10 : 11 }}
             />
           ) : null}
         </p>
-        <p className={`text-neutral-600 ${pdpType.micro}`}>
+        <p
+          className={cn(
+            "text-neutral-600",
+            size === "compact" ? "text-[10px] leading-tight" : pdpType.micro,
+          )}
+        >
           {story.colorway} · {story.carry}
         </p>
-        {story.quote ? (
+        {story.quote && size !== "compact" ? (
           <p className={`text-neutral-800 ${pdpType.micro}`}>&ldquo;{story.quote}&rdquo;</p>
         ) : null}
       </div>

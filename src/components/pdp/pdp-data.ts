@@ -2526,8 +2526,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "maren",
     rating: 5,
-    quote:
-      "The perfect everyday bag — fits everything I need without feeling bulky. The quilting feels luxe in person and the gold hardware catches the light beautifully.",
+    quote: "Perfect everyday bag — fits everything without feeling bulky ✨",
     author: "Maren K.",
     date: "Oct 12, 2025",
     verified: true,
@@ -2536,8 +2535,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "jules",
     rating: 5,
-    quote:
-      "Wore this on a weekend trip and it held up beautifully. Strap sits comfortably crossbody all day and the flap stays secure.",
+    quote: "Weekend trip tested. Crossbody all day, zero issues 💯",
     author: "Jules T.",
     date: "Sep 28, 2025",
     verified: true,
@@ -2546,8 +2544,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "priya",
     rating: 5,
-    quote:
-      "Obsessed with the leather finish — photos do not do it justice. Looks elevated with denim and dresses alike.",
+    quote: "The leather in person >>> photos 😍",
     author: "Priya S.",
     date: "Sep 14, 2025",
     verified: true,
@@ -2562,8 +2559,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "elena",
     rating: 4,
-    quote:
-      "Beautiful craftsmanship and the C clasp feels substantial. Wish the interior pocket were slightly larger, but still my go-to bag.",
+    quote: "C clasp feels so good. Pocket could be bigger but still obsessed 🤍",
     author: "Elena R.",
     date: "Aug 30, 2025",
     verified: true,
@@ -2572,8 +2568,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "danielle",
     rating: 5,
-    quote:
-      "Finally a bag that fits my phone, wallet, keys, and sunglasses without looking overstuffed. The chain strap is the perfect length.",
+    quote: "Phone, wallet, keys, sunglasses — all in, still looks sleek 👏",
     author: "Danielle M.",
     date: "Aug 18, 2025",
     verified: true,
@@ -2582,8 +2577,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "sofia",
     rating: 5,
-    quote:
-      "Got the black colorway and it goes with literally everything. Leather has a soft hand-feel but holds its shape well.",
+    quote: "Black goes with literally everything 🖤 soft leather too",
     author: "Sofia L.",
     date: "Jul 22, 2025",
     verified: true,
@@ -2592,8 +2586,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "hannah",
     rating: 5,
-    quote:
-      "Bought this as a treat-yourself purchase and zero regrets. The cherry charm pairing is so fun — already getting compliments.",
+    quote: "Treat yourself purchase, zero regrets. Cherry charm = chef's kiss 🍒",
     author: "Hannah W.",
     date: "Jul 9, 2025",
     verified: true,
@@ -2602,8 +2595,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "taylor",
     rating: 4,
-    quote:
-      "Classic Tabby silhouette with a modern leather update. Straps are easy to swap between shoulder and crossbody carry.",
+    quote: "Classic Tabby vibes, easy strap swap shoulder ↔ crossbody 👌",
     author: "Taylor B.",
     date: "Jun 25, 2025",
     verified: true,
@@ -2612,8 +2604,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "nicole",
     rating: 5,
-    quote:
-      "Transitioned from a larger tote and this size is ideal for daily errands. Quality is what you expect from Coach.",
+    quote: "Downsized from a tote and this is the one for errands 🙌",
     author: "Nicole A.",
     date: "Jun 3, 2025",
     verified: true,
@@ -2622,8 +2613,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "rachel",
     rating: 5,
-    quote:
-      "The gold hardware against the black leather is stunning. Interior lining feels durable and wipes clean easily.",
+    quote: "Gold hardware on black leather? Stunning ✨",
     author: "Rachel P.",
     date: "May 19, 2025",
     verified: true,
@@ -2632,8 +2622,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "amanda",
     rating: 4,
-    quote:
-      "Lovely bag overall. Arrived quickly and packaged well. Strap length works for shoulder or crossbody on my frame (5'6\").",
+    quote: "Packaged beautifully, strap length is perfect on me (5'6\") 📦",
     author: "Amanda C.",
     date: "May 2, 2025",
     verified: true,
@@ -2642,8 +2631,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "lily",
     rating: 5,
-    quote:
-      "This has become my default going-out bag. Structured enough for evenings, relaxed enough for daytime coffee runs.",
+    quote: "Default going-out bag now. Coffee run to dinner 🥂",
     author: "Lily H.",
     date: "Apr 14, 2025",
     verified: true,

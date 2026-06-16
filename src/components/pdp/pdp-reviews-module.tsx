@@ -1,25 +1,28 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import {
-  pdpCarouselImageClass,
-  pdpCarouselInsetScrollClass,
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
-  pdpUgcStoryCardClass,
+  pdpUgcStoryCardCompactClass,
 } from "./pdp-carousel";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
 import { PdpTextReveal } from "./pdp-text-reveal";
-import { PdpReviewLikeButton } from "./pdp-review-like-button";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { PdpUgcStoryCard } from "./pdp-ugc-story-card";
+import {
+  createUserComment,
+  PdpReviewComment,
+  PdpReviewCommentBox,
+  PdpStarRating,
+  type PdpReviewCommentData,
+} from "./pdp-review-comment";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
 import {
@@ -28,85 +31,38 @@ import {
   PDP_UGC_REVIEW_STORIES,
   PDP_REVIEWS_AI_SUMMARY,
   PDP_REVIEWS_SUMMARY,
-  type PdpFeaturedReview,
 } from "./pdp-data";
 
 const PAGE_REVIEW_COUNT = 4;
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div
-      className="flex items-center gap-1"
-      aria-label={`${rating.toFixed(1)} out of 5 stars`}
-    >
-      {Array.from({ length: 5 }, (_, index) => {
-        const fill = Math.min(Math.max(rating - index, 0), 1);
-
-        return (
-          <span key={index} className="relative inline-flex size-4 shrink-0">
-            <MaterialIcon name="star" size={18} className="text-neutral-300" />
-            {fill > 0 ? (
-              <span
-                className="absolute inset-y-0 left-0 overflow-hidden"
-                style={{ width: `${fill * 100}%` }}
-              >
-                <MaterialIcon name="star" size={18} filled className="text-black" />
-              </span>
-            ) : null}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-function ReviewCard({ review }: { review: PdpFeaturedReview }) {
-  return (
-    <article className="flex flex-col gap-2.5 border-t border-neutral-200 py-5">
-      <StarRating rating={review.rating} />
-      <p className={`font-extended text-[#4a4a4a] ${pdpType.caption}`}>
-        {review.quote}
-      </p>
-
-      {review.photos?.length ? (
-        <div className={cn("flex", pdpCarouselInsetScrollClass, "pt-1")}>
-          {review.photos.map((photo) => (
-            <div
-              key={photo.src}
-              className="relative size-28 shrink-0 overflow-hidden bg-neutral-100"
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                className={cn("object-cover object-center", pdpCarouselImageClass)}
-                sizes="112px"
-              />
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex items-center justify-between gap-3">
-        <p className={`min-w-0 text-neutral-500 ${pdpType.label}`}>
-          {review.author} · {review.date}
-          {review.verified ? " · Verified buyer" : ""}
-        </p>
-        <PdpReviewLikeButton initialLikes={review.likes} />
-      </div>
-    </article>
-  );
-}
 
 type PdpReviewsModuleProps = {
   onReadAll?: () => void;
   onWriteReview?: () => void;
 };
 
-/** Inline reviews — summary, UGC, and featured quotes exposed on the page */
+/** Inline reviews — summary, UGC, and social-style comments on the page */
 export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleProps) {
   const { average } = PDP_REVIEWS_SUMMARY;
   const pageReviews = PDP_CUSTOMER_REVIEWS.slice(0, PAGE_REVIEW_COUNT);
+  const [userComments, setUserComments] = useState<PdpReviewCommentData[]>([]);
+
+  const handlePostComment = (text: string) => {
+    setUserComments((current) => [createUserComment(text), ...current]);
+  };
+
+  const allComments: PdpReviewCommentData[] = [
+    ...userComments,
+    ...pageReviews.map((review) => ({
+      id: review.id,
+      quote: review.quote,
+      author: review.author,
+      date: review.date,
+      verified: review.verified,
+      photos: review.photos,
+      likes: review.likes,
+      rating: review.rating,
+    })),
+  ];
 
   return (
     <section
@@ -134,7 +90,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                 </p>
                 <div className="h-8 w-px bg-neutral-200" aria-hidden />
                 <div className="flex flex-col gap-1">
-                  <StarRating rating={average} />
+                  <PdpStarRating rating={average} />
                   <p className="font-extended m-0 text-sm tracking-[0.2px] text-black">
                     {PDP_COMMENTS_SUMMARY.count} reviews
                   </p>
@@ -152,7 +108,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
             />
             </PdpRevealItem>
 
-            <PdpRevealItem as="section" delay={210} className="flex flex-col gap-4">
+            <PdpRevealItem as="section" delay={210} className="flex flex-col gap-2">
               <PdpTextReveal
                 as="p"
                 delay={80}
@@ -167,8 +123,9 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
                     <PdpUgcStoryCard
                       key={story.id}
                       story={story}
-                      className={pdpUgcStoryCardClass}
-                      imageSizes="72vw"
+                      size="compact"
+                      className={pdpUgcStoryCardCompactClass}
+                      imageSizes="30vw"
                     />
                   ))}
                 </div>
@@ -176,11 +133,15 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
             </PdpRevealItem>
 
             <PdpRevealItem as="section" delay={280} className="flex flex-col">
-              {pageReviews.map((review, index) => (
-                <PdpRevealItem key={review.id} as="div" delay={index * 70}>
-                  <ReviewCard review={review} />
-                </PdpRevealItem>
-              ))}
+              <div className="divide-y divide-neutral-200">
+                {allComments.map((comment, index) => (
+                  <PdpRevealItem key={comment.id} as="div" delay={index * 50}>
+                    <PdpReviewComment comment={comment} variant="compact" />
+                  </PdpRevealItem>
+                ))}
+              </div>
+
+              <PdpReviewCommentBox onPost={handlePostComment} />
             </PdpRevealItem>
 
             <PdpRevealItem delay={140}>
