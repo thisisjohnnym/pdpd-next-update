@@ -41,6 +41,220 @@ function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
 }
 
+function BagBundlePricing({
+  bundle,
+  hasDiscount,
+  savings,
+}: {
+  bundle: PdpBundleAddPayload;
+  hasDiscount: boolean;
+  savings: number;
+}) {
+  return (
+    <div className="flex shrink-0 flex-col items-end">
+      {hasDiscount ? (
+        <span className="font-extended text-xs tracking-[0.2px] text-neutral-400 line-through">
+          {formatPrice(bundle.subtotal)}
+        </span>
+      ) : null}
+      <span className="font-extended text-base tracking-[0.2px] text-black">
+        {formatPrice(bundle.total)}
+      </span>
+      {hasDiscount ? (
+        <span className="font-extended mt-0.5 text-[11px] tracking-[0.2px] text-neutral-600">
+          You saved {formatPrice(savings)}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function BagBundleSummary({
+  bundle,
+  hasDiscount,
+  savings,
+}: {
+  bundle: PdpBundleAddPayload;
+  hasDiscount: boolean;
+  savings: number;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-lg bg-[#f2f2f2] px-3 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-extended text-base tracking-[0.2px] text-black">
+            Your bundle
+          </p>
+          <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+            {bundle.items.length} item
+            {bundle.items.length === 1 ? "" : "s"}
+            {hasDiscount
+              ? ` · ${Math.round(PDP_BUNDLE_DISCOUNT * 100)}% bundle savings applied`
+              : ""}
+          </p>
+        </div>
+        <BagBundlePricing
+          bundle={bundle}
+          hasDiscount={hasDiscount}
+          savings={savings}
+        />
+      </div>
+
+      <ul className="flex flex-col gap-2 border-t border-neutral-200 pt-3">
+        {bundle.items.map((item) => (
+          <li key={item.id} className="flex items-center gap-3">
+            <div className="relative size-14 shrink-0 overflow-hidden bg-neutral-100">
+              <Image
+                src={item.imageSrc}
+                alt={item.imageAlt}
+                fill
+                className="object-cover object-center"
+                sizes="56px"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+                {item.name}
+              </p>
+            </div>
+            <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black">
+              {formatPrice(item.price)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function BagProductCard({
+  selectedColor,
+}: {
+  selectedColor: (typeof PDP_COLORS)[number];
+}) {
+  return (
+    <div className="flex overflow-hidden rounded-lg bg-[#f2f2f2]">
+      <div className="relative w-[7.25rem] shrink-0 self-stretch min-h-[6.75rem]">
+        <Image
+          src={PDP_PRODUCT.imageSrc}
+          alt={PDP_PRODUCT.imageAlt}
+          fill
+          className="object-cover object-center"
+          sizes="116px"
+        />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3.5">
+        <p className="font-extended text-base tracking-[0.2px] text-black">
+          {PDP_PRODUCT.name}
+        </p>
+        <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+          {selectedColor.name} · {PDP_PRODUCT.subtitle}
+        </p>
+        <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
+          {PDP_PRODUCT.price}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function BagUpsellAddButton({
+  added,
+  onAdd,
+}: {
+  added: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onAdd}
+      disabled={added}
+      className={cn(
+        "font-extended inline-flex shrink-0 items-center justify-center gap-1 px-3.5 py-2 text-xs tracking-[0.2px] transition-colors",
+        added ? pdpStrokeCtaMutedClass : pdpStrokeCtaClass,
+      )}
+    >
+      <span className={pdpAddIconLabelClass}>
+        {added ? "Added" : "Quick add"}
+      </span>
+      {!added ? (
+        <MaterialIcon
+          name="add"
+          size={18}
+          className="shrink-0 text-black"
+          aria-hidden
+        />
+      ) : null}
+    </button>
+  );
+}
+
+function BagUpsellItem({
+  item,
+  added,
+  onAdd,
+}: {
+  item: (typeof PDP_BAG_UPSELLS)[number];
+  added: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <li className="border-t border-neutral-200 first:border-t-0">
+      <div className="flex items-center gap-3 py-3">
+        <div className="relative size-20 shrink-0 overflow-hidden bg-neutral-100">
+          <Image
+            src={item.imageSrc}
+            alt={item.imageAlt}
+            fill
+            className="object-cover object-center"
+            sizes="80px"
+          />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+            {item.name}
+          </p>
+          <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+            {item.price}
+          </p>
+        </div>
+
+        <BagUpsellAddButton added={added} onAdd={onAdd} />
+      </div>
+    </li>
+  );
+}
+
+function BagUpsellList({
+  quickAddedIds,
+  onQuickAdd,
+}: {
+  quickAddedIds: Set<string>;
+  onQuickAdd: (id: string) => void;
+}) {
+  return (
+    <section className="flex flex-col gap-1.5 pt-3">
+      <p className="font-extended text-sm tracking-[0.2px] text-black">
+        Complete the look
+      </p>
+
+      <ul className="flex flex-col">
+        {PDP_BAG_UPSELLS.map((item) => (
+          <BagUpsellItem
+            key={item.id}
+            item={item}
+            added={quickAddedIds.has(item.id)}
+            onAdd={() => onQuickAdd(item.id)}
+          />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** Bottom tray — add-to-bag confirmation, checkout, and quick-add upsells */
 export function PdpAddToBagSheet({
   open,
@@ -148,85 +362,13 @@ export function PdpAddToBagSheet({
           </div>
 
           {isBundle && bundle ? (
-            <div className="flex flex-col gap-3 rounded-lg bg-[#f2f2f2] px-3 py-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-extended text-base tracking-[0.2px] text-black">
-                    Your bundle
-                  </p>
-                  <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                    {bundle.items.length} item
-                    {bundle.items.length === 1 ? "" : "s"}
-                    {hasDiscount
-                      ? ` · ${Math.round(PDP_BUNDLE_DISCOUNT * 100)}% bundle savings applied`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end">
-                  {hasDiscount ? (
-                    <span className="font-extended text-xs tracking-[0.2px] text-neutral-400 line-through">
-                      {formatPrice(bundle.subtotal)}
-                    </span>
-                  ) : null}
-                  <span className="font-extended text-base tracking-[0.2px] text-black">
-                    {formatPrice(bundle.total)}
-                  </span>
-                  {hasDiscount ? (
-                    <span className="font-extended mt-0.5 text-[11px] tracking-[0.2px] text-neutral-600">
-                      You saved {formatPrice(savings)}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              <ul className="flex flex-col gap-2 border-t border-neutral-200 pt-3">
-                {bundle.items.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3">
-                    <div className="relative size-14 shrink-0 overflow-hidden bg-neutral-100">
-                      <Image
-                        src={item.imageSrc}
-                        alt={item.imageAlt}
-                        fill
-                        className="object-cover object-center"
-                        sizes="56px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
-                        {item.name}
-                      </p>
-                    </div>
-                    <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black">
-                      {formatPrice(item.price)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <BagBundleSummary
+              bundle={bundle}
+              hasDiscount={hasDiscount}
+              savings={savings}
+            />
           ) : (
-            <div className="flex overflow-hidden rounded-lg bg-[#f2f2f2]">
-              <div className="relative w-[7.25rem] shrink-0 self-stretch min-h-[6.75rem]">
-                <Image
-                  src={PDP_PRODUCT.imageSrc}
-                  alt={PDP_PRODUCT.imageAlt}
-                  fill
-                  className="object-cover object-center"
-                  sizes="116px"
-                />
-              </div>
-
-              <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3.5">
-                <p className="font-extended text-base tracking-[0.2px] text-black">
-                  {PDP_PRODUCT.name}
-                </p>
-                <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                  {selectedColor.name} · {PDP_PRODUCT.subtitle}
-                </p>
-                <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
-                  {PDP_PRODUCT.price}
-                </p>
-              </div>
-            </div>
+            <BagProductCard selectedColor={selectedColor} />
           )}
 
           <div className="flex gap-2 py-4">
@@ -249,69 +391,10 @@ export function PdpAddToBagSheet({
           </div>
 
           {!isBundle ? (
-            <section className="flex flex-col gap-1.5 pt-3">
-              <p className="font-extended text-sm tracking-[0.2px] text-black">
-                Complete the look
-              </p>
-
-              <ul className="flex flex-col">
-                {PDP_BAG_UPSELLS.map((item) => {
-                  const added = quickAddedIds.has(item.id);
-
-                  return (
-                    <li
-                      key={item.id}
-                      className="border-t border-neutral-200 first:border-t-0"
-                    >
-                      <div className="flex items-center gap-3 py-3">
-                        <div className="relative size-20 shrink-0 overflow-hidden bg-neutral-100">
-                          <Image
-                            src={item.imageSrc}
-                            alt={item.imageAlt}
-                            fill
-                            className="object-cover object-center"
-                            sizes="80px"
-                          />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
-                            {item.name}
-                          </p>
-                          <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                            {item.price}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleQuickAdd(item.id)}
-                          disabled={added}
-                          className={cn(
-                            "font-extended inline-flex shrink-0 items-center justify-center gap-1 px-3.5 py-2 text-xs tracking-[0.2px] transition-colors",
-                            added
-                              ? pdpStrokeCtaMutedClass
-                              : pdpStrokeCtaClass,
-                          )}
-                        >
-                          <span className={pdpAddIconLabelClass}>
-                            {added ? "Added" : "Quick add"}
-                          </span>
-                          {!added ? (
-                            <MaterialIcon
-                              name="add"
-                              size={18}
-                              className="shrink-0 text-black"
-                              aria-hidden
-                            />
-                          ) : null}
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+            <BagUpsellList
+              quickAddedIds={quickAddedIds}
+              onQuickAdd={handleQuickAdd}
+            />
           ) : null}
           </>
           ) : null}

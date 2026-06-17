@@ -35,6 +35,178 @@ type BuildPickerOption = {
   };
 };
 
+function isStrapOptionIncluded(option: BuildPickerOption): boolean {
+  return Boolean(option.stock) || option.priceLabel === "Included";
+}
+
+function canQuickAddStrapOption(
+  isActive: boolean,
+  included: boolean,
+  quickAddId: string | undefined,
+  onQuickAdd: ((id: string) => void) | undefined,
+): boolean {
+  return isActive && !included && Boolean(quickAddId) && Boolean(onQuickAdd);
+}
+
+function resolveStrapOptionAdded(
+  showQuickAdd: boolean,
+  quickAddId: string | undefined,
+  addedOptionIds: ReadonlySet<string> | undefined,
+): boolean {
+  if (!showQuickAdd || !quickAddId) {
+    return false;
+  }
+  return addedOptionIds?.has(quickAddId) ?? false;
+}
+
+function strapSelectButtonClass(showQuickAdd: boolean): string {
+  return cn(
+    "inline-flex min-w-0 items-center gap-2 py-1 pl-1 text-left transition-colors",
+    showQuickAdd ? "pr-2" : "pr-3",
+    pdpPressableClass,
+  );
+}
+
+function strapQuickAddButtonClass(added: boolean): string {
+  return cn(
+    "inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full px-2.5 py-1.5 text-[10px] leading-none tracking-[0.2px] transition-colors",
+    added ? pdpPressableClass : pdpPressableSolidClass,
+    added
+      ? "bg-neutral-100 text-neutral-500"
+      : "bg-black text-white active:bg-neutral-800",
+  );
+}
+
+function BuildPickerOptionThumb({
+  image,
+}: {
+  image: BuildPickerOption["image"];
+}) {
+  return (
+    <span className="relative size-9 shrink-0 overflow-hidden rounded-full bg-neutral-100">
+      <Image
+        src={image.src}
+        alt=""
+        fill
+        className="object-cover object-center"
+        style={{ objectPosition: image.objectPosition ?? "center center" }}
+        sizes="36px"
+        draggable={false}
+      />
+    </span>
+  );
+}
+
+function BuildPickerOptionMeta({
+  option,
+  included,
+}: {
+  option: BuildPickerOption;
+  included: boolean;
+}) {
+  return (
+    <span className="flex min-w-0 flex-col">
+      <span className="font-extended text-[11px] leading-tight tracking-[0.2px] text-black">
+        {option.label}
+      </span>
+      {included || option.priceLabel ? (
+        <span className="font-extended text-[10px] leading-tight tracking-[0.2px] text-neutral-500">
+          {included ? "Included" : option.priceLabel}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+function BuildPickerQuickAddButton({
+  optionLabel,
+  added,
+  onClick,
+}: {
+  optionLabel: string;
+  added: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div className="flex shrink-0 items-center gap-2 self-center pr-1">
+      <span aria-hidden className="h-6 w-px shrink-0 bg-neutral-200" />
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={added}
+        aria-label={
+          added ? `${optionLabel} added to bag` : `Add ${optionLabel} to bag`
+        }
+        className={strapQuickAddButtonClass(added)}
+      >
+        <span className={pdpAddIconLabelClass}>{added ? "Added" : "Add"}</span>
+        {!added ? (
+          <MaterialIcon
+            name="add"
+            size={18}
+            className="shrink-0 text-white"
+            aria-hidden
+          />
+        ) : null}
+      </button>
+    </div>
+  );
+}
+
+function BuildPickerOptionItem({
+  option,
+  isActive,
+  onSelect,
+  addedOptionIds,
+  onQuickAdd,
+}: {
+  option: BuildPickerOption;
+  isActive: boolean;
+  onSelect: (id: string) => void;
+  addedOptionIds?: ReadonlySet<string>;
+  onQuickAdd?: (optionId: string) => void;
+}) {
+  const included = isStrapOptionIncluded(option);
+  const quickAddId = option.quickAddOptionId;
+  const showQuickAdd = canQuickAddStrapOption(
+    isActive,
+    included,
+    quickAddId,
+    onQuickAdd,
+  );
+  const added = resolveStrapOptionAdded(showQuickAdd, quickAddId, addedOptionIds);
+
+  return (
+    <div
+      role="option"
+      aria-selected={isActive}
+      className={cn(
+        "inline-flex shrink-0 items-stretch overflow-hidden rounded-full border text-left transition-colors",
+        isActive
+          ? "border-black bg-white"
+          : "border-neutral-200 bg-white text-neutral-700",
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onSelect(option.id)}
+        className={strapSelectButtonClass(showQuickAdd)}
+      >
+        <BuildPickerOptionThumb image={option.image} />
+        <BuildPickerOptionMeta option={option} included={included} />
+      </button>
+
+      {showQuickAdd && quickAddId ? (
+        <BuildPickerQuickAddButton
+          optionLabel={option.label}
+          added={added}
+          onClick={() => onQuickAdd?.(quickAddId)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function BuildPickerRow({
   label,
   options,
@@ -62,110 +234,16 @@ function BuildPickerRow({
           role="listbox"
           aria-label={label}
         >
-        {options.map((option) => {
-          const isActive = activeId === option.id;
-          const isIncluded = option.stock || option.priceLabel === "Included";
-          const quickAddId = option.quickAddOptionId;
-          const showQuickAdd =
-            isActive &&
-            !isIncluded &&
-            Boolean(quickAddId) &&
-            Boolean(onQuickAdd);
-          const added =
-            showQuickAdd && quickAddId
-              ? addedOptionIds?.has(quickAddId) ?? false
-              : false;
-
-          return (
-            <div
+          {options.map((option) => (
+            <BuildPickerOptionItem
               key={option.id}
-              role="option"
-              aria-selected={isActive}
-              className={cn(
-                "inline-flex shrink-0 items-stretch overflow-hidden rounded-full border text-left transition-colors",
-                isActive
-                  ? "border-black bg-white"
-                  : "border-neutral-200 bg-white text-neutral-700",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => onSelect(option.id)}
-                className={cn(
-                  "inline-flex min-w-0 items-center gap-2 py-1 pl-1 text-left transition-colors",
-                  showQuickAdd ? "pr-2" : "pr-3",
-                  pdpPressableClass,
-                )}
-              >
-                <span className="relative size-9 shrink-0 overflow-hidden rounded-full bg-neutral-100">
-                  <Image
-                    src={option.image.src}
-                    alt=""
-                    fill
-                    className="object-cover object-center"
-                    style={{
-                      objectPosition: option.image.objectPosition ?? "center center",
-                    }}
-                    sizes="36px"
-                    draggable={false}
-                  />
-                </span>
-                <span className="flex min-w-0 flex-col">
-                  <span className="font-extended text-[11px] leading-tight tracking-[0.2px] text-black">
-                    {option.label}
-                  </span>
-                  {isIncluded ? (
-                    <span className="font-extended text-[10px] leading-tight tracking-[0.2px] text-neutral-500">
-                      Included
-                    </span>
-                  ) : option.priceLabel ? (
-                    <span className="font-extended text-[10px] leading-tight tracking-[0.2px] text-neutral-500">
-                      {option.priceLabel}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-
-              {showQuickAdd && quickAddId ? (
-                <div className="flex shrink-0 items-center gap-2 self-center pr-1">
-                  <span
-                    aria-hidden
-                    className="h-6 w-px shrink-0 bg-neutral-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => onQuickAdd?.(quickAddId)}
-                    disabled={added}
-                    aria-label={
-                      added
-                        ? `${option.label} added to bag`
-                        : `Add ${option.label} to bag`
-                    }
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full px-2.5 py-1.5 text-[10px] leading-none tracking-[0.2px] transition-colors",
-                      added ? pdpPressableClass : pdpPressableSolidClass,
-                      added
-                        ? "bg-neutral-100 text-neutral-500"
-                        : "bg-black text-white active:bg-neutral-800",
-                    )}
-                  >
-                    <span className={pdpAddIconLabelClass}>
-                      {added ? "Added" : "Add"}
-                    </span>
-                    {!added ? (
-                      <MaterialIcon
-                        name="add"
-                        size={18}
-                        className="shrink-0 text-white"
-                        aria-hidden
-                      />
-                    ) : null}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
+              option={option}
+              isActive={activeId === option.id}
+              onSelect={onSelect}
+              addedOptionIds={addedOptionIds}
+              onQuickAdd={onQuickAdd}
+            />
+          ))}
         </div>
       </div>
     </div>

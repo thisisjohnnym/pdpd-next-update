@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -190,7 +196,228 @@ type PdpGalleryPortraitSlideProps = {
   dragZoom?: boolean;
 };
 
+function portraitBackgroundClass(
+  panel: boolean,
+  fitContain: boolean,
+  insetMargins: boolean,
+): string {
+  if (panel) {
+    return fitContain ? "bg-neutral-200" : "bg-black";
+  }
+  return insetMargins ? "bg-white p-3" : "bg-white";
+}
+
+function portraitFrameClass(
+  panel: boolean,
+  aspect: "4/5" | "9/16",
+  insetMargins: boolean,
+): string {
+  if (panel) {
+    return PANEL_MEDIA_FRAME_CLASS;
+  }
+  return cn(
+    "relative w-full overflow-hidden",
+    aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
+    insetMargins ? "bg-white" : PDP_STUDIO_BACKDROP_CLASS,
+  );
+}
+
+function portraitSectionStyle(
+  panel: boolean,
+  reserveBottomCta: boolean,
+): CSSProperties | undefined {
+  if (panel) {
+    return SCREEN_HEIGHT_STYLE;
+  }
+  return reserveBottomCta ? { paddingBottom: BOTTOM_CTA_OFFSET } : undefined;
+}
+
+function portraitImageClass(
+  panel: boolean,
+  fitContain: boolean,
+  scale: string,
+): string {
+  return cn(
+    panel && !fitContain && PANEL_MEDIA_COVER_CLASS,
+    fitContain ? "object-contain" : "object-cover",
+    scale,
+  );
+}
+
+function portraitHeaderSurface(
+  headerSurface: "light" | "dark" | undefined,
+  headerLight: boolean,
+): "light" | "dark" | undefined {
+  return headerSurface ?? (headerLight ? "light" : undefined);
+}
+
+type PortraitMediaProps = {
+  src: string;
+  alt: string;
+  priority: boolean;
+  scale: string;
+  objectPosition: string;
+  panel: boolean;
+  fitContain: boolean;
+  dragZoom: boolean;
+};
+
+function PortraitMedia({
+  src,
+  alt,
+  priority,
+  scale,
+  objectPosition,
+  panel,
+  fitContain,
+  dragZoom,
+}: PortraitMediaProps) {
+  return (
+    <div className={panel ? PANEL_MEDIA_FILL_CLASS : "relative size-full"}>
+      {dragZoom ? (
+        <PdpGalleryDragZoomImage
+          src={src}
+          alt={alt}
+          priority={priority}
+          objectPosition={objectPosition}
+          scale={scale}
+          fitContain={fitContain}
+          panel={panel}
+        />
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          priority={priority}
+          loading={panel ? "eager" : undefined}
+          className={portraitImageClass(panel, fitContain, scale)}
+          style={{ objectPosition }}
+          sizes="100vw"
+        />
+      )}
+    </div>
+  );
+}
+
+function PortraitHotspots({ hotspots }: { hotspots?: PdpProductHotspot[] }) {
+  if (!hotspots?.length) {
+    return null;
+  }
+  return <PdpProductHotspots hotspots={hotspots} />;
+}
+
+function PortraitInfluencerBadge({
+  influencer,
+}: {
+  influencer?: PdpInfluencerCredit;
+}) {
+  if (!influencer) {
+    return null;
+  }
+  const network = influencer.platform === "tiktok" ? "TikTok" : "Instagram";
+  return (
+    <a
+      href={influencer.profileUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`absolute bottom-4 left-4 flex items-center gap-1 rounded-full bg-black/35 py-2 pl-3 pr-3.5 text-white backdrop-blur-md transition-colors active:bg-black/50 ${pdpType.label}`}
+      aria-label={`View ${influencer.handle} on ${network}`}
+    >
+      <span className="font-extended translate-y-px">{influencer.handle}</span>
+      <MaterialIcon name="north_east" size={18} className="text-white/90" />
+    </a>
+  );
+}
+
+function PortraitShopTheLookButton({
+  shopTheLookId,
+  onOpenShopTheLook,
+}: {
+  shopTheLookId?: string;
+  onOpenShopTheLook?: (lookId: string) => void;
+}) {
+  if (!shopTheLookId || !onOpenShopTheLook) {
+    return null;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenShopTheLook(shopTheLookId)}
+      aria-label="Shop the look"
+      className={cn(
+        "absolute bottom-4 left-3 z-10 flex items-center gap-1 rounded-full border border-white/55 bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95 lg:left-5",
+        pdpType.micro,
+      )}
+    >
+      <span
+        aria-hidden
+        className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/90"
+      >
+        <MaterialIcon name="checkroom" size={18} className="text-neutral-900" />
+      </span>
+      <span className="font-extended">Shop the look</span>
+    </button>
+  );
+}
+
+function PortraitStrapCard({
+  strapOptionsId,
+  onOpenStrapOptions,
+}: {
+  strapOptionsId?: string;
+  onOpenStrapOptions?: (setId: string) => void;
+}) {
+  if (!strapOptionsId || !onOpenStrapOptions) {
+    return null;
+  }
+  const set = PDP_STRAP_OPTIONS[strapOptionsId];
+  if (!set) {
+    return null;
+  }
+  return (
+    <PdpGalleryStrapCard
+      set={set}
+      onOpen={() => onOpenStrapOptions(strapOptionsId)}
+    />
+  );
+}
+
+type PortraitOverlaysProps = {
+  hotspots?: PdpProductHotspot[];
+  influencer?: PdpInfluencerCredit;
+  shopTheLookId?: string;
+  strapOptionsId?: string;
+  onOpenShopTheLook?: (lookId: string) => void;
+  onOpenStrapOptions?: (setId: string) => void;
+};
+
+function PortraitOverlays({
+  hotspots,
+  influencer,
+  shopTheLookId,
+  strapOptionsId,
+  onOpenShopTheLook,
+  onOpenStrapOptions,
+}: PortraitOverlaysProps) {
+  return (
+    <>
+      <PortraitHotspots hotspots={hotspots} />
+      <PortraitInfluencerBadge influencer={influencer} />
+      <PortraitShopTheLookButton
+        shopTheLookId={shopTheLookId}
+        onOpenShopTheLook={onOpenShopTheLook}
+      />
+      <PortraitStrapCard
+        strapOptionsId={strapOptionsId}
+        onOpenStrapOptions={onOpenStrapOptions}
+      />
+    </>
+  );
+}
+
 /** Immersive 4:5 portrait — full-bleed by default, optional 12px white inset */
+// fallow-ignore-next-line complexity
 function PdpGalleryPortraitSlide({
   src,
   alt,
@@ -213,114 +440,39 @@ function PdpGalleryPortraitSlide({
 }: PdpGalleryPortraitSlideProps) {
   const panel = PDP_PANEL_SCROLL;
   const fitContain = panel && panelContain;
+  const headerLight = fitContain || (insetMargins && !panel);
+  const resolvedHeaderSurface = portraitHeaderSurface(headerSurface, headerLight);
 
   return (
     <section
       className={cn(
         "relative w-full shrink-0 overflow-hidden",
-        panel
-          ? fitContain
-            ? "bg-neutral-200"
-            : "bg-black"
-          : insetMargins
-            ? "bg-white p-3"
-            : "bg-white",
+        portraitBackgroundClass(panel, fitContain, insetMargins),
         galleryPanelClassName(isLastPanel),
       )}
-      data-header-surface={
-        headerSurface ?? (insetMargins && !panel ? "light" : fitContain ? "light" : undefined)
-      }
-      style={
-        panel
-          ? SCREEN_HEIGHT_STYLE
-          : reserveBottomCta
-            ? { paddingBottom: BOTTOM_CTA_OFFSET }
-            : undefined
-      }
+      data-header-surface={resolvedHeaderSurface}
+      style={portraitSectionStyle(panel, reserveBottomCta)}
     >
-      <div
-        className={cn(
-          panel
-            ? PANEL_MEDIA_FRAME_CLASS
-            : cn(
-                "relative w-full overflow-hidden",
-                aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
-                insetMargins ? "bg-white" : PDP_STUDIO_BACKDROP_CLASS,
-              ),
-        )}
-      >
-        <div className={panel ? PANEL_MEDIA_FILL_CLASS : "relative size-full"}>
-          {dragZoom ? (
-            <PdpGalleryDragZoomImage
-              src={src}
-              alt={alt}
-              priority={priority}
-              objectPosition={objectPosition}
-              scale={scale}
-              fitContain={fitContain}
-              panel={panel}
-            />
-          ) : (
-            <Image
-              src={src}
-              alt={alt}
-              fill
-              priority={priority}
-              loading={panel ? "eager" : undefined}
-              className={cn(
-                panel && !fitContain && PANEL_MEDIA_COVER_CLASS,
-                fitContain ? "object-contain" : "object-cover",
-                scale,
-              )}
-              style={{ objectPosition }}
-              sizes="100vw"
-            />
-          )}
-        </div>
+      <div className={portraitFrameClass(panel, aspect, insetMargins)}>
+        <PortraitMedia
+          src={src}
+          alt={alt}
+          priority={priority}
+          scale={scale}
+          objectPosition={objectPosition}
+          panel={panel}
+          fitContain={fitContain}
+          dragZoom={dragZoom}
+        />
 
-        {hotspots?.length ? <PdpProductHotspots hotspots={hotspots} /> : null}
-
-        {influencer ? (
-          <a
-            href={influencer.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`absolute bottom-4 left-4 flex items-center gap-1 rounded-full bg-black/35 py-2 pl-3 pr-3.5 text-white backdrop-blur-md transition-colors active:bg-black/50 ${pdpType.label}`}
-            aria-label={`View ${influencer.handle} on ${influencer.platform === "tiktok" ? "TikTok" : "Instagram"}`}
-          >
-            <span className="font-extended translate-y-px">{influencer.handle}</span>
-            <MaterialIcon name="north_east" size={18} className="text-white/90" />
-          </a>
-        ) : null}
-
-        {shopTheLookId && onOpenShopTheLook ? (
-          <button
-            type="button"
-            onClick={() => onOpenShopTheLook(shopTheLookId)}
-            aria-label="Shop the look"
-            className={cn(
-              "absolute bottom-4 left-3 z-10 flex items-center gap-1 rounded-full border border-white/55 bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95 lg:left-5",
-              pdpType.micro,
-            )}
-          >
-            <span
-              aria-hidden
-              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/90"
-            >
-              <MaterialIcon name="checkroom" size={18} className="text-neutral-900" />
-            </span>
-            <span className="font-extended">Shop the look</span>
-          </button>
-        ) : null}
-
-        {strapOptionsId &&
-        onOpenStrapOptions &&
-        PDP_STRAP_OPTIONS[strapOptionsId] ? (
-          <PdpGalleryStrapCard
-            set={PDP_STRAP_OPTIONS[strapOptionsId]}
-            onOpen={() => onOpenStrapOptions(strapOptionsId)}
-          />
-        ) : null}
+        <PortraitOverlays
+          hotspots={hotspots}
+          influencer={influencer}
+          shopTheLookId={shopTheLookId}
+          strapOptionsId={strapOptionsId}
+          onOpenShopTheLook={onOpenShopTheLook}
+          onOpenStrapOptions={onOpenStrapOptions}
+        />
       </div>
     </section>
   );
