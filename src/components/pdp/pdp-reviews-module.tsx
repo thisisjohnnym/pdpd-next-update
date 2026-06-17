@@ -44,6 +44,7 @@ type PdpReviewsModuleProps = {
 };
 
 /** Inline reviews — summary, UGC, and social-style comments on the page */
+// fallow-ignore-next-line complexity
 export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleProps) {
   const { average } = PDP_REVIEWS_SUMMARY;
   const pageReviews = PDP_CUSTOMER_REVIEWS.slice(0, PAGE_REVIEW_COUNT);
@@ -99,6 +100,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
               contained
               containedSurface="flat"
               showIcon={false}
+              clampBodyLines={2}
               eyebrow={PDP_REVIEWS_AI_SUMMARY.attribution}
               eyebrowPosition="below"
               title={PDP_REVIEWS_AI_SUMMARY.headline}

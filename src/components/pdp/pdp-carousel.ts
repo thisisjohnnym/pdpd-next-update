@@ -73,12 +73,12 @@ const pdpCarouselInfiniteCenteredPeekScrollClass = cn(
 
 /** UGC video tiles — center snap for infinite peek rail */
 export const pdpUgcVideoCardInfiniteClass =
-  "w-[calc((100vw-1.25rem)/1.1)] shrink-0 snap-center snap-always lg:w-[calc((100vw-2.25rem)/2.2)]";
+  "w-[calc((100vw-1.25rem)/1.2)] shrink-0 snap-center snap-always lg:w-[calc((100vw-2.25rem)/2.2)]";
 
 /** UGC video infinite rail — active tile centered with side peek */
 export const pdpUgcVideoInfiniteScrollClass = cn(
   pdpCarouselInfiniteCenteredScrollClass,
-  "px-[calc((100vw-((100vw-1.25rem)/1.1))/2)]",
+  "px-[calc((100vw-((100vw-1.25rem)/1.2))/2)]",
   "lg:px-[calc((100vw-((100vw-2.25rem)/2.2))/2)]",
 );
 

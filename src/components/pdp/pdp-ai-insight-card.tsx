@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
+import { PdpExpandableText } from "./pdp-expandable-text";
+
 export type PdpAiInsightContentProps = {
   title: string;
   body: string;
@@ -13,9 +15,12 @@ export type PdpAiInsightContentProps = {
   showIcon?: boolean;
   iconVariant?: "default" | "compact";
   size?: "default" | "compact" | "xs";
+  /** Collapse the body to this many lines with a Read more toggle */
+  clampBodyLines?: number;
 };
 
 /** Shared icon + title + body row for AI insight callouts */
+// fallow-ignore-next-line complexity
 export function PdpAiInsightContent({
   title,
   body,
@@ -25,10 +30,20 @@ export function PdpAiInsightContent({
   showIcon = true,
   iconVariant = "default",
   size = "default",
+  clampBodyLines,
 }: PdpAiInsightContentProps) {
   const compact = size === "compact" || size === "xs";
   const extraSmall = size === "xs";
   const compactIcon = iconVariant === "compact" || extraSmall;
+
+  const bodyClass = cn(
+    "font-extended tracking-[0.2px] text-neutral-600",
+    extraSmall
+      ? "mt-1 text-[11px] leading-[1.35]"
+      : compact
+        ? "mt-1.5 text-sm leading-[1.35]"
+        : "mt-2 text-base leading-[1.35]",
+  );
 
   const eyebrowEl = eyebrow ? (
     <p
@@ -75,18 +90,15 @@ export function PdpAiInsightContent({
         >
           {title}
         </p>
-        <p
-          className={cn(
-            "font-extended tracking-[0.2px] text-neutral-600",
-            extraSmall
-              ? "mt-1 text-[11px] leading-[1.35]"
-              : compact
-                ? "mt-1.5 text-sm leading-[1.35]"
-                : "mt-2 text-base leading-[1.35]",
-          )}
-        >
-          {body}
-        </p>
+        {clampBodyLines ? (
+          <PdpExpandableText
+            text={body}
+            className={bodyClass}
+            clampLines={clampBodyLines}
+          />
+        ) : (
+          <p className={bodyClass}>{body}</p>
+        )}
         {eyebrowPosition === "below" ? (
           <div className={cn(extraSmall ? "mt-1.5" : compact ? "mt-2" : "mt-2.5")}>
             {eyebrowEl}
@@ -112,6 +124,7 @@ export type PdpAiInsightCardProps = PdpAiInsightContentProps & {
 };
 
 /** White insight card — browsing nudges, compare tips, reviews summary, etc. */
+// fallow-ignore-next-line complexity
 export function PdpAiInsightCard({
   title,
   body,
@@ -128,6 +141,7 @@ export function PdpAiInsightCard({
   variant = "card",
   contained = false,
   containedSurface = "elevated",
+  clampBodyLines,
 }: PdpAiInsightCardProps) {
   const minimal = variant === "minimal";
   const extraSmall = size === "xs";
@@ -186,6 +200,7 @@ export function PdpAiInsightCard({
         showIcon={minimal ? (contained ? showIcon : false) : showIcon}
         iconVariant={minimal && contained && !extraSmall ? "compact" : "default"}
         size={minimal ? (size === "default" ? "compact" : size) : size}
+        clampBodyLines={clampBodyLines}
       />
 
       {footer ? (
