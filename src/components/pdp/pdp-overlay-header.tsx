@@ -102,7 +102,10 @@ export function PdpOverlayHeader({
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
             >
-              <span className="relative inline-flex items-center justify-center">
+              <span
+                className="relative inline-flex shrink-0 items-center justify-center"
+                style={{ width: HEADER_ICON_SIZE, height: HEADER_ICON_SIZE }}
+              >
                 <MaterialIcon
                   name="shopping_bag"
                   size={HEADER_ICON_SIZE}
@@ -113,7 +116,7 @@ export function PdpOverlayHeader({
                     key={bagCount}
                     aria-hidden
                     className={cn(
-                      "font-extended animate-bag-badge-pop pointer-events-none absolute inset-0 flex items-center justify-center pt-[30%] text-[9px] font-semibold leading-none tracking-[0.1px] transition-colors duration-300",
+                      "pdp-bag-badge animate-bag-badge-pop pointer-events-none absolute inset-0 z-10 flex items-center justify-center pt-[30%] text-[9px] font-semibold leading-none tracking-[0.1px] transition-colors duration-300",
                       isLight ? "text-black" : "text-white",
                     )}
                   >

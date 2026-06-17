@@ -312,14 +312,20 @@ export function PdpAddToBagSheet({
   }, [onClose, open]);
 
   const handleQuickAdd = (id: string) => {
+    let didAdd = false;
+
     setQuickAddedIds((current) => {
       if (current.has(id)) {
         return current;
       }
 
-      onQuickAdd?.();
+      didAdd = true;
       return new Set(current).add(id);
     });
+
+    if (didAdd) {
+      onQuickAdd?.();
+    }
   };
 
   if (!mounted) {

@@ -31,7 +31,7 @@ export function useLazyNearView(
           observer.disconnect();
         }
       },
-      { threshold: 0, rootMargin: "0px 0px 100% 0px" },
+      { threshold: 0, rootMargin: "0px 0px 150% 0px" },
     );
 
     observer.observe(node);

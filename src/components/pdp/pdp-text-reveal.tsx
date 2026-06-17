@@ -88,9 +88,20 @@ export function PdpTextReveal<T extends ElementType = "div">({
     });
 
     const scrollTrigger = timeline.scrollTrigger;
-    if (scrollTrigger && scrollTrigger.progress > 0.08) {
+    if (!scrollTrigger) {
+      return;
+    }
+
+    const scrolledPast = node.getBoundingClientRect().bottom < 0;
+
+    if (scrolledPast) {
       timeline.progress(1);
       scrollTrigger.kill(false);
+      return;
+    }
+
+    if (scrollTrigger.progress > 0 || scrollTrigger.isActive) {
+      timeline.play(0);
     }
 
     return () => {

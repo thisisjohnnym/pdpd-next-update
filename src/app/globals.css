@@ -94,6 +94,11 @@ body {
   line-height: 1;
 }
 
+/* Bag count overlay — extended face without .font-extended position nudge */
+.pdp-bag-badge {
+  font-family: var(--font-extended);
+}
+
 /* Root layout — never offset the document; font-extended nudge is for labels only */
 body.font-extended,
 html.font-extended {

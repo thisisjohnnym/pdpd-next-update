@@ -27,6 +27,7 @@ import { PdpReviewsModule } from "./pdp-reviews-module";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
 import { PdpSiteFooter } from "./pdp-site-footer";
 import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
 import { PdpLeatherAgingModule } from "./pdp-leather-aging-module";
@@ -89,7 +90,7 @@ function galleryScrollReveal(
   return (
     <PdpScrollReveal
       key={key}
-      variant={options.variant ?? "subtle"}
+      variant={options.variant ?? "rise"}
       surface={options.surface ?? "transparent"}
       lazyMount
     >
@@ -454,16 +455,18 @@ function PdpGalleryPortraitSlide({
       style={portraitSectionStyle(panel, reserveBottomCta)}
     >
       <div className={portraitFrameClass(panel, aspect, insetMargins)}>
-        <PortraitMedia
-          src={src}
-          alt={alt}
-          priority={priority}
-          scale={scale}
-          objectPosition={objectPosition}
-          panel={panel}
-          fitContain={fitContain}
-          dragZoom={dragZoom}
-        />
+        <PdpRevealItem className="relative size-full">
+          <PortraitMedia
+            src={src}
+            alt={alt}
+            priority={priority}
+            scale={scale}
+            objectPosition={objectPosition}
+            panel={panel}
+            fitContain={fitContain}
+            dragZoom={dragZoom}
+          />
+        </PdpRevealItem>
 
         <PortraitOverlays
           hotspots={hotspots}
@@ -537,7 +540,7 @@ function PdpGalleryVideoSlide({
             : undefined
       }
     >
-      <div
+      <PdpRevealItem
         className={cn(
           PDP_PANEL_SCROLL
             ? cn("bg-black", PANEL_MEDIA_FRAME_CLASS)
@@ -569,6 +572,7 @@ function PdpGalleryVideoSlide({
             >
               <PdpTextReveal
                 as="p"
+                delay={100}
                 className={`font-extended m-0 text-center text-white ${pdpType.caption}`}
               >
                 {caption}
@@ -576,7 +580,7 @@ function PdpGalleryVideoSlide({
             </div>
           ) : null}
         </div>
-      </div>
+      </PdpRevealItem>
     </section>
   );
 }
@@ -686,7 +690,6 @@ export function PdpGalleryView({
               galleryScrollReveal(
                 `weight-feel-${index}`,
                 <PdpWeightFeelModule isLastPanel={isLastPanel} />,
-                { variant: "subtle" },
               ),
             ];
           }

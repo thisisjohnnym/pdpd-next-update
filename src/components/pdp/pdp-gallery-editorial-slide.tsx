@@ -12,6 +12,7 @@ import { galleryPanelClassName } from "./pdp-gallery-panel";
 import { BOTTOM_CTA_OFFSET, SCREEN_HEIGHT_STYLE } from "./pdp-viewport-chrome";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
 
 type PdpGalleryEditorialSlideProps = {
@@ -115,42 +116,43 @@ export function PdpGalleryEditorialSlide({
               panelScroll && "max-h-[calc(var(--pdp-screen-height,100svh)-7rem)] justify-center",
             )}
           >
-            <div
-              ref={mediaRef}
-              className={cn(
-                "relative w-full overflow-hidden bg-neutral-100",
-                panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
-              )}
-            >
-              {videoSrc ? (
-                <PdpGalleryHeroVideo
-                  src={videoSrc}
-                  poster={src}
-                  ariaLabel={alt}
-                  isActive={isActive}
-                  preload={isActive ? "auto" : "metadata"}
-                  skeletonTone="light"
-                  showControls
-                  showMuteControl={showMuteControl}
-                  className="size-full object-cover object-center"
-                />
-              ) : dragZoom ? (
-                <PdpGalleryDragZoomImage
-                  src={src}
-                  alt={alt}
-                  objectPosition={objectPosition}
-                  scale={scale}
-                />
-              ) : (
-                <Image
-                  src={src}
-                  alt={alt}
-                  fill
-                  className="object-cover"
-                  style={{ objectPosition }}
-                  sizes="(max-width: 1023px) 78vw, 42vw"
-                />
-              )}
+            <div ref={mediaRef} className="w-full">
+              <PdpRevealItem
+                className={cn(
+                  "relative w-full overflow-hidden bg-neutral-100",
+                  panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
+                )}
+              >
+                {videoSrc ? (
+                  <PdpGalleryHeroVideo
+                    src={videoSrc}
+                    poster={src}
+                    ariaLabel={alt}
+                    isActive={isActive}
+                    preload={isActive ? "auto" : "metadata"}
+                    skeletonTone="light"
+                    showControls
+                    showMuteControl={showMuteControl}
+                    className="size-full object-cover object-center"
+                  />
+                ) : dragZoom ? (
+                  <PdpGalleryDragZoomImage
+                    src={src}
+                    alt={alt}
+                    objectPosition={objectPosition}
+                    scale={scale}
+                  />
+                ) : (
+                  <Image
+                    src={src}
+                    alt={alt}
+                    fill
+                    className="object-cover"
+                    style={{ objectPosition }}
+                    sizes="(max-width: 1023px) 78vw, 42vw"
+                  />
+                )}
+              </PdpRevealItem>
             </div>
 
             <div
@@ -159,7 +161,7 @@ export function PdpGalleryEditorialSlide({
                 learnMore && "pb-2 lg:pb-4",
               )}
             >
-              <PdpTextReveal as="p" className={`font-extended m-0 w-full text-black ${pdpType.caption}`}>
+              <PdpTextReveal as="p" delay={100} className={`font-extended m-0 w-full text-black ${pdpType.caption}`}>
                 {caption}
               </PdpTextReveal>
 
@@ -187,7 +189,10 @@ export function PdpGalleryEditorialSlide({
             </div>
 
             {secondarySrc && !panelScroll ? (
-              <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
+              <PdpRevealItem
+                delay={140}
+                className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100"
+              >
                 <Image
                   src={secondarySrc}
                   alt={secondaryAlt ?? ""}
@@ -195,7 +200,7 @@ export function PdpGalleryEditorialSlide({
                   className="object-cover object-top scale-[1.12]"
                   sizes="(max-width: 1023px) 78vw, 42vw"
                 />
-              </div>
+              </PdpRevealItem>
             ) : null}
           </div>
         </GridItem>

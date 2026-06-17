@@ -46,7 +46,12 @@ function setRevealHidden(
   layout: RevealLayout,
 ) {
   if (layout === "module") {
-    gsap.set(inner, { opacity: 0 });
+    if (targets.length === 0) {
+      gsap.set(inner, { opacity: 0, y: 16, filter: "blur(5px)" });
+    } else {
+      gsap.set(inner, { clearProps: "opacity,transform,scale,filter" });
+      inner.classList.add("pdp-scroll-reveal__inner--revealed");
+    }
   } else {
     gsap.set(inner, { clearProps: "opacity,transform,scale" });
     inner.classList.add("pdp-scroll-reveal__inner--revealed");
@@ -59,7 +64,7 @@ function setRevealHidden(
 
 export function markRevealComplete(inner: HTMLElement) {
   inner.classList.add("pdp-scroll-reveal__inner--revealed");
-  gsap.set(inner, { clearProps: "opacity,transform,scale" });
+  gsap.set(inner, { clearProps: "opacity,transform,scale,filter" });
 }
 
 export function markTargetsComplete(targets: NodeListOf<HTMLElement> | HTMLElement[]) {
@@ -119,10 +124,12 @@ export function buildRevealTimeline({
     },
   });
 
-  if (layout === "module") {
+  if (layout === "module" && targets.length === 0) {
     timeline.to(inner, {
       opacity: 1,
-      duration: 0.55,
+      y: 0,
+      filter: "blur(0px)",
+      duration: 0.85,
       ease: REVEAL_EASE,
     });
   }
@@ -134,11 +141,11 @@ export function buildRevealTimeline({
         opacity: 1,
         y: 0,
         filter: "blur(0px)",
-        duration: 0.8,
+        duration: 0.85,
         ease: REVEAL_EASE,
         stagger: textRevealStagger,
       },
-      layout === "module" ? "-=0.35" : 0,
+      0,
     );
   }
 
@@ -157,12 +164,20 @@ export function syncRevealIfAlreadyInView(
     return;
   }
 
+  const trigger = scrollTrigger.trigger as HTMLElement;
   ScrollTrigger.refresh();
 
-  if (scrollTrigger.progress > 0.08 || scrollTrigger.isActive) {
+  const scrolledPast = trigger.getBoundingClientRect().bottom < 0;
+
+  if (scrolledPast) {
     timeline.progress(1);
     onComplete?.();
     scrollTrigger.kill(false);
+    return;
+  }
+
+  if (scrollTrigger.progress > 0 || scrollTrigger.isActive) {
+    timeline.play(0);
   }
 }
 
