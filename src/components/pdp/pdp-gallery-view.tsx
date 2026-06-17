@@ -35,6 +35,7 @@ import { PdpAsSeenOnModule } from "./pdp-as-seen-on-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
   PDP_GALLERY_HERO_IMAGE_FOCUS,
+  PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
@@ -94,11 +95,13 @@ function galleryScrollReveal(
 /** Hero only — full-screen immersive video, edge-to-edge under device safe areas */
 export function PdpGalleryHero({
   videoSrc,
+  poster,
   alt,
   onOpenReviews,
   isLastPanel = false,
 }: {
   videoSrc: string;
+  poster?: string;
   alt: string;
   onOpenReviews?: () => void;
   isLastPanel?: boolean;
@@ -139,6 +142,7 @@ export function PdpGalleryHero({
         <div className={PANEL_MEDIA_FILL_CLASS}>
           <PdpGalleryHeroVideo
             src={videoSrc}
+            poster={poster}
             ariaLabel={alt}
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
@@ -325,6 +329,7 @@ function PdpGalleryPortraitSlide({
 /** Immersive gallery video — 4:5 product spin or 9:16 TikTok-style clip */
 function PdpGalleryVideoSlide({
   src,
+  poster,
   alt,
   showMuteControl = true,
   aspect = "4/5",
@@ -333,6 +338,7 @@ function PdpGalleryVideoSlide({
   isLastPanel = false,
 }: {
   src: string;
+  poster?: string;
   alt: string;
   showMuteControl?: boolean;
   aspect?: "4/5" | "9/16";
@@ -392,6 +398,7 @@ function PdpGalleryVideoSlide({
         <div className={PDP_PANEL_SCROLL ? PANEL_MEDIA_FILL_CLASS : "size-full"}>
           <PdpGalleryHeroVideo
             src={src}
+            poster={poster}
             ariaLabel={alt}
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
@@ -462,6 +469,7 @@ export function PdpGalleryView({
     {!omitHero ? (
       <PdpGalleryHero
         videoSrc={PDP_GALLERY_IMMERSIVE_HERO_VIDEO}
+        poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
         alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
         onOpenReviews={onOpenReviews}
         isLastPanel={lastPanelSlideIndex === -1}
@@ -567,6 +575,7 @@ export function PdpGalleryView({
                 `video-${index}-${slide.src}`,
                 <PdpGalleryVideoSlide
                   src={slide.src}
+                  poster={slide.poster}
                   alt={slide.alt}
                   showMuteControl={slide.showMuteControl}
                   aspect={slide.aspect}

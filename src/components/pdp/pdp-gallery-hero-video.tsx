@@ -16,6 +16,10 @@ import {
 } from "./pdp-media-policy";
 import { usePdpRuntime } from "./pdp-runtime-context";
 import { resolveVideoSources } from "./pdp-video-sources";
+import { logVideoTelemetry } from "./pdp-video-telemetry";
+
+/** Max wait for the first decoded frame before we surface the poster + tap-to-play fallback */
+const FIRST_FRAME_TIMEOUT_MS = 2500;
 
 type PdpGalleryHeroVideoProps = {
   className?: string;
@@ -66,6 +70,8 @@ export function PdpGalleryHeroVideo({
   const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
   const previewShownRef = useRef(false);
+  const firstFrameLoggedRef = useRef(false);
+  const fallbackLoggedRef = useRef(false);
 
   const { lifecycle, lowPowerMode, network, reducedMotion } = usePdpRuntime();
   const resolvedDecoderId = decoderId ?? src;
@@ -77,6 +83,7 @@ export function PdpGalleryHeroVideo({
   const [isMuted, setIsMuted] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [firstFrameTimedOut, setFirstFrameTimedOut] = useState(false);
   const [isClientReady, setIsClientReady] = useState(false);
   const [playbackHint, setPlaybackHint] = useState<"play" | "pause" | null>(null);
   const [isMounted, setIsMounted] = useState(true);
@@ -137,7 +144,10 @@ export function PdpGalleryHeroVideo({
   useEffect(() => {
     setIsReady(false);
     setPreviewVisible(false);
+    setFirstFrameTimedOut(false);
     previewShownRef.current = false;
+    firstFrameLoggedRef.current = false;
+    fallbackLoggedRef.current = false;
     setAutoplayRestricted(false);
     userStartedRef.current = false;
     userPausedRef.current = false;
@@ -243,9 +253,22 @@ export function PdpGalleryHeroVideo({
       return;
     }
 
+    const logFirstFrame = () => {
+      if (firstFrameLoggedRef.current) {
+        return;
+      }
+
+      firstFrameLoggedRef.current = true;
+      logVideoTelemetry("first_frame_rendered", {
+        src,
+        readyState: video.readyState,
+      });
+    };
+
     const markReady = () => {
       if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
         setIsReady(true);
+        logFirstFrame();
       }
     };
 
@@ -258,6 +281,7 @@ export function PdpGalleryHeroVideo({
       }
 
       previewShownRef.current = true;
+      logFirstFrame();
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -268,11 +292,37 @@ export function PdpGalleryHeroVideo({
       });
     };
 
+    const onError = () => {
+      logVideoTelemetry("video_error", {
+        src,
+        readyState: video.readyState,
+        networkState: video.networkState,
+        reason: video.error?.message ?? `code_${video.error?.code ?? "unknown"}`,
+      });
+
+      if (mountedRef.current) {
+        setFirstFrameTimedOut(true);
+        setAutoplayRestricted(true);
+      }
+    };
+
+    const onStalled = (event: Event) => {
+      logVideoTelemetry("video_stalled", {
+        src,
+        readyState: video.readyState,
+        networkState: video.networkState,
+        reason: event.type,
+      });
+    };
+
     for (const type of ["playing", "loadeddata", "canplay"] as const) {
       video.addEventListener(type, markReady);
     }
 
     video.addEventListener("loadeddata", markPreviewFrame);
+    video.addEventListener("error", onError);
+    video.addEventListener("stalled", onStalled);
+    video.addEventListener("suspend", onStalled);
 
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       markReady();
@@ -285,8 +335,40 @@ export function PdpGalleryHeroVideo({
       }
 
       video.removeEventListener("loadeddata", markPreviewFrame);
+      video.removeEventListener("error", onError);
+      video.removeEventListener("stalled", onStalled);
+      video.removeEventListener("suspend", onStalled);
     };
   }, [src, isMounted, isClientReady]);
+
+  useEffect(() => {
+    if (!isMounted || isReady || previewVisible || firstFrameTimedOut) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (!mountedRef.current) {
+        return;
+      }
+
+      const video = videoRef.current;
+      if (video && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        return;
+      }
+
+      setFirstFrameTimedOut(true);
+      setAutoplayRestricted(true);
+      logVideoTelemetry("first_frame_timeout", {
+        src,
+        readyState: video?.readyState,
+        networkState: video?.networkState,
+      });
+    }, FIRST_FRAME_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [isMounted, isReady, previewVisible, firstFrameTimedOut, src]);
 
   useEffect(() => {
     if (!priorityAutoplay || poster || !previewVisible || isPlaying) {
@@ -309,10 +391,39 @@ export function PdpGalleryHeroVideo({
     };
   }, [priorityAutoplay, poster, previewVisible, isPlaying, isClientReady]);
 
-  const onPlayRejected = () => {
+  useEffect(() => {
+    if (fallbackLoggedRef.current) {
+      return;
+    }
+
+    const fallbackActive =
+      isActive && !isPlaying && (autoplayRestricted || firstFrameTimedOut);
+
+    if (fallbackActive) {
+      fallbackLoggedRef.current = true;
+      logVideoTelemetry("fallback_shown", {
+        src,
+        readyState: videoRef.current?.readyState,
+        reason: firstFrameTimedOut ? "first_frame_timeout" : "autoplay_restricted",
+      });
+    }
+  }, [isActive, isPlaying, autoplayRestricted, firstFrameTimedOut, src]);
+
+  const onPlayRejected = (error?: unknown) => {
     if (!mountedRef.current) {
       return;
     }
+
+    logVideoTelemetry("autoplay_blocked", {
+      src,
+      readyState: videoRef.current?.readyState,
+      reason:
+        error instanceof DOMException
+          ? error.name
+          : error instanceof Error
+            ? error.message
+            : "play_promise_rejected",
+    });
 
     setAutoplayRestricted(true);
   };
@@ -332,6 +443,7 @@ export function PdpGalleryHeroVideo({
         return;
       }
 
+      logVideoTelemetry("autoplay_attempt", { src, readyState: video.readyState });
       void video.play().catch(onPlayRejected);
     };
 
@@ -362,8 +474,9 @@ export function PdpGalleryHeroVideo({
       return;
     }
 
-    void video.play().catch(() => {
-      onPlayRejected();
+    logVideoTelemetry("autoplay_attempt", { src, readyState: video.readyState });
+    void video.play().catch((error) => {
+      onPlayRejected(error);
       video.pause();
     });
   }, [shouldPlay, isActive, isMounted, isClientReady, src, userPaused, priorityAutoplay]);
@@ -416,9 +529,18 @@ export function PdpGalleryHeroVideo({
       setUserPaused(false);
       userStartedRef.current = true;
       setUserStarted(true);
-      void video.play().catch(() => {
-        setAutoplayRestricted(true);
-      });
+      logVideoTelemetry("user_tap_play", { src, readyState: video.readyState });
+      void video
+        .play()
+        .then(() => {
+          if (mountedRef.current) {
+            setFirstFrameTimedOut(false);
+            setAutoplayRestricted(false);
+          }
+        })
+        .catch((error) => {
+          onPlayRejected(error);
+        });
       flashPlaybackHint("play");
       return;
     }
@@ -448,18 +570,23 @@ export function PdpGalleryHeroVideo({
 
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
-  const showBlurReveal = priorityAutoplay && !poster;
+  const showBlurReveal = priorityAutoplay;
   const isRevealed =
     !showBlurReveal || reducedMotion ? isReady : isPlaying && isReady;
 
-  const showLandingPoster = Boolean(poster) && !isReady && !priorityAutoplay;
+  /** The video element is actually painting a frame on screen */
+  const videoFrameVisible = showBlurReveal ? previewVisible : isReady;
+
   const showFrozenPlayOverlay =
     isActive &&
     !isPlaying &&
     !userStarted &&
-    (priorityAutoplay && previewVisible
-      ? priorityHeroNeedsManualPlay || autoplayRestricted || !canAutoplayPriorityHero
-      : manualPlaybackRequired && (isReady || Boolean(poster)));
+    (priorityAutoplay
+      ? priorityHeroNeedsManualPlay ||
+        autoplayRestricted ||
+        firstFrameTimedOut ||
+        !canAutoplayPriorityHero
+      : manualPlaybackRequired && (isReady || Boolean(poster) || firstFrameTimedOut));
 
   const effectivePreload = (() => {
     if (priorityAutoplay && isActive) {
@@ -489,7 +616,9 @@ export function PdpGalleryHeroVideo({
     return preload;
   })();
 
-  const heroBlackout = showBlurReveal && (!isClientReady || !previewVisible);
+  // Last-resort black is only used when there is no poster to fall back to.
+  const heroBlackout =
+    showBlurReveal && !poster && (!isClientReady || !previewVisible);
 
   const videoClassName = cn(
     className,
@@ -564,10 +693,13 @@ export function PdpGalleryHeroVideo({
           (allowHorizontalPan ? "[touch-action:pan-x_pan-y]" : "touch-pan-y"),
       )}
     >
-      {showLandingPoster ? (
+      {poster ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-[1] bg-cover bg-center"
+          className={cn(
+            "pointer-events-none absolute inset-0 z-[1] bg-cover bg-center transition-opacity duration-500",
+            videoFrameVisible ? "opacity-0" : "opacity-100",
+          )}
           style={{ backgroundImage: `url(${poster})` }}
         />
       ) : null}

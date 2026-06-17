@@ -1027,6 +1027,9 @@ export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
 /** Immersive hero — full-bleed 9:16 on-model lifestyle video */
 export const PDP_GALLERY_IMMERSIVE_HERO_VIDEO = "/videos/tabby-hero.mp4";
 
+/** First-frame still — fallback whenever the hero video can't autoplay (e.g. iOS Low Power Mode) */
+export const PDP_GALLERY_IMMERSIVE_HERO_POSTER = "/images/posters/tabby-hero.jpg";
+
 /** Full-bleed rotating product video for Gallery tab */
 export const PDP_GALLERY_HERO_VIDEO = "/videos/soft-tabby-360.webm";
 
