@@ -342,7 +342,6 @@ export function PdpLeatherAgingModule({
           </PdpTextReveal>
 
           <div
-            ref={trackRef}
             role="slider"
             tabIndex={0}
             aria-valuemin={0}
@@ -353,7 +352,7 @@ export function PdpLeatherAgingModule({
             }
             aria-label="Leather aging over time"
             className={cn(
-              "relative mt-1 flex h-11 cursor-grab touch-none select-none items-center active:cursor-grabbing",
+              "relative mt-1 flex h-11 cursor-grab touch-none select-none items-center px-2 active:cursor-grabbing",
               isDragging && "cursor-grabbing",
             )}
             onPointerDown={handleScrubPointerDown}
@@ -372,7 +371,10 @@ export function PdpLeatherAgingModule({
               }
             }}
           >
-            <div className="pdp-aging-timeline__track relative h-[3px] w-full rounded-full bg-neutral-200">
+            <div
+              ref={trackRef}
+              className="pdp-aging-timeline__track relative h-[3px] w-full rounded-full bg-neutral-200"
+            >
               <div
                 className={cn(
                   "absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-neutral-950 via-neutral-800 to-[#7a5c32]",

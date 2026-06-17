@@ -6,7 +6,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_MORE_PHOTOS } from "./pdp-data";
-import { pdpPressableClass } from "./pdp-type";
+import { pdpBodyRhythm, pdpPressableClass } from "./pdp-type";
 
 const PREVIEW_COUNT = 3;
 
@@ -54,7 +54,7 @@ export function PdpGalleryViewMorePhotos({ onOpen }: PdpGalleryViewMorePhotosPro
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="block text-sm leading-tight text-neutral-900">
+          <span className={`block text-sm text-neutral-900 ${pdpBodyRhythm}`}>
             View more media
           </span>
           {remaining > 0 ? (

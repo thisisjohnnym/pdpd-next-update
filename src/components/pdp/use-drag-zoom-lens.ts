@@ -6,9 +6,21 @@ type Point = { x: number; y: number };
 type Size = { width: number; height: number };
 type LensPosition = Point & { xPct: number; yPct: number };
 
-type Phase = "idle" | "zooming";
+type Phase = "idle" | "pending" | "zooming";
 
 type CloseReason = "pointerup" | "pointercancel" | "lostpointercapture" | "blur" | "unmount" | "recapture-failed";
+
+/**
+ * How long the user must hold still before the zoom lens engages. Long enough
+ * that a scroll flick never trips it, short enough to feel intentional.
+ */
+const HOLD_TO_ZOOM_MS = 520;
+
+/**
+ * If the pointer travels more than this many pixels before the hold completes,
+ * we treat the gesture as a scroll and abandon the zoom.
+ */
+const MOVE_CANCEL_THRESHOLD = 10;
 
 /** Ref-counted body scroll lock — prevents page scroll while the lens is active */
 let pageScrollLockCount = 0;
@@ -79,25 +91,26 @@ function exploreHaptic() {
   }
 }
 
-function lockGestureScroll(target: HTMLDivElement) {
-  target.style.touchAction = "none";
-  target.classList.add("touch-none");
-}
-
-function restoreGestureScroll(target: HTMLDivElement) {
-  target.classList.remove("touch-none");
-  target.style.touchAction = "pan-y";
-}
-
-/** Instant magnifier lens — touch and mouse activate on pointerdown */
+/**
+ * Press-and-hold magnifier lens. The hold gesture is intentionally scoped to a
+ * dedicated trigger control (see `triggerHandlers`) rather than the whole image
+ * — so the image body stays freely scrollable and accidental holds while
+ * scrolling can never arm the zoom. Once the hold completes, the pointer is
+ * captured and the lens roams the entire photo until release.
+ */
 export function useDragZoomLens() {
   const containerRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<Phase>("idle");
   const pointerIdRef = useRef<number | null>(null);
+  const captureTargetRef = useRef<HTMLElement | null>(null);
   const pageScrollLockedRef = useRef(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressOriginRef = useRef<Point | null>(null);
+  const lastClientRef = useRef<Point | null>(null);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [lensPosition, setLensPosition] = useState<LensPosition | null>(null);
+  const [pressPoint, setPressPoint] = useState<Point | null>(null);
   const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
   const [pointerType, setPointerType] = useState<React.PointerEvent["pointerType"] | null>(
     null,
@@ -135,9 +148,18 @@ export function useDragZoomLens() {
     unlockPageScroll();
   }, []);
 
+  const clearHoldTimer = useCallback(() => {
+    if (holdTimerRef.current !== null) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  }, []);
+
   const release = useCallback(
-    (target?: HTMLDivElement | null, pointerId?: number, _reason: CloseReason = "pointerup") => {
-      const el = target ?? containerRef.current;
+    (target?: HTMLElement | null, pointerId?: number, _reason: CloseReason = "pointerup") => {
+      clearHoldTimer();
+
+      const el = target ?? captureTargetRef.current;
       const pid = pointerId ?? pointerIdRef.current;
       const hadCapture = Boolean(el && pid !== null && el.hasPointerCapture(pid));
 
@@ -149,78 +171,127 @@ export function useDragZoomLens() {
         }
       }
 
-      if (el) {
-        restoreGestureScroll(el);
-      }
-
       unlockPageScrollIfNeeded();
 
+      captureTargetRef.current = null;
       pointerIdRef.current = null;
+      pressOriginRef.current = null;
+      lastClientRef.current = null;
       setPhaseSafe("idle");
       setLensPosition(null);
+      setPressPoint(null);
       setPointerType(null);
     },
-    [setPhaseSafe, unlockPageScrollIfNeeded],
+    [clearHoldTimer, setPhaseSafe, unlockPageScrollIfNeeded],
   );
 
+  /**
+   * Fires once the hold timer completes. The pointer is already captured on the
+   * trigger; here we lock the page and reveal the lens so a continued drag can
+   * roam the whole photo.
+   */
   const activateZoom = useCallback(
-    (
-      target: HTMLDivElement,
-      pointerId: number,
-      type: React.PointerEvent["pointerType"],
-      clientX: number,
-      clientY: number,
-    ) => {
-      try {
-        target.setPointerCapture(pointerId);
-      } catch {
-        release(target, pointerId, "recapture-failed");
+    (type: React.PointerEvent["pointerType"]) => {
+      const last = lastClientRef.current;
+      if (pointerIdRef.current === null || !last) {
         return;
       }
 
-      pointerIdRef.current = pointerId;
+      lockPageScroll();
+      pageScrollLockedRef.current = true;
+
       setPointerType(type);
       setPhaseSafe("zooming");
-      updateLens(clientX, clientY);
+      setPressPoint(null);
+      updateLens(last.x, last.y);
 
       if (type === "touch") {
         exploreHaptic();
       }
     },
-    [release, setPhaseSafe, updateLens],
+    [setPhaseSafe, updateLens],
   );
 
+  /**
+   * Attach these to the dedicated zoom trigger control — NOT the image. The hold
+   * begins on the trigger and the pointer is captured immediately, so the
+   * subsequent drag continues across the photo even though it left the trigger.
+   */
   const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
+    (event: React.PointerEvent<HTMLElement>) => {
       if (event.pointerType === "mouse" && event.button !== 0) {
         return;
       }
 
+      // A press while already zooming dismisses the lens.
       if (phaseRef.current === "zooming") {
         release(event.currentTarget, event.pointerId, "pointerup");
         return;
       }
 
+      clearHoldTimer();
+
       const target = event.currentTarget;
 
-      // Lock page scroll synchronously — must run before the browser applies pan-y
-      // from the initial touch (scroll can jump before the first pointermove).
-      lockPageScroll();
-      pageScrollLockedRef.current = true;
-      lockGestureScroll(target);
-
-      if (event.pointerType === "touch" && event.cancelable) {
-        event.preventDefault();
+      // Capture on the trigger now so the drag keeps reporting once the finger
+      // moves off the control and onto the image.
+      try {
+        target.setPointerCapture(event.pointerId);
+      } catch {
+        /* capture unsupported — handlers still work without it */
       }
 
-      activateZoom(target, event.pointerId, event.pointerType, event.clientX, event.clientY);
+      captureTargetRef.current = target;
+      pointerIdRef.current = event.pointerId;
+      pressOriginRef.current = { x: event.clientX, y: event.clientY };
+      lastClientRef.current = { x: event.clientX, y: event.clientY };
+
+      const type = event.pointerType;
+      setPointerType(type);
+      setPhaseSafe("pending");
+
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+        setPressPoint(localPoint(event.clientX, event.clientY, rect));
+      } else {
+        setPressPoint(null);
+      }
+
+      holdTimerRef.current = setTimeout(() => {
+        holdTimerRef.current = null;
+        if (phaseRef.current === "pending") {
+          activateZoom(type);
+        }
+      }, HOLD_TO_ZOOM_MS);
     },
-    [activateZoom, release],
+    [activateZoom, clearHoldTimer, release, setPhaseSafe],
   );
 
   const handlePointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (pointerIdRef.current !== event.pointerId || phaseRef.current !== "zooming") {
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (pointerIdRef.current !== event.pointerId) {
+        return;
+      }
+
+      lastClientRef.current = { x: event.clientX, y: event.clientY };
+
+      if (phaseRef.current === "pending") {
+        const origin = pressOriginRef.current;
+        if (origin) {
+          const dx = event.clientX - origin.x;
+          const dy = event.clientY - origin.y;
+          // Sliding off the trigger before the hold lands means it wasn't a
+          // deliberate press — abandon so the gesture can't accidentally arm.
+          if (Math.hypot(dx, dy) > MOVE_CANCEL_THRESHOLD) {
+            release(event.currentTarget, event.pointerId, "pointercancel");
+          }
+        }
+        return;
+      }
+
+      if (phaseRef.current !== "zooming") {
         return;
       }
 
@@ -230,11 +301,11 @@ export function useDragZoomLens() {
 
       updateLens(event.clientX, event.clientY);
     },
-    [updateLens],
+    [release, updateLens],
   );
 
   const handlePointerUp = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
+    (event: React.PointerEvent<HTMLElement>) => {
       if (pointerIdRef.current !== event.pointerId) {
         return;
       }
@@ -245,7 +316,7 @@ export function useDragZoomLens() {
   );
 
   const handlePointerCancel = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
+    (event: React.PointerEvent<HTMLElement>) => {
       if (pointerIdRef.current !== event.pointerId) {
         return;
       }
@@ -258,7 +329,7 @@ export function useDragZoomLens() {
   const handlePointerEnd = handlePointerUp;
 
   const handleLostPointerCapture = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
+    (event: React.PointerEvent<HTMLElement>) => {
       if (pointerIdRef.current !== event.pointerId) {
         return;
       }
@@ -268,7 +339,7 @@ export function useDragZoomLens() {
     [release],
   );
 
-  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
   }, []);
 
@@ -291,20 +362,34 @@ export function useDragZoomLens() {
   }, [phase]);
 
   useEffect(() => {
-    const onBlur = () => release(containerRef.current, undefined, "blur");
+    const onBlur = () => release(undefined, undefined, "blur");
     window.addEventListener("blur", onBlur);
     return () => {
       window.removeEventListener("blur", onBlur);
-      release(containerRef.current, undefined, "unmount");
+      release(undefined, undefined, "unmount");
     };
   }, [release]);
+
+  /** Spread onto the dedicated press-and-hold zoom trigger control. */
+  const triggerHandlers = {
+    onPointerDown: handlePointerDown,
+    onPointerMove: handlePointerMove,
+    onPointerUp: handlePointerUp,
+    onPointerCancel: handlePointerCancel,
+    onLostPointerCapture: handleLostPointerCapture,
+    onContextMenu: handleContextMenu,
+  };
 
   return {
     containerRef,
     lensPosition,
+    pressPoint,
     containerSize,
+    isPending: phase === "pending",
     isZooming: phase === "zooming",
+    holdDurationMs: HOLD_TO_ZOOM_MS,
     pointerType,
+    triggerHandlers,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,

@@ -1,5 +1,7 @@
 import { cn } from "@/lib/cn";
 
+import { pdpType, pdpBodyRhythm } from "./pdp-type";
+
 type PdpModuleSectionOptions = {
   /** White default; muted for recently viewed */
   variant?: "white" | "muted";
@@ -42,10 +44,7 @@ export function pdpModuleHeadingLeadClass() {
 }
 /** Primary H1 — modules, sheets, drawers */
 function pdpPageHeadingClass({ lead = true }: { lead?: boolean } = {}) {
-  return cn(
-    "font-extended m-0 text-xl font-normal tracking-[0.4px] text-black",
-    lead && "mb-4",
-  );
+  return cn(pdpType.headline, "m-0", lead && "mb-4");
 }
 
 /** Sheet / drawer title — same scale as module H1s */
@@ -60,7 +59,7 @@ export function pdpModuleHeadingClass({
 }: { lead?: boolean; size?: "lg" | "sm" } = {}) {
   if (size === "sm") {
     return cn(
-      "font-extended m-0 text-sm font-normal tracking-[0.2px] text-black",
+      `font-extended m-0 text-sm ${pdpBodyRhythm} text-black`,
       lead && "mb-3",
     );
   }

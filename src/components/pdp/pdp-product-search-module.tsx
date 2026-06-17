@@ -13,7 +13,7 @@ import {
 } from "./pdp-data";
 import { PdpAiInsightContent } from "./pdp-ai-insight-card";
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
-import { pdpType } from "./pdp-type";
+import { pdpBodyRhythm, pdpType } from "./pdp-type";
 
 function ConciergeResponse({
   prompt,
@@ -251,7 +251,7 @@ export function PdpAiConciergePanel({
                 <span className="font-extended block text-[10px] tracking-[0.2px] text-neutral-500">
                   {prompt.category}
                 </span>
-                <span className="font-extended mt-1 block text-sm leading-snug tracking-[0.2px] text-black">
+                <span className={`font-extended mt-1 block text-sm text-black ${pdpBodyRhythm}`}>
                   {prompt.question}
                 </span>
               </span>

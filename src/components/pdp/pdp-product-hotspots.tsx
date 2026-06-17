@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { PdpProductHotspot } from "./pdp-data";
+import { pdpBodyRhythm } from "./pdp-type";
 
 type PdpProductHotspotsProps = {
   hotspots: PdpProductHotspot[];
@@ -112,10 +113,10 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
             transform: getCardTransform(activeHotspot.y),
           }}
         >
-          <p className="font-extended text-[13px] font-normal leading-tight tracking-[0.2px] text-black">
+          <p className={`font-extended text-[13px] text-black ${pdpBodyRhythm}`}>
             {activeHotspot.title}
           </p>
-          <p className="mt-0.5 font-extended text-[11px] leading-snug tracking-[0.2px] text-neutral-600">
+          <p className={`mt-0.5 font-extended text-[11px] text-neutral-600 ${pdpBodyRhythm}`}>
             {activeHotspot.body}
           </p>
         </div>

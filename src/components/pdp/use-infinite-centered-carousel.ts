@@ -121,6 +121,111 @@ export function useInfiniteCenteredCarousel(
   }, [scrollRef, itemCount, initialIndex]);
 }
 
+/**
+ * Single-swipe paging assist for the center-snapped rail.
+ *
+ * `scroll-snap-stop: always` on near-full-width tiles makes a gentle thumb
+ * swipe feel sticky: if the flick doesn't carry enough momentum past the snap
+ * threshold the browser rubber-bands back to the current card, so the next clip
+ * only half slides in and the user has to swipe twice. This watches each touch
+ * gesture and, on release, commits to the adjacent card with a smooth
+ * programmatic scroll whenever the swipe shows clear horizontal intent — even a
+ * short, slow one — so one swipe always advances exactly one card.
+ */
+export function useCarouselSwipeAssist(
+  scrollRef: RefObject<HTMLDivElement | null>,
+) {
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    // Distance (px) or velocity (px/ms) at which a swipe counts as intentional.
+    const DISTANCE_THRESHOLD = 20;
+    const VELOCITY_THRESHOLD = 0.18;
+
+    const cardStep = () => {
+      const first = el.children[0] as HTMLElement | undefined;
+      const second = el.children[1] as HTMLElement | undefined;
+      if (!first || !second) {
+        return 0;
+      }
+      return Math.abs(second.offsetLeft - first.offsetLeft);
+    };
+
+    let tracking = false;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startTime = 0;
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        tracking = false;
+        return;
+      }
+      tracking = true;
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+      startScrollLeft = el.scrollLeft;
+      startTime = event.timeStamp;
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      if (!tracking) {
+        return;
+      }
+      tracking = false;
+
+      const touch = event.changedTouches[0];
+      if (!touch) {
+        return;
+      }
+
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      // Defer to the page for vertical scrolls and ignore taps.
+      if (Math.abs(dx) <= Math.abs(dy)) {
+        return;
+      }
+
+      const elapsed = Math.max(event.timeStamp - startTime, 1);
+      const velocity = Math.abs(dx) / elapsed;
+      if (Math.abs(dx) < DISTANCE_THRESHOLD && velocity < VELOCITY_THRESHOLD) {
+        return;
+      }
+
+      const step = cardStep();
+      if (step <= 0) {
+        return;
+      }
+
+      // Swipe left (dx < 0) reveals the next clip → scroll right by one card.
+      const direction = dx < 0 ? 1 : -1;
+      const maxScrollLeft = el.scrollWidth - el.clientWidth;
+      const target = clampNumber(
+        startScrollLeft + direction * step,
+        0,
+        maxScrollLeft,
+      );
+
+      el.scrollTo({ left: target, behavior: "smooth" });
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [scrollRef]);
+}
+
 /** Coverflow depth tuning — how far the side clips rotate, recede, and dim */
 const COVERFLOW = {
   /** Peak rotation (deg) reached ~1.4 cards from center */
@@ -191,10 +296,7 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       });
     };
 
-    let frame = 0;
-
     const apply = () => {
-      frame = 0;
       const viewportCenter = el.scrollLeft + viewportWidth / 2;
 
       for (let i = 0; i < cards.length; i += 1) {
@@ -236,11 +338,45 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       }
     };
 
-    const onScroll = () => {
-      if (frame) {
+    // iOS dispatches `scroll` in sparse bursts during momentum, so applying
+    // transforms only on those events makes the depth effect (and the text
+    // riding on each card) lag and jump. Instead, once motion starts we drive a
+    // self-sustaining rAF loop that re-applies every frame against the live
+    // scrollLeft — buttery tracking — and shut it down a few idle frames after
+    // the rail settles so we're not burning frames at rest.
+    const IDLE_FRAMES_BEFORE_STOP = 4;
+    let frame = 0;
+    let running = false;
+    let lastScrollLeft = Number.NaN;
+    let idleFrames = 0;
+
+    const tick = () => {
+      apply();
+
+      if (el.scrollLeft === lastScrollLeft) {
+        idleFrames += 1;
+      } else {
+        idleFrames = 0;
+        lastScrollLeft = el.scrollLeft;
+      }
+
+      if (idleFrames >= IDLE_FRAMES_BEFORE_STOP) {
+        running = false;
+        frame = 0;
         return;
       }
-      frame = requestAnimationFrame(apply);
+
+      frame = requestAnimationFrame(tick);
+    };
+
+    const startLoop = () => {
+      if (running) {
+        return;
+      }
+      running = true;
+      idleFrames = 0;
+      lastScrollLeft = Number.NaN;
+      frame = requestAnimationFrame(tick);
     };
 
     const onResize = () => {
@@ -250,17 +386,20 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
 
     measure();
     apply();
-    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("scroll", startLoop, { passive: true });
+    el.addEventListener("touchstart", startLoop, { passive: true });
 
     const ro = new ResizeObserver(onResize);
     ro.observe(el);
 
     return () => {
-      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("scroll", startLoop);
+      el.removeEventListener("touchstart", startLoop);
       ro.disconnect();
       if (frame) {
         cancelAnimationFrame(frame);
       }
+      running = false;
       resetStyles();
     };
   }, [scrollRef]);

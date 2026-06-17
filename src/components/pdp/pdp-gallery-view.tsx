@@ -816,16 +816,16 @@ export function PdpGalleryView({
         />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="40dvh">
-        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
-      </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpShoppingDiscoveryModule onAddToBag={() => onAddSimilarToBag?.()} />
-      </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="40dvh">
         <PdpReviewsModule
           onReadAll={onOpenReviews}
           onWriteReview={onOpenReviews}
         />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="muted" lazyMount reserveMinHeight="40dvh">
+        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+      </PdpScrollReveal>
+      <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="40dvh">
+        <PdpShoppingDiscoveryModule onAddToBag={() => onAddSimilarToBag?.()} />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="muted" lazyMount reserveMinHeight="24dvh">
         <PdpRecentlyViewedCarousel />

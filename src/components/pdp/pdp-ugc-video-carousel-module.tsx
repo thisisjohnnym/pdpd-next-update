@@ -11,25 +11,23 @@ import {
   pdpUgcVideoInfiniteScrollClass,
 } from "./pdp-carousel";
 import { PDP_UGC_VIDEO_CAROUSEL } from "./pdp-data";
-import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpUgcVideoCard } from "./pdp-ugc-video-card";
-import { pdpType } from "./pdp-type";
-import { PdpTextLinkCta } from "./pdp-text-link-cta";
-import { PdpTextReveal } from "./pdp-text-reveal";
 import {
   loopCarouselItems,
   useCarouselCoverflow,
+  useCarouselSwipeAssist,
   useInfiniteCenteredCarousel,
 } from "./use-infinite-centered-carousel";
 
 /** TikTok-style UGC rail — center-snapped, infinite loop left and right */
 export function PdpUgcVideoCarouselModule() {
-  const { title, followCta, videos } = PDP_UGC_VIDEO_CAROUSEL;
+  const { title, videos } = PDP_UGC_VIDEO_CAROUSEL;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
   const loopedVideos = useMemo(() => loopCarouselItems(videos), [videos]);
 
   useInfiniteCenteredCarousel(scrollRef, videos.length);
+  useCarouselSwipeAssist(scrollRef);
   useCarouselCoverflow(scrollRef);
 
   useEffect(() => {
@@ -44,22 +42,7 @@ export function PdpUgcVideoCarouselModule() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <div className="flex items-end justify-between gap-3">
-            <PdpModuleHeading spacing="none">{title}</PdpModuleHeading>
-            <PdpTextReveal as="div" delay={100} className="shrink-0">
-              <PdpTextLinkCta
-                as="a"
-                href={followCta.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={pdpType.label}
-              >
-                {followCta.label}
-              </PdpTextLinkCta>
-            </PdpTextReveal>
-          </div>
-
-          <div className={cn(pdpCarouselScrollWrapClass, "relative mt-3")}>
+          <div className={cn(pdpCarouselScrollWrapClass, "relative")}>
             <div
               ref={scrollRef}
               className={cn(

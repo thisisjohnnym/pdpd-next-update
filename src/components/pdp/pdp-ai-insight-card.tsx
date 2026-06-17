@@ -83,7 +83,7 @@ export function PdpAiInsightContent({
         {eyebrowPosition === "above" ? eyebrowEl : null}
         <p
           className={cn(
-            "font-extended font-normal leading-snug tracking-[0.2px] text-black",
+            "font-extended leading-[1.35] tracking-[0.2px] text-black",
             extraSmall ? "text-xs" : compact ? "text-sm" : "text-base",
             eyebrow && eyebrowPosition === "above" && "mt-0.5",
           )}

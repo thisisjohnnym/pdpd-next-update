@@ -6,6 +6,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_WEIGHT_FEEL } from "./pdp-data";
+import { pdpBodyRhythm } from "./pdp-type";
 import {
   EXPERIENCE_PANEL_MEDIA_CLASS,
   experiencePanelSectionProps,
@@ -132,7 +133,7 @@ export function PdpWeightFeelModule({
             >
               {showLiftedAsset ? (
                 <>
-                  <p className="font-extended text-sm leading-snug tracking-[0.2px] text-black">
+                  <p className={`font-extended text-sm text-black ${pdpBodyRhythm}`}>
                     {reveal.headline}
                   </p>
                   <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">

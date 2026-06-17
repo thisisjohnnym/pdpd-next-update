@@ -16,7 +16,7 @@ import {
   type PdpBundleAddPayload,
   type PdpBundleItem,
 } from "./pdp-data";
-import { pdpType } from "./pdp-type";
+import { pdpBodyRhythm, pdpType } from "./pdp-type";
 
 function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -51,7 +51,7 @@ function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="font-extended text-base font-normal leading-snug tracking-[0.2px] text-black">
+          <p className={`font-extended text-base text-black ${pdpBodyRhythm}`}>
             {item.name}
           </p>
         </div>

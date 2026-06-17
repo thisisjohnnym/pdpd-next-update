@@ -226,7 +226,8 @@ export function PdpCompareModule({
             </div>
             </PdpRevealItem>
 
-            {!insightDismissed ? (
+            {/* Temporarily hidden — "Based on your browsing" insight card */}
+            {false && !insightDismissed ? (
               <PdpRevealItem delay={210}>
               <PdpAiInsightCard
                 variant="minimal"

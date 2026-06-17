@@ -1238,7 +1238,7 @@ const PDP_GALLERY_PRODUCT_FRONT_IMAGE =
   "/images/gallery/tabby-product-front-916.jpg";
 
 /** Lead product shot — first frame below hero (native 9:16) */
-export const PDP_GALLERY_DRAG_ZOOM_HINT = "Hold and drag to zoom";
+export const PDP_GALLERY_DRAG_ZOOM_HINT = "Press & hold to zoom";
 
 const PDP_GALLERY_PRODUCT_FRONT_SLIDE: PdpGalleryImmersiveSlide = {
   type: "immersive",
@@ -1311,6 +1311,7 @@ const PDP_GALLERY_PRODUCT_SHOTS: PdpGallerySlide[] = [
     src: "/images/gallery/tabby-leather-detail-hardware.png",
     alt: "Close-up of Tabby Shoulder Bag 26 full-grain leather, gold C clasp, and accordion interior",
     objectPosition: "center center",
+    aspect: "9/16",
     hotspots: PDP_PRODUCT_IMMERSIVE_HOTSPOTS,
   },
 ];
