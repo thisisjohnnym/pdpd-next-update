@@ -96,12 +96,9 @@ export function PdpTextReveal<T extends ElementType = "div">({
 
     if (scrolledPast) {
       timeline.progress(1);
+      node.classList.add("pdp-reveal-target--revealed");
+      gsap.set(node, { clearProps: "opacity,transform,filter" });
       scrollTrigger.kill(false);
-      return;
-    }
-
-    if (scrollTrigger.progress > 0 || scrollTrigger.isActive) {
-      timeline.play(0);
     }
 
     return () => {

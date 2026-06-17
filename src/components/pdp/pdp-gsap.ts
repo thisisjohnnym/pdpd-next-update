@@ -10,6 +10,7 @@ export function ensureGsapPlugins() {
   }
 
   gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
   pluginsRegistered = true;
 }
 
@@ -154,6 +155,20 @@ export function buildRevealTimeline({
   return timeline;
 }
 
+let scrollTriggerRefreshRaf = 0;
+
+/** Batch layout refreshes — one global pass per frame, not per lazy-mounted section */
+export function scheduleScrollTriggerRefresh() {
+  if (typeof window === "undefined" || scrollTriggerRefreshRaf) {
+    return;
+  }
+
+  scrollTriggerRefreshRaf = window.requestAnimationFrame(() => {
+    scrollTriggerRefreshRaf = 0;
+    ScrollTrigger.refresh();
+  });
+}
+
 export function syncRevealIfAlreadyInView(
   timeline: gsap.core.Timeline,
   onComplete?: () => void,
@@ -165,20 +180,13 @@ export function syncRevealIfAlreadyInView(
   }
 
   const trigger = scrollTrigger.trigger as HTMLElement;
-  ScrollTrigger.refresh();
-
   const scrolledPast = trigger.getBoundingClientRect().bottom < 0;
 
   if (scrolledPast) {
     timeline.progress(1);
     onComplete?.();
     scrollTrigger.kill(false);
-    return;
-  }
-
-  if (scrollTrigger.progress > 0 || scrollTrigger.isActive) {
-    timeline.play(0);
   }
 }
 
-export { gsap, ScrollTrigger };
+export { gsap };

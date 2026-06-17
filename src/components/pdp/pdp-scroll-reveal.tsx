@@ -11,7 +11,7 @@ import {
   markRevealComplete,
   markTargetsComplete,
   queryRevealTargets,
-  ScrollTrigger,
+  scheduleScrollTriggerRefresh,
   syncRevealIfAlreadyInView,
   type RevealLayout,
 } from "./pdp-gsap";
@@ -94,13 +94,9 @@ export function PdpScrollReveal({
     });
 
     syncRevealIfAlreadyInView(timeline, finish);
-
-    const refreshTimer = window.requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
-    });
+    scheduleScrollTriggerRefresh();
 
     return () => {
-      window.cancelAnimationFrame(refreshTimer);
       timeline.kill();
     };
   }, [shouldMount, layout, reducedMotion]);
