@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -19,6 +19,8 @@ import {
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpAddIconLabelClass, pdpType } from "./pdp-type";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
+import { useTransientAddedSet } from "./use-transient-added-set";
 
 type PdpStrapOptionsSheetProps = {
   set: PdpStrapOptionsSet | null;
@@ -35,55 +37,16 @@ export function PdpStrapOptionsSheet({
   onAddToBag,
 }: PdpStrapOptionsSheetProps) {
   const titleId = useId();
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      setAddedIds(new Set());
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
+  const { isAdded, confirmAdd } = useTransientAddedSet();
+  const mounted = useOverlayDismiss(open, onClose);
 
   if (!set || !mounted) {
     return null;
   }
 
-  // fallow-ignore-next-line code-duplication
   const handleAdd = (id: string) => {
-    setAddedIds((current) => {
-      if (current.has(id)) {
-        return current;
-      }
-
-      onAddToBag();
-      return new Set(current).add(id);
-    });
+    onAddToBag();
+    confirmAdd(id);
   };
 
   return createPortal(
@@ -127,7 +90,7 @@ export function PdpStrapOptionsSheet({
 
           <ul className="flex flex-col gap-3">
             {set.options.map((option) => {
-              const added = addedIds.has(option.id);
+              const added = isAdded(option.id);
 
               return (
                 <li

@@ -12,9 +12,7 @@ import {
   experiencePanelSectionProps,
 } from "./pdp-experience-panel";
 import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
-import { PdpTextReveal } from "./pdp-text-reveal";
-
-const AGING_TITLE_MIN_HEIGHT_CLASS = "min-h-7";
+import { useTransientAddedSet } from "./use-transient-added-set";
 
 function formatCarePrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -169,7 +167,8 @@ export function PdpLeatherAgingModule({
   const [dragProgress, setDragProgress] = useState(0);
   const [stageIndex, setStageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [careAddedIds, setCareAddedIds] = useState<Set<string>>(() => new Set());
+  const { isAdded: isCareAdded, confirmAdd: confirmCareAdd } =
+    useTransientAddedSet();
   const trackRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
   const dragProgressRef = useRef(0);
@@ -324,23 +323,7 @@ export function PdpLeatherAgingModule({
         className="shrink-0 bg-white px-4 pt-3.5"
         style={{ paddingBottom: `calc(0.75rem + var(--pdp-safe-area-bottom))` }}
       >
-        <div className="pdp-aging-timeline" aria-live="polite">
-          <div className={AGING_TITLE_MIN_HEIGHT_CLASS}>
-            <PdpTextReveal
-              as="p"
-              className="font-extended text-lg tracking-[0.2px] text-black"
-            >
-              {stage.label}
-            </PdpTextReveal>
-          </div>
-          <PdpTextReveal
-            as="p"
-            delay={100}
-            className={`mt-0.5 text-neutral-500 ${pdpType.micro}`}
-          >
-            {stage.summary}
-          </PdpTextReveal>
-
+        <div className="pdp-aging-timeline">
           <div
             role="slider"
             tabIndex={0}
@@ -462,14 +445,10 @@ export function PdpLeatherAgingModule({
                     <AgingCareUpsellRow
                       key={product.id}
                       product={product}
-                      added={careAddedIds.has(product.id)}
+                      added={isCareAdded(product.id)}
                       onQuickAdd={() => {
-                        if (careAddedIds.has(product.id)) {
-                          return;
-                        }
-
                         onQuickAdd?.();
-                        setCareAddedIds((current) => new Set(current).add(product.id));
+                        confirmCareAdd(product.id);
                       }}
                     />
                   ))}

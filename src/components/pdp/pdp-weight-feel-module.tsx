@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_WEIGHT_FEEL } from "./pdp-data";
+import { PdpHoldChip } from "./pdp-hold-chip";
 import { pdpBodyRhythm } from "./pdp-type";
 import {
   EXPERIENCE_PANEL_MEDIA_CLASS,
@@ -109,96 +109,40 @@ export function PdpWeightFeelModule({
             backgroundImage: `linear-gradient(to top, ${surfaceColor} 42%, color-mix(in srgb, ${surfaceColor} 88%, transparent) 68%, transparent 100%)`,
           }}
         >
-          <div
-            role="button"
-            tabIndex={0}
-            className={cn(
-              "pdp-weight-lift-control mx-auto flex w-full max-w-[16rem] flex-col items-center gap-2 select-none",
-            )}
-            aria-label={hint}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerEnd}
-            onPointerCancel={handlePointerEnd}
-            onContextMenu={handleContextMenu}
-            onKeyDown={(event) => {
-              if (event.key === " " || event.key === "Enter") {
-                event.preventDefault();
-              }
-            }}
-          >
-            <div
-              aria-live="polite"
-              className="min-h-[2.75rem] px-2 text-center"
-            >
-              {showLiftedAsset ? (
-                <>
-                  <p className={`font-extended text-sm text-black ${pdpBodyRhythm}`}>
-                    {reveal.headline}
-                  </p>
-                  <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
-                    {reveal.subline}
-                  </p>
-                </>
-              ) : isHolding ? (
-                <p className="font-extended text-center text-xs tracking-[0.2px] text-neutral-900">
-                  Keep holding…
+          <div className="pdp-weight-lift-control mx-auto flex w-full max-w-[16rem] flex-col items-center gap-3 text-center select-none">
+            {showLiftedAsset ? (
+              <div aria-live="polite" className="px-2">
+                <p className={`font-extended text-sm text-black ${pdpBodyRhythm}`}>
+                  {reveal.headline}
                 </p>
-              ) : (
-                <p className="pdp-weight-lift__hint font-extended text-center text-[11px] uppercase tracking-[0.14em] text-neutral-900">
-                  {hint}
+                <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+                  {reveal.subline}
                 </p>
-              )}
-            </div>
-            <div className="relative flex size-[4.25rem] items-center justify-center">
-              <span
-                aria-hidden
-                className="pdp-weight-lift__ring pdp-weight-lift__ring--outer pointer-events-none absolute size-[4.25rem] rounded-full border border-neutral-400/55"
-              />
-              <span
-                aria-hidden
-                className="pdp-weight-lift__ring pointer-events-none absolute size-[3.25rem] rounded-full border border-neutral-500/65"
-              />
-              <span
-                className={cn(
-                  "relative flex size-10 items-center justify-center rounded-full border border-neutral-300 bg-white shadow-sm transition-transform duration-200",
-                  isHolding && "scale-95",
-                )}
-              >
-                <svg
-                  viewBox="0 0 44 44"
-                  className="absolute inset-0 size-full -rotate-90"
-                  aria-hidden
-                >
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-neutral-200"
-                  />
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    className="text-black transition-all duration-75"
-                    strokeDasharray={2 * Math.PI * 18}
-                    strokeDashoffset={2 * Math.PI * 18 * (1 - progress)}
-                  />
-                </svg>
-                <MaterialIcon
-                  name="back_hand"
-                  size={20}
-                  className="relative text-neutral-800"
-                />
-              </span>
-            </div>
+              </div>
+            ) : null}
+
+            <PdpHoldChip
+              as="div"
+              role="button"
+              tabIndex={0}
+              aria-label={hint}
+              tone="light"
+              icon="back_hand"
+              label={isHolding ? "Keep holding…" : hint}
+              progress={progress}
+              pressed={isHolding}
+              className="cursor-pointer touch-none"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              onContextMenu={handleContextMenu}
+              onKeyDown={(event: React.KeyboardEvent) => {
+                if (event.key === " " || event.key === "Enter") {
+                  event.preventDefault();
+                }
+              }}
+            />
           </div>
         </div>
       </div>

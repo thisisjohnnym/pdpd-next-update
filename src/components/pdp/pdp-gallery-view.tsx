@@ -75,20 +75,8 @@ const GALLERY_SCROLL_PAD = {
 /** Stacked gallery frames */
 const GALLERY_MEDIA_STACK_CLASS = "flex flex-col bg-white";
 
-/**
- * Bottom-of-page ecommerce modules — each is a gentle scroll-snap target so a
- * scroll settles cleanly on the next module's top. Modules size to their own
- * content (no forced viewport-fill) so short modules don't open up dead space.
- */
-const ECOMM_MODULE_CLASS = "pdp-snap-module w-full shrink-0";
-
-/**
- * Continuous-scroll media height — each full-bleed photo/video owns nearly the
- * whole screen so the gallery reads "one thing at a time" instead of a dense
- * stack of half-height frames peeking past each other. Sits above the aspect
- * ratio (which acts as a floor) and lets object-cover fill the taller frame.
- */
-const GALLERY_MEDIA_MIN_H = "min-h-[90svh]";
+/** Bottom-of-page ecommerce modules — free-form scroll, sized to their content */
+const ECOMM_MODULE_CLASS = "w-full shrink-0";
 
 type GallerySectionSurface = "dark" | "light" | "muted" | "transparent";
 
@@ -239,7 +227,6 @@ function portraitFrameClass(
   return cn(
     "relative w-full overflow-hidden",
     aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
-    GALLERY_MEDIA_MIN_H,
     PDP_STUDIO_BACKDROP_CLASS,
   );
 }
@@ -568,7 +555,6 @@ function PdpGalleryVideoSlide({
             : cn(
                 "relative w-full overflow-hidden bg-white",
                 aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
-                GALLERY_MEDIA_MIN_H,
               ),
         )}
       >
@@ -830,19 +816,18 @@ export function PdpGalleryView({
         )}
       </div>
 
-      {/* Ecommerce — after desire + function gallery scroll.
-          Each module is a snap target sized to ~one viewport so a scroll lands
-          cleanly on the next module (see .pdp-snap-module in globals.css). */}
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpCompareModule
-          onAddToBag={() => onAddSimilarToBag?.()}
-          onPickerOpenChange={onComparePickerOpenChange}
-        />
-      </PdpScrollReveal>
+      {/* Ecommerce — after desire + function gallery scroll. Free-form scroll;
+          modules size to their own content. */}
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="40dvh">
         <PdpReviewsModule
           onReadAll={onOpenReviews}
           onWriteReview={onOpenReviews}
+        />
+      </PdpScrollReveal>
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
+        <PdpCompareModule
+          onAddToBag={() => onAddSimilarToBag?.()}
+          onPickerOpenChange={onComparePickerOpenChange}
         />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">

@@ -18,6 +18,7 @@ import {
   pdpPressableSolidClass,
 } from "./pdp-type";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
+import { useTransientAddedSet } from "./use-transient-added-set";
 import { BOTTOM_CTA_OFFSET, SCREEN_HEIGHT_STYLE } from "./pdp-viewport-chrome";
 
 /** Picker sits above the fixed CTA bar with a little breathing room */
@@ -57,15 +58,16 @@ function canQuickAddStrapOption(
   return isActive && !included && Boolean(quickAddId) && Boolean(onQuickAdd);
 }
 
+// fallow-ignore-next-line complexity
 function resolveStrapOptionAdded(
   showQuickAdd: boolean,
   quickAddId: string | undefined,
-  addedOptionIds: ReadonlySet<string> | undefined,
+  isOptionAdded: ((id: string) => boolean) | undefined,
 ): boolean {
   if (!showQuickAdd || !quickAddId) {
     return false;
   }
-  return addedOptionIds?.has(quickAddId) ?? false;
+  return isOptionAdded?.(quickAddId) ?? false;
 }
 
 function strapSelectButtonClass(showQuickAdd: boolean): string {
@@ -166,13 +168,13 @@ function BuildPickerOptionItem({
   option,
   isActive,
   onSelect,
-  addedOptionIds,
+  isOptionAdded,
   onQuickAdd,
 }: {
   option: BuildPickerOption;
   isActive: boolean;
   onSelect: (id: string) => void;
-  addedOptionIds?: ReadonlySet<string>;
+  isOptionAdded?: (id: string) => boolean;
   onQuickAdd?: (optionId: string) => void;
 }) {
   const included = isStrapOptionIncluded(option);
@@ -183,7 +185,7 @@ function BuildPickerOptionItem({
     quickAddId,
     onQuickAdd,
   );
-  const added = resolveStrapOptionAdded(showQuickAdd, quickAddId, addedOptionIds);
+  const added = resolveStrapOptionAdded(showQuickAdd, quickAddId, isOptionAdded);
 
   return (
     <div
@@ -221,14 +223,14 @@ function BuildPickerRow({
   options,
   activeId,
   onSelect,
-  addedOptionIds,
+  isOptionAdded,
   onQuickAdd,
 }: {
   label: string;
   options: BuildPickerOption[];
   activeId: string;
   onSelect: (id: string) => void;
-  addedOptionIds?: ReadonlySet<string>;
+  isOptionAdded?: (id: string) => boolean;
   onQuickAdd?: (optionId: string) => void;
 }) {
   return (
@@ -249,7 +251,7 @@ function BuildPickerRow({
               option={option}
               isActive={activeId === option.id}
               onSelect={onSelect}
-              addedOptionIds={addedOptionIds}
+              isOptionAdded={isOptionAdded}
               onQuickAdd={onQuickAdd}
             />
           ))}
@@ -292,7 +294,8 @@ export function PdpStrapSimulationModule({
   const { modes, charms, title } = PDP_STRAP_SIMULATION;
   const [activeStrapId, setActiveStrapId] = useState(modes[0]!.id);
   const [activeCharmId, setActiveCharmId] = useState(charms[0]!.id);
-  const [addedOptionIds, setAddedOptionIds] = useState<Set<string>>(() => new Set());
+  const { isAdded: isOptionAdded, confirmAdd: confirmOptionAdd } =
+    useTransientAddedSet();
 
   const strapOptions = useMemo(() => toStrapOptions(modes), [modes]);
   const charmOptions = useMemo(() => toCharmOptions(charms), [charms]);
@@ -303,12 +306,8 @@ export function PdpStrapSimulationModule({
   );
 
   const handleQuickAdd = (optionId: string) => {
-    if (addedOptionIds.has(optionId)) {
-      return;
-    }
-
     onQuickAddStrap?.(optionId);
-    setAddedOptionIds((current) => new Set(current).add(optionId));
+    confirmOptionAdd(optionId);
   };
 
   return (
@@ -356,7 +355,7 @@ export function PdpStrapSimulationModule({
             options={strapOptions}
             activeId={activeStrapId}
             onSelect={setActiveStrapId}
-            addedOptionIds={addedOptionIds}
+            isOptionAdded={isOptionAdded}
             onQuickAdd={onQuickAddStrap ? handleQuickAdd : undefined}
           />
 
@@ -365,7 +364,7 @@ export function PdpStrapSimulationModule({
             options={charmOptions}
             activeId={activeCharmId}
             onSelect={setActiveCharmId}
-            addedOptionIds={addedOptionIds}
+            isOptionAdded={isOptionAdded}
             onQuickAdd={onQuickAddStrap ? handleQuickAdd : undefined}
           />
         </div>

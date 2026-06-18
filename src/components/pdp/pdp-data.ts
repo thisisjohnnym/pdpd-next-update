@@ -328,7 +328,7 @@ export const PDP_COMPARE_SELECTED: PdpCompareItem = {
   name: PDP_PRODUCT.name,
   shortName: "Tabby 26",
   price: PDP_PRODUCT.price,
-  imageSrc: PDP_PRODUCT.imageSrc,
+  imageSrc: "/images/compare/tabby-26.png",
   imageAlt: PDP_PRODUCT.imageAlt,
   size: '10" W x 6" H x 3" D',
   strap: "Detachable leather",
@@ -1292,6 +1292,7 @@ const PDP_GALLERY_PRODUCT_FRONT_SLIDE: PdpGalleryImmersiveSlide = {
   objectPosition: "center",
   scale: "scale-100",
   headerSurface: "light",
+  aspect: "9/16",
   dragZoom: true,
 };
 
@@ -2243,7 +2244,7 @@ export const PDP_WEIGHT_FEEL = {
   title: "Weight & feel",
   intro:
     "Hard to picture on a screen. Press and hold to lift — feel what everyday carry is like.",
-  hint: "Press and hold to lift",
+  hint: "Press & hold to lift",
   holdMs: 720,
   hapticPattern: [14, 36, 18, 52, 22],
   image: {

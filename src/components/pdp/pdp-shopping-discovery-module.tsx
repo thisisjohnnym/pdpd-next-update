@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
@@ -25,6 +25,7 @@ import { PdpAiConciergePanel } from "./pdp-product-search-module";
 import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { pdpType, pdpPressableSolidClass } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { useTransientAddedSet } from "./use-transient-added-set";
 
 type PdpShoppingDiscoveryModuleProps = {
   onAddToBag?: () => void;
@@ -35,40 +36,11 @@ export function PdpShoppingDiscoveryModule({
   onAddToBag,
 }: PdpShoppingDiscoveryModuleProps) {
   const [assistantOpen, setAssistantOpen] = useState(false);
-  const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set());
-  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  );
-
-  useEffect(() => {
-    const timeouts = timeoutsRef.current;
-    return () => {
-      timeouts.forEach((timeout) => clearTimeout(timeout));
-      timeouts.clear();
-    };
-  }, []);
+  const { isAdded, confirmAdd } = useTransientAddedSet();
 
   const handleAdd = (id: string) => {
     onAddToBag?.();
-
-    setConfirmedIds((current) => new Set(current).add(id));
-
-    const existing = timeoutsRef.current.get(id);
-    if (existing) {
-      clearTimeout(existing);
-    }
-
-    timeoutsRef.current.set(
-      id,
-      setTimeout(() => {
-        timeoutsRef.current.delete(id);
-        setConfirmedIds((current) => {
-          const next = new Set(current);
-          next.delete(id);
-          return next;
-        });
-      }, 1400),
-    );
+    confirmAdd(id);
   };
 
   return (
@@ -91,7 +63,7 @@ export function PdpShoppingDiscoveryModule({
                   aria-label="More like this"
                 >
                   {PDP_MORE_LIKE_THIS.items.map((item) => {
-                    const confirmed = confirmedIds.has(item.id);
+                    const confirmed = isAdded(item.id);
 
                     return (
                       <li

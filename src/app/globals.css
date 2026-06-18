@@ -460,7 +460,6 @@ html.font-extended {
 /* Horizontal carousel rails — scroll track owns horizontal pan; children defer to it */
 .pdp-carousel-scroll {
   touch-action: pan-x pan-y;
-  -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
 }
 
@@ -867,20 +866,6 @@ html.pdp-drag-zoom-scroll-lock {
 /* Full-viewport gallery panels snap on scroll (toggle in pdp-panel-scroll.ts) */
 html.pdp-panel-scroll {
   scroll-snap-type: y mandatory;
-}
-
-/* Ecommerce stack — "one module per scroll."
-   Proximity snap on the window scroller only acts on elements that opt in via
-   .pdp-snap-module, so the continuous gallery above is left untouched. */
-html {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: var(--pdp-safe-area-top);
-}
-
-.pdp-snap-module {
-  scroll-snap-align: start;
-  /* Gentle — fast flicks can pass straight through instead of catching on every module */
-  scroll-snap-stop: normal;
 }
 
 .pdp-gallery-panel {

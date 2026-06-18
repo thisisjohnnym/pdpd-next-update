@@ -62,7 +62,7 @@ export function PdpReviewsModule({ onReadAll, onWriteReview }: PdpReviewsModuleP
   return (
     <section
       data-header-surface="light"
-      className={pdpModuleSectionClass()}
+      className={pdpModuleSectionClass({ first: true })}
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">

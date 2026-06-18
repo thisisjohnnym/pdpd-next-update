@@ -11,6 +11,10 @@ import {
   pdpUgcVideoInfiniteScrollClass,
 } from "./pdp-carousel";
 import { PDP_UGC_VIDEO_CAROUSEL } from "./pdp-data";
+import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { PdpTextReveal } from "./pdp-text-reveal";
+import { pdpType } from "./pdp-type";
 import { PdpUgcVideoCard } from "./pdp-ugc-video-card";
 import {
   loopCarouselItems,
@@ -19,8 +23,9 @@ import {
 } from "./use-infinite-centered-carousel";
 
 /** TikTok-style UGC rail — center-snapped, infinite loop left and right */
+// fallow-ignore-next-line complexity
 export function PdpUgcVideoCarouselModule() {
-  const { title, videos } = PDP_UGC_VIDEO_CAROUSEL;
+  const { title, followCta, videos } = PDP_UGC_VIDEO_CAROUSEL;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
   const loopedVideos = useMemo(() => loopCarouselItems(videos), [videos]);
@@ -36,15 +41,30 @@ export function PdpUgcVideoCarouselModule() {
     <section
       data-header-surface="light"
       aria-label={title}
-      className="relative w-full shrink-0 overflow-x-clip bg-white pt-9 pb-5"
+      className="relative w-full shrink-0 overflow-x-clip bg-white pt-9 pb-2"
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <div className={cn(pdpCarouselScrollWrapClass, "relative")}>
+          <div className="flex items-end justify-between gap-3">
+            <PdpModuleHeading spacing="none">{title}</PdpModuleHeading>
+            <PdpTextReveal as="div" delay={100} className="shrink-0">
+              <PdpTextLinkCta
+                as="a"
+                href={followCta.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={pdpType.label}
+              >
+                {followCta.label}
+              </PdpTextLinkCta>
+            </PdpTextReveal>
+          </div>
+
+          <div className={cn(pdpCarouselScrollWrapClass, "relative mt-3")}>
             <div
               ref={scrollRef}
               className={cn(
-                "flex gap-2 pdp-ugc-coverflow pb-8",
+                "flex gap-2 pdp-ugc-coverflow overflow-y-clip pt-3 pb-12",
                 pdpUgcVideoInfiniteScrollClass,
               )}
               aria-label="TikTok videos"

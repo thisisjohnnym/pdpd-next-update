@@ -24,6 +24,8 @@ import {
 } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
+import { useTransientAddedSet } from "./use-transient-added-set";
 
 type BagConfirmation =
   | { type: "product" }
@@ -229,10 +231,10 @@ function BagUpsellItem({
 }
 
 function BagUpsellList({
-  quickAddedIds,
+  isAdded,
   onQuickAdd,
 }: {
-  quickAddedIds: Set<string>;
+  isAdded: (id: string) => boolean;
   onQuickAdd: (id: string) => void;
 }) {
   return (
@@ -246,7 +248,7 @@ function BagUpsellList({
           <BagUpsellItem
             key={item.id}
             item={item}
-            added={quickAddedIds.has(item.id)}
+            added={isAdded(item.id)}
             onAdd={() => onQuickAdd(item.id)}
           />
         ))}
@@ -264,9 +266,10 @@ export function PdpAddToBagSheet({
   confirmation = { type: "product" },
 }: PdpAddToBagSheetProps) {
   const titleId = useId();
-  const [quickAddedIds, setQuickAddedIds] = useState<Set<string>>(new Set());
+  const { isAdded: isQuickAdded, confirmAdd: confirmQuickAdd } =
+    useTransientAddedSet();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useOverlayDismiss(open, onClose);
 
   const selectedColor =
     PDP_COLORS.find((color) => color.id === selectedColorId) ?? PDP_COLORS[0];
@@ -279,53 +282,14 @@ export function PdpAddToBagSheet({
     bundle !== null ? bundle.subtotal - bundle.total : 0;
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
     if (open) {
       setHasBeenOpen(true);
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) {
-      setQuickAddedIds(new Set());
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
-
   const handleQuickAdd = (id: string) => {
-    let didAdd = false;
-
-    setQuickAddedIds((current) => {
-      if (current.has(id)) {
-        return current;
-      }
-
-      didAdd = true;
-      return new Set(current).add(id);
-    });
-
-    if (didAdd) {
-      onQuickAdd?.();
-    }
+    onQuickAdd?.();
+    confirmQuickAdd(id);
   };
 
   if (!mounted) {
@@ -398,7 +362,7 @@ export function PdpAddToBagSheet({
 
           {!isBundle ? (
             <BagUpsellList
-              quickAddedIds={quickAddedIds}
+              isAdded={isQuickAdded}
               onQuickAdd={handleQuickAdd}
             />
           ) : null}

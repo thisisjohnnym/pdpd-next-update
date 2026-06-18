@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_DRAG_ZOOM_HINT } from "./pdp-data";
+import { PdpHoldChip } from "./pdp-hold-chip";
 import { PANEL_MEDIA_COVER_CLASS } from "./pdp-viewport-chrome";
 import { useDragZoomLens } from "./use-drag-zoom-lens";
 
@@ -14,74 +13,6 @@ const LENS_SIZE = 132;
 const MAGNIFICATION = 2.75;
 /** Lift lens above the thumb so the magnified area stays visible */
 const TOUCH_LENS_OFFSET_Y = 96;
-
-const HOLD_RING_SIZE = 34;
-const HOLD_RING_STROKE = 2.5;
-const HOLD_RING_RADIUS = (HOLD_RING_SIZE - HOLD_RING_STROKE) / 2;
-const HOLD_RING_CIRCUMFERENCE = 2 * Math.PI * HOLD_RING_RADIUS;
-
-/**
- * Circular "hold to zoom" indicator that sits inside the trigger control. While
- * `active` (the press is pending) it fills its progress arc over `durationMs`,
- * giving a clear, deliberate loading cue before the magnifier engages. When the
- * press ends, the arc snaps back to empty.
- */
-function HoldToZoomRing({ active, durationMs }: { active: boolean; durationMs: number }) {
-  const [filled, setFilled] = useState(false);
-
-  useEffect(() => {
-    if (!active) {
-      setFilled(false);
-      return;
-    }
-    const id = requestAnimationFrame(() => setFilled(true));
-    return () => cancelAnimationFrame(id);
-  }, [active]);
-
-  return (
-    <span
-      className="relative flex shrink-0 items-center justify-center"
-      style={{ width: HOLD_RING_SIZE, height: HOLD_RING_SIZE }}
-    >
-      <svg
-        width={HOLD_RING_SIZE}
-        height={HOLD_RING_SIZE}
-        viewBox={`0 0 ${HOLD_RING_SIZE} ${HOLD_RING_SIZE}`}
-        className="absolute inset-0 -rotate-90"
-      >
-        <circle
-          cx={HOLD_RING_SIZE / 2}
-          cy={HOLD_RING_SIZE / 2}
-          r={HOLD_RING_RADIUS}
-          fill="none"
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth={HOLD_RING_STROKE}
-        />
-        <circle
-          cx={HOLD_RING_SIZE / 2}
-          cy={HOLD_RING_SIZE / 2}
-          r={HOLD_RING_RADIUS}
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth={HOLD_RING_STROKE}
-          strokeLinecap="round"
-          strokeDasharray={HOLD_RING_CIRCUMFERENCE}
-          strokeDashoffset={filled ? 0 : HOLD_RING_CIRCUMFERENCE}
-          style={{
-            transition: filled ? `stroke-dashoffset ${durationMs}ms linear` : "none",
-          }}
-        />
-      </svg>
-      <MaterialIcon
-        name="pan_tool"
-        size={18}
-        filled={active}
-        className="text-white transition-transform duration-150"
-        style={{ transform: active ? "scale(0.92)" : "scale(1)" }}
-      />
-    </span>
-  );
-}
 
 type PdpGalleryDragZoomImageProps = {
   src: string;
@@ -95,6 +26,7 @@ type PdpGalleryDragZoomImageProps = {
 };
 
 /** Press-and-hold magnifier lens for studio product shots */
+// fallow-ignore-next-line complexity
 export function PdpGalleryDragZoomImage({
   src,
   alt,
@@ -174,22 +106,19 @@ export function PdpGalleryDragZoomImage({
           isZooming ? "opacity-0" : "opacity-100",
         )}
       >
-        <button
+        <PdpHoldChip
+          as="button"
           type="button"
           aria-label={PDP_GALLERY_DRAG_ZOOM_HINT}
           {...triggerHandlers}
-          className={cn(
-            "pointer-events-auto flex touch-none select-none items-center gap-2 rounded-full",
-            "border border-white/15 bg-black/45 py-1.5 pl-1.5 pr-3.5 backdrop-blur-md",
-            "transition-transform duration-150 active:scale-[0.97]",
-            isPending && "scale-[1.04]",
-          )}
-        >
-          <HoldToZoomRing active={isPending} durationMs={holdDurationMs} />
-          <span className="font-extended text-[11px] tracking-[0.2px] text-white/95">
-            {isPending ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
-          </span>
-        </button>
+          tone="dark"
+          icon="pan_tool"
+          label={isPending ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
+          active={isPending}
+          durationMs={holdDurationMs}
+          pressed={isPending}
+          className="pointer-events-auto touch-none"
+        />
       </div>
 
       {lensPosition && magnifiedWidth > 0 ? (

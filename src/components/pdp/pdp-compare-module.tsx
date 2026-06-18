@@ -22,6 +22,7 @@ import {
   type PdpFamilyCompareAlternative,
 } from "./pdp-data";
 import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass } from "./pdp-type";
+import { useTransientAddedSet } from "./use-transient-added-set";
 
 function CompareProductCard({
   item,
@@ -164,7 +165,7 @@ export function PdpCompareModule({
 }: PdpCompareModuleProps) {
   const [alternativeIndex, setAlternativeIndex] = useState(0);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const { isAdded, confirmAdd } = useTransientAddedSet();
   const [insightDismissed, setInsightDismissed] = useState(false);
   const [showAllDifferences, setShowAllDifferences] = useState(false);
 
@@ -192,20 +193,14 @@ export function PdpCompareModule({
   );
 
   const handleAdd = (id: string) => {
-    setAddedIds((current) => {
-      if (current.has(id)) {
-        return current;
-      }
-
-      onAddToBag?.();
-      return new Set(current).add(id);
-    });
+    onAddToBag?.();
+    confirmAdd(id);
   };
 
   return (
     <section
       data-header-surface="light"
-      className={pdpModuleSectionClass({ variant: "muted", first: true })}
+      className={pdpModuleSectionClass({ variant: "muted" })}
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
@@ -221,11 +216,11 @@ export function PdpCompareModule({
                 <CompareAddButton
                   className="mt-auto shrink-0"
                   label={
-                    addedIds.has(selected.id)
+                    isAdded(selected.id)
                       ? "Added"
                       : `Add ${selectedShortName}`
                   }
-                  added={addedIds.has(selected.id)}
+                  added={isAdded(selected.id)}
                   onClick={() => handleAdd(selected.id)}
                   variant="primary"
                 />
@@ -243,11 +238,11 @@ export function PdpCompareModule({
                 <CompareAddButton
                   className="mt-auto shrink-0"
                   label={
-                    addedIds.has(alternative.id)
+                    isAdded(alternative.id)
                       ? "Added"
                       : `Add ${alternative.shortName}`
                   }
-                  added={addedIds.has(alternative.id)}
+                  added={isAdded(alternative.id)}
                   onClick={() => handleAdd(alternative.id)}
                   variant="secondary"
                 />
@@ -256,21 +251,21 @@ export function PdpCompareModule({
 
             <PdpRevealItem delay={140}>
               <div className="flex flex-col gap-3">
-                <p
-                  className={cn(
-                    "font-extended text-black",
-                    pdpType.body,
-                  )}
-                >
-                  {alternative.summary}
-                </p>
-
-                <div className="flex flex-col border-y border-neutral-200 py-2">
-                  <span
-                    className={cn("pb-1 text-neutral-500", pdpType.micro)}
-                  >
+                <div className="flex flex-col gap-1">
+                  <span className={cn("text-neutral-500", pdpType.tag)}>
                     {alternative.shortName} vs {selectedShortName}
                   </span>
+                  <p
+                    className={cn(
+                      "font-extended text-black",
+                      pdpType.body,
+                    )}
+                  >
+                    {alternative.summary}
+                  </p>
+                </div>
+
+                <div className="flex flex-col border-y border-neutral-200 py-2">
                   <div className="flex flex-col">
                     {alternative.scales.map((scale) => (
                       <CompareDeltaRow key={scale.id} scale={scale} />

@@ -122,7 +122,7 @@ export function PdpSignatureSoundsModule() {
     <section
       data-header-surface="light"
       className={cn(
-        "relative w-full shrink-0 overflow-x-clip bg-neutral-100 pt-16 pb-3",
+        "relative w-full shrink-0 overflow-x-clip bg-white pt-16 pb-3",
       )}
     >
       <PageGrid fullWidth>
