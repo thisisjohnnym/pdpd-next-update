@@ -3,7 +3,6 @@
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpCompareModule } from "./pdp-compare-module";
 import { TabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-experiment";
-import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 
 type PdpCompareModuleGateProps = {
   onAddToBag?: () => void;
@@ -11,17 +10,16 @@ type PdpCompareModuleGateProps = {
 };
 
 /**
- * A/B gate — control renders the existing Compare the family module;
- * variant renders the Tabby family discovery experiment.
+ * Tabby PDPs use the family compare module (full attribute list, plain-language deltas).
+ * Legacy compare module remains for non-Tabby products.
  */
 export function PdpCompareModuleGate({
   onAddToBag,
   onPickerOpenChange,
 }: PdpCompareModuleGateProps) {
   const { productId } = useActiveProduct();
-  const experimentEnabled = useTabbyFamilyCompareExperiment();
 
-  if (productId === "tabby" && experimentEnabled) {
+  if (productId === "tabby") {
     return (
       <TabbyFamilyCompareExperiment
         onAddToBag={onAddToBag}

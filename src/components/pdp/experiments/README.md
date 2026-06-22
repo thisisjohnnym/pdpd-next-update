@@ -31,12 +31,9 @@ NEXT_PUBLIC_TABBY_FAMILY_COMPARE_EXPERIMENT=true
 ?tabbyFamilyCompareExperiment=1
 ```
 
-When the flag is off (default), the PDP renders the existing **Compare the family** module and **Color + Add to bag** in the buy bar.
+When the flag is off (default on `main`), the PDP renders **Explore the Tabby family** (full comparison table) and **Color + Add to bag** in the buy bar.
 
-When the flag is on, the PDP also renders:
-- **Style · Size · Color + Add to bag** in the sticky buy bar
-- **Configure your Tabby** on-page module (desktop/tablet)
-- **Explore the Tabby family** compare module
+When the flag is on, the PDP also renders **Style · Size · Color + Add to bag** in the sticky buy bar and **Configure your Tabby** on-page module.
 
 ## Architecture
 
