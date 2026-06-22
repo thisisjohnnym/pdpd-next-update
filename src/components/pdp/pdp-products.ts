@@ -50,7 +50,7 @@ export type PdpProductConfig = {
 
 export const DEFAULT_PRODUCT_ID: PdpProductId = "tabby";
 
-export const PDP_PRODUCTS: Record<PdpProductId, PdpProductConfig> = {
+const PDP_PRODUCTS: Record<PdpProductId, PdpProductConfig> = {
   tabby: {
     id: "tabby",
     layout: "full",
@@ -115,6 +115,6 @@ export function getPdpProduct(id: PdpProductId): PdpProductConfig {
  * Maps a "Recently viewed" card id to a switchable product. Cards without an
  * entry stay on the current PDP (no demo data behind them yet).
  */
-export const RECENTLY_VIEWED_PRODUCT_MAP: Record<string, PdpProductId> = {
+const RECENTLY_VIEWED_PRODUCT_MAP: Record<string, PdpProductId> = {
   "kira-crossbody": "kira",
 };
