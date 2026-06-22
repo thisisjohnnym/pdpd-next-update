@@ -33,13 +33,13 @@ export const pdpPressableIconClass = "pdp-pressable pdp-pressable--icon";
 /** "Add" / "Added" label beside Material add icon — counters .font-extended top nudge */
 export const pdpAddIconLabelClass = "font-extended pdp-add-icon-label";
 
-/** Pill CTA — grey fill, no stroke (Add buttons, sheet actions) */
+/** Pill outline CTA — white fill, soft grey stroke (Add buttons, sheet actions) */
 export const pdpStrokeCtaClass =
-  "rounded-full bg-neutral-100 text-black transition-colors active:bg-neutral-200 pdp-pressable";
+  "rounded-full border border-neutral-200 bg-white text-black transition-colors active:bg-neutral-50 pdp-pressable";
 
-/** Pill CTA disabled / added state */
+/** Outline CTA disabled / added state — same border box as default so the pill does not shrink */
 export const pdpStrokeCtaMutedClass =
-  "rounded-full bg-neutral-200 text-neutral-500";
+  "rounded-full border border-neutral-200 bg-neutral-100 text-neutral-500";
 
 /** Underlined text CTA — primary (Shop Shoulder Bags) */
 export const pdpTextLinkCtaClass =
