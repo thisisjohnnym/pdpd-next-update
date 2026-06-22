@@ -1,6 +1,6 @@
 export const PDP_PRODUCT = {
   name: "Tabby Shoulder Bag 26",
-  subtitle: "Our signature shoulder bag in full-grain leather.",
+  subtitle: "Quilted Leather",
   price: "$550",
   imageSrc: "/images/gallery/tabby-product-front-916.jpg",
   imageAlt:
@@ -174,39 +174,6 @@ const PDP_BAG_SIZE = {
   ] satisfies PdpBagSizeHotspot[],
 } as const;
 
-type PdpFamilySizeOption = {
-  id: string;
-  label: string;
-  imageSrc: string;
-  imageAlt: string;
-};
-
-/** Tabby family size picker — Mini / Medium / Large silhouettes */
-const PDP_FAMILY_SIZES = {
-  title: "Also available in this family",
-  selectedId: "medium",
-  options: [
-    {
-      id: "mini",
-      label: "Mini",
-      imageSrc: "/images/similar/tabby-chain-crossbody.png",
-      imageAlt: "Tabby Mini chain crossbody bag",
-    },
-    {
-      id: "medium",
-      label: "Medium",
-      imageSrc: PDP_PRODUCT.imageSrc,
-      imageAlt: PDP_PRODUCT.imageAlt,
-    },
-    {
-      id: "large",
-      label: "Large",
-      imageSrc: "/images/gallery/tabby-model-full.png",
-      imageAlt: "Tabby Large shoulder bag on model",
-    },
-  ] satisfies PdpFamilySizeOption[],
-} as const;
-
 const PDP_COMPARE_TEASER = {
   title: "Compare with similar",
   linkLabel: "Compare sizes, style, occasions",
@@ -300,6 +267,12 @@ export type PdpCompareScale = {
   highLabel: string;
   /** Word when the alternative sits lower, e.g. "Lighter" */
   lowLabel: string;
+  /**
+   * Prescriptive magnitude phrase shown instead of the bare direction word —
+   * e.g. '½" larger', '~20% roomier', '≈4 oz lighter'. Omit when the two bags
+   * are effectively equal (renders as "Same").
+   */
+  delta?: string;
 };
 
 export type PdpFamilyCompareAlternative = PdpCompareItem & {
@@ -391,9 +364,9 @@ export const PDP_FAMILY_COMPARE_ALTERNATIVES: PdpFamilyCompareAlternative[] = [
     closure: "C clasp turn-lock",
     summary: "Bigger, roomier & lighter — built for weekends.",
     scales: [
-      { id: "size", label: "Size", selected: 0.45, alternative: 0.62, highLabel: "Larger", lowLabel: "Smaller" },
-      { id: "carry-capacity", label: "Capacity", selected: 0.4, alternative: 0.66, highLabel: "Roomier", lowLabel: "Less room" },
-      { id: "weight", label: "Weight", selected: 0.58, alternative: 0.36, highLabel: "Heavier", lowLabel: "Lighter" },
+      { id: "size", label: "Size", selected: 0.45, alternative: 0.62, highLabel: "Larger", lowLabel: "Smaller", delta: '½" larger' },
+      { id: "carry-capacity", label: "Capacity", selected: 0.4, alternative: 0.66, highLabel: "Roomier", lowLabel: "Less room", delta: "~20% roomier" },
+      { id: "weight", label: "Weight", selected: 0.58, alternative: 0.36, highLabel: "Heavier", lowLabel: "Lighter", delta: "≈4 oz lighter" },
     ],
     differences: [
       {
@@ -537,7 +510,7 @@ export const PDP_FAMILY_COMPARE_ALTERNATIVES: PdpFamilyCompareAlternative[] = [
     scales: [
       { id: "size", label: "Size", selected: 0.5, alternative: 0.5, highLabel: "Larger", lowLabel: "Smaller" },
       { id: "carry-capacity", label: "Capacity", selected: 0.5, alternative: 0.5, highLabel: "Roomier", lowLabel: "Less room" },
-      { id: "weight", label: "Weight", selected: 0.46, alternative: 0.58, highLabel: "Heavier", lowLabel: "Lighter" },
+      { id: "weight", label: "Weight", selected: 0.46, alternative: 0.58, highLabel: "Heavier", lowLabel: "Lighter", delta: "≈2 oz heavier" },
     ],
     differences: [
       {
@@ -1646,7 +1619,7 @@ export type PdpStrapSimulationCharm = {
 /** Strap swap simulator — preview detachable carry setups on the bag */
 export const PDP_STRAP_SIMULATION = {
   moment: "Customize",
-  title: "Build your bag",
+  title: "Make it Yours",
   intro: "Start with what’s included, then preview add-on straps and charms on your Tabby.",
   hint: "Tap to customize",
   modes: [
@@ -2011,16 +1984,16 @@ const PDP_LEATHER_AGING_TWO_YEARS_IMAGE = {
 
 export const PDP_LEATHER_AGING = {
   moment: "Material",
-  title: "Leather aging simulator",
+  title: "How leather evolves over time",
   intro:
-    "See how glovetanned full-grain leather evolves — patina, softening, and honest wear over years of daily carry.",
+    "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
   image: PDP_LEATHER_AGING_NEW_IMAGE,
   stages: [
     {
       id: "new",
       label: "New",
       timeline: "Day one",
-      summary: "Factory-fresh grain, structured silhouette, crisp edges.",
+      summary: "Crisp grain, structured shape, factory-fresh.",
       image: PDP_LEATHER_AGING_NEW_IMAGE,
       traits: [
         {
@@ -2057,7 +2030,7 @@ export const PDP_LEATHER_AGING = {
       id: "six-months",
       label: "6 months",
       timeline: "Six months in",
-      summary: "Warm highlights emerge; leather relaxes into daily rhythm.",
+      summary: "Warm patina and a softer, relaxed hand.",
       image: PDP_LEATHER_AGING_SIX_MONTHS_IMAGE,
       traits: [
         {
@@ -2094,7 +2067,7 @@ export const PDP_LEATHER_AGING = {
       id: "two-years",
       label: "2 years",
       timeline: "Two years of carry",
-      summary: "Lived-in depth — supple drape with an honest crease map.",
+      summary: "Rich depth, supple drape, honest creasing.",
       image: PDP_LEATHER_AGING_TWO_YEARS_IMAGE,
       traits: [
         {
@@ -2361,6 +2334,8 @@ const PDP_HERITAGE_STORY = {
     "Inspired by a Coach design from the 1970s and reimagined for today.",
 } as const;
 
+export type PdpColorAvailability = "in_stock" | "low_stock" | "notify";
+
 export type PdpColor = {
   id: string;
   name: string;
@@ -2369,7 +2344,44 @@ export type PdpColor = {
   heroAlt: string;
   /** Sampled tone for bottom-bar color chrome */
   chromeSample: string;
+  /** Mock inventory state for color picker UX */
+  availability: PdpColorAvailability;
 };
+
+export function pdpColorIsSelectable(
+  availability: PdpColorAvailability,
+): boolean {
+  return availability !== "notify";
+}
+
+export const PDP_COLOR_NOTIFY_TOAST =
+  "We'll email you when this color is back in stock.";
+
+export function pdpColorAvailabilityLabel(
+  availability: PdpColorAvailability,
+): string {
+  switch (availability) {
+    case "in_stock":
+      return "In stock";
+    case "low_stock":
+      return "Only a few left";
+    case "notify":
+      return "Sold out";
+  }
+}
+
+export function pdpColorAvailabilityClass(
+  availability: PdpColorAvailability,
+): string {
+  switch (availability) {
+    case "in_stock":
+      return "text-neutral-500";
+    case "low_stock":
+      return "text-amber-800";
+    case "notify":
+      return "text-neutral-600";
+  }
+}
 
 export const PDP_COLORS: PdpColor[] = [
   {
@@ -2379,6 +2391,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/black.png",
     heroAlt: "Tabby Shoulder Bag 26 in black leather",
     chromeSample: "#1a1a1a",
+    availability: "in_stock",
   },
   {
     id: "canyon",
@@ -2387,6 +2400,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/canyon.png",
     heroAlt: "Tabby Shoulder Bag 26 in canyon suede",
     chromeSample: "#a34e3d",
+    availability: "in_stock",
   },
   {
     id: "oxblood",
@@ -2395,6 +2409,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/oxblood.png",
     heroAlt: "Tabby Shoulder Bag 26 in oxblood leather",
     chromeSample: "#6b2c32",
+    availability: "low_stock",
   },
   {
     id: "black-charm",
@@ -2403,6 +2418,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/black-charm.png",
     heroAlt: "Tabby Shoulder Bag 26 in black with bag charms",
     chromeSample: "#1a1a1a",
+    availability: "in_stock",
   },
   {
     id: "beaded",
@@ -2411,6 +2427,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/beaded.png",
     heroAlt: "Tabby Shoulder Bag 26 in beaded floral",
     chromeSample: "#8a7a6a",
+    availability: "notify",
   },
   {
     id: "tan-fringe",
@@ -2419,6 +2436,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/tan-fringe.png",
     heroAlt: "Tabby Shoulder Bag 26 in tan suede with fringe",
     chromeSample: "#c4a06a",
+    availability: "in_stock",
   },
   {
     id: "black-fringe",
@@ -2427,6 +2445,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/black-fringe.png",
     heroAlt: "Tabby Shoulder Bag 26 in black suede with fringe",
     chromeSample: "#1a1a1a",
+    availability: "low_stock",
   },
   {
     id: "olive",
@@ -2435,6 +2454,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/olive.png",
     heroAlt: "Tabby Shoulder Bag 26 in olive suede",
     chromeSample: "#556847",
+    availability: "in_stock",
   },
   {
     id: "mustard",
@@ -2443,6 +2463,7 @@ export const PDP_COLORS: PdpColor[] = [
     hero: "/images/colors/soft-tabby/mustard.png",
     heroAlt: "Tabby Shoulder Bag 26 in mustard suede",
     chromeSample: "#c9a227",
+    availability: "notify",
   },
 ];
 
@@ -2773,7 +2794,7 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
     likes: 31_400,
     photos: [
       {
-        src: "/images/reviews/comment-cat.webp",
+        src: "/images/reviews/comment-cat.gif",
         alt: "Nyan Cat uploaded with comment",
       },
     ],

@@ -6,21 +6,30 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_COMMENTS_SUMMARY, PDP_LIKE_SUMMARY, PDP_SAVE_SUMMARY } from "./pdp-data";
-import { BOTTOM_CTA_OFFSET } from "./pdp-viewport-chrome";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
 import {
   isHeroOverlayVisible,
   useHeroScrollOpacity,
 } from "./use-hero-scroll-opacity";
+import { useBottomBarDocked } from "./use-bottom-bar-docked";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
 import { useReducedMotion } from "./use-reduced-motion";
 
 const LIKE_RED = "#FE2C55";
 
-/** Tight dark halo so white glyphs read on bright hero media */
+/**
+ * Tight dark halo around each white glyph — first line of defense so the icons
+ * read even before the soft rail scrim. A hard 1px + a small blur keeps edges
+ * crisp on busy or bright media.
+ */
 const RAIL_GLYPH_SHADOW =
   "[filter:drop-shadow(0_0_1px_rgba(0,0,0,0.55))_drop-shadow(0_1px_3px_rgba(0,0,0,0.45))]";
+
 const BURST_DURATION_MS = 1700;
 const BURST_EASING = "cubic-bezier(0.22, 0.92, 0.24, 1)";
 const RAIL_ICON_SIZE = 26;
@@ -254,6 +263,11 @@ function LikeRailAction({
 export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => void }) {
   const opacity = useHeroScrollOpacity();
   const visible = isHeroOverlayVisible(opacity);
+  const { docked, frostOpacity } = useBottomBarDocked();
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
+  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
   const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -276,12 +290,14 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
         RAIL_GLYPH_SHADOW,
       )}
       style={{
-        bottom: `calc(${BOTTOM_CTA_OFFSET} + 5.5rem)`,
+        bottom: heroActionRailOffset(showTabbyExperiment, docked),
         opacity,
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",
       }}
     >
+      {/* Soft contrast bed — guarantees the white glyphs read on any backdrop
+          (bright photos, light video frames) without flipping colors. */}
       <span
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[118%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/22 blur-2xl"

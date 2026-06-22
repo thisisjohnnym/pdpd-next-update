@@ -33,13 +33,13 @@ export const pdpPressableIconClass = "pdp-pressable pdp-pressable--icon";
 /** "Add" / "Added" label beside Material add icon — counters .font-extended top nudge */
 export const pdpAddIconLabelClass = "font-extended pdp-add-icon-label";
 
-/** Pill CTA — white fill, no stroke (Add buttons, sheet actions) */
+/** Pill CTA — grey fill, no stroke (Add buttons, sheet actions) */
 export const pdpStrokeCtaClass =
-  "rounded-full bg-white text-black transition-colors active:bg-neutral-50 pdp-pressable";
+  "rounded-full bg-neutral-100 text-black transition-colors active:bg-neutral-200 pdp-pressable";
 
 /** Pill CTA disabled / added state */
 export const pdpStrokeCtaMutedClass =
-  "rounded-full bg-neutral-100 text-neutral-500";
+  "rounded-full bg-neutral-200 text-neutral-500";
 
 /** Underlined text CTA — primary (Shop Shoulder Bags) */
 export const pdpTextLinkCtaClass =
@@ -58,3 +58,7 @@ export const pdpTextLinkCtaMutedLabelClass =
 /** Bottom-bar variant pill — Style / Size / Color triggers */
 export const pdpVariantPillClass =
   "font-extended flex h-12 min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-3 text-left text-[12px] leading-none text-black transition-colors active:bg-neutral-50 pdp-pressable";
+
+/** Frost variant pill — docked hero buy bar */
+export const pdpVariantPillFrostClass =
+  "font-extended flex h-12 min-w-0 flex-1 items-center gap-2 rounded-full px-3 text-left text-[12px] leading-none text-white pdp-frost-dark active:brightness-95 pdp-pressable";

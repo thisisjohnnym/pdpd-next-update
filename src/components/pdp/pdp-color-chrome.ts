@@ -6,7 +6,7 @@ export type AtbChrome = {
 };
 
 /** Foreground on sampled color chrome — white on dark tones, black on light */
-export function getColorChromeForeground(hex: string): string {
+function getColorChromeForeground(hex: string): string {
   const normalized = hex.replace("#", "");
   if (normalized.length !== 6) {
     return "#ffffff";

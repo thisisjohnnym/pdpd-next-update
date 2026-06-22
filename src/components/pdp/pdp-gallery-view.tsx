@@ -21,7 +21,11 @@ import { PdpGalleryViewMorePhotos } from "./pdp-gallery-view-more-photos";
 import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
 import { PdpBundleModule } from "./pdp-bundle-module";
-import { PdpCompareModule } from "./pdp-compare-module";
+import { PdpCompareModuleGate } from "./pdp-compare-module-gate";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { PdpTabbyVariantModule } from "./pdp-tabby-variant-module";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { PdpShoppingDiscoveryModule } from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
@@ -53,6 +57,7 @@ import type { PdpBundleAddPayload, PdpInfluencerCredit, PdpProductHotspot } from
 import { pdpType } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import {
+  bottomCtaOffset,
   BOTTOM_CTA_OFFSET,
   HERO_IMMERSIVE_CLASS,
   HERO_IMMERSIVE_MEDIA_CLASS,
@@ -66,11 +71,6 @@ import { galleryPanelClassName, getLastGalleryPanelSlideIndex } from "./pdp-gall
 import { usePanelScrollRelease } from "./use-panel-scroll-release";
 
 const GALLERY_CLASS = "w-full overflow-x-clip bg-white";
-
-/** Reserve scroll space so modules aren't hidden behind the fixed bottom bar */
-const GALLERY_SCROLL_PAD = {
-  paddingBottom: BOTTOM_CTA_OFFSET,
-} as const;
 
 /** Stacked gallery frames */
 const GALLERY_MEDIA_STACK_CLASS = "flex flex-col bg-white";
@@ -330,7 +330,7 @@ function PortraitInfluencerBadge({
       href={influencer.profileUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`absolute bottom-4 left-4 flex items-center gap-1 rounded-full bg-black/35 py-2 pl-3 pr-3.5 text-white backdrop-blur-md transition-colors active:bg-black/50 ${pdpType.label}`}
+      className={`pointer-events-auto absolute bottom-4 left-4 flex items-center gap-1 rounded-full bg-black/35 py-2 pl-3 pr-3.5 text-white backdrop-blur-md transition-colors active:bg-black/50 ${pdpType.label}`}
       aria-label={`View ${influencer.handle} on ${network}`}
     >
       <span className="font-extended translate-y-px">{influencer.handle}</span>
@@ -355,7 +355,7 @@ function PortraitShopTheLookButton({
       onClick={() => onOpenShopTheLook(shopTheLookId)}
       aria-label="Shop the look"
       className={cn(
-        "absolute bottom-4 left-3 z-10 flex items-center gap-1 rounded-full border border-white/55 bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95 lg:left-5",
+        "pointer-events-auto flex items-center gap-1 rounded-full bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95",
         pdpType.micro,
       )}
     >
@@ -410,18 +410,24 @@ function PortraitOverlays({
   onOpenStrapOptions,
 }: PortraitOverlaysProps) {
   return (
-    <>
-      <PortraitHotspots hotspots={hotspots} />
-      <PortraitInfluencerBadge influencer={influencer} />
-      <PortraitShopTheLookButton
-        shopTheLookId={shopTheLookId}
-        onOpenShopTheLook={onOpenShopTheLook}
-      />
-      <PortraitStrapCard
-        strapOptionsId={strapOptionsId}
-        onOpenStrapOptions={onOpenStrapOptions}
-      />
-    </>
+    <div className="pointer-events-none col-start-1 row-start-1 z-10 grid size-full min-h-0 grid-cols-1 grid-rows-1">
+      <div className="pointer-events-auto relative col-start-1 row-start-1 size-full min-h-0">
+        <PortraitHotspots hotspots={hotspots} />
+        <PortraitInfluencerBadge influencer={influencer} />
+        <div className="pointer-events-auto">
+          <PortraitStrapCard
+            strapOptionsId={strapOptionsId}
+            onOpenStrapOptions={onOpenStrapOptions}
+          />
+        </div>
+      </div>
+      <div className="pointer-events-none col-start-1 row-start-1 flex size-full min-h-0 flex-col items-center justify-end pb-4">
+        <PortraitShopTheLookButton
+          shopTheLookId={shopTheLookId}
+          onOpenShopTheLook={onOpenShopTheLook}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -462,8 +468,8 @@ function PdpGalleryPortraitSlide({
       data-header-surface={resolvedHeaderSurface}
       style={portraitSectionStyle(panel, reserveBottomCta)}
     >
-      <div className={portraitFrameClass(panel, aspect, insetMargins)}>
-        <PdpRevealItem className="relative size-full">
+      <div className={cn(portraitFrameClass(panel, aspect, insetMargins), "grid")}>
+        <PdpRevealItem className="relative col-start-1 row-start-1 size-full min-h-0">
           <PortraitMedia
             src={src}
             alt={alt}
@@ -621,6 +627,13 @@ export function PdpGalleryView({
   const activeStrapOptions = strapOptionsId
     ? PDP_STRAP_OPTIONS[strapOptionsId] ?? null
     : null;
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
+  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
+  const galleryScrollPad = {
+    paddingBottom: bottomCtaOffset(showTabbyExperiment),
+  } as const;
 
   useEffect(() => {
     onStrapOptionsOpenChange?.(strapOptionsId !== null);
@@ -640,7 +653,8 @@ export function PdpGalleryView({
       />
     ) : null}
 
-    <div className={GALLERY_CLASS} style={GALLERY_SCROLL_PAD}>
+    <div className={GALLERY_CLASS} style={galleryScrollPad}>
+      {showTabbyExperiment ? <PdpTabbyVariantModule /> : null}
       <div className={GALLERY_MEDIA_STACK_CLASS}>
         {PDP_GALLERY_SLIDES.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
@@ -825,7 +839,7 @@ export function PdpGalleryView({
         />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpCompareModule
+        <PdpCompareModuleGate
           onAddToBag={() => onAddSimilarToBag?.()}
           onPickerOpenChange={onComparePickerOpenChange}
         />

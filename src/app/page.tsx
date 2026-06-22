@@ -1,5 +1,7 @@
-import { PdpSocialView } from "@/components/pdp/pdp-social-view";
+import { redirect } from "next/navigation";
+
+import { DEFAULT_TABBY_SLUG } from "@/components/pdp/pdp-tabby-variants";
 
 export default function Home() {
-  return <PdpSocialView />;
+  redirect(`/products/${DEFAULT_TABBY_SLUG}`);
 }
