@@ -1,5 +1,9 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
 /** Query/env key for the Tabby family compare A/B test — used in URL + env wiring */
-export const TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG = "tabbyFamilyCompareExperiment";
+const TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG = "tabbyFamilyCompareExperiment";
 
 const TRUTHY = new Set(["1", "true", "yes", "on"]);
 
@@ -21,7 +25,7 @@ function isTabbyFamilyCompareExperimentEnabledFromEnv(): boolean {
  * 1. URL query `?tabbyFamilyCompareExperiment=1` (QA override)
  * 2. `NEXT_PUBLIC_TABBY_FAMILY_COMPARE_EXPERIMENT=true`
  */
-export function resolveTabbyFamilyCompareExperiment(
+function resolveTabbyFamilyCompareExperiment(
   searchParam: string | null,
 ): boolean {
   if (searchParam !== null) {
@@ -29,4 +33,12 @@ export function resolveTabbyFamilyCompareExperiment(
   }
 
   return isTabbyFamilyCompareExperimentEnabledFromEnv();
+}
+
+/** Hook for gating experiment UI (compare module + Style/Size/Color buy bar) */
+export function useTabbyFamilyCompareExperiment(): boolean {
+  const searchParams = useSearchParams();
+  return resolveTabbyFamilyCompareExperiment(
+    searchParams.get(TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG),
+  );
 }

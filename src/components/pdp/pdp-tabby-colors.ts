@@ -159,7 +159,7 @@ const QUILTED_26: TabbyColorSeed[] = [
     name: "Brass/Indigo",
     swatch: coachSwatch("brass-indigo"),
     chromeSample: "#3d4a6a",
-    availability: "in_stock",
+    availability: "notify",
   },
   {
     id: "brass-maple",

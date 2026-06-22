@@ -26,7 +26,7 @@ import {
 import { ColorSwatchCircle } from "./pdp-color-swatch";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { PdpToast } from "./pdp-toast";
-import { pdpPressableClass, pdpType } from "./pdp-type";
+import { pdpPressableClass, pdpStrokeCtaClass, pdpType } from "./pdp-type";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpColorSheetColor = PdpColor | TabbyColorOption;
@@ -203,8 +203,8 @@ export function PdpColorSheet({
                             aria-label={`Notify me when ${color.name} is back in stock`}
                             onClick={handleNotify}
                             className={cn(
-                              "font-extended inline-flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-2 text-[11px] tracking-[0.2px] text-black transition-colors active:bg-neutral-50",
-                              pdpPressableClass,
+                              "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
+                              pdpStrokeCtaClass,
                             )}
                           >
                             <MaterialIcon

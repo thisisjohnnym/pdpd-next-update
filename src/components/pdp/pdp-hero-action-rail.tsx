@@ -6,6 +6,9 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_COMMENTS_SUMMARY, PDP_LIKE_SUMMARY, PDP_SAVE_SUMMARY } from "./pdp-data";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
@@ -261,6 +264,10 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
   const opacity = useHeroScrollOpacity();
   const visible = isHeroOverlayVisible(opacity);
   const { docked, frostOpacity } = useBottomBarDocked();
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
+  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
   const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -283,7 +290,7 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
         RAIL_GLYPH_SHADOW,
       )}
       style={{
-        bottom: heroActionRailOffset(docked),
+        bottom: heroActionRailOffset(showTabbyExperiment, docked),
         opacity,
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",

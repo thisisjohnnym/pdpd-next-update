@@ -121,10 +121,8 @@ export function PdpComparePickerSheet({
                     onClick={() => handleSelect(index)}
                     aria-pressed={selected}
                     className={cn(
-                      "flex w-full items-center gap-3 border p-3 text-left transition-colors",
-                      selected
-                        ? "border-black bg-neutral-50"
-                        : "border-neutral-200 bg-white active:bg-neutral-50",
+                      "flex w-full items-center gap-3 p-3 text-left transition-colors",
+                      selected ? "bg-neutral-100" : "bg-white active:bg-neutral-50",
                     )}
                   >
                     <div className="relative size-16 shrink-0 overflow-hidden bg-neutral-100">

@@ -1,14 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpCompareModule } from "./pdp-compare-module";
 import { TabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-experiment";
-import {
-  TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG,
-  resolveTabbyFamilyCompareExperiment,
-} from "./experiments/tabby-family-compare-flag";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 
 type PdpCompareModuleGateProps = {
   onAddToBag?: () => void;
@@ -23,11 +18,8 @@ export function PdpCompareModuleGate({
   onAddToBag,
   onPickerOpenChange,
 }: PdpCompareModuleGateProps) {
-  const searchParams = useSearchParams();
   const { productId } = useActiveProduct();
-  const experimentEnabled = resolveTabbyFamilyCompareExperiment(
-    searchParams.get(TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG),
-  );
+  const experimentEnabled = useTabbyFamilyCompareExperiment();
 
   if (productId === "tabby" && experimentEnabled) {
     return (

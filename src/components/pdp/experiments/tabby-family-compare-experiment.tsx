@@ -52,7 +52,7 @@ function CompareProductCard({
       {badge ? (
         <span
           className={cn(
-            "absolute left-2 top-2 z-10 inline-flex items-center rounded-full border border-neutral-200 bg-white/95 px-3 py-1.5 text-black shadow-sm",
+            "absolute left-2 top-2 z-10 inline-flex items-center rounded-full bg-white/95 px-3 py-1.5 text-black shadow-sm",
             pdpType.micro,
           )}
         >
@@ -61,7 +61,7 @@ function CompareProductCard({
       ) : null}
       {onOpenPicker ? (
         <span
-          className="absolute bottom-2 left-2 right-2 z-10 inline-flex items-center justify-center gap-1 rounded-full border border-neutral-200 bg-white/95 px-3 py-2 text-black shadow-sm"
+          className="absolute bottom-2 left-2 right-2 z-10 inline-flex items-center justify-center gap-1 rounded-full bg-white/95 px-3 py-2 text-black shadow-sm"
           aria-hidden
         >
           <MaterialIcon

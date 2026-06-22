@@ -192,10 +192,8 @@ function BuildPickerOptionItem({
       role="option"
       aria-selected={isActive}
       className={cn(
-        "inline-flex shrink-0 items-stretch overflow-hidden rounded-full border text-left transition-colors",
-        isActive
-          ? "border-black bg-white"
-          : "border-neutral-200 bg-white text-neutral-700",
+        "inline-flex shrink-0 items-stretch overflow-hidden rounded-full text-left transition-colors",
+        isActive ? "bg-neutral-100 text-black" : "bg-white text-neutral-700",
       )}
     >
       <button

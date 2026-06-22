@@ -3,10 +3,10 @@
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 import { useActiveProduct } from "./pdp-active-product-context";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { heroProductHudOffset } from "./pdp-viewport-chrome";
-import { pdpBodyRhythm, pdpType } from "./pdp-type";
 import {
   isHeroOverlayVisible,
   useHeroScrollOpacity,
@@ -21,9 +21,11 @@ export function PdpGalleryProductHud() {
   const visible = isHeroOverlayVisible(opacity);
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
-  const hudBottom = heroProductHudOffset();
+  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
+  const hudBottom = heroProductHudOffset(showTabbyExperiment);
   const playHeroEnter = useHeroEnterOnce();
 
   return (
@@ -32,15 +34,14 @@ export function PdpGalleryProductHud() {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[15]"
         style={{
-          height: `calc(13rem + ${hudBottom})`,
-          minHeight: "52vh",
+          height: `calc(10.5rem + ${hudBottom})`,
           opacity,
           visibility: visible ? "visible" : "hidden",
         }}
       >
         <div
           className={cn(
-            "pdp-hero-bottom-scrim absolute inset-0",
+            "absolute inset-0 bg-[linear-gradient(to_top,rgb(0_0_0)_0%,rgb(0_0_0/0.72)_30%,rgb(0_0_0/0.28)_56%,transparent_84%)]",
             playHeroEnter && "pdp-hero-scrim-enter",
           )}
         />
@@ -55,23 +56,28 @@ export function PdpGalleryProductHud() {
         }}
       >
         <div className={cn(playHeroEnter && "pdp-hero-hud-enter")}>
-        <PageGrid fullWidth className="pb-1">
-          <GridItem mobile={12} desktop={24}>
-            <div className={`font-extended flex items-start justify-between gap-4 tracking-[0.2px] text-white ${heroHudTextShadow}`}>
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <p className={`text-base text-white ${pdpBodyRhythm}`}>
-                  {summary.name}
-                </p>
-                <p className={cn("text-white/75", pdpType.micro)}>
-                  {summary.subtitle}
+          <PageGrid fullWidth className="pb-2.5">
+            <GridItem mobile={12} desktop={24}>
+              <div
+                className={cn(
+                  "font-extended flex items-start justify-between gap-4 tracking-[0.2px] text-white",
+                  heroHudTextShadow,
+                )}
+              >
+                <div className="flex min-w-0 flex-col">
+                  <p className="text-base font-normal leading-none tracking-[0.2px]">
+                    {summary.name}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-none tracking-[0.2px] text-white/75">
+                    {summary.subtitle}
+                  </p>
+                </div>
+                <p className="shrink-0 pt-px text-sm font-normal leading-none tracking-[0.2px]">
+                  {summary.price}
                 </p>
               </div>
-              <p className={`shrink-0 pt-px text-sm text-white ${pdpBodyRhythm}`}>
-                {summary.price}
-              </p>
-            </div>
-          </GridItem>
-        </PageGrid>
+            </GridItem>
+          </PageGrid>
         </div>
       </div>
     </>

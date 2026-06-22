@@ -41,7 +41,7 @@ import {
   type TabbyStyleId,
 } from "./pdp-tabby-variants";
 
-type TabbySizeOptionAvailability = {
+export type TabbySizeOptionAvailability = {
   option: ReturnType<typeof getTabbySizeOption>;
   available: boolean;
 };
@@ -287,6 +287,16 @@ export function TabbyVariantProvider({
       {children}
     </TabbyVariantContext.Provider>
   );
+}
+
+export function useTabbyVariant(): TabbyVariantContextValue {
+  const context = useContext(TabbyVariantContext);
+
+  if (!context) {
+    throw new Error("useTabbyVariant must be used within TabbyVariantProvider");
+  }
+
+  return context;
 }
 
 export function useOptionalTabbyVariant(): TabbyVariantContextValue | null {

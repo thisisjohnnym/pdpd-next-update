@@ -14,7 +14,7 @@ import { PdpColorSheet } from "./pdp-color-sheet";
 import { ColorSwatchCircle, ColorSwatchImage } from "./pdp-color-swatch";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
-import { pdpPressableIconClass, pdpVariantPillClass } from "./pdp-type";
+import { pdpPressableIconClass, pdpVariantPillClass, pdpVariantPillFrostClass } from "./pdp-type";
 
 type PdpColorSelectorColor = PdpColor | TabbyColorOption;
 
@@ -36,6 +36,8 @@ type PdpColorSelectorProps = {
   onOpenChange?: (open: boolean) => void;
   /** Fill equal share of a full-width variant row */
   stretch?: boolean;
+  /** Frosted pill on docked hero buy bar */
+  frost?: boolean;
 };
 
 function PdpColorDropup({
@@ -44,9 +46,10 @@ function PdpColorDropup({
   onSelect,
   onOpenChange,
   stretch = false,
+  frost = false,
 }: Pick<
   PdpColorSelectorProps,
-  "colors" | "selectedId" | "onSelect" | "onOpenChange" | "stretch"
+  "colors" | "selectedId" | "onSelect" | "onOpenChange" | "stretch" | "frost"
 >) {
   const [open, setOpen] = useState(false);
   const selected =
@@ -88,19 +91,29 @@ function PdpColorDropup({
         aria-expanded={open}
         aria-label={`Color: ${coachColor.full}, ${pdpColorAvailabilityLabel(selected.availability)}. Choose another color.`}
         onClick={() => setSheetOpen(!open)}
-        className={cn(pdpVariantPillClass, stretch && "w-full max-w-none")}
+        className={cn(
+          frost ? pdpVariantPillFrostClass : pdpVariantPillClass,
+          stretch && "w-full max-w-none",
+        )}
       >
         <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
         <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
           <span className="max-w-full truncate translate-y-px" title={coachColor.full}>
             {coachColor.shade}
           </span>
-          <span className="truncate text-[10px] tracking-[0.2px] text-neutral-500">Color</span>
+          <span
+            className={cn(
+              "truncate text-[10px] tracking-[0.2px]",
+              frost ? "text-white/55" : "text-neutral-500",
+            )}
+          >
+            Color
+          </span>
         </span>
         <MaterialIcon
           name={open ? "expand_less" : "expand_more"}
           size={18}
-          className="shrink-0 text-neutral-600"
+          className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
         />
       </button>
     </div>
@@ -116,6 +129,7 @@ export function PdpColorSelector({
   inline = false,
   onOpenChange,
   stretch = false,
+  frost = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
@@ -128,6 +142,7 @@ export function PdpColorSelector({
         onSelect={onSelect}
         onOpenChange={onOpenChange}
         stretch={stretch}
+        frost={frost}
       />
     );
   }

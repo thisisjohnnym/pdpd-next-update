@@ -4,6 +4,10 @@ import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
+/** Coach.com $desktopSwatchImage$ — bag sits in lower third of portrait frame */
+const COACH_SWATCH_FOCAL = "50% 68%";
+const COACH_SWATCH_ZOOM = 3.25;
+
 /** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
 const PRODUCT_SWATCH_FOCAL = "50% 58%";
 const PRODUCT_SWATCH_ZOOM = 2.25;
@@ -12,13 +16,13 @@ function isCoachSwatchSrc(src: string): boolean {
   return src.includes("/images/colors/tabby/");
 }
 
-/** Coach.com $desktopSwatchImage$ crops — render as-is; product shots get a lighter zoom */
+/** Coach.com swatches and legacy hero frames — zoomed to fill the circular clip */
 export function ColorSwatchImage({
   src,
   sizes,
   className,
-  objectPosition = PRODUCT_SWATCH_FOCAL,
-  zoom = PRODUCT_SWATCH_ZOOM,
+  objectPosition,
+  zoom,
   variant,
 }: {
   src: string;
@@ -26,30 +30,20 @@ export function ColorSwatchImage({
   className?: string;
   objectPosition?: string;
   zoom?: number;
-  /** coach = pre-cropped Coach swatch; product = full hero crop */
+  /** coach = Coach.com swatch frame; product = full hero crop */
   variant?: "coach" | "product";
 }) {
   const coachMode = variant === "coach" || (variant !== "product" && isCoachSwatchSrc(src));
-
-  if (coachMode) {
-    return (
-      <Image
-        src={src}
-        alt=""
-        fill
-        className={cn("object-cover object-center", className)}
-        sizes={sizes}
-      />
-    );
-  }
+  const focal = objectPosition ?? (coachMode ? COACH_SWATCH_FOCAL : PRODUCT_SWATCH_FOCAL);
+  const scale = zoom ?? (coachMode ? COACH_SWATCH_ZOOM : PRODUCT_SWATCH_ZOOM);
 
   return (
     <span
       aria-hidden
       className={cn("absolute inset-0", className)}
       style={{
-        transform: `scale(${zoom})`,
-        transformOrigin: objectPosition,
+        transform: `scale(${scale})`,
+        transformOrigin: focal,
       }}
     >
       <Image
@@ -57,7 +51,7 @@ export function ColorSwatchImage({
         alt=""
         fill
         className="object-cover"
-        style={{ objectPosition }}
+        style={{ objectPosition: focal }}
         sizes={sizes}
       />
     </span>
@@ -83,7 +77,7 @@ export function ColorSwatchCircle({
     <span
       aria-hidden
       className={cn(
-        "relative block shrink-0 overflow-hidden rounded-full border border-black/5 bg-neutral-100",
+        "relative block shrink-0 overflow-hidden rounded-full bg-neutral-100",
         sizeClass,
         dimmed && "opacity-40",
       )}

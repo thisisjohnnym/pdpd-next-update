@@ -42,12 +42,12 @@ export function PdpTabbySizeOption({
       }
       onClick={() => !disabled && onSelect(option.size)}
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden rounded-xl border text-left transition-colors",
+        "flex h-full w-full flex-col overflow-hidden rounded-xl text-left transition-colors",
         disabled
-          ? "cursor-not-allowed border-neutral-100 bg-neutral-50 opacity-50"
+          ? "cursor-not-allowed bg-neutral-50 opacity-50"
           : selected
-            ? "border-black bg-neutral-50"
-            : "border-neutral-200 bg-white active:bg-neutral-50",
+            ? "bg-neutral-100"
+            : "bg-white active:bg-neutral-50",
         !disabled && pdpPressableClass,
       )}
     >

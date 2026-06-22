@@ -24,8 +24,8 @@ const RING_TONE = {
 } as const;
 
 const CHIP_TONE = {
-  dark: "border border-white/15 bg-black/45 text-white/95 backdrop-blur-md",
-  light: "border border-black/10 bg-white/80 text-neutral-900 shadow-sm backdrop-blur-md",
+  dark: "bg-black/45 text-white/95 backdrop-blur-md",
+  light: "bg-white/80 text-neutral-900 shadow-sm backdrop-blur-md",
 } as const;
 
 type HoldRingProps = {

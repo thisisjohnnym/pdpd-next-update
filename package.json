@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NEXT_PUBLIC_TABBY_FAMILY_COMPARE_EXPERIMENT=true next dev",
+    "dev:control": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

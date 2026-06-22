@@ -8,9 +8,12 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PdpColorSelector } from "./pdp-color-selector";
-import { getColorChromeForeground, getColorChromeGlow, isDarkColorChrome } from "./pdp-color-chrome";
+import { getAtbChromeFromColorSample } from "./pdp-color-chrome";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 import { PDP_COLORS, pdpColorIsSelectable } from "./pdp-data";
 import { useActiveProduct } from "./pdp-active-product-context";
+import { PdpSizeSelector } from "./pdp-size-selector";
+import { PdpStyleSelector } from "./pdp-style-selector";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { PdpToast } from "./pdp-toast";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
@@ -26,7 +29,7 @@ type PdpBottomActionsProps = {
   suppressed?: boolean;
 };
 
-/** Fixed bottom chrome — Style · Size · Color + Add to bag */
+/** Fixed bottom chrome — control: Color + ATB · experiment: Style · Size · Color + ATB */
 export function PdpBottomActions({
   selectedColorId,
   onColorSelect,
@@ -34,11 +37,15 @@ export function PdpBottomActions({
   suppressed = false,
 }: PdpBottomActionsProps) {
   const [mounted, setMounted] = useState(false);
+  const [styleSheetOpen, setStyleSheetOpen] = useState(false);
+  const [sizeSheetOpen, setSizeSheetOpen] = useState(false);
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
   const { docked, frostOpacity } = useBottomBarDocked();
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
+  const showTabbyConfigurator = isTabbyProduct && tabbyExperiment;
   const playHeroEnter = useHeroEnterOnce();
 
   const colors = isTabbyProduct ? tabby!.colorOptions : PDP_COLORS;
@@ -48,16 +55,11 @@ export function PdpBottomActions({
       ? tabby!.colors.find((entry) => entry.id === activeColorId)
       : colors.find((entry) => entry.id === activeColorId)) ?? colors[0];
   const atbChromeSample = selectedColor?.chromeSample ?? "#0a0a0a";
-  const atbForeground = getColorChromeForeground(atbChromeSample);
-  const atbGlow = getColorChromeGlow(atbChromeSample);
-  const isDarkChrome = isDarkColorChrome(atbChromeSample);
-  /** Dark chrome on the docked hero scrim — rounded pill instead of flush bar */
-  const atbNeedsContrastOnScrim = docked && isDarkChrome;
-  /** Non-Tabby dark chrome — inset float vs flush bar row */
-  const atbFloatsWhenDocked = atbNeedsContrastOnScrim && !isTabbyProduct;
-  /** Tabby + dark chrome on scrim use rounded pills */
-  const atbUsesRoundedPill = !docked || atbNeedsContrastOnScrim || isTabbyProduct;
-  const variantSheetOpen = colorSheetOpen;
+  const atbChrome = getAtbChromeFromColorSample(atbChromeSample);
+  const isDarkChrome = atbChrome.isDarkBackdrop;
+  const atbUsesRoundedPill =
+    !docked || showTabbyConfigurator || isDarkChrome || isTabbyProduct;
+  const variantSheetOpen = styleSheetOpen || sizeSheetOpen || colorSheetOpen;
 
   useEffect(() => {
     setMounted(true);
@@ -90,15 +92,27 @@ export function PdpBottomActions({
     onColorSelect(id);
   };
 
-  /** Match PageGrid margins (12px mobile / 20px desktop) — aligns with hero product HUD */
   const dockedContentInset = docked ? "px-3 lg:px-5" : "";
 
-  const variantRow = (
+  const variantRow = showTabbyConfigurator ? (
+    <div className={cn("flex w-full items-stretch gap-2", dockedContentInset)}>
+      <PdpStyleSelector onOpenChange={setStyleSheetOpen} stretch />
+      <PdpSizeSelector onOpenChange={setSizeSheetOpen} stretch />
+      <PdpColorSelector
+        colors={colors}
+        selectedId={activeColorId}
+        onSelect={handleColorSelect}
+        inline
+        stretch
+        onOpenChange={setColorSheetOpen}
+      />
+    </div>
+  ) : (
     <div
       className={cn(
         "flex items-center",
         isTabbyProduct ? "min-w-0 flex-[2]" : "shrink-0",
-        !atbFloatsWhenDocked && !isTabbyProduct && dockedContentInset,
+        !isTabbyProduct && docked && dockedContentInset,
       )}
     >
       <PdpColorSelector
@@ -125,9 +139,8 @@ export function PdpBottomActions({
           : "h-[54px] rounded-none px-4",
       )}
       style={{
-        backgroundColor: atbChromeSample,
-        color: atbForeground,
-        boxShadow: atbGlow,
+        backgroundColor: atbChrome.background,
+        color: atbChrome.foreground,
       }}
     >
       <span className="relative z-[1] flex min-w-0 items-center justify-center gap-2">
@@ -135,7 +148,7 @@ export function PdpBottomActions({
           name="shopping_bag"
           size={18}
           className="shrink-0 -translate-y-px"
-          style={{ color: atbForeground }}
+          style={{ color: atbChrome.foreground }}
           aria-hidden
         />
         <span className="translate-y-px text-[12px]">Add to bag</span>
@@ -143,21 +156,30 @@ export function PdpBottomActions({
     </button>
   );
 
-  const addToBagSlot =
-    isTabbyProduct ? (
-      <div className="min-w-0 flex-[3]">{addToBagButton}</div>
-    ) : atbFloatsWhenDocked ? (
-      <div className={dockedContentInset}>{addToBagButton}</div>
-    ) : (
-      addToBagButton
-    );
+  const addToBagSlot = showTabbyConfigurator ? (
+    <div className={cn("w-full min-w-0", dockedContentInset)}>{addToBagButton}</div>
+  ) : isTabbyProduct ? (
+    <div className="min-w-0 flex-[3]">{addToBagButton}</div>
+  ) : (
+    addToBagButton
+  );
 
-  const bar = (
+  const bar = showTabbyConfigurator ? (
     <div
       className={cn(
-        "flex w-full items-stretch transition-[gap,padding] duration-300 ease-out",
+        "flex w-full min-w-0 flex-col items-stretch gap-2 transition-[gap,padding] duration-300 ease-out",
+        playHeroEnter && "pdp-hero-bottom-enter",
+      )}
+    >
+      {variantRow}
+      {addToBagSlot}
+    </div>
+  ) : (
+    <div
+      className={cn(
+        "flex w-full items-stretch gap-2 transition-[gap,padding] duration-300 ease-out",
         isTabbyProduct ? "gap-1.5" : "gap-2",
-        (atbFloatsWhenDocked || (isTabbyProduct && docked)) && dockedContentInset,
+        isTabbyProduct && docked && dockedContentInset,
         playHeroEnter && "pdp-hero-bottom-enter",
       )}
     >
@@ -182,7 +204,9 @@ export function PdpBottomActions({
           "pdp-bottom-frost-gradient pointer-events-none fixed inset-x-0 bottom-0 z-[39] transition-[transform,opacity] duration-300 ease-out",
           suppressed ? "translate-y-full opacity-0" : "translate-y-0",
           docked
-            ? "pdp-bottom-frost-gradient--docked h-[calc(6.5rem+var(--pdp-fixed-bottom-offset))]"
+            ? showTabbyConfigurator
+              ? "pdp-bottom-frost-gradient--docked h-[calc(9.5rem+var(--pdp-fixed-bottom-offset))]"
+              : "pdp-bottom-frost-gradient--docked h-[calc(6.5rem+var(--pdp-fixed-bottom-offset))]"
             : "pdp-bottom-frost-gradient--prominent h-[calc(15rem+var(--pdp-fixed-bottom-offset))]",
         )}
         style={{ opacity: suppressed || variantSheetOpen || docked ? 0 : frostOpacity }}

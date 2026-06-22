@@ -9,6 +9,14 @@ export type TabbyStyleId =
   | "loved-leather"
   | "chain";
 
+export type TabbyStyleGroupId = "core" | "special-editions";
+
+export type TabbyStyleGroup = {
+  id: TabbyStyleGroupId;
+  label: string;
+  styleIds: TabbyStyleId[];
+};
+
 export type TabbySize = 20 | 26 | 33 | 36;
 
 export type TabbySizeOption = {
@@ -156,6 +164,19 @@ const TABBY_STYLES: TabbyStyle[] = [
   },
 ];
 
+const TABBY_STYLE_GROUPS: TabbyStyleGroup[] = [
+  {
+    id: "core",
+    label: "Core Styles",
+    styleIds: ["classic", "soft", "quilted", "pillow-quilted"],
+  },
+  {
+    id: "special-editions",
+    label: "Special Editions",
+    styleIds: ["signature-canvas", "twisted", "loved-leather", "chain"],
+  },
+];
+
 export const DEFAULT_TABBY_STYLE_ID: TabbyStyleId = "quilted";
 export const DEFAULT_TABBY_SIZE: TabbySize = 26;
 export const DEFAULT_TABBY_SLUG = buildTabbySlug(DEFAULT_TABBY_SIZE, DEFAULT_TABBY_STYLE_ID);
@@ -182,6 +203,16 @@ export function parseTabbySlug(slug: string): { size: TabbySize; styleId: TabbyS
 
 export function getTabbyStyle(styleId: TabbyStyleId): TabbyStyle {
   return TABBY_STYLES.find((style) => style.id === styleId) ?? TABBY_STYLES[0]!;
+}
+
+export function getTabbyStyleGroups(): Array<{
+  group: TabbyStyleGroup;
+  styles: TabbyStyle[];
+}> {
+  return TABBY_STYLE_GROUPS.map((group) => ({
+    group,
+    styles: group.styleIds.map((id) => getTabbyStyle(id)),
+  }));
 }
 
 export function getTabbySku(size: TabbySize, styleId: TabbyStyleId): TabbySku {

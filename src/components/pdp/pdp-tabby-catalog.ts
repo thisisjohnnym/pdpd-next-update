@@ -115,6 +115,7 @@ const TABBY_FAMILY_CATALOG: TabbyFamilyStyleEntry[] = [
           "brass-indigo",
           "brass-maple",
           "brass-biscuit",
+          "brass-black-multi",
         ],
       },
       {

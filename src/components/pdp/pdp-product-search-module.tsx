@@ -233,10 +233,8 @@ export function PdpAiConciergePanel({
               onClick={() => runPrompt(prompt)}
               aria-pressed={isActive}
               className={cn(
-                "flex w-full items-start gap-3 border p-3 text-left transition-colors duration-200",
-                isActive
-                  ? "border-black bg-white shadow-sm"
-                  : "border-neutral-200 bg-white active:bg-neutral-50",
+                "flex w-full items-start gap-3 p-3 text-left transition-colors duration-200",
+                isActive ? "bg-neutral-100 shadow-sm" : "bg-white active:bg-neutral-50",
               )}
             >
               <span

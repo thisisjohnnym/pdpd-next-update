@@ -5,21 +5,34 @@
 
 ## Enable the variant
 
-**Environment (persistent):**
+On this branch, **`npm run dev` enables the variant automatically** (via `NEXT_PUBLIC_TABBY_FAMILY_COMPARE_EXPERIMENT=true` in the dev script). Restart the dev server after pulling if you still see Color + ATB only.
+
+**Test control locally:**
+
+```bash
+npm run dev:control
+```
+
+Or append `?tabbyFamilyCompareExperiment=0` to override when the env flag is on.
+
+**Environment (persistent, CI / preview):**
 
 ```bash
 NEXT_PUBLIC_TABBY_FAMILY_COMPARE_EXPERIMENT=true
 ```
 
-**URL query (QA / local):**
+**URL query (QA):**
 
 ```
 ?tabbyFamilyCompareExperiment=1
 ```
 
-When the flag is off (default), the PDP renders the existing **Compare the family** control module unchanged.
+When the flag is off (default), the PDP renders the existing **Compare the family** module and **Color + Add to bag** in the buy bar.
 
-When the flag is on, the PDP renders **Explore the Tabby family** — the family discovery compare experience.
+When the flag is on, the PDP also renders:
+- **Style · Size · Color + Add to bag** in the sticky buy bar
+- **Configure your Tabby** on-page module (desktop/tablet)
+- **Explore the Tabby family** compare module
 
 ## Architecture
 

@@ -22,6 +22,10 @@ import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
 import { PdpBundleModule } from "./pdp-bundle-module";
 import { PdpCompareModuleGate } from "./pdp-compare-module-gate";
+import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { PdpTabbyVariantModule } from "./pdp-tabby-variant-module";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { PdpShoppingDiscoveryModule } from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
@@ -351,7 +355,7 @@ function PortraitShopTheLookButton({
       onClick={() => onOpenShopTheLook(shopTheLookId)}
       aria-label="Shop the look"
       className={cn(
-        "pointer-events-auto flex items-center gap-1 rounded-full border border-white/55 bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95",
+        "pointer-events-auto flex items-center gap-1 rounded-full bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95",
         pdpType.micro,
       )}
     >
@@ -623,8 +627,12 @@ export function PdpGalleryView({
   const activeStrapOptions = strapOptionsId
     ? PDP_STRAP_OPTIONS[strapOptionsId] ?? null
     : null;
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+  const tabbyExperiment = useTabbyFamilyCompareExperiment();
+  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
   const galleryScrollPad = {
-    paddingBottom: bottomCtaOffset(),
+    paddingBottom: bottomCtaOffset(showTabbyExperiment),
   } as const;
 
   useEffect(() => {
@@ -646,6 +654,7 @@ export function PdpGalleryView({
     ) : null}
 
     <div className={GALLERY_CLASS} style={galleryScrollPad}>
+      {showTabbyExperiment ? <PdpTabbyVariantModule /> : null}
       <div className={GALLERY_MEDIA_STACK_CLASS}>
         {PDP_GALLERY_SLIDES.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
