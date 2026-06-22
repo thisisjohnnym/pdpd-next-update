@@ -168,7 +168,7 @@ function QuickReplyRow({
         >
           <MaterialIcon
             name={prompt.icon}
-            size={16}
+            size={18}
             className="shrink-0 text-neutral-600"
             aria-hidden
           />
