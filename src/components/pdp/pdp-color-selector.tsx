@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -9,7 +8,8 @@ import { cn } from "@/lib/cn";
 import type { PdpColor } from "./pdp-data";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { getColorChromeForeground } from "./pdp-color-chrome";
-import { pdpPressableIconClass, pdpPressableSolidClass } from "./pdp-type";
+import { ColorSwatchCircle, ColorSwatchImage } from "./pdp-color-swatch";
+import { pdpPressableIconClass, pdpVariantPillClass } from "./pdp-type";
 
 type PdpColorSelectorProps = {
   colors: PdpColor[];
@@ -30,41 +30,6 @@ type PdpColorSelectorProps = {
   /** Fires when the inline color tray opens or closes */
   onOpenChange?: (open: boolean) => void;
 };
-
-/** Swatch assets are full product shots — zoom to bag body so color fills the circle */
-function ColorSwatchImage({
-  src,
-  sizes,
-}: {
-  src: string;
-  sizes: string;
-}) {
-  return (
-    <Image
-      src={src}
-      alt=""
-      fill
-      className="object-cover object-[center_82%] origin-[center_82%] scale-[4.5]"
-      sizes={sizes}
-    />
-  );
-}
-
-function ColorSwatchButton({
-  color,
-  sizeClass,
-}: {
-  color: PdpColor;
-  sizeClass: string;
-}) {
-  return (
-    <span
-      className={`relative inline-block shrink-0 overflow-hidden rounded-full bg-white ${sizeClass}`}
-    >
-      <ColorSwatchImage src={color.swatch} sizes="32px" />
-    </span>
-  );
-}
 
 function PdpColorDropup({
   colors,
@@ -94,6 +59,7 @@ function PdpColorDropup({
   };
 
   const chromeForeground = getColorChromeForeground(selected.chromeSample);
+  const useWhitePill = compact && !flush;
 
   return (
     <div className="relative min-w-0 w-full">
@@ -112,41 +78,66 @@ function PdpColorDropup({
         aria-label={`Color: ${selected.name}. Choose another color.`}
         onClick={() => setSheetOpen(!open)}
         className={cn(
-          "font-extended flex w-full items-center overflow-hidden tracking-[0.2px] transition-[border-radius,background-color,color] duration-300",
-          pdpPressableSolidClass,
-          compact ? "h-12 text-[11px]" : "h-[54px] text-xs",
-          flush
-            ? "justify-center gap-2 rounded-none px-3"
+          useWhitePill
+            ? pdpVariantPillClass
             : cn(
-                "rounded-full px-2.5",
-                iconOnly
-                  ? "justify-center gap-1.5"
-                  : compact
-                    ? "justify-center gap-1.5"
-                    : "justify-between gap-2.5",
-                compact ? "gap-2" : "gap-2.5",
+                "font-extended flex w-full items-center overflow-hidden tracking-[0.2px] transition-[border-radius,background-color,color] duration-300 pdp-pressable",
+                compact ? "h-12 text-[12px]" : "h-[54px] text-xs",
+                flush
+                  ? "justify-center gap-2 rounded-none px-3"
+                  : cn(
+                      "rounded-full px-2.5",
+                      iconOnly
+                        ? "justify-center gap-1.5"
+                        : compact
+                          ? "justify-center gap-1.5"
+                          : "justify-between gap-2.5",
+                      compact ? "gap-2" : "gap-2.5",
+                    ),
               ),
         )}
-        style={{
-          backgroundColor: selected.chromeSample,
-          color: chromeForeground,
-        }}
+        style={
+          useWhitePill
+            ? undefined
+            : {
+                backgroundColor: selected.chromeSample,
+                color: chromeForeground,
+              }
+        }
       >
-        <span className={cn("flex min-w-0 items-center", iconOnly ? "gap-0" : "gap-2")}>
-          <ColorSwatchButton
-            color={selected}
-            sizeClass={compact ? "size-7" : "size-8"}
-          />
-          {!iconOnly ? (
-            <span className="truncate translate-y-px">{selected.name}</span>
-          ) : null}
-        </span>
-        <MaterialIcon
-          name={open ? "expand_less" : "expand_more"}
-          size={compact ? 18 : 20}
-          className="shrink-0"
-          style={{ color: chromeForeground }}
-        />
+        {useWhitePill ? (
+          <>
+            <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
+            <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
+              <span className="max-w-full truncate translate-y-px" title={selected.name}>
+                {selected.name}
+              </span>
+              <span className="truncate text-[10px] tracking-[0.2px] text-neutral-500">
+                Color
+              </span>
+            </span>
+            <MaterialIcon
+              name={open ? "expand_less" : "expand_more"}
+              size={18}
+              className="shrink-0 text-neutral-600"
+            />
+          </>
+        ) : (
+          <>
+            <span className={cn("flex min-w-0 items-center", iconOnly ? "gap-0" : "gap-2")}>
+              <ColorSwatchCircle src={selected.swatch} sizeClass={compact ? "size-7" : "size-8"} sizes="32px" />
+              {!iconOnly ? (
+                <span className="truncate translate-y-px">{selected.name}</span>
+              ) : null}
+            </span>
+            <MaterialIcon
+              name={open ? "expand_less" : "expand_more"}
+              size={compact ? 18 : 20}
+              className="shrink-0"
+              style={{ color: chromeForeground }}
+            />
+          </>
+        )}
       </button>
     </div>
   );

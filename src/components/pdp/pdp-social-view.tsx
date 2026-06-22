@@ -18,6 +18,7 @@ import { PdpReviewsSheet } from "./pdp-reviews-sheet";
 import { PdpRuntimeProvider } from "./pdp-runtime-context";
 import type { PdpBundleAddPayload } from "./pdp-data";
 import { PdpScrollProvider } from "./use-coalesced-scroll";
+import { PdpHeroEnterProvider } from "./use-hero-enter-once";
 
 type BagConfirmation =
   | { type: "product" }
@@ -54,6 +55,7 @@ export function PdpSocialView() {
   return (
     <PdpRuntimeProvider>
       <PdpScrollProvider>
+        <PdpHeroEnterProvider>
         <div className="relative min-h-svh w-full overflow-x-clip bg-black">
           <PdpBrowserChromeSync />
           <PdpOverlayHeader
@@ -100,6 +102,7 @@ export function PdpSocialView() {
             confirmation={bagConfirmation}
           />
         </div>
+        </PdpHeroEnterProvider>
       </PdpScrollProvider>
     </PdpRuntimeProvider>
   );

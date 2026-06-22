@@ -13,9 +13,14 @@ import {
   isHeroOverlayVisible,
   useHeroScrollOpacity,
 } from "./use-hero-scroll-opacity";
+import { useHeroEnterOnce } from "./use-hero-enter-once";
 import { useReducedMotion } from "./use-reduced-motion";
 
 const LIKE_RED = "#FE2C55";
+
+/** Tight dark halo so white glyphs read on bright hero media */
+const RAIL_GLYPH_SHADOW =
+  "[filter:drop-shadow(0_0_1px_rgba(0,0,0,0.55))_drop-shadow(0_1px_3px_rgba(0,0,0,0.45))]";
 const BURST_DURATION_MS = 1700;
 const BURST_EASING = "cubic-bezier(0.22, 0.92, 0.24, 1)";
 const RAIL_ICON_SIZE = 26;
@@ -249,6 +254,7 @@ function LikeRailAction({
 export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => void }) {
   const opacity = useHeroScrollOpacity();
   const visible = isHeroOverlayVisible(opacity);
+  const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [saveToastOpen, setSaveToastOpen] = useState(false);
@@ -265,7 +271,10 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
   return (
     <>
     <div
-      className="absolute right-2 z-20 flex flex-col items-center gap-4 [filter:drop-shadow(0_1px_3px_rgba(0,0,0,0.45))]"
+      className={cn(
+        "absolute right-3 z-20 flex flex-col items-center gap-3",
+        RAIL_GLYPH_SHADOW,
+      )}
       style={{
         bottom: `calc(${BOTTOM_CTA_OFFSET} + 5.5rem)`,
         opacity,
@@ -273,22 +282,26 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
         pointerEvents: visible ? "auto" : "none",
       }}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[118%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/22 blur-2xl"
+      />
       <LikeRailAction
-        className="pdp-social-rail-item"
+        className={cn(playHeroEnter && "pdp-social-rail-item")}
         label={PDP_LIKE_SUMMARY.label}
         ariaLabel={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
         liked={liked}
         onToggle={() => setLiked((prev) => !prev)}
       />
       <RailAction
-        className="pdp-social-rail-item"
+        className={cn(playHeroEnter && "pdp-social-rail-item")}
         icon="chat_bubble"
         label={PDP_COMMENTS_SUMMARY.label}
         ariaLabel={`Comments, ${PDP_COMMENTS_SUMMARY.label} comments`}
         onClick={onOpenReviews}
       />
       <RailAction
-        className="pdp-social-rail-item"
+        className={cn(playHeroEnter && "pdp-social-rail-item")}
         icon="bookmark"
         label={PDP_SAVE_SUMMARY.label}
         ariaLabel={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
