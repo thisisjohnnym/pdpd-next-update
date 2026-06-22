@@ -14,10 +14,10 @@
     "prepare": "fallow hooks install --target git || true"
   },
   "dependencies": {
-    "material-symbols": "^0.44.12",
-    "next": "16.2.7",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "material-symbols": "^0.45.2",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -25,7 +25,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "^16.2.9",
     "fallow": "^2.97.0",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -1,18 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import type { PdpColor } from "./pdp-data";
+import {
+  pdpColorAvailabilityLabel,
+  pdpColorIsSelectable,
+} from "./pdp-data";
 import { PdpColorSheet } from "./pdp-color-sheet";
-import { getColorChromeForeground } from "./pdp-color-chrome";
-import { pdpPressableIconClass, pdpPressableSolidClass } from "./pdp-type";
+import { ColorSwatchCircle, ColorSwatchImage } from "./pdp-color-swatch";
+import type { TabbyColorOption } from "./pdp-tabby-colors";
+import { splitCoachColorName } from "./pdp-tabby-colors";
+import { pdpPressableIconClass, pdpVariantPillClass } from "./pdp-type";
+
+type PdpColorSelectorColor = PdpColor | TabbyColorOption;
+
+function isCombinationAvailable(color: PdpColorSelectorColor): boolean {
+  return !("combinationAvailable" in color) || color.combinationAvailable;
+}
 
 type PdpColorSelectorProps = {
-  colors: PdpColor[];
+  colors: PdpColorSelectorColor[];
   selectedId: string;
   onSelect: (id: string) => void;
   /** Overlay on hero image vs standalone on black */
@@ -21,68 +32,21 @@ type PdpColorSelectorProps = {
   compact?: boolean;
   /** Drop-up picker inside bottom bar pill */
   inline?: boolean;
-  /** Flush docked bar — square join with ATB at hero rest */
-  flush?: boolean;
-  /** Slightly smaller floating bottom-bar pill */
-  compactPill?: boolean;
-  /** Thumbnail + chevron only — saves space in stacked bottom bar */
-  iconOnly?: boolean;
   /** Fires when the inline color tray opens or closes */
   onOpenChange?: (open: boolean) => void;
+  /** Fill equal share of a full-width variant row */
+  stretch?: boolean;
 };
-
-/** Swatch assets are full product shots — zoom to bag body so color fills the circle */
-function ColorSwatchImage({
-  src,
-  sizes,
-}: {
-  src: string;
-  sizes: string;
-}) {
-  return (
-    <Image
-      src={src}
-      alt=""
-      fill
-      className="object-cover object-[center_82%] origin-[center_82%] scale-[4.5]"
-      sizes={sizes}
-    />
-  );
-}
-
-function ColorSwatchButton({
-  color,
-  sizeClass,
-}: {
-  color: PdpColor;
-  sizeClass: string;
-}) {
-  return (
-    <span
-      className={`relative inline-block shrink-0 overflow-hidden rounded-full bg-white ${sizeClass}`}
-    >
-      <ColorSwatchImage src={color.swatch} sizes="32px" />
-    </span>
-  );
-}
 
 function PdpColorDropup({
   colors,
   selectedId,
   onSelect,
-  flush = false,
-  compact = false,
-  iconOnly = false,
   onOpenChange,
+  stretch = false,
 }: Pick<
   PdpColorSelectorProps,
-  | "colors"
-  | "selectedId"
-  | "onSelect"
-  | "flush"
-  | "compact"
-  | "iconOnly"
-  | "onOpenChange"
+  "colors" | "selectedId" | "onSelect" | "onOpenChange" | "stretch"
 >) {
   const [open, setOpen] = useState(false);
   const selected =
@@ -93,59 +57,50 @@ function PdpColorDropup({
     onOpenChange?.(next);
   };
 
-  const chromeForeground = getColorChromeForeground(selected.chromeSample);
+  const handleSelect = (id: string) => {
+    const color = colors.find((entry) => entry.id === id);
+    if (
+      !color ||
+      !isCombinationAvailable(color) ||
+      !pdpColorIsSelectable(color.availability)
+    ) {
+      return;
+    }
+
+    onSelect(id);
+  };
+
+  const coachColor = splitCoachColorName(selected.name);
 
   return (
-    <div className="relative min-w-0 w-full">
+    <div className={cn("relative", stretch ? "min-w-0 w-full flex-1" : "shrink-0")}>
       <PdpColorSheet
         colors={colors}
         selectedId={selectedId}
         open={open}
         onClose={() => setSheetOpen(false)}
-        onSelect={onSelect}
+        onSelect={handleSelect}
       />
 
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Color: ${selected.name}. Choose another color.`}
+        aria-label={`Color: ${coachColor.full}, ${pdpColorAvailabilityLabel(selected.availability)}. Choose another color.`}
         onClick={() => setSheetOpen(!open)}
-        className={cn(
-          "font-extended flex w-full items-center overflow-hidden tracking-[0.2px] transition-[border-radius,background-color,color] duration-300",
-          pdpPressableSolidClass,
-          compact ? "h-12 text-[11px]" : "h-[54px] text-xs",
-          flush
-            ? "justify-center gap-2 rounded-none px-3"
-            : cn(
-                "rounded-full px-2.5",
-                iconOnly
-                  ? "justify-center gap-1.5"
-                  : compact
-                    ? "justify-center gap-1.5"
-                    : "justify-between gap-2.5",
-                compact ? "gap-2" : "gap-2.5",
-              ),
-        )}
-        style={{
-          backgroundColor: selected.chromeSample,
-          color: chromeForeground,
-        }}
+        className={cn(pdpVariantPillClass, stretch && "w-full max-w-none")}
       >
-        <span className={cn("flex min-w-0 items-center", iconOnly ? "gap-0" : "gap-2")}>
-          <ColorSwatchButton
-            color={selected}
-            sizeClass={compact ? "size-7" : "size-8"}
-          />
-          {!iconOnly ? (
-            <span className="truncate translate-y-px">{selected.name}</span>
-          ) : null}
+        <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
+        <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
+          <span className="max-w-full truncate translate-y-px" title={coachColor.full}>
+            {coachColor.shade}
+          </span>
+          <span className="truncate text-[10px] tracking-[0.2px] text-neutral-500">Color</span>
         </span>
         <MaterialIcon
           name={open ? "expand_less" : "expand_more"}
-          size={compact ? 18 : 20}
-          className="shrink-0"
-          style={{ color: chromeForeground }}
+          size={18}
+          className="shrink-0 text-neutral-600"
         />
       </button>
     </div>
@@ -159,14 +114,11 @@ export function PdpColorSelector({
   variant = "default",
   compact = false,
   inline = false,
-  flush = false,
-  compactPill = false,
-  iconOnly = false,
   onOpenChange,
+  stretch = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
-  const dropupCompact = compactPill && inline && !flush;
 
   if (inline) {
     return (
@@ -174,10 +126,8 @@ export function PdpColorSelector({
         colors={colors}
         selectedId={selectedId}
         onSelect={onSelect}
-        flush={flush}
-        compact={dropupCompact}
-        iconOnly={iconOnly}
         onOpenChange={onOpenChange}
+        stretch={stretch}
       />
     );
   }
@@ -208,30 +158,52 @@ export function PdpColorSelector({
 
         {colors.map((color) => {
           const isSelected = color.id === selectedId;
+          const isSelectable =
+            isCombinationAvailable(color) &&
+            pdpColorIsSelectable(color.availability);
 
           return (
             <button
               key={color.id}
               type="button"
-              aria-label={`Select ${color.name}`}
-              aria-pressed={isSelected}
-              onClick={() => onSelect(color.id)}
+              aria-label={
+                isSelectable
+                  ? `Select ${color.name}`
+                  : `${color.name}, out of stock`
+              }
+              aria-pressed={isSelectable ? isSelected : undefined}
+              aria-disabled={!isSelectable}
+              disabled={!isSelectable}
+              onClick={() => isSelectable && onSelect(color.id)}
               className={cn(
                 "relative shrink-0 overflow-hidden rounded-full bg-white transition-all",
-                pdpPressableIconClass,
+                isSelectable && pdpPressableIconClass,
+                !isSelectable && "cursor-not-allowed",
                 compact
                   ? isSelected
                     ? "size-9 ring-2 ring-white/80 ring-offset-1 ring-offset-transparent opacity-100"
-                    : "size-7 opacity-50"
+                    : cn("size-7", isSelectable ? "opacity-50" : "opacity-30")
                   : isSelected
                     ? "size-[70px] border border-white/20 opacity-100"
-                    : "size-14 opacity-40",
+                    : cn("size-14", isSelectable ? "opacity-40" : "opacity-30"),
               )}
             >
               <ColorSwatchImage
                 src={color.swatch}
                 sizes={compact ? "36px" : "70px"}
               />
+              {!isSelectable ? (
+                <span
+                  aria-hidden
+                  className="absolute inset-0 flex items-center justify-center bg-black/35"
+                >
+                  <MaterialIcon
+                    name="mail"
+                    size={18}
+                    className="text-white"
+                  />
+                </span>
+              ) : null}
             </button>
           );
         })}

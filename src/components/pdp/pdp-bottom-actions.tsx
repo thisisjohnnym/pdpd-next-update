@@ -8,10 +8,15 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PdpColorSelector } from "./pdp-color-selector";
-import { PDP_COLORS } from "./pdp-data";
+import { getColorChromeForeground, getColorChromeGlow, isDarkColorChrome } from "./pdp-color-chrome";
+import { PDP_COLORS, pdpColorIsSelectable } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { PdpToast } from "./pdp-toast";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { pdpPressableSolidClass } from "./pdp-type";
 import { useBottomBarDocked } from "./use-bottom-bar-docked";
+import { useHeroEnterOnce } from "./use-hero-enter-once";
 
 type PdpBottomActionsProps = {
   selectedColorId: string;
@@ -21,7 +26,7 @@ type PdpBottomActionsProps = {
   suppressed?: boolean;
 };
 
-/** Fixed bottom chrome — docked flush on hero, floating pills on scroll */
+/** Fixed bottom chrome — Style · Size · Color + Add to bag */
 export function PdpBottomActions({
   selectedColorId,
   onColorSelect,
@@ -31,6 +36,28 @@ export function PdpBottomActions({
   const [mounted, setMounted] = useState(false);
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
   const { docked, frostOpacity } = useBottomBarDocked();
+  const tabby = useOptionalTabbyVariant();
+  const { productId } = useActiveProduct();
+  const isTabbyProduct = productId === "tabby" && Boolean(tabby);
+  const playHeroEnter = useHeroEnterOnce();
+
+  const colors = isTabbyProduct ? tabby!.colorOptions : PDP_COLORS;
+  const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
+  const selectedColor =
+    (isTabbyProduct
+      ? tabby!.colors.find((entry) => entry.id === activeColorId)
+      : colors.find((entry) => entry.id === activeColorId)) ?? colors[0];
+  const atbChromeSample = selectedColor?.chromeSample ?? "#0a0a0a";
+  const atbForeground = getColorChromeForeground(atbChromeSample);
+  const atbGlow = getColorChromeGlow(atbChromeSample);
+  const isDarkChrome = isDarkColorChrome(atbChromeSample);
+  /** Dark chrome on the docked hero scrim — rounded pill instead of flush bar */
+  const atbNeedsContrastOnScrim = docked && isDarkChrome;
+  /** Non-Tabby dark chrome — inset float vs flush bar row */
+  const atbFloatsWhenDocked = atbNeedsContrastOnScrim && !isTabbyProduct;
+  /** Tabby + dark chrome on scrim use rounded pills */
+  const atbUsesRoundedPill = !docked || atbNeedsContrastOnScrim || isTabbyProduct;
+  const variantSheetOpen = colorSheetOpen;
 
   useEffect(() => {
     setMounted(true);
@@ -40,53 +67,115 @@ export function PdpBottomActions({
     return null;
   }
 
-  const bar = (
+  const handleColorSelect = (id: string) => {
+    const color = colors.find((entry) => entry.id === id);
+    const combinationAvailable =
+      !color ||
+      !("combinationAvailable" in color) ||
+      color.combinationAvailable;
+
+    if (
+      !color ||
+      !combinationAvailable ||
+      !pdpColorIsSelectable(color.availability)
+    ) {
+      return;
+    }
+
+    if (isTabbyProduct) {
+      tabby!.setSelectedColorId(id);
+      return;
+    }
+
+    onColorSelect(id);
+  };
+
+  /** Match PageGrid margins (12px mobile / 20px desktop) — aligns with hero product HUD */
+  const dockedContentInset = docked ? "px-3 lg:px-5" : "";
+
+  const variantRow = (
     <div
       className={cn(
-        "pdp-hero-bottom-enter transition-[gap,padding] duration-300 ease-out",
-        docked
-          ? "grid w-full grid-cols-2 gap-0"
-          : "grid w-full grid-cols-2 gap-1",
+        "flex items-center",
+        isTabbyProduct ? "min-w-0 flex-[2]" : "shrink-0",
+        !atbFloatsWhenDocked && !isTabbyProduct && dockedContentInset,
       )}
     >
       <PdpColorSelector
-        colors={PDP_COLORS}
-        selectedId={selectedColorId}
-        onSelect={onColorSelect}
+        colors={colors}
+        selectedId={activeColorId}
+        onSelect={handleColorSelect}
         inline
-        flush={docked}
-        compactPill={!docked}
+        stretch={isTabbyProduct}
         onOpenChange={setColorSheetOpen}
       />
+    </div>
+  );
 
-      <button
-        type="button"
-        onClick={onAddToBag}
-        className={cn(
-          "font-extended relative isolate flex min-w-0 items-center justify-center gap-2 overflow-hidden border border-neutral-200 bg-white text-center leading-none text-neutral-900 transition-[border-radius,background-color,color,box-shadow,transform] duration-300 active:bg-neutral-100",
-          pdpPressableSolidClass,
-          docked
-            ? "h-[54px] w-full rounded-none border-0 px-4 shadow-none"
-            : "h-12 w-full rounded-full border-neutral-200 px-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]",
-        )}
-      >
-        <span
-          className="relative z-[1] flex min-w-0 items-center justify-center gap-2"
-        >
-          <MaterialIcon
-            name="shopping_bag"
-            size={18}
-            className="shrink-0 -translate-y-px"
-            aria-hidden
-          />
-          <span className="translate-y-px text-[12px]">Add to bag</span>
-        </span>
-      </button>
+  const addToBagButton = (
+    <button
+      type="button"
+      onClick={onAddToBag}
+      className={cn(
+        "font-extended relative isolate flex min-w-0 w-full items-center justify-center gap-2 overflow-hidden text-center leading-none transition-[border-radius,background-color,color,box-shadow,transform,filter] duration-300",
+        pdpPressableSolidClass,
+        "active:brightness-90",
+        atbUsesRoundedPill
+          ? "h-12 rounded-full px-3"
+          : "h-[54px] rounded-none px-4",
+      )}
+      style={{
+        backgroundColor: atbChromeSample,
+        color: atbForeground,
+        boxShadow: atbGlow,
+      }}
+    >
+      <span className="relative z-[1] flex min-w-0 items-center justify-center gap-2">
+        <MaterialIcon
+          name="shopping_bag"
+          size={18}
+          className="shrink-0 -translate-y-px"
+          style={{ color: atbForeground }}
+          aria-hidden
+        />
+        <span className="translate-y-px text-[12px]">Add to bag</span>
+      </span>
+    </button>
+  );
+
+  const addToBagSlot =
+    isTabbyProduct ? (
+      <div className="min-w-0 flex-[3]">{addToBagButton}</div>
+    ) : atbFloatsWhenDocked ? (
+      <div className={dockedContentInset}>{addToBagButton}</div>
+    ) : (
+      addToBagButton
+    );
+
+  const bar = (
+    <div
+      className={cn(
+        "flex w-full items-stretch transition-[gap,padding] duration-300 ease-out",
+        isTabbyProduct ? "gap-1.5" : "gap-2",
+        (atbFloatsWhenDocked || (isTabbyProduct && docked)) && dockedContentInset,
+        playHeroEnter && "pdp-hero-bottom-enter",
+      )}
+    >
+      {variantRow}
+      {addToBagSlot}
     </div>
   );
 
   return createPortal(
     <>
+      {isTabbyProduct && tabby?.adjustment ? (
+        <PdpToast
+          message={tabby.adjustment.message}
+          open={Boolean(tabby.adjustment)}
+          onClose={tabby.dismissAdjustment}
+        />
+      ) : null}
+
       <div
         aria-hidden
         className={cn(
@@ -96,17 +185,17 @@ export function PdpBottomActions({
             ? "pdp-bottom-frost-gradient--docked h-[calc(6.5rem+var(--pdp-fixed-bottom-offset))]"
             : "pdp-bottom-frost-gradient--prominent h-[calc(15rem+var(--pdp-fixed-bottom-offset))]",
         )}
-        style={{ opacity: suppressed || colorSheetOpen ? 0 : frostOpacity }}
+        style={{ opacity: suppressed || variantSheetOpen || docked ? 0 : frostOpacity }}
       />
 
       <footer
         className={cn(
           "pointer-events-none fixed inset-x-0 z-40 transition-[transform,padding] duration-300 ease-out",
-          suppressed || colorSheetOpen ? "translate-y-full" : "translate-y-0",
+          suppressed || variantSheetOpen ? "translate-y-full" : "translate-y-0",
         )}
         style={{
           bottom: BOTTOM_CHROME_OFFSET,
-          paddingBottom: docked ? 0 : "0.625rem",
+          paddingBottom: atbUsesRoundedPill ? "0.625rem" : 0,
         }}
       >
         <div
