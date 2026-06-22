@@ -40,14 +40,14 @@ function getColorChromeGlow(hex: string): string {
 
   if (!rgb) {
     return isDark
-      ? "0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.22), 0 0 40px rgba(255,255,255,0.1)"
+      ? "inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.24), 0 0 40px rgba(255,255,255,0.12)"
       : "0 4px 16px rgba(0,0,0,0.18), 0 0 24px rgba(0,0,0,0.12)";
   }
 
   const { r, g, b } = rgb;
 
   if (isDark) {
-    return "0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.22), 0 0 40px rgba(255,255,255,0.1)";
+    return "inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.24), 0 0 40px rgba(255,255,255,0.12)";
   }
 
   return `0 4px 16px rgba(0,0,0,0.18), 0 0 24px rgba(${r},${g},${b},0.45), 0 0 48px rgba(${r},${g},${b},0.2)`;
@@ -58,10 +58,35 @@ function isDarkColorChrome(hex: string): boolean {
   return getColorChromeForeground(hex) === "#ffffff";
 }
 
+/**
+ * Near-black colorways read as pure black and disappear into the hero's black
+ * gradient scrim. Floor the ATB background to an off-black so the pill stays
+ * visible against the gradient.
+ */
+const ATB_DARK_FLOOR = 0x2a;
+
+function liftDarkBackground(hex: string): string {
+  const rgb = parseHexRgb(hex);
+  if (!rgb) {
+    return hex;
+  }
+
+  const { r, g, b } = rgb;
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  if (luminance > 0.08) {
+    return hex;
+  }
+
+  const lift = (channel: number) =>
+    Math.max(channel, ATB_DARK_FLOOR).toString(16).padStart(2, "0");
+
+  return `#${lift(r)}${lift(g)}${lift(b)}`;
+}
+
 /** Solid Add to bag chrome from the active colorway sample */
 export function getAtbChromeFromColorSample(hex: string): AtbChrome {
   return {
-    background: hex,
+    background: liftDarkBackground(hex),
     foreground: getColorChromeForeground(hex),
     glow: getColorChromeGlow(hex),
     isDarkBackdrop: isDarkColorChrome(hex),

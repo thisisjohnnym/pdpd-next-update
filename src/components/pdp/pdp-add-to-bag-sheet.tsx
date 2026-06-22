@@ -16,12 +16,15 @@ import {
 } from "./pdp-bottom-sheet";
 
 import {
-  PDP_BAG_UPSELLS,
   PDP_BUNDLE_DISCOUNT,
-  PDP_COLORS,
   PDP_PRODUCT,
+  type PdpBagUpsell,
   type PdpBundleAddPayload,
+  type PdpColor,
 } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
+import type { PdpProductConfig } from "./pdp-products";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
@@ -131,15 +134,24 @@ function BagBundleSummary({
 
 function BagProductCard({
   selectedColor,
+  product,
 }: {
-  selectedColor: (typeof PDP_COLORS)[number];
+  selectedColor: PdpColor;
+  product: PdpProductConfig;
 }) {
+  const imageSrc =
+    product.hero.kind === "image"
+      ? product.hero.src
+      : PDP_PRODUCT.imageSrc;
+  const imageAlt =
+    product.hero.kind === "image" ? product.hero.alt : PDP_PRODUCT.imageAlt;
+
   return (
     <div className="flex overflow-hidden rounded-lg bg-[#f2f2f2]">
       <div className="relative w-[7.25rem] shrink-0 self-stretch min-h-[6.75rem]">
         <Image
-          src={PDP_PRODUCT.imageSrc}
-          alt={PDP_PRODUCT.imageAlt}
+          src={imageSrc}
+          alt={imageAlt}
           fill
           className="object-cover object-center"
           sizes="116px"
@@ -148,13 +160,13 @@ function BagProductCard({
 
       <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3.5">
         <p className="font-extended text-base tracking-[0.2px] text-black">
-          {PDP_PRODUCT.name}
+          {product.summary.name}
         </p>
         <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
-          {selectedColor.name} · {PDP_PRODUCT.subtitle}
+          {selectedColor.name} · {product.summary.subtitle}
         </p>
         <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
-          {PDP_PRODUCT.price}
+          {product.summary.price}
         </p>
       </div>
     </div>
@@ -198,7 +210,7 @@ function BagUpsellItem({
   added,
   onAdd,
 }: {
-  item: (typeof PDP_BAG_UPSELLS)[number];
+  item: PdpBagUpsell;
   added: boolean;
   onAdd: () => void;
 }) {
@@ -231,9 +243,11 @@ function BagUpsellItem({
 }
 
 function BagUpsellList({
+  upsells,
   isAdded,
   onQuickAdd,
 }: {
+  upsells: PdpBagUpsell[];
   isAdded: (id: string) => boolean;
   onQuickAdd: (id: string) => void;
 }) {
@@ -244,7 +258,7 @@ function BagUpsellList({
       </p>
 
       <ul className="flex flex-col">
-        {PDP_BAG_UPSELLS.map((item) => (
+        {upsells.map((item) => (
           <BagUpsellItem
             key={item.id}
             item={item}
@@ -265,14 +279,17 @@ export function PdpAddToBagSheet({
   onQuickAdd,
   confirmation = { type: "product" },
 }: PdpAddToBagSheetProps) {
+  const { productId, product } = useActiveProduct();
   const titleId = useId();
   const { isAdded: isQuickAdded, confirmAdd: confirmQuickAdd } =
     useTransientAddedSet();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
   const mounted = useOverlayDismiss(open, onClose);
 
+  const colors = getPdpColors(productId);
+  const upsells = getPdpBagUpsells(productId);
   const selectedColor =
-    PDP_COLORS.find((color) => color.id === selectedColorId) ?? PDP_COLORS[0];
+    colors.find((color) => color.id === selectedColorId) ?? colors[0];
 
   const isBundle = confirmation.type === "bundle";
   const bundle = isBundle ? confirmation.payload : null;
@@ -338,7 +355,7 @@ export function PdpAddToBagSheet({
               savings={savings}
             />
           ) : (
-            <BagProductCard selectedColor={selectedColor} />
+            <BagProductCard selectedColor={selectedColor} product={product} />
           )}
 
           <div className="flex gap-2 py-4">
@@ -362,6 +379,7 @@ export function PdpAddToBagSheet({
 
           {!isBundle ? (
             <BagUpsellList
+              upsells={upsells}
               isAdded={isQuickAdded}
               onQuickAdd={handleQuickAdd}
             />

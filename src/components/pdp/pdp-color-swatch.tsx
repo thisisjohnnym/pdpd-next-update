@@ -4,8 +4,8 @@ import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
-/** Coach.com $desktopSwatchImage$ — bag sits in lower third of portrait frame */
-const COACH_SWATCH_FOCAL = "50% 68%";
+/** Coach.com $desktopSwatchImage$ — bag body + C clasp sit in the lower portion of the frame */
+const COACH_SWATCH_FOCAL = "50% 80%";
 const COACH_SWATCH_ZOOM = 3.25;
 
 /** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
@@ -77,7 +77,7 @@ export function ColorSwatchCircle({
     <span
       aria-hidden
       className={cn(
-        "relative block shrink-0 overflow-hidden rounded-full bg-neutral-100",
+        "relative block shrink-0 overflow-hidden rounded-full border border-black/5 bg-neutral-100",
         sizeClass,
         dimmed && "opacity-40",
       )}

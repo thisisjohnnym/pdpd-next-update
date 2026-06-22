@@ -97,13 +97,7 @@ const TABBY_FAMILY_CATALOG: TabbyFamilyStyleEntry[] = [
     sizes: [
       {
         size: 20,
-        colorIds: [
-          "brass-black",
-          "silver-black",
-          "brass-chalk",
-          "brass-maple",
-          "brass-biscuit",
-        ],
+        colorIds: ["brass-black"],
       },
       {
         size: 26,

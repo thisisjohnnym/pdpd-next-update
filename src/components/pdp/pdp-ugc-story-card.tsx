@@ -95,7 +95,20 @@ export function PdpUgcStoryCard({
             <p className={`text-neutral-800 ${pdpType.micro}`}>&ldquo;{story.quote}&rdquo;</p>
           ) : null}
         </div>
-      ) : null}
+      ) : (
+        <p className="font-extended flex items-center gap-1 pt-2 text-xs tracking-[0.2px] text-black">
+          {story.wearer}
+          {story.verified ? (
+            <MaterialIcon
+              name="verified"
+              size={18}
+              filled
+              className="inline-block align-middle text-[#0095F6]"
+              style={{ fontSize: 11 }}
+            />
+          ) : null}
+        </p>
+      )}
     </article>
   );
 }

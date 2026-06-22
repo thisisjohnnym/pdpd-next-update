@@ -55,10 +55,19 @@ export const pdpTextLinkCtaMutedClass =
 export const pdpTextLinkCtaMutedLabelClass =
   "underline decoration-neutral-300 underline-offset-[3px] group-active:decoration-neutral-500";
 
+/** Default sizing/shape for bottom-bar variant pills */
+const pdpVariantPillShapeClass = "h-12 rounded-full";
+
+/** Bottom-bar variant pill — sizing-free base (apply height/radius separately) */
+export const pdpVariantPillBaseClass =
+  "font-extended flex min-w-0 flex-1 items-center gap-2 bg-white px-3 text-left text-[12px] leading-none text-black transition-colors active:bg-neutral-50 pdp-pressable";
+
+/** Frost variant pill base — sizing-free (apply height/radius separately) */
+export const pdpVariantPillFrostBaseClass =
+  "font-extended flex min-w-0 flex-1 items-center gap-2 px-3 text-left text-[12px] leading-none text-white pdp-frost-dark active:brightness-95 pdp-pressable";
+
 /** Bottom-bar variant pill — Style / Size / Color triggers */
-export const pdpVariantPillClass =
-  "font-extended flex h-12 min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-3 text-left text-[12px] leading-none text-black transition-colors active:bg-neutral-50 pdp-pressable";
+export const pdpVariantPillClass = `${pdpVariantPillBaseClass} ${pdpVariantPillShapeClass}`;
 
 /** Frost variant pill — docked hero buy bar */
-export const pdpVariantPillFrostClass =
-  "font-extended flex h-12 min-w-0 flex-1 items-center gap-2 rounded-full px-3 text-left text-[12px] leading-none text-white pdp-frost-dark active:brightness-95 pdp-pressable";
+export const pdpVariantPillFrostClass = `${pdpVariantPillFrostBaseClass} ${pdpVariantPillShapeClass}`;

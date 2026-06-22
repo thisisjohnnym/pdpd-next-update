@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useScrollSnapshot } from "./use-coalesced-scroll";
 
 /** Hero rest — bar is flush to the viewport bottom; past this it floats */
@@ -27,14 +25,10 @@ function getBottomFrostOpacity(scrollY: number, viewportHeight: number) {
 }
 
 export function useBottomBarDocked() {
-  const [docked, setDocked] = useState(true);
-  const [frostOpacity, setFrostOpacity] = useState(0);
   const { scrollY, viewportHeight } = useScrollSnapshot();
 
-  useEffect(() => {
-    setDocked(getBottomBarDocked(scrollY, viewportHeight));
-    setFrostOpacity(getBottomFrostOpacity(scrollY, viewportHeight));
-  }, [scrollY, viewportHeight]);
-
-  return { docked, frostOpacity };
+  return {
+    docked: getBottomBarDocked(scrollY, viewportHeight),
+    frostOpacity: getBottomFrostOpacity(scrollY, viewportHeight),
+  };
 }

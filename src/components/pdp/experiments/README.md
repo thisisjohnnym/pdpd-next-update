@@ -42,8 +42,7 @@ When the flag is on, the PDP also renders **Style · Size · Color + Add to bag*
 | `pdp-compare-module.tsx` | **Control** — existing module (do not modify for experiment logic) |
 | `pdp-compare-picker-sheet.tsx` | **Control** picker |
 | `pdp-compare-module-gate.tsx` | A/B wrapper used by the gallery |
-| `experiments/tabby-family-compare-experiment.tsx` | **Variant** UI |
-| `experiments/tabby-family-compare-picker-sheet.tsx` | **Variant** style + size picker |
+| `experiments/tabby-family-compare-experiment.tsx` | **Variant** UI — Apple-style family explorer (one featured style at a time: arrows, dots, swipe) |
 | `experiments/tabby-family-compare-data.ts` | Catalog helpers isolated for easy removal |
 | `experiments/tabby-family-compare-flag.ts` | Flag resolution |
 

@@ -361,6 +361,26 @@ export function useDragZoomLens() {
     };
   }, [phase]);
 
+  // The native long-press menu (Android Chrome context menu / iOS callout) fires
+  // around the same moment our hold timer completes. A React onContextMenu on the
+  // trigger isn't enough — the callout can target the page or a child element — so
+  // we suppress it at the document level for the entire life of an active press.
+  useEffect(() => {
+    if (phase === "idle") {
+      return;
+    }
+
+    const blockContextMenu = (event: Event) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", blockContextMenu, { capture: true });
+
+    return () => {
+      document.removeEventListener("contextmenu", blockContextMenu, { capture: true });
+    };
+  }, [phase]);
+
   useEffect(() => {
     const onBlur = () => release(undefined, undefined, "blur");
     window.addEventListener("blur", onBlur);

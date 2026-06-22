@@ -25,8 +25,12 @@ import { PdpCompareModuleGate } from "./pdp-compare-module-gate";
 import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpTabbyVariantModule } from "./pdp-tabby-variant-module";
+import { getTabbyGalleryMorePhotosForColor, getTabbyGallerySlidesForColor } from "./pdp-tabby-color-media";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
-import { PdpShoppingDiscoveryModule } from "./pdp-shopping-discovery-module";
+import {
+  PdpCoachAiModule,
+  PdpMoreLikeThisModule,
+} from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
 import { PdpSiteFooter } from "./pdp-site-footer";
@@ -48,12 +52,18 @@ import {
   PDP_GALLERY_HERO_IMAGE_FOCUS,
   PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
+  PDP_GALLERY_MORE_PHOTOS,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
   PDP_STUDIO_BACKDROP_CLASS,
   PDP_STRAP_OPTIONS,
 } from "./pdp-data";
-import type { PdpBundleAddPayload, PdpInfluencerCredit, PdpProductHotspot } from "./pdp-data";
+import type {
+  PdpBundleAddPayload,
+  PdpInfluencerCredit,
+  PdpProductHotspot,
+  PdpStrapSetAddPayload,
+} from "./pdp-data";
 import { pdpType } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import {
@@ -104,12 +114,14 @@ export function PdpGalleryHero({
   poster,
   alt,
   onOpenReviews,
+  onOpenArTryOn,
   isLastPanel = false,
 }: {
   videoSrc: string;
   poster?: string;
   alt: string;
   onOpenReviews?: () => void;
+  onOpenArTryOn?: () => void;
   isLastPanel?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -170,7 +182,10 @@ export function PdpGalleryHero({
       <div aria-hidden className="pdp-hero-immersive__top-scrim" />
 
       <PdpGalleryProductHud />
-      <PdpHeroActionRail onOpenReviews={onOpenReviews} />
+      <PdpHeroActionRail
+        onOpenReviews={onOpenReviews}
+        onOpenArTryOn={onOpenArTryOn}
+      />
     </section>
   );
 }
@@ -355,7 +370,7 @@ function PortraitShopTheLookButton({
       onClick={() => onOpenShopTheLook(shopTheLookId)}
       aria-label="Shop the look"
       className={cn(
-        "pointer-events-auto flex items-center gap-1 rounded-full bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95",
+        "pointer-events-auto flex items-center gap-1 rounded-full border border-white/55 bg-white/80 py-1 pl-1 pr-2.5 text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.14)] backdrop-blur-md transition-colors active:bg-white/95",
         pdpType.micro,
       )}
     >
@@ -421,7 +436,7 @@ function PortraitOverlays({
           />
         </div>
       </div>
-      <div className="pointer-events-none col-start-1 row-start-1 flex size-full min-h-0 flex-col items-center justify-end pb-4">
+      <div className="pointer-events-none col-start-1 row-start-1 flex size-full min-h-0 flex-col items-start justify-end pb-4 pl-3">
         <PortraitShopTheLookButton
           shopTheLookId={shopTheLookId}
           onOpenShopTheLook={onOpenShopTheLook}
@@ -601,18 +616,20 @@ function PdpGalleryVideoSlide({
 
 export function PdpGalleryView({
   onOpenReviews,
+  onOpenArTryOn,
   onAddSimilarToBag,
   onAddBundle,
-  onQuickAddStrap,
+  onAddSetToBag,
   onStrapOptionsOpenChange,
   onComparePickerOpenChange,
   selectedColorId,
   omitHero = false,
 }: {
   onOpenReviews?: () => void;
+  onOpenArTryOn?: () => void;
   onAddSimilarToBag?: () => void;
   onAddBundle?: (payload: PdpBundleAddPayload) => void;
-  onQuickAddStrap?: (optionId: string) => void;
+  onAddSetToBag?: (payload: PdpStrapSetAddPayload) => void;
   onStrapOptionsOpenChange?: (open: boolean) => void;
   onComparePickerOpenChange?: (open: boolean) => void;
   selectedColorId: string;
@@ -622,7 +639,6 @@ export function PdpGalleryView({
   const [strapOptionsId, setStrapOptionsId] = useState<string | null>(null);
   const [photosOpen, setPhotosOpen] = useState(false);
   const galleryEndRef = useRef<HTMLDivElement>(null);
-  const lastPanelSlideIndex = getLastGalleryPanelSlideIndex(PDP_GALLERY_SLIDES);
   const activeShopLook = shopLookId ? PDP_SHOP_THE_LOOK[shopLookId] ?? null : null;
   const activeStrapOptions = strapOptionsId
     ? PDP_STRAP_OPTIONS[strapOptionsId] ?? null
@@ -631,6 +647,15 @@ export function PdpGalleryView({
   const tabby = useOptionalTabbyVariant();
   const tabbyExperiment = useTabbyFamilyCompareExperiment();
   const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
+  const gallerySlides =
+    productId === "tabby"
+      ? getTabbyGallerySlidesForColor(selectedColorId)
+      : PDP_GALLERY_SLIDES;
+  const galleryMorePhotos =
+    productId === "tabby"
+      ? getTabbyGalleryMorePhotosForColor(selectedColorId)
+      : PDP_GALLERY_MORE_PHOTOS;
+  const lastPanelSlideIndex = getLastGalleryPanelSlideIndex(gallerySlides);
   const galleryScrollPad = {
     paddingBottom: bottomCtaOffset(showTabbyExperiment),
   } as const;
@@ -649,6 +674,7 @@ export function PdpGalleryView({
         poster={PDP_GALLERY_IMMERSIVE_HERO_POSTER}
         alt="Model in camel trench coat carrying Tabby Shoulder Bag 26 on a city street"
         onOpenReviews={onOpenReviews}
+        onOpenArTryOn={onOpenArTryOn}
         isLastPanel={lastPanelSlideIndex === -1}
       />
     ) : null}
@@ -656,7 +682,7 @@ export function PdpGalleryView({
     <div className={GALLERY_CLASS} style={galleryScrollPad}>
       {showTabbyExperiment ? <PdpTabbyVariantModule /> : null}
       <div className={GALLERY_MEDIA_STACK_CLASS}>
-        {PDP_GALLERY_SLIDES.flatMap((slide, index) => {
+        {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
           if (slide.type === "editorial") {
@@ -731,8 +757,21 @@ export function PdpGalleryView({
                 `strap-simulation-${index}`,
                 <PdpStrapSimulationModule
                   isLastPanel={isLastPanel}
-                  onQuickAddStrap={onQuickAddStrap}
+                  onAddSetToBag={onAddSetToBag}
                 />,
+              ),
+            ];
+          }
+
+          if (slide.type === "view-more-photos") {
+            return [
+              gallerySection(
+                `view-more-photos-${index}`,
+                <PdpGalleryViewMorePhotos
+                  photos={galleryMorePhotos}
+                  onOpen={() => setPhotosOpen(true)}
+                />,
+                { surface: "muted" },
               ),
             ];
           }
@@ -823,11 +862,6 @@ export function PdpGalleryView({
           ];
         })}
         <div ref={galleryEndRef} aria-hidden className="h-px w-full shrink-0" />
-        {gallerySection(
-          "view-more-photos",
-          <PdpGalleryViewMorePhotos onOpen={() => setPhotosOpen(true)} />,
-          { surface: "muted" },
-        )}
       </div>
 
       {/* Ecommerce — after desire + function gallery scroll. Free-form scroll;
@@ -838,6 +872,12 @@ export function PdpGalleryView({
           onWriteReview={onOpenReviews}
         />
       </PdpScrollReveal>
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
+        <PdpCoachAiModule />
+      </PdpScrollReveal>
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
+        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+      </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
         <PdpCompareModuleGate
           onAddToBag={() => onAddSimilarToBag?.()}
@@ -845,25 +885,26 @@ export function PdpGalleryView({
         />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
-      </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="40dvh">
-        <PdpShoppingDiscoveryModule onAddToBag={() => onAddSimilarToBag?.()} />
+        <PdpMoreLikeThisModule onAddToBag={() => onAddSimilarToBag?.()} />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="24dvh">
         <PdpRecentlyViewedCarousel />
       </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="28dvh">
-        <PdpCoachPremiumModule />
-      </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="32dvh">
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
         <PdpFaqModule />
+      </PdpScrollReveal>
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="28dvh">
+        <PdpCoachPremiumModule />
       </PdpScrollReveal>
       <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="20dvh">
         <PdpSiteFooter />
       </PdpScrollReveal>
     </div>
-    <PdpGalleryPhotosSheet open={photosOpen} onClose={() => setPhotosOpen(false)} />
+    <PdpGalleryPhotosSheet
+      photos={galleryMorePhotos}
+      open={photosOpen}
+      onClose={() => setPhotosOpen(false)}
+    />
     <PdpShopTheLookSheet
       look={activeShopLook}
       open={shopLookId !== null}

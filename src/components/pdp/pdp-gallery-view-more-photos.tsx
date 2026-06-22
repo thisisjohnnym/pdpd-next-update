@@ -5,19 +5,23 @@ import Image from "next/image";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
-import { PDP_GALLERY_MORE_PHOTOS } from "./pdp-data";
+import { PDP_GALLERY_MORE_PHOTOS, type PdpGalleryPhoto } from "./pdp-data";
 import { pdpBodyRhythm, pdpPressableClass } from "./pdp-type";
 
 const PREVIEW_COUNT = 3;
 
 type PdpGalleryViewMorePhotosProps = {
+  photos?: PdpGalleryPhoto[];
   onOpen: () => void;
 };
 
 /** Flush against the last gallery frame — full-bleed extension of the photo stack */
-export function PdpGalleryViewMorePhotos({ onOpen }: PdpGalleryViewMorePhotosProps) {
-  const previews = PDP_GALLERY_MORE_PHOTOS.slice(0, PREVIEW_COUNT);
-  const remaining = PDP_GALLERY_MORE_PHOTOS.length - PREVIEW_COUNT;
+export function PdpGalleryViewMorePhotos({
+  photos = PDP_GALLERY_MORE_PHOTOS,
+  onOpen,
+}: PdpGalleryViewMorePhotosProps) {
+  const previews = photos.slice(0, PREVIEW_COUNT);
+  const remaining = photos.length - PREVIEW_COUNT;
 
   return (
     <section
@@ -36,7 +40,12 @@ export function PdpGalleryViewMorePhotos({ onOpen }: PdpGalleryViewMorePhotosPro
           {previews.map((photo, index) => (
             <span
               key={photo.id}
-              className="relative size-11 overflow-hidden border-2 border-white bg-neutral-200 shadow-sm"
+              className={cn(
+                "relative size-11 overflow-hidden bg-neutral-200",
+                index < previews.length - 1
+                  ? "shadow-[2px_0_0_0_#fff,0_1px_3px_rgba(0,0,0,0.08)]"
+                  : "shadow-[0_1px_3px_rgba(0,0,0,0.08)]",
+              )}
               style={{
                 zIndex: PREVIEW_COUNT - index,
                 marginLeft: index === 0 ? 0 : -10,

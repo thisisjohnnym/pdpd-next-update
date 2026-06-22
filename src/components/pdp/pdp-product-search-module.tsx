@@ -8,23 +8,31 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import {
-  PDP_AI_CONCIERGE,
+  pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
+} from "./pdp-carousel";
+
+import {
   type PdpAiConciergePrompt,
 } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { getPdpCoachAiContent } from "./pdp-coach-ai-content";
 import { PdpAiInsightContent } from "./pdp-ai-insight-card";
 import { pdpModuleSectionClass, pdpModuleHeadingClass } from "./pdp-module-section";
-import { pdpBodyRhythm, pdpType } from "./pdp-type";
+import { pdpType } from "./pdp-type";
 
 function ConciergeResponse({
   prompt,
   userQuery,
   flat = false,
+  fallbackResponse,
 }: {
   prompt: PdpAiConciergePrompt | null;
   userQuery: string;
   flat?: boolean;
+  fallbackResponse: { headline: string; body: string };
 }) {
-  const response = prompt?.response ?? PDP_AI_CONCIERGE.fallbackResponse;
+  const response = prompt?.response ?? fallbackResponse;
   const highlights = prompt?.response.highlights;
 
   return (
@@ -42,14 +50,11 @@ function ConciergeResponse({
       />
 
       {highlights?.length ? (
-        <ul className="flex flex-wrap gap-1.5">
+        <ul className="ml-4 flex list-disc flex-col gap-1">
           {highlights.map((highlight) => (
             <li
               key={highlight}
-              className={cn(
-                "font-extended bg-neutral-100 px-2.5 py-1 text-[10px] tracking-[0.2px] text-neutral-700",
-                !flat && "rounded-full",
-              )}
+              className="font-extended text-sm leading-[1.35] tracking-[0.2px] text-neutral-600 marker:text-neutral-400"
             >
               {highlight}
             </li>
@@ -93,6 +98,11 @@ type PdpAiConciergePanelProps = {
   className?: string;
   /** Square corners — for embedded discovery card */
   variant?: "default" | "flat";
+  /**
+   * When provided, prompts and the composer hand off to a chat experience
+   * (e.g. a tray) instead of rendering an inline response below the form.
+   */
+  onAsk?: (question: string, promptId: string | null) => void;
 };
 
 /** Inline AI Concierge — form, prompts, and responses without page section wrapper */
@@ -102,9 +112,11 @@ export function PdpAiConciergePanel({
   onClose,
   className,
   variant = "default",
+  onAsk,
 }: PdpAiConciergePanelProps) {
   const flat = variant === "flat";
-  const { title, placeholder, prompts } = PDP_AI_CONCIERGE;
+  const { productId } = useActiveProduct();
+  const { placeholder, prompts, fallbackResponse } = getPdpCoachAiContent(productId);
   const [query, setQuery] = useState("");
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
@@ -115,12 +127,21 @@ export function PdpAiConciergePanel({
   const activePrompt =
     prompts.find((prompt) => prompt.id === activePromptId) ?? null;
 
-  const runPrompt = useCallback((prompt: PdpAiConciergePrompt) => {
-    setQuery(prompt.question);
-    setActivePromptId(prompt.id);
-    setSubmittedQuery(prompt.question);
-    setShowResponse(true);
-  }, []);
+  const runPrompt = useCallback(
+    (prompt: PdpAiConciergePrompt) => {
+      if (onAsk) {
+        onAsk(prompt.question, prompt.id);
+        setQuery("");
+        return;
+      }
+
+      setQuery(prompt.question);
+      setActivePromptId(prompt.id);
+      setSubmittedQuery(prompt.question);
+      setShowResponse(true);
+    },
+    [onAsk],
+  );
 
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -134,11 +155,17 @@ export function PdpAiConciergePanel({
         (prompt) => prompt.question.toLowerCase() === trimmed.toLowerCase(),
       );
 
+      if (onAsk) {
+        onAsk(trimmed, matchedPrompt?.id ?? null);
+        setQuery("");
+        return;
+      }
+
       setSubmittedQuery(trimmed);
       setActivePromptId(matchedPrompt?.id ?? null);
       setShowResponse(true);
     },
-    [query, prompts],
+    [query, prompts, onAsk],
   );
 
   return (
@@ -146,7 +173,7 @@ export function PdpAiConciergePanel({
       {showTitle ? (
         <div className="flex items-center justify-between gap-2">
           <h3 className={pdpModuleHeadingClass({ lead: false, size: "sm" })}>
-            {title}
+            Coach AI
           </h3>
           {onClose ? (
             <button
@@ -219,51 +246,35 @@ export function PdpAiConciergePanel({
         </div>
       </form>
 
-      <div className="flex flex-col gap-2">
-        <p className={`font-extended m-0 text-neutral-500 ${pdpType.micro}`}>
-          Try asking
-        </p>
-        {prompts.map((prompt) => {
-          const isActive = activePromptId === prompt.id && showResponse;
+      <div className={pdpCarouselScrollWrapClass}>
+        <div
+          className={cn(
+            "flex gap-2",
+            pdpCarouselScrollClass,
+            "pdp-build-picker-scroll pr-3 lg:pr-5",
+          )}
+        >
+          {prompts.map((prompt) => {
+            const isActive = activePromptId === prompt.id && showResponse;
 
-          return (
-            <button
-              key={prompt.id}
-              type="button"
-              onClick={() => runPrompt(prompt)}
-              aria-pressed={isActive}
-              className={cn(
-                "flex w-full items-start gap-3 p-3 text-left transition-colors duration-200",
-                isActive ? "bg-neutral-100 shadow-sm" : "bg-white active:bg-neutral-50",
-              )}
-            >
-              <span
+            return (
+              <button
+                key={prompt.id}
+                type="button"
+                onClick={() => runPrompt(prompt)}
+                aria-pressed={isActive}
                 className={cn(
-                  "flex size-9 shrink-0 items-center justify-center transition-colors",
-                  isActive ? "bg-black text-white" : "bg-neutral-100 text-neutral-600",
+                  "font-extended inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] leading-[1.4] transition-colors duration-200",
+                  isActive
+                    ? "border-black bg-black text-white"
+                    : "border-neutral-200 bg-white text-black active:bg-neutral-50",
                 )}
               >
-                <MaterialIcon name={prompt.icon} size={18} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="font-extended block text-[10px] tracking-[0.2px] text-neutral-500">
-                  {prompt.category}
-                </span>
-                <span className={`font-extended mt-1 block text-sm text-black ${pdpBodyRhythm}`}>
-                  {prompt.question}
-                </span>
-              </span>
-              <MaterialIcon
-                name="chevron_right"
-                size={20}
-                className={cn(
-                  "mt-1 shrink-0 transition-colors",
-                  isActive ? "text-black" : "text-neutral-300",
-                )}
-              />
-            </button>
-          );
-        })}
+                {prompt.question}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {showResponse ? (
@@ -271,6 +282,7 @@ export function PdpAiConciergePanel({
           prompt={activePrompt}
           userQuery={submittedQuery ?? ""}
           flat={flat}
+          fallbackResponse={fallbackResponse}
         />
       ) : null}
     </div>

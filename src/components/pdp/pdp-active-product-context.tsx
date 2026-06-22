@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,8 +25,18 @@ type PdpActiveProductValue = {
 const PdpActiveProductContext = createContext<PdpActiveProductValue | null>(null);
 
 /** Holds which product the PDP is currently rendering — drives layout + copy */
-export function PdpActiveProductProvider({ children }: { children: ReactNode }) {
-  const [productId, setProductId] = useState<PdpProductId>(DEFAULT_PRODUCT_ID);
+export function PdpActiveProductProvider({
+  children,
+  initialProductId = DEFAULT_PRODUCT_ID,
+}: {
+  children: ReactNode;
+  initialProductId?: PdpProductId;
+}) {
+  const [productId, setProductId] = useState<PdpProductId>(initialProductId);
+
+  useEffect(() => {
+    setProductId(initialProductId);
+  }, [initialProductId]);
 
   const value = useMemo<PdpActiveProductValue>(
     () => ({

@@ -43,7 +43,7 @@ function CompareProductCard({
         />
         {showChangeAffordance ? (
           <span
-            className="absolute left-2 top-2 z-10 inline-flex items-center justify-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-black shadow-sm"
+            className="absolute left-2 top-2 z-10 inline-flex items-center justify-center gap-1 rounded-full border border-neutral-200 bg-white/95 px-3 py-1.5 text-black shadow-sm"
             aria-hidden
           >
             <MaterialIcon

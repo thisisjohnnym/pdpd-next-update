@@ -96,32 +96,32 @@ export const PDP_BUNDLE_ITEMS: PdpBundleItem[] = [
     id: "cherry-charm",
     name: "Cherry Bag Charm",
     price: 45,
-    imageSrc: "/images/gallery/tabby-leather-front-charm.png",
-    imageAlt: "Red cherry bag charm on gold chain",
+    imageSrc: "/images/similar/cherry-charm.png",
+    imageAlt: "Glittered red cherry bag charm with gold-tone clip",
     defaultSelected: true,
   },
   {
     id: "chain-strap",
     name: "Signature Chain Strap",
     price: 68,
-    imageSrc: "/images/gallery/tabby-leather-detail-hardware.png",
-    imageAlt: "Gold chain strap with leather weave detail",
+    imageSrc: "/images/similar/charm-chain-strap.png",
+    imageAlt: "Gold-tone curb chain strap with assorted charms",
     defaultSelected: false,
   },
   {
     id: "heart-charm",
     name: "Heart Bag Charm",
     price: 42,
-    imageSrc: "/images/gallery/tabby-leather-front-charm.png",
-    imageAlt: "Gold heart bag charm on chain",
+    imageSrc: "/images/similar/heart-charm.png",
+    imageAlt: "Pink leather heart bag charm on strap",
     defaultSelected: false,
   },
   {
     id: "card-case-clip",
     name: "Card Case & Clip",
     price: 52,
-    imageSrc: "/images/gallery/tabby-leather-interior-packed.png",
-    imageAlt: "Compact card case with bag clip attachment",
+    imageSrc: "/images/similar/card-case-clip.jpg",
+    imageAlt: "Black leather zip card case with D-ring clip",
     defaultSelected: false,
   },
 ];
@@ -783,12 +783,6 @@ export const PDP_RECENTLY_VIEWED_SECTION = {
   subtitle: "Pick up where you left off",
 } as const;
 
-export const PDP_SHOPPING_ASSISTANT_PROMPT = {
-  title: "Still deciding?",
-  body: "Tell us what you're looking for and we'll narrow it down.",
-  cta: "Open shopping assistant",
-} as const;
-
 export type PdpCoachPremiumPerk = {
   id: string;
   label: string;
@@ -833,35 +827,73 @@ export type PdpSiteFooterGroup = {
   links: PdpSiteFooterLink[];
 };
 
+type PdpSiteFooterSocial = {
+  label: string;
+  href: string;
+  icon: string;
+};
+
 export const PDP_SITE_FOOTER = {
   brand: "Coach Outlet",
+  newsletter: {
+    title: "Stay connected",
+    description: "Be the first to know about new arrivals, store openings and early access events.",
+    placeholder: "Email address",
+    cta: "Sign up",
+  },
   groups: [
     {
-      id: "help",
-      title: "Customer Care",
+      id: "service",
+      title: "Customer Service",
       links: [
-        { label: "Order status", href: "#" },
-        { label: "Shipping & returns", href: "#" },
-        { label: "Start a return", href: "#" },
         { label: "Contact us", href: "#" },
+        { label: "Track order", href: "#" },
+        { label: "Shipping", href: "#" },
+        { label: "Returns & exchanges", href: "#" },
+        { label: "Product care", href: "#" },
+        { label: "Size guide", href: "#" },
+        { label: "FAQ", href: "#" },
       ],
     },
     {
-      id: "about",
-      title: "About Coach",
+      id: "company",
+      title: "Company",
       links: [
-        { label: "Our story", href: "#" },
-        { label: "Sustainability", href: "#" },
+        { label: "About Coach", href: "#" },
+        { label: "Coachtopia", href: "#" },
+        { label: "Coach (Re)Loved", href: "#" },
         { label: "Careers", href: "#" },
+        { label: "Affiliate program", href: "#" },
+        { label: "Coach Foundation", href: "#" },
+        { label: "Tapestry, Inc.", href: "#" },
+      ],
+    },
+    {
+      id: "services",
+      title: "Coach Services",
+      links: [
         { label: "Store locator", href: "#" },
+        { label: "Personalization", href: "#" },
+        { label: "Bag repairs", href: "#" },
+        { label: "Gift cards", href: "#" },
+        { label: "Coach Cares", href: "#" },
       ],
     },
   ] satisfies PdpSiteFooterGroup[],
+  social: [
+    { label: "Instagram", href: "#", icon: "photo_camera" },
+    { label: "TikTok", href: "#", icon: "music_note" },
+    { label: "YouTube", href: "#", icon: "smart_display" },
+    { label: "Facebook", href: "#", icon: "thumb_up" },
+    { label: "Pinterest", href: "#", icon: "push_pin" },
+  ] satisfies PdpSiteFooterSocial[],
   legal: [
     { label: "Privacy Policy", href: "#" },
     { label: "Terms of Use", href: "#" },
+    { label: "CA Transparency Act", href: "#" },
+    { label: "Do Not Sell My Personal Information", href: "#" },
     { label: "Accessibility", href: "#" },
-    { label: "Do Not Sell", href: "#" },
+    { label: "Cookie settings", href: "#" },
   ] satisfies PdpSiteFooterLink[],
   copyright: "© 2026 Coach IP Holdings LLC. All rights reserved.",
 } as const;
@@ -876,40 +908,40 @@ export const PDP_RECENTLY_VIEWED: PdpRecentlyViewedItem[] = [
     id: "rowan-satchel",
     name: "Rowan Satchel",
     price: "$395",
-    imageSrc: "/images/gallery/tabby-on-model-plaid.png",
-    imageAlt: "Rowan satchel styled on model",
+    imageSrc: "/images/recently-viewed/rowan-satchel.jpg",
+    imageAlt: "Coach Rowan Satchel in black crossgrain leather with top handles and crossbody strap",
     viewedLabel: "Today",
   },
   {
     id: "brooklyn-shoulder",
     name: "Brooklyn Shoulder Bag 34",
     price: "$450",
-    imageSrc: "/images/gallery/tabby-patio-pink-dress.png",
-    imageAlt: "Brooklyn shoulder bag on model",
+    imageSrc: "/images/recently-viewed/brooklyn-shoulder.jpg",
+    imageAlt: "Coach Brooklyn Shoulder Bag 34 in maple natural grain leather",
     viewedLabel: "Yesterday",
   },
   {
     id: "kira-crossbody",
     name: "Kira Crossbody",
     price: "$298",
-    imageSrc: "/images/gallery/tabby-on-model-back.png",
-    imageAlt: "Kira crossbody bag on model",
+    imageSrc: "/images/gallery/kira-crossbody-product-hero.jpg",
+    imageAlt: "Kira Crossbody in black pebbled leather with gold C hardware and wristlet strap on a studio grey background",
     viewedLabel: "2 days ago",
   },
   {
     id: "morgan-hobo",
     name: "Morgan Hobo",
     price: "$425",
-    imageSrc: "/images/gallery/tabby-hero-model.png",
-    imageAlt: "Morgan hobo bag on model",
+    imageSrc: "/images/recently-viewed/morgan-shoulder.jpg",
+    imageAlt: "Coach Morgan Shoulder Bag in black leather with a snake-embossed C buckle",
     viewedLabel: "Last week",
   },
   {
     id: "field-tote",
     name: "Field Tote 40",
     price: "$495",
-    imageSrc: "/images/gallery/tabby-model-full.png",
-    imageAlt: "Field tote styled with denim",
+    imageSrc: "/images/recently-viewed/field-tote.jpg",
+    imageAlt: "Coach Field Tote 40 in green leather with embossed Coach Leatherware badge",
     viewedLabel: "Last week",
   },
 ];
@@ -1186,6 +1218,10 @@ export type PdpGalleryStrapSimulationSlide = {
   type: "strap-simulation";
 };
 
+export type PdpGalleryViewMorePhotosSlide = {
+  type: "view-more-photos";
+};
+
 export type PdpGalleryUgcContextSlide = {
   type: "ugc-context";
 };
@@ -1217,6 +1253,7 @@ export type PdpGallerySlide =
   | PdpGalleryWeightFeelSlide
   | PdpGalleryBagStoriesSlide
   | PdpGalleryStrapSimulationSlide
+  | PdpGalleryViewMorePhotosSlide
   | PdpGalleryUgcContextSlide
   | PdpGalleryUgcVideosSlide
   | PdpGalleryAsSeenOnSlide
@@ -1347,6 +1384,7 @@ const PDP_GALLERY_DESIRE_SLIDES: PdpGallerySlide[] = [
     type: "immersive",
     src: PDP_GALLERY_ON_MODEL_TRENCH_IMAGE,
     alt: "Model wearing Tabby Shoulder Bag 26 with a tan trench coat over the shoulder",
+    aspect: "9/16",
     shopTheLookId: "trench-daytime",
   },
 ];
@@ -1373,6 +1411,7 @@ const PDP_GALLERY_FUNCTION_SLIDES: PdpGallerySlide[] = [
   { type: "weight-feel" },
   { type: "ugc-videos" },
   { type: "strap-simulation" },
+  { type: "view-more-photos" },
 ];
 
 /** @deprecated Use PDP_GALLERY_DESIRE_SLIDES */
@@ -1617,9 +1656,17 @@ export type PdpStrapSimulationCharm = {
 };
 
 /** Strap swap simulator — preview detachable carry setups on the bag */
+export type PdpStrapSetAddPayload = {
+  /** Quick-add ids for staged straps and charms (duplicates preserved for quantity) */
+  optionIds: string[];
+  includeBag: boolean;
+  total: number;
+};
+
 export const PDP_STRAP_SIMULATION = {
   moment: "Customize",
   title: "Make it Yours",
+  subtitle: "Mix straps, charms, and your bag",
   intro: "Start with what’s included, then preview add-on straps and charms on your Tabby.",
   hint: "Tap to customize",
   modes: [
@@ -1630,15 +1677,15 @@ export const PDP_STRAP_SIMULATION = {
       answer: "Both leather straps clip on — wear shoulder or crossbody out of the box.",
       priceLabel: "Included",
       image: {
-        src: "/images/gallery/tabby-leather-product-alt.png",
+        src: "/images/gallery/tabby-make-it-yours-default.png",
         alt: "Tabby Shoulder Bag 26 with included shoulder and crossbody leather straps",
-        objectPosition: "center 42%",
+        objectPosition: "center center",
         fit: "cover",
       },
       previewImage: {
-        src: "/images/gallery/tabby-leather-product-alt.png",
+        src: "/images/gallery/tabby-make-it-yours-default.png",
         alt: "Tabby Shoulder Bag 26 with included shoulder and crossbody leather straps",
-        objectPosition: "center 42%",
+        objectPosition: "center center",
       },
     },
     {
@@ -1701,6 +1748,106 @@ export const PDP_STRAP_SIMULATION = {
         objectPosition: "center center",
       },
     },
+    {
+      id: "signature-jacquard-strap",
+      label: "Signature jacquard",
+      detail: "Signature C webbing · leather tabs.",
+      answer:
+        "Wide signature jacquard guitar strap in tan — clips onto the same Tabby hardware for an everyday logo look.",
+      priceLabel: "$78",
+      quickAddOptionId: "signature-jacquard-strap",
+      image: {
+        src: "/images/similar/signature-jacquard-strap.png",
+        alt: "Coach signature C jacquard guitar strap in tan and brown with gold clips",
+        objectPosition: "center center",
+        fit: "cover",
+      },
+      previewImage: {
+        src: "/images/gallery/tabby-leather-product-front.png",
+        alt: "Tabby Shoulder Bag 26 with signature jacquard guitar strap",
+        objectPosition: "center 38%",
+      },
+    },
+    {
+      id: "varsity-stripe-strap",
+      label: "Varsity stripe",
+      detail: "Bold webbing stripe · leather tabs.",
+      answer:
+        "Varsity stripe webbing guitar strap in cream, red, and green — a sporty pop that swaps onto the same hardware.",
+      priceLabel: "$72",
+      quickAddOptionId: "varsity-stripe-strap",
+      image: {
+        src: "/images/similar/varsity-stripe-strap.png",
+        alt: "Coach varsity stripe webbing guitar strap in cream, red, and green with gold clips",
+        objectPosition: "center center",
+        fit: "cover",
+      },
+      previewImage: {
+        src: "/images/gallery/tabby-leather-product-front.png",
+        alt: "Tabby Shoulder Bag 26 with varsity stripe guitar strap",
+        objectPosition: "center 38%",
+      },
+    },
+    {
+      id: "woven-leather-strap",
+      label: "Woven leather",
+      detail: "Braided leather · adjustable.",
+      answer:
+        "Hand-woven braided leather strap in tan with an adjustable buckle — texture and warmth on the same Tabby hardware.",
+      priceLabel: "$95",
+      quickAddOptionId: "woven-leather-strap",
+      image: {
+        src: "/images/similar/woven-leather-strap.png",
+        alt: "Coach braided woven leather strap in tan with gold buckle and clips",
+        objectPosition: "center center",
+        fit: "cover",
+      },
+      previewImage: {
+        src: "/images/gallery/tabby-leather-product-front.png",
+        alt: "Tabby Shoulder Bag 26 with woven leather strap",
+        objectPosition: "center 38%",
+      },
+    },
+    {
+      id: "leather-chain-strap",
+      label: "Leather + chain",
+      detail: "Gold chain top · leather drop.",
+      answer:
+        "Leather-and-chain strap — gold curb chain threaded with leather, dressy enough for evenings and still everyday wearable.",
+      priceLabel: "$110",
+      quickAddOptionId: "leather-chain-strap",
+      image: {
+        src: "/images/similar/leather-chain-strap.png",
+        alt: "Coach leather and gold chain strap with black leather drop and gold hardware",
+        objectPosition: "center center",
+        fit: "cover",
+      },
+      previewImage: {
+        src: "/images/similar/tabby-chain-crossbody.png",
+        alt: "Tabby Shoulder Bag 26 with leather and chain strap",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "beaded-strap",
+      label: "Beaded",
+      detail: "Hand-beaded · pastel mix.",
+      answer:
+        "Hand-beaded crossbody strap in a pastel glass-bead mix — a playful, lightweight swap on the same hardware.",
+      priceLabel: "$85",
+      quickAddOptionId: "beaded-strap",
+      image: {
+        src: "/images/similar/beaded-strap.png",
+        alt: "Coach hand-beaded crossbody strap in pastel pink, blue, and green glass beads",
+        objectPosition: "center center",
+        fit: "cover",
+      },
+      previewImage: {
+        src: "/images/gallery/tabby-leather-product-alt.png",
+        alt: "Tabby Shoulder Bag 26 with beaded crossbody strap",
+        objectPosition: "center 42%",
+      },
+    },
   ] satisfies PdpStrapSimulationMode[],
   charms: [
     {
@@ -1709,9 +1856,9 @@ export const PDP_STRAP_SIMULATION = {
       priceLabel: "Included",
       stock: true,
       image: {
-        src: "/images/gallery/tabby-leather-product-alt.png",
+        src: "/images/gallery/tabby-make-it-yours-default.png",
         alt: "Tabby Shoulder Bag 26 without bag charms",
-        objectPosition: "center 42%",
+        objectPosition: "center center",
       },
     },
     {
@@ -1720,9 +1867,9 @@ export const PDP_STRAP_SIMULATION = {
       priceLabel: "$45",
       quickAddOptionId: "cherry-charm",
       image: {
-        src: "/images/gallery/tabby-leather-front-charm.png",
-        alt: "Cherry bag charm on Tabby Shoulder Bag 26",
-        objectPosition: "center 78%",
+        src: "/images/similar/cherry-charm.png",
+        alt: "Coach cherry bag charm with red glitter cherries and gold hardware",
+        objectPosition: "center center",
       },
     },
     {
@@ -1731,9 +1878,75 @@ export const PDP_STRAP_SIMULATION = {
       priceLabel: "$42",
       quickAddOptionId: "heart-charm",
       image: {
-        src: "/images/gallery/tabby-leather-front-charm.png",
-        alt: "Heart bag charm on Tabby Shoulder Bag 26",
-        objectPosition: "center 78%",
+        src: "/images/similar/heart-charm.png",
+        alt: "Coach puffy leather heart bag charm in pink with gold hardware",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "rexy-charm",
+      label: "Rexy charm",
+      priceLabel: "$58",
+      quickAddOptionId: "rexy-charm",
+      image: {
+        src: "/images/similar/rexy-charm.png",
+        alt: "Coach Rexy T-Rex bag charm in pale green leather with gold hardware",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "bow-charm",
+      label: "Bow charm",
+      priceLabel: "$48",
+      quickAddOptionId: "bow-charm",
+      image: {
+        src: "/images/similar/bow-charm.png",
+        alt: "Coach leather bow bag charm in blush pink with gold center hardware",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "strawberry-charm",
+      label: "Strawberry charm",
+      priceLabel: "$45",
+      quickAddOptionId: "strawberry-charm",
+      image: {
+        src: "/images/similar/strawberry-charm.png",
+        alt: "Coach strawberry bag charm in red glitter resin with gold leaf detail",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "tea-rose-charm",
+      label: "Tea rose charm",
+      priceLabel: "$52",
+      quickAddOptionId: "tea-rose-charm",
+      image: {
+        src: "/images/similar/tea-rose-charm.png",
+        alt: "Coach Tea Rose leather flower bag charm in cream and pink with gold center",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "star-charm",
+      label: "Star charm",
+      priceLabel: "$40",
+      quickAddOptionId: "star-charm",
+      image: {
+        src: "/images/similar/star-charm.png",
+        alt: "Coach wavy star bag charm in polished gold-tone metal",
+        objectPosition: "center center",
+      },
+    },
+    {
+      id: "butterfly-charm",
+      label: "Butterfly charm",
+      priceLabel: "$50",
+      quickAddOptionId: "butterfly-charm",
+      image: {
+        src: "/images/similar/butterfly-charm.png",
+        alt: "Coach butterfly bag charm with blue and lavender enamel wings and gold trim",
+        objectPosition: "center center",
       },
     },
   ] satisfies PdpStrapSimulationCharm[],
@@ -1993,7 +2206,8 @@ export const PDP_LEATHER_AGING = {
       id: "new",
       label: "New",
       timeline: "Day one",
-      summary: "Crisp grain, structured shape, factory-fresh.",
+      summary:
+        "Crisp grain, structured shape, factory-fresh. Enjoy the break-in — no special care needed yet.",
       image: PDP_LEATHER_AGING_NEW_IMAGE,
       traits: [
         {
@@ -2030,7 +2244,8 @@ export const PDP_LEATHER_AGING = {
       id: "six-months",
       label: "6 months",
       timeline: "Six months in",
-      summary: "Warm patina and a softer, relaxed hand.",
+      summary:
+        "Warm patina and a softer hand. A light clean and condition keeps leather supple as character develops.",
       image: PDP_LEATHER_AGING_SIX_MONTHS_IMAGE,
       traits: [
         {
@@ -2067,7 +2282,8 @@ export const PDP_LEATHER_AGING = {
       id: "two-years",
       label: "2 years",
       timeline: "Two years of carry",
-      summary: "Rich depth, supple drape, honest creasing.",
+      summary:
+        "Rich depth, supple drape, honest creasing. Condition regularly to restore moisture and protect against drying.",
       image: PDP_LEATHER_AGING_TWO_YEARS_IMAGE,
       traits: [
         {
@@ -2290,7 +2506,7 @@ export const PDP_SIGNATURE_SOUNDS = {
   sounds: [
     {
       id: "tabby-turnlock",
-      label: "Hear the Tabby clasp",
+      label: "Signature clasp",
       hint: "click · snap",
       playingHint: "Tabby turnlock",
       audioSrc: "/audio/tabby-turnlock.mp3",
@@ -2301,7 +2517,7 @@ export const PDP_SIGNATURE_SOUNDS = {
     },
     {
       id: "tabby-zipper",
-      label: "Hear the zipper",
+      label: "Precision zipper",
       hint: "Smooth brass hardware",
       playingHint: "Luxury zipper pull",
       audioSrc: "/audio/tabby-zipper.mp3",
@@ -2312,7 +2528,7 @@ export const PDP_SIGNATURE_SOUNDS = {
     },
     {
       id: "tabby-leather-sound",
-      label: "Sound of leather",
+      label: "Soft leather",
       hint: "Grain · patina · touch",
       playingHint: "Leather texture",
       audioSrc: "/audio/tabby-bag-open.mp3",
@@ -2364,7 +2580,7 @@ export function pdpColorAvailabilityLabel(
     case "in_stock":
       return "In stock";
     case "low_stock":
-      return "Only a few left";
+      return "Only a few items left";
     case "notify":
       return "Sold out";
   }
@@ -2772,6 +2988,27 @@ export type PdpReviewPhoto = {
   alt: string;
 };
 
+/** Pexels model portraits — placeholder profile avatars for review authors */
+const PDP_COMMENT_AUTHOR_AVATARS: Record<string, string> = {
+  "Maren K.": "/images/avatars/maren-k.jpg",
+  "Jules T.": "/images/avatars/jules-t.jpg",
+  "Priya S.": "/images/avatars/priya-s.jpg",
+  "Elena R.": "/images/avatars/elena-r.jpg",
+  "Danielle M.": "/images/avatars/danielle-m.jpg",
+  "Sofia L.": "/images/avatars/sofia-l.jpg",
+  "Hannah W.": "/images/avatars/hannah-w.jpg",
+  "Taylor B.": "/images/avatars/taylor-b.jpg",
+  "Nicole A.": "/images/avatars/nicole-a.jpg",
+  "Rachel P.": "/images/avatars/rachel-p.jpg",
+  "Amanda C.": "/images/avatars/amanda-c.jpg",
+  "Lily H.": "/images/avatars/lily-h.jpg",
+  You: "/images/avatars/you.jpg",
+};
+
+export function getCommentAuthorAvatar(author: string) {
+  return PDP_COMMENT_AUTHOR_AVATARS[author.trim()];
+}
+
 export type PdpFeaturedReview = {
   id: string;
   rating: number;
@@ -3022,7 +3259,7 @@ export const PDP_REVIEWS_AI_SUMMARY = {
   attribution: "Buyer highlights, summarized by AI",
 } as const;
 
-export const PDP_REVIEWS_RATING_BREAKDOWN = [
+const PDP_REVIEWS_RATING_BREAKDOWN = [
   { stars: 5, percent: 84 },
   { stars: 4, percent: 8 },
   { stars: 3, percent: 5 },

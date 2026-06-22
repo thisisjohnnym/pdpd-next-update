@@ -33,6 +33,15 @@ const RAIL_GLYPH_SHADOW =
 const BURST_DURATION_MS = 1700;
 const BURST_EASING = "cubic-bezier(0.22, 0.92, 0.24, 1)";
 const RAIL_ICON_SIZE = 26;
+const STATIC_PILL_ICON_SIZE = 20;
+
+const STATIC_SOCIAL_PILL_CLASS = cn(
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3.5 text-neutral-900 transition-colors active:bg-[#ececec]",
+  pdpPressableIconClass,
+);
+
+const STATIC_SOCIAL_PILL_LABEL_CLASS =
+  "font-extended text-[13px] font-normal leading-none tracking-[0.2px]";
 
 /** Upward-floating hearts — rise distance, horizontal sway, spin, stagger */
 const HEART_BURST_PARTICLES = [
@@ -48,10 +57,10 @@ const HEART_BURST_PARTICLES = [
   { rise: 84, sway: 6, size: 9, delay: 220, spin: 8 },
 ] as const;
 
-function railIconStyle(filled = false): CSSProperties {
+function railIconStyle(filled = false, size = RAIL_ICON_SIZE): CSSProperties {
   return {
-    fontSize: RAIL_ICON_SIZE,
-    fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${RAIL_ICON_SIZE}`,
+    fontSize: size,
+    fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${size}`,
   };
 }
 
@@ -260,7 +269,13 @@ function LikeRailAction({
 }
 
 /** TikTok-style action rail — hero image only */
-export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => void }) {
+export function PdpHeroActionRail({
+  onOpenReviews,
+  onOpenArTryOn,
+}: {
+  onOpenReviews?: () => void;
+  onOpenArTryOn?: () => void;
+}) {
   const opacity = useHeroScrollOpacity();
   const visible = isHeroOverlayVisible(opacity);
   const { docked, frostOpacity } = useBottomBarDocked();
@@ -286,7 +301,7 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
     <>
     <div
       className={cn(
-        "absolute right-3 z-20 flex flex-col items-center gap-3",
+        "absolute right-3 z-20 flex flex-col items-center gap-4",
         RAIL_GLYPH_SHADOW,
       )}
       style={{
@@ -325,12 +340,143 @@ export function PdpHeroActionRail({ onOpenReviews }: { onOpenReviews?: () => voi
         pressed={saved}
         onClick={handleSave}
       />
+      {onOpenArTryOn ? (
+        <RailAction
+          className={cn("mt-4", playHeroEnter && "pdp-social-rail-item")}
+          icon="view_in_ar"
+          label="Try On"
+          ariaLabel="Try on with AI"
+          onClick={onOpenArTryOn}
+        />
+      ) : null}
     </div>
     <PdpToast
       message="Saved to your bookmarks"
       open={saveToastOpen}
       onClose={() => setSaveToastOpen(false)}
     />
+    </>
+  );
+}
+
+/** Horizontal social row — static hero product summary */
+function StaticActionRowTrack({
+  liked,
+  saved,
+  onToggleLike,
+  onOpenReviews,
+  onToggleSave,
+  onOpenArTryOn,
+}: {
+  liked: boolean;
+  saved: boolean;
+  onToggleLike: () => void;
+  onOpenReviews?: () => void;
+  onToggleSave: () => void;
+  onOpenArTryOn?: () => void;
+}) {
+  return (
+    <div className="-mx-3 overflow-x-auto px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex w-max items-center gap-2">
+        <button
+          type="button"
+          aria-label={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
+          aria-pressed={liked}
+          onClick={onToggleLike}
+          className={STATIC_SOCIAL_PILL_CLASS}
+        >
+          <MaterialIcon
+            name="thumb_up"
+            size={STATIC_PILL_ICON_SIZE}
+            filled={liked}
+            className={cn(liked && "text-neutral-900")}
+          />
+          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+            {PDP_LIKE_SUMMARY.label}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          aria-label={`Comments, ${PDP_COMMENTS_SUMMARY.label} comments`}
+          onClick={onOpenReviews}
+          className={STATIC_SOCIAL_PILL_CLASS}
+        >
+          <MaterialIcon name="chat_bubble" size={STATIC_PILL_ICON_SIZE} />
+          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+            {PDP_COMMENTS_SUMMARY.label}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          aria-label={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
+          aria-pressed={saved}
+          onClick={onToggleSave}
+          className={STATIC_SOCIAL_PILL_CLASS}
+        >
+          <MaterialIcon
+            name="bookmark"
+            size={STATIC_PILL_ICON_SIZE}
+            filled={saved}
+          />
+          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+            {PDP_SAVE_SUMMARY.label}
+          </span>
+        </button>
+
+        {onOpenArTryOn ? (
+          <button
+            type="button"
+            aria-label="Try on with AI"
+            onClick={onOpenArTryOn}
+            className={STATIC_SOCIAL_PILL_CLASS}
+          >
+            <MaterialIcon name="view_in_ar" size={STATIC_PILL_ICON_SIZE} />
+            <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>Try On</span>
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Horizontal social row — static hero product summary */
+export function PdpStaticActionRow({
+  onOpenReviews,
+  onOpenArTryOn,
+}: {
+  onOpenReviews?: () => void;
+  onOpenArTryOn?: () => void;
+}) {
+  const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [saveToastOpen, setSaveToastOpen] = useState(false);
+
+  const handleSave = () => {
+    setSaved((prev) => {
+      if (!prev) {
+        setSaveToastOpen(true);
+      }
+      return !prev;
+    });
+  };
+
+  return (
+    <>
+      <StaticActionRowTrack
+        liked={liked}
+        saved={saved}
+        onToggleLike={() => setLiked((prev) => !prev)}
+        onOpenReviews={onOpenReviews}
+        onToggleSave={handleSave}
+        onOpenArTryOn={onOpenArTryOn}
+      />
+      <PdpToast
+        message="Saved to your bookmarks"
+        open={saveToastOpen}
+        onClose={() => setSaveToastOpen(false)}
+      />
     </>
   );
 }

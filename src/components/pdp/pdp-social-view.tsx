@@ -2,39 +2,61 @@
 
 import { Suspense, useEffect, useState } from "react";
 
+import { cn } from "@/lib/cn";
+
 import { SafeAreaMain } from "@/components/layout/safe-area-main";
 import { useActiveProduct, PdpActiveProductProvider } from "./pdp-active-product-context";
 import { PdpAddToBagSheet } from "./pdp-add-to-bag-sheet";
+import { PdpArTryOnSheet } from "./pdp-ar-try-on-sheet";
 import { PdpBottomActions } from "./pdp-bottom-actions";
 import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
-import { DEFAULT_COLOR_ID } from "./pdp-data";
+import { getDefaultColorId } from "./pdp-product-colors";
+import {
+  PdpProductUrlSync,
+  useKiraColorFromSearchParam,
+} from "./pdp-product-url-sync";
+import { DEFAULT_PRODUCT_ID, type PdpProductId } from "./pdp-products";
 import { PdpGalleryHero, PdpGalleryView } from "./pdp-gallery-view";
 import { PdpNavMenu } from "./pdp-nav-menu";
 import { PdpOverlayHeader } from "./pdp-overlay-header";
 import { PdpReviewsSheet } from "./pdp-reviews-sheet";
 import { PdpRuntimeProvider } from "./pdp-runtime-context";
-import { PdpStrippedHero, PdpStrippedView } from "./pdp-stripped-view";
+import { PdpStrippedHero, PdpStaticHero, PdpStrippedView } from "./pdp-stripped-view";
+import { isStaticImageHero } from "./pdp-products";
 import { TabbyVariantProvider, useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { hasTabbyColorHeroOverride } from "./pdp-tabby-colors";
+import { getTabbyColorHeroObjectPosition } from "./pdp-tabby-color-media";
 import { PdpHeroEnterProvider } from "./use-hero-enter-once";
 import { DEFAULT_TABBY_SLUG } from "./pdp-tabby-variants";
-import type { PdpBundleAddPayload } from "./pdp-data";
+import type { PdpBundleAddPayload, PdpStrapSetAddPayload } from "./pdp-data";
+import { TabbyFamilyCompareExperimentProvider } from "./experiments/tabby-family-compare-flag";
 import { PdpScrollProvider } from "./use-coalesced-scroll";
 
 type BagConfirmation =
   | { type: "product" }
   | { type: "bundle"; payload: PdpBundleAddPayload };
 
-export function PdpSocialView({ slug = DEFAULT_TABBY_SLUG }: { slug?: string }) {
+export function PdpSocialView({
+  slug = DEFAULT_TABBY_SLUG,
+  initialProductId = DEFAULT_PRODUCT_ID,
+  tabbyExperimentEnabled = false,
+}: {
+  slug?: string;
+  initialProductId?: PdpProductId;
+  tabbyExperimentEnabled?: boolean;
+}) {
   return (
-    <PdpActiveProductProvider>
+    <PdpActiveProductProvider initialProductId={initialProductId}>
       <PdpRuntimeProvider>
         <PdpScrollProvider>
           <Suspense fallback={null}>
-            <TabbyVariantProvider slug={slug}>
-              <PdpHeroEnterProvider>
-                <PdpSocialViewInner />
-              </PdpHeroEnterProvider>
-            </TabbyVariantProvider>
+            <TabbyFamilyCompareExperimentProvider initialEnabled={tabbyExperimentEnabled}>
+              <TabbyVariantProvider slug={slug}>
+                <PdpHeroEnterProvider>
+                  <PdpSocialViewInner />
+                </PdpHeroEnterProvider>
+              </TabbyVariantProvider>
+            </TabbyFamilyCompareExperimentProvider>
           </Suspense>
         </PdpScrollProvider>
       </PdpRuntimeProvider>
@@ -45,18 +67,33 @@ export function PdpSocialView({ slug = DEFAULT_TABBY_SLUG }: { slug?: string }) 
 function PdpSocialViewInner() {
   const { productId, product } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const [selectedColorId, setSelectedColorId] = useState(DEFAULT_COLOR_ID);
+  const [selectedColorId, setSelectedColorId] = useState(() =>
+    getDefaultColorId(productId),
+  );
   const [navOpen, setNavOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [bagSheetOpen, setBagSheetOpen] = useState(false);
   const [strapOptionsOpen, setStrapOptionsOpen] = useState(false);
   const [comparePickerOpen, setComparePickerOpen] = useState(false);
+  const [arTryOnOpen, setArTryOnOpen] = useState(false);
   const [bagCount, setBagCount] = useState(0);
   const [bagConfirmation, setBagConfirmation] = useState<BagConfirmation>({
     type: "product",
   });
 
-  const activeColorId = tabby?.selectedColorId ?? selectedColorId;
+  const activeColorId =
+    productId === "tabby" && tabby ? tabby.selectedColorId : selectedColorId;
+
+  const selectedTabbyColor =
+    productId === "tabby" && tabby
+      ? tabby.colors.find((entry) => entry.id === activeColorId)
+      : null;
+  const tabbyColorHero =
+    selectedTabbyColor && hasTabbyColorHeroOverride(selectedTabbyColor)
+      ? selectedTabbyColor
+      : null;
+
+  useKiraColorFromSearchParam(productId, selectedColorId, setSelectedColorId);
 
   const handleAddToBag = () => {
     setBagCount((count) => count + 1);
@@ -64,8 +101,13 @@ function PdpSocialViewInner() {
     setBagSheetOpen(true);
   };
 
-  const handleQuickAddToBag = () => {
-    setBagCount((count) => count + 1);
+  const handleAddSetToBag = (payload: PdpStrapSetAddPayload) => {
+    const count = payload.optionIds.length + (payload.includeBag ? 1 : 0);
+    setBagCount((current) => current + count);
+    if (payload.includeBag) {
+      setBagConfirmation({ type: "product" });
+      setBagSheetOpen(true);
+    }
   };
 
   const handleAddBundle = (payload: PdpBundleAddPayload) => {
@@ -76,45 +118,84 @@ function PdpSocialViewInner() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
+    setSelectedColorId(getDefaultColorId(productId));
   }, [productId]);
 
   const isStripped = product.layout === "stripped";
+  const isStaticHero = isStripped && isStaticImageHero(product.hero);
+  const isColorHero = Boolean(tabbyColorHero);
+  const chromeSuppressed =
+    navOpen ||
+    reviewsOpen ||
+    bagSheetOpen ||
+    strapOptionsOpen ||
+    comparePickerOpen ||
+    arTryOnOpen;
 
   return (
-    <div className="relative min-h-svh w-full overflow-x-clip bg-black">
+    <div
+      className={cn(
+        "relative min-h-svh w-full overflow-x-clip",
+        isStaticHero || isColorHero ? "bg-white" : "bg-black",
+      )}
+    >
       <PdpBrowserChromeSync />
+      <PdpProductUrlSync activeColorId={activeColorId} />
       <PdpOverlayHeader
         bagCount={bagCount}
         onOpenMenu={() => setNavOpen(true)}
       />
-      {isStripped && product.hero.kind === "image" ? (
+      {tabbyColorHero ? null : isStripped && product.hero.kind === "image" && !isStaticHero ? (
         <PdpStrippedHero
           src={product.hero.src}
           alt={product.hero.alt}
           objectPosition={product.hero.objectPosition}
           onOpenReviews={() => setReviewsOpen(true)}
         />
-      ) : product.hero.kind === "video" ? (
+      ) : !isStaticHero && !tabbyColorHero && product.hero.kind === "video" ? (
         <PdpGalleryHero
           videoSrc={product.hero.videoSrc}
           poster={product.hero.poster}
           alt={product.hero.alt}
           onOpenReviews={() => setReviewsOpen(true)}
+          onOpenArTryOn={() => setArTryOnOpen(true)}
         />
       ) : null}
       <SafeAreaMain className="bg-white" omitTop>
+        {tabbyColorHero ? (
+          <PdpStaticHero
+            hero={{
+              src: tabbyColorHero.hero,
+              alt: tabbyColorHero.heroAlt,
+              objectPosition: getTabbyColorHeroObjectPosition(tabbyColorHero.id),
+              aspect: "4/5",
+            }}
+            onOpenReviews={() => setReviewsOpen(true)}
+            onOpenArTryOn={() => setArTryOnOpen(true)}
+          />
+        ) : isStaticHero && product.hero.kind === "image" ? (
+          <PdpStaticHero
+            hero={product.hero}
+            onOpenReviews={() => setReviewsOpen(true)}
+          />
+        ) : null}
         {isStripped ? (
           <PdpStrippedView
             product={product}
             onOpenReviews={() => setReviewsOpen(true)}
+            onAddSimilarToBag={() => {
+              setBagCount((count) => count + 1);
+            }}
           />
         ) : (
           <PdpGalleryView
             omitHero
             onOpenReviews={() => setReviewsOpen(true)}
-            onAddSimilarToBag={handleQuickAddToBag}
+            onAddSimilarToBag={() => {
+              setBagCount((count) => count + 1);
+            }}
             onAddBundle={handleAddBundle}
-            onQuickAddStrap={() => handleQuickAddToBag()}
+            onAddSetToBag={handleAddSetToBag}
             onStrapOptionsOpenChange={setStrapOptionsOpen}
             onComparePickerOpenChange={setComparePickerOpen}
             selectedColorId={activeColorId}
@@ -125,21 +206,27 @@ function PdpSocialViewInner() {
         selectedColorId={activeColorId}
         onColorSelect={setSelectedColorId}
         onAddToBag={handleAddToBag}
-        suppressed={
-          navOpen ||
-          reviewsOpen ||
-          bagSheetOpen ||
-          strapOptionsOpen ||
-          comparePickerOpen
-        }
+        suppressed={chromeSuppressed}
       />
       <PdpNavMenu open={navOpen} onClose={() => setNavOpen(false)} />
       <PdpReviewsSheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} />
+      {!isStripped ? (
+        <PdpArTryOnSheet
+          open={arTryOnOpen}
+          onClose={() => setArTryOnOpen(false)}
+          onAddToBag={() => {
+            setArTryOnOpen(false);
+            handleAddToBag();
+          }}
+        />
+      ) : null}
       <PdpAddToBagSheet
         open={bagSheetOpen}
         onClose={() => setBagSheetOpen(false)}
         selectedColorId={activeColorId}
-        onQuickAdd={handleQuickAddToBag}
+        onQuickAdd={() => {
+          setBagCount((count) => count + 1);
+        }}
         confirmation={bagConfirmation}
       />
     </div>

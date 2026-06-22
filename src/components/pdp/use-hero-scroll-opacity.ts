@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useScrollSnapshot } from "./use-coalesced-scroll";
 
 /** Smoothstep — gentle ease in/out, no hard stops */
@@ -25,14 +23,9 @@ function getHeroScrollOpacity(scrollY: number, viewportHeight: number) {
 }
 
 export function useHeroScrollOpacity() {
-  const [opacity, setOpacity] = useState(1);
   const { scrollY, viewportHeight } = useScrollSnapshot();
 
-  useEffect(() => {
-    setOpacity(getHeroScrollOpacity(scrollY, viewportHeight));
-  }, [scrollY, viewportHeight]);
-
-  return opacity;
+  return getHeroScrollOpacity(scrollY, viewportHeight);
 }
 
 /** Keep mounted but non-interactive when fully faded */

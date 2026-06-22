@@ -34,14 +34,14 @@ export function PdpGalleryProductHud() {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[15]"
         style={{
-          height: `calc(10.5rem + ${hudBottom})`,
+          height: `calc(8rem + ${hudBottom})`,
           opacity,
           visibility: visible ? "visible" : "hidden",
         }}
       >
         <div
           className={cn(
-            "absolute inset-0 bg-[linear-gradient(to_top,rgb(0_0_0)_0%,rgb(0_0_0/0.72)_30%,rgb(0_0_0/0.28)_56%,transparent_84%)]",
+            "absolute inset-0 bg-[linear-gradient(to_top,rgb(0_0_0)_0%,rgb(0_0_0/0.82)_34%,rgb(0_0_0/0.42)_62%,transparent_90%)]",
             playHeroEnter && "pdp-hero-scrim-enter",
           )}
         />
@@ -60,20 +60,16 @@ export function PdpGalleryProductHud() {
             <GridItem mobile={12} desktop={24}>
               <div
                 className={cn(
-                  "font-extended flex items-start justify-between gap-4 tracking-[0.2px] text-white",
+                  "font-extended tracking-[0.2px] text-white",
                   heroHudTextShadow,
                 )}
               >
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-base font-normal leading-none tracking-[0.2px]">
-                    {summary.name}
-                  </p>
-                  <p className="mt-0.5 text-xs leading-none tracking-[0.2px] text-white/75">
-                    {summary.subtitle}
-                  </p>
+                <div className="flex items-center justify-between gap-4 text-base font-normal leading-none">
+                  <p className="min-w-0 truncate">{summary.name}</p>
+                  <p className="shrink-0 tabular-nums">{summary.price}</p>
                 </div>
-                <p className="shrink-0 pt-px text-sm font-normal leading-none tracking-[0.2px]">
-                  {summary.price}
+                <p className="mt-0.5 text-xs font-normal leading-none tracking-[0.2px] text-white/75">
+                  {summary.subtitle}
                 </p>
               </div>
             </GridItem>

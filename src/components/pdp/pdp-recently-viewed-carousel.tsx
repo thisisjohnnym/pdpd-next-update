@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { useActiveProduct } from "./pdp-active-product-context";
 import {
   pdpCarouselCard15Class,
   pdpCarouselImageClass,
@@ -15,11 +17,33 @@ import { PDP_RECENTLY_VIEWED, PDP_RECENTLY_VIEWED_SECTION } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
+import { getDefaultColorId } from "./pdp-product-colors";
+import { productPath } from "./pdp-product-routes";
+import { getRecentlyViewedProductId } from "./pdp-products";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
 
 /** History rail — last block on the PDP, portrait cards with viewed-time chips */
 export function PdpRecentlyViewedCarousel() {
+  const router = useRouter();
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+
+  const handleViewAgain = (itemId: string) => {
+    const targetProductId = getRecentlyViewedProductId(itemId);
+    if (!targetProductId || targetProductId === productId) {
+      return;
+    }
+
+    router.push(
+      productPath(targetProductId, {
+        tabbySlug: tabby?.slug,
+        colorId: getDefaultColorId(targetProductId),
+      }),
+    );
+  };
+
   return (
     <section
       data-header-surface="light"
@@ -37,14 +61,33 @@ export function PdpRecentlyViewedCarousel() {
               )}
               aria-label="Recently viewed items"
             >
-              {PDP_RECENTLY_VIEWED.map((item, index) => (
+              {PDP_RECENTLY_VIEWED.map((item, index) => {
+                const isLinked = getRecentlyViewedProductId(item.id) !== null;
+
+                return (
                 <li
                   key={item.id}
                   className={cn("flex flex-col", pdpCarouselCard15Class)}
                 >
                   <div className="group relative w-full">
                     <div
-                      className="relative w-full overflow-hidden bg-neutral-100"
+                      role={isLinked ? "button" : undefined}
+                      tabIndex={isLinked ? 0 : undefined}
+                      onClick={isLinked ? () => handleViewAgain(item.id) : undefined}
+                      onKeyDown={
+                        isLinked
+                          ? (event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                handleViewAgain(item.id);
+                              }
+                            }
+                          : undefined
+                      }
+                      className={cn(
+                        "relative w-full overflow-hidden bg-neutral-100",
+                        isLinked && "cursor-pointer",
+                      )}
                       style={{ aspectRatio: "4 / 5" }}
                     >
                     <Image
@@ -67,7 +110,11 @@ export function PdpRecentlyViewedCarousel() {
                   </div>
                 </div>
                 <p
-                  className={`font-extended mt-2 line-clamp-2 text-black ${pdpType.label}`}
+                  className={cn(
+                    `font-extended mt-2 line-clamp-2 text-black ${pdpType.label}`,
+                    isLinked && "cursor-pointer",
+                  )}
+                  onClick={isLinked ? () => handleViewAgain(item.id) : undefined}
                 >
                   {item.name}
                 </p>
@@ -76,13 +123,15 @@ export function PdpRecentlyViewedCarousel() {
                 </p>
                 <PdpTextLinkCta
                   type="button"
-                  className={cn("mt-2", pdpType.label)}
+                  className={cn("mt-2", pdpType.label, isLinked && "cursor-pointer")}
                   aria-label={`View again: ${item.name}, viewed ${item.viewedLabel}`}
+                  onClick={() => handleViewAgain(item.id)}
                 >
                   View again
                 </PdpTextLinkCta>
               </li>
-            ))}
+                );
+              })}
             </ul>
           </PdpRevealItem>
         </GridItem>

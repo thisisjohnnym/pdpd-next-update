@@ -12,14 +12,13 @@ import {
 } from "react";
 
 import { pdpColorIsSelectable } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
 import {
   getSizeAvailabilityForStyle,
   resolveTabbySelection,
-  type TabbySelectionAdjustment,
 } from "./pdp-tabby-catalog";
 import {
   getDefaultColorIdForSku,
-  getTabbyColorName,
   getTabbyColorOptionsForStyleSize,
   getTabbyColorsForSku,
   resolveTabbyColorId,
@@ -59,10 +58,10 @@ type TabbyVariantContextValue = {
   sizeOptions: TabbySizeOptionAvailability[];
   selectedColorId: string;
   setSelectedColorId: (colorId: string) => void;
+  /** Jump to another size in the current style and select a color */
+  selectColorAtSize: (colorId: string, size: TabbySize) => void;
   navigateToStyle: (styleId: TabbyStyleId) => void;
   navigateToSize: (size: TabbySize) => void;
-  adjustment: TabbySelectionAdjustment | null;
-  dismissAdjustment: () => void;
   summary: {
     name: string;
     subtitle: string;
@@ -101,10 +100,8 @@ export function TabbyVariantProvider({
   children: ReactNode;
 }) {
   const searchParams = useSearchParams();
+  const { productId: activeProductId } = useActiveProduct();
   const [slug, setSlug] = useState(() => resolveInitialSlug(initialSlug));
-  const [adjustment, setAdjustment] = useState<TabbySelectionAdjustment | null>(
-    null,
-  );
 
   const parsed = parseTabbySlug(slug);
   const styleId = parsed?.styleId ?? DEFAULT_TABBY_STYLE_ID;
@@ -132,6 +129,10 @@ export function TabbyVariantProvider({
   }, [initialSlug]);
 
   useEffect(() => {
+    if (activeProductId !== "tabby") {
+      return;
+    }
+
     const parsedSlug = parseTabbySlug(slug);
     if (!parsedSlug) {
       return;
@@ -147,7 +148,7 @@ export function TabbyVariantProvider({
       setSlug(resolved.slug);
       replaceTabbyBrowserUrl(resolved.slug, resolved.colorId);
     }
-  }, [selectedColorId, slug]);
+  }, [activeProductId, selectedColorId, slug]);
 
   const paramColor = searchParams.get("color");
 
@@ -174,34 +175,25 @@ export function TabbyVariantProvider({
     });
   }, [colors, paramColor, size, sku, styleId]);
 
-  const dismissAdjustment = useCallback(() => {
-    setAdjustment(null);
-  }, []);
-
   const applySelection = useCallback(
     (
       nextStyleId: TabbyStyleId,
       nextSize: TabbySize,
       preferredColorId: string,
-      trackAdjustments: boolean,
     ) => {
       const resolved = resolveTabbySelection({
         styleId: nextStyleId,
         size: nextSize,
         colorId: preferredColorId,
-        trackAdjustments,
-        colorNameLookup: (colorId) => getTabbyColorName(nextStyleId, colorId),
       });
 
       setSlug(resolved.slug);
       setSelectedColorIdState(resolved.colorId);
-      replaceTabbyBrowserUrl(resolved.slug, resolved.colorId);
-
-      const nextAdjustment =
-        resolved.adjustments[resolved.adjustments.length - 1] ?? null;
-      setAdjustment(nextAdjustment);
+      if (activeProductId === "tabby") {
+        replaceTabbyBrowserUrl(resolved.slug, resolved.colorId);
+      }
     },
-    [],
+    [activeProductId],
   );
 
   const setSelectedColorId = useCallback(
@@ -212,10 +204,25 @@ export function TabbyVariantProvider({
       }
 
       setSelectedColorIdState(colorId);
-      setAdjustment(null);
-      replaceTabbyBrowserUrl(slug, colorId);
+      if (activeProductId === "tabby") {
+        replaceTabbyBrowserUrl(slug, colorId);
+      }
     },
-    [colors, slug],
+    [activeProductId, colors, slug],
+  );
+
+  const selectColorAtSize = useCallback(
+    (colorId: string, nextSize: TabbySize) => {
+      const nextColors = getTabbyColorsForSku(getTabbySku(nextSize, styleId));
+      const color = nextColors.find((entry) => entry.id === colorId);
+
+      if (!color || !pdpColorIsSelectable(color.availability)) {
+        return;
+      }
+
+      applySelection(styleId, nextSize, colorId);
+    },
+    [applySelection, styleId],
   );
 
   const navigateToStyle = useCallback(
@@ -224,7 +231,7 @@ export function TabbyVariantProvider({
         return;
       }
 
-      applySelection(nextStyleId, size, selectedColorId, true);
+      applySelection(nextStyleId, size, selectedColorId);
     },
     [applySelection, selectedColorId, size, styleId],
   );
@@ -236,7 +243,7 @@ export function TabbyVariantProvider({
         return;
       }
 
-      applySelection(styleId, nextSize, selectedColorId, true);
+      applySelection(styleId, nextSize, selectedColorId);
     },
     [applySelection, selectedColorId, size, sizeOptions, styleId],
   );
@@ -253,24 +260,22 @@ export function TabbyVariantProvider({
       sizeOptions,
       selectedColorId,
       setSelectedColorId,
+      selectColorAtSize,
       navigateToStyle,
       navigateToSize,
-      adjustment,
-      dismissAdjustment,
       summary: {
-        name: getTabbyProductTitle(size),
+        name: getTabbyProductTitle(size, styleId),
         subtitle: style.materialLabel,
         price: sku.price,
       },
       isTabbyFamily: true,
     }),
     [
-      adjustment,
       colorOptions,
       colors,
-      dismissAdjustment,
       navigateToSize,
       navigateToStyle,
+      selectColorAtSize,
       selectedColorId,
       setSelectedColorId,
       size,

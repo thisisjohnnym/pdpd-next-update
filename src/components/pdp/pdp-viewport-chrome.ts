@@ -26,10 +26,10 @@ const HERO_PRODUCT_HUD_OFFSET = `calc(${BOTTOM_DOCKED_HEIGHT_PX}px + ${HERO_PROD
 /** Hero product HUD — clears two-row Tabby experiment docked bar */
 const HERO_PRODUCT_HUD_TABBY_OFFSET = `calc(${BOTTOM_TABBY_DOCKED_HEIGHT_PX}px + ${HERO_PRODUCT_HUD_GAP} + var(--pdp-fixed-bottom-offset))`;
 
-/** Hero action rail — clears title/price row on the right (save label + icon) */
-const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 6.5rem)`;
+/** Hero action rail — clears title/price/material on the left */
+const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 5rem)`;
 
-const HERO_ACTION_RAIL_TABBY_OFFSET = `calc(${HERO_PRODUCT_HUD_TABBY_OFFSET} + 6.5rem)`;
+const HERO_ACTION_RAIL_TABBY_OFFSET = `calc(${HERO_PRODUCT_HUD_TABBY_OFFSET} + 5rem)`;
 
 /** Hero action rail when bottom bar floats — clears pill + product HUD */
 const HERO_ACTION_RAIL_FLOATING_OFFSET = `calc(${BOTTOM_CTA_OFFSET} + 9rem)`;

@@ -11,12 +11,14 @@ type PdpReviewLikeButtonProps = {
   initialLikes: number;
   /** Instagram — heart stacked above like count on the right */
   layout?: "inline" | "stacked";
+  className?: string;
 };
 
 /** Toggle like on a customer review */
 export function PdpReviewLikeButton({
   initialLikes,
   layout = "stacked",
+  className,
 }: PdpReviewLikeButtonProps) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialLikes);
@@ -42,6 +44,7 @@ export function PdpReviewLikeButton({
         className={cn(
           "inline-flex shrink-0 items-center gap-1 py-1 pl-1 pr-2 transition-colors active:bg-neutral-100",
           pdpPressableClass,
+          className,
         )}
       >
         <MaterialIcon
@@ -62,7 +65,12 @@ export function PdpReviewLikeButton({
   }
 
   return (
-    <div className="flex w-8 shrink-0 flex-col items-center gap-0.5 pt-0.5">
+    <div
+      className={cn(
+        "flex w-8 shrink-0 flex-col items-center gap-0.5 pt-0.5",
+        className,
+      )}
+    >
       <button
         type="button"
         onClick={handleToggle}

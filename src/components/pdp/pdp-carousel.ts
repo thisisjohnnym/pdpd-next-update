@@ -42,9 +42,9 @@ const pdpReviewPhotoCardClass =
 const pdpUgcStoryCardClass =
   "w-[calc((100vw-1.25rem)/1.35)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/2.8)]";
 
-/** UGC story cards — compact rail for reviews (~2.9 across) */
+/** UGC story cards — compact rail for reviews (~1.8 across) */
 export const pdpUgcStoryCardCompactClass =
-  "w-[calc((100vw-1.25rem)/2.9)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/5)]";
+  "w-[calc((100vw-1.25rem)/1.8)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
 
 /** UGC video tiles (9:16) — ~1.1 across with next clip peek, gap-2 */
 const pdpUgcVideoCardClass =

@@ -224,7 +224,10 @@ export function getTabbySku(size: TabbySize, styleId: TabbyStyleId): TabbySku {
   };
 }
 
-export function getTabbyProductTitle(size: TabbySize): string {
+export function getTabbyProductTitle(
+  size: TabbySize,
+  _styleId?: TabbyStyleId,
+): string {
   return `Tabby Shoulder Bag ${size}`;
 }
 

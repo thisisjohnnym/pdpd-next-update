@@ -20,12 +20,7 @@ export function PdpCompareModuleGate({
   const { productId } = useActiveProduct();
 
   if (productId === "tabby") {
-    return (
-      <TabbyFamilyCompareExperiment
-        onAddToBag={onAddToBag}
-        onPickerOpenChange={onPickerOpenChange}
-      />
-    );
+    return <TabbyFamilyCompareExperiment />;
   }
 
   return (

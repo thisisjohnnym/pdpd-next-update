@@ -11,6 +11,8 @@ type TabbyColorSeed = {
   /** Coach.com color label — e.g. "Brass/Black" */
   name: string;
   swatch: string;
+  /** Studio product hero — when set, replaces the default lifestyle hero */
+  hero?: string;
   chromeSample?: string;
   availability: PdpColorAvailability;
 };
@@ -24,7 +26,7 @@ function toPdpColor(
     id: seed.id,
     name: seed.name,
     swatch: seed.swatch,
-    hero: seed.swatch,
+    hero: seed.hero ?? seed.swatch,
     heroAlt: `Tabby Shoulder Bag ${size} in ${seed.name} — ${styleLabel}`,
     chromeSample: seed.chromeSample ?? "#1a1a1a",
     availability: seed.availability,
@@ -60,10 +62,20 @@ const COACH_SWATCH = {
   "silver-flower-pink": "/images/colors/tabby/silver-flower-pink.jpg",
 } as const satisfies Record<string, string>;
 
+/** Lifestyle hero swaps — replace default video hero when selected */
+const COACH_HERO = {
+  "silver-soft-purple":
+    "/images/colors/tabby/silver-soft-purple-on-model-bomber.png",
+} as const satisfies Partial<Record<keyof typeof COACH_SWATCH, string>>;
+
 type CoachColorId = keyof typeof COACH_SWATCH;
 
 function coachSwatch(id: CoachColorId): string {
   return COACH_SWATCH[id];
+}
+
+function coachHero(id: CoachColorId): string | undefined {
+  return COACH_HERO[id as keyof typeof COACH_HERO];
 }
 
 /** Coach US colorways — Tabby Shoulder Bag 26, refined pebble (CH735 / CH857) */
@@ -151,6 +163,7 @@ const QUILTED_26: TabbyColorSeed[] = [
     id: "silver-soft-purple",
     name: "Silver/Soft Purple",
     swatch: coachSwatch("silver-soft-purple"),
+    hero: coachHero("silver-soft-purple"),
     chromeSample: "#7a5c8a",
     availability: "low_stock",
   },
@@ -216,6 +229,7 @@ const PILLOW_26: TabbyColorSeed[] = [
     id: "silver-soft-purple",
     name: "Silver/Soft Purple",
     swatch: coachSwatch("silver-soft-purple"),
+    hero: coachHero("silver-soft-purple"),
     chromeSample: "#7a5c8a",
     availability: "in_stock",
   },
@@ -248,7 +262,7 @@ const SOFT_26: TabbyColorSeed[] = [
     name: "Brass/Moss",
     swatch: coachSwatch("brass-moss"),
     chromeSample: "#556847",
-    availability: "in_stock",
+    availability: "low_stock",
   },
   {
     id: "silver-dragonfruit",
@@ -334,6 +348,7 @@ const LOVED_26: TabbyColorSeed[] = [
     id: "silver-soft-purple",
     name: "Silver/Soft Purple",
     swatch: coachSwatch("silver-soft-purple"),
+    hero: coachHero("silver-soft-purple"),
     chromeSample: "#7a5c8a",
     availability: "low_stock",
   },
@@ -372,6 +387,7 @@ const CHAIN_26: TabbyColorSeed[] = [
     id: "silver-soft-purple",
     name: "Silver/Soft Purple",
     swatch: coachSwatch("silver-soft-purple"),
+    hero: coachHero("silver-soft-purple"),
     chromeSample: "#7a5c8a",
     availability: "low_stock",
   },
@@ -392,7 +408,7 @@ const STYLE_SIZE_CATALOG: Partial<
     33: SOFT_26,
   },
   quilted: {
-    20: QUILTED_26,
+    20: QUILTED_26.filter((seed) => seed.id === "brass-black"),
     26: QUILTED_26,
     33: QUILTED_26.filter((seed) => seed.id === "brass-black"),
     36: QUILTED_26.filter((seed) =>
@@ -527,12 +543,17 @@ export function resolveTabbyColorId(
 }
 
 /** Display name for adjustment copy */
-export function getTabbyColorName(
+function getTabbyColorName(
   styleId: TabbyStyleId,
   colorId: string,
 ): string {
   const seeds = getAllColorSeedsForStyle(styleId);
   return seeds.find((seed) => seed.id === colorId)?.name ?? colorId;
+}
+
+/** Dedicated studio hero — distinct from the swatch thumbnail; renders as static 4:5 hero */
+export function hasTabbyColorHeroOverride(color: PdpColor): boolean {
+  return color.hero !== color.swatch;
 }
 
 /** Coach "Hardware/Shade" — compact bar shows shade; sheet keeps full name */

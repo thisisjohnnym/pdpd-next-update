@@ -96,8 +96,19 @@ class ScrollBus {
   }
 
   subscribe(onStoreChange: () => void): () => void {
+    const isFirstListener = this.listeners.size === 0;
     this.ensureSubscribed();
     this.listeners.add(onStoreChange);
+
+    // Hydrate client scroll once — getSnapshot must stay pure during render.
+    if (isFirstListener && typeof window !== "undefined") {
+      if (
+        this.snapshot.scrollY !== SERVER_SNAPSHOT.scrollY ||
+        this.snapshot.viewportHeight !== SERVER_SNAPSHOT.viewportHeight
+      ) {
+        queueMicrotask(onStoreChange);
+      }
+    }
 
     return () => {
       this.listeners.delete(onStoreChange);
@@ -106,10 +117,6 @@ class ScrollBus {
   }
 
   getSnapshot(): ScrollSnapshot {
-    if (typeof window !== "undefined") {
-      this.readAndCommitSnapshot();
-    }
-
     return this.snapshot;
   }
 

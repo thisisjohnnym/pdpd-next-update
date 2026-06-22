@@ -1,6 +1,7 @@
 "use client";
 
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
+import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_SITE_FOOTER, type PdpSiteFooterGroup } from "./pdp-data";
@@ -33,14 +34,14 @@ function CoachCMark({ className }: { className?: string }) {
 function FooterLinkGroup({ group }: { group: PdpSiteFooterGroup }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
-      <p className={`m-0 text-black ${pdpType.label}`}>{group.title}</p>
+      <p className={`m-0 text-white ${pdpType.label}`}>{group.title}</p>
       <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
         {group.links.map((link) => (
           <li key={link.label}>
             <a
               href={link.href}
               className={cn(
-                "font-extended text-neutral-600 transition-colors active:text-black",
+                "font-extended text-neutral-400 transition-colors active:text-white",
                 pdpType.micro,
                 pdpPressableClass,
               )}
@@ -56,23 +57,21 @@ function FooterLinkGroup({ group }: { group: PdpSiteFooterGroup }) {
 
 /** Standard Coach Outlet site footer — last block on the PDP scroll */
 export function PdpSiteFooter({ embedded = false }: { embedded?: boolean }) {
-  const { brand, groups, legal, copyright } = PDP_SITE_FOOTER;
-
   return (
     <footer
-      data-header-surface="light"
+      data-header-surface="dark"
       className={
         embedded
-          ? "relative w-full shrink-0 border-t border-neutral-200 bg-neutral-100 pt-8 pb-8"
-          : cn(pdpModuleSectionClass({ variant: "muted", rhythm: "break" }), "pt-12")
+          ? "relative w-full shrink-0 bg-black pt-8 pb-8 text-white"
+          : cn(pdpModuleSectionClass({ rhythm: "break" }), "bg-black pt-12 text-white")
       }
     >
       {embedded ? (
-        <FooterContent brand={brand} groups={groups} legal={legal} copyright={copyright} />
+        <FooterContent />
       ) : (
         <PageGrid fullWidth>
           <GridItem mobile={12} desktop={24}>
-            <FooterContent brand={brand} groups={groups} legal={legal} copyright={copyright} />
+            <FooterContent />
           </GridItem>
         </PageGrid>
       )}
@@ -80,38 +79,73 @@ export function PdpSiteFooter({ embedded = false }: { embedded?: boolean }) {
   );
 }
 
-function FooterContent({
-  brand,
-  groups,
-  legal,
-  copyright,
-}: {
-  brand: string;
-  groups: PdpSiteFooterGroup[];
-  legal: (typeof PDP_SITE_FOOTER)["legal"];
-  copyright: string;
-}) {
+function FooterContent() {
+  const { brand, newsletter, groups, social, legal, copyright } = PDP_SITE_FOOTER;
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center gap-2 text-black">
+      <div className="flex items-center gap-2 text-white">
         <CoachCMark />
         <span className="font-extended text-sm tracking-[0.2px]">{brand}</span>
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col gap-3">
+        <p className={`m-0 text-white ${pdpType.label}`}>{newsletter.title}</p>
+        <p className={`m-0 max-w-xs text-neutral-400 ${pdpType.micro}`}>{newsletter.description}</p>
+        <form
+          className="flex max-w-sm items-stretch gap-2"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            aria-label={newsletter.placeholder}
+            placeholder={newsletter.placeholder}
+            className="font-extended min-w-0 flex-1 border-b border-neutral-700 bg-transparent pb-2 text-[12px] text-white placeholder:text-neutral-500 focus:border-white focus:outline-none"
+          />
+          <button
+            type="submit"
+            className={cn(
+              "font-extended shrink-0 border border-white px-4 py-2 text-[11px] tracking-[0.4px] text-white uppercase transition-colors active:bg-white active:text-black",
+              pdpPressableClass,
+            )}
+          >
+            {newsletter.cta}
+          </button>
+        </form>
+      </div>
+
+      <div className="flex flex-wrap gap-x-8 gap-y-8">
         {groups.map((group) => (
           <FooterLinkGroup key={group.id} group={group} />
         ))}
       </div>
 
-      <div className="flex flex-col gap-4 border-t border-neutral-200 pt-6">
+      <nav aria-label="Social" className="flex flex-wrap items-center gap-4">
+        {social.map((item) => (
+          <a
+            key={item.label}
+            href={item.href}
+            aria-label={item.label}
+            className={cn(
+              "text-neutral-400 transition-colors active:text-white",
+              pdpPressableClass,
+            )}
+          >
+            <MaterialIcon name={item.icon} size={20} />
+          </a>
+        ))}
+      </nav>
+
+      <div className="flex flex-col gap-4 border-t border-neutral-800 pt-6">
         <nav aria-label="Legal" className="flex flex-wrap gap-x-4 gap-y-2">
           {legal.map((link) => (
             <a
               key={link.label}
               href={link.href}
               className={cn(
-                "font-extended text-neutral-600 transition-colors active:text-black",
+                "font-extended text-neutral-400 transition-colors active:text-white",
                 pdpType.micro,
                 pdpPressableClass,
               )}

@@ -3,21 +3,20 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { PdpBuyBarRow } from "./pdp-buy-bar-row";
 import { PdpColorSelector } from "./pdp-color-selector";
 import { getAtbChromeFromColorSample } from "./pdp-color-chrome";
 import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
-import { PDP_COLORS, pdpColorIsSelectable } from "./pdp-data";
+import { pdpColorIsSelectable } from "./pdp-data";
 import { useActiveProduct } from "./pdp-active-product-context";
+import { getPdpColors } from "./pdp-product-colors";
 import { PdpSizeSelector } from "./pdp-size-selector";
 import { PdpStyleSelector } from "./pdp-style-selector";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
-import { PdpToast } from "./pdp-toast";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
-import { pdpPressableSolidClass } from "./pdp-type";
 import { useBottomBarDocked } from "./use-bottom-bar-docked";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
 
@@ -48,18 +47,18 @@ export function PdpBottomActions({
   const showTabbyConfigurator = isTabbyProduct && tabbyExperiment;
   const playHeroEnter = useHeroEnterOnce();
 
-  const colors = isTabbyProduct ? tabby!.colorOptions : PDP_COLORS;
+  const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
   const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
   const selectedColor =
     (isTabbyProduct
       ? tabby!.colors.find((entry) => entry.id === activeColorId)
       : colors.find((entry) => entry.id === activeColorId)) ?? colors[0];
-  const atbChromeSample = selectedColor?.chromeSample ?? "#0a0a0a";
-  const atbChrome = getAtbChromeFromColorSample(atbChromeSample);
+  const atbChrome = getAtbChromeFromColorSample(selectedColor?.chromeSample ?? "#0a0a0a");
   const isDarkChrome = atbChrome.isDarkBackdrop;
   const atbUsesRoundedPill =
     !docked || showTabbyConfigurator || isDarkChrome || isTabbyProduct;
   const variantSheetOpen = styleSheetOpen || sizeSheetOpen || colorSheetOpen;
+  const dockedContentInset = docked ? "px-3 lg:px-5" : "";
 
   useEffect(() => {
     setMounted(true);
@@ -92,7 +91,16 @@ export function PdpBottomActions({
     onColorSelect(id);
   };
 
-  const dockedContentInset = docked ? "px-3 lg:px-5" : "";
+  const simpleBuyBar = (
+    <PdpBuyBarRow
+      selectedColorId={selectedColorId}
+      onColorSelect={onColorSelect}
+      onAddToBag={onAddToBag}
+      onColorSheetOpenChange={setColorSheetOpen}
+      squared={!atbUsesRoundedPill}
+      elevated={!docked}
+    />
+  );
 
   const variantRow = showTabbyConfigurator ? (
     <div className={cn("flex w-full items-stretch gap-2", dockedContentInset)}>
@@ -105,64 +113,10 @@ export function PdpBottomActions({
         inline
         stretch
         onOpenChange={setColorSheetOpen}
+        elevated={!docked}
       />
     </div>
-  ) : (
-    <div
-      className={cn(
-        "flex items-center",
-        isTabbyProduct ? "min-w-0 flex-[2]" : "shrink-0",
-        !isTabbyProduct && docked && dockedContentInset,
-      )}
-    >
-      <PdpColorSelector
-        colors={colors}
-        selectedId={activeColorId}
-        onSelect={handleColorSelect}
-        inline
-        stretch={isTabbyProduct}
-        onOpenChange={setColorSheetOpen}
-      />
-    </div>
-  );
-
-  const addToBagButton = (
-    <button
-      type="button"
-      onClick={onAddToBag}
-      className={cn(
-        "font-extended relative isolate flex min-w-0 w-full items-center justify-center gap-2 overflow-hidden text-center leading-none transition-[border-radius,background-color,color,box-shadow,transform,filter] duration-300",
-        pdpPressableSolidClass,
-        "active:brightness-90",
-        atbUsesRoundedPill
-          ? "h-12 rounded-full px-3"
-          : "h-[54px] rounded-none px-4",
-      )}
-      style={{
-        backgroundColor: atbChrome.background,
-        color: atbChrome.foreground,
-      }}
-    >
-      <span className="relative z-[1] flex min-w-0 items-center justify-center gap-2">
-        <MaterialIcon
-          name="shopping_bag"
-          size={18}
-          className="shrink-0 -translate-y-px"
-          style={{ color: atbChrome.foreground }}
-          aria-hidden
-        />
-        <span className="translate-y-px text-[12px]">Add to bag</span>
-      </span>
-    </button>
-  );
-
-  const addToBagSlot = showTabbyConfigurator ? (
-    <div className={cn("w-full min-w-0", dockedContentInset)}>{addToBagButton}</div>
-  ) : isTabbyProduct ? (
-    <div className="min-w-0 flex-[3]">{addToBagButton}</div>
-  ) : (
-    addToBagButton
-  );
+  ) : null;
 
   const bar = showTabbyConfigurator ? (
     <div
@@ -172,7 +126,15 @@ export function PdpBottomActions({
       )}
     >
       {variantRow}
-      {addToBagSlot}
+      <div className={cn("flex w-full min-w-0 items-stretch gap-2", dockedContentInset)}>
+        <PdpBuyBarRow
+          selectedColorId={selectedColorId}
+          onColorSelect={onColorSelect}
+          onAddToBag={onAddToBag}
+          hideColor
+          elevated={!docked}
+        />
+      </div>
     </div>
   ) : (
     <div
@@ -183,21 +145,12 @@ export function PdpBottomActions({
         playHeroEnter && "pdp-hero-bottom-enter",
       )}
     >
-      {variantRow}
-      {addToBagSlot}
+      {simpleBuyBar}
     </div>
   );
 
   return createPortal(
     <>
-      {isTabbyProduct && tabby?.adjustment ? (
-        <PdpToast
-          message={tabby.adjustment.message}
-          open={Boolean(tabby.adjustment)}
-          onClose={tabby.dismissAdjustment}
-        />
-      ) : null}
-
       <div
         aria-hidden
         className={cn(

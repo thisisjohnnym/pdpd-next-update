@@ -24,7 +24,6 @@ export function PdpTabbyVariantModule() {
     navigateToStyle,
     navigateToSize,
     setSelectedColorId,
-    adjustment,
   } = useTabbyVariant();
   const styleGroups = getTabbyStyleGroups();
 
@@ -41,17 +40,6 @@ export function PdpTabbyVariantModule() {
               <p className={cn("m-0 text-neutral-500", pdpType.micro)}>
                 Style first, then size and color options update to match.
               </p>
-              {adjustment ? (
-                <p
-                  role="status"
-                  className={cn(
-                    "m-0 mt-2 rounded-lg bg-neutral-100 px-3 py-2 text-neutral-700",
-                    pdpType.micro,
-                  )}
-                >
-                  {adjustment.message}
-                </p>
-              ) : null}
             </header>
 
             <div className="flex flex-col gap-4">

@@ -117,7 +117,7 @@ export function PdpGalleryDragZoomImage({
           active={isPending}
           durationMs={holdDurationMs}
           pressed={isPending}
-          className="pointer-events-auto touch-none"
+          className="pdp-drag-zoom-control pointer-events-auto touch-none"
         />
       </div>
 

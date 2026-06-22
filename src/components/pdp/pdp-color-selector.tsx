@@ -10,11 +10,20 @@ import {
   pdpColorAvailabilityLabel,
   pdpColorIsSelectable,
 } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { ColorSwatchCircle, ColorSwatchImage } from "./pdp-color-swatch";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
-import { pdpPressableIconClass, pdpVariantPillClass, pdpVariantPillFrostClass } from "./pdp-type";
+import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import {
+  pdpPressableIconClass,
+  pdpVariantPillBaseClass,
+  pdpVariantPillClass,
+  pdpVariantPillFrostBaseClass,
+  pdpVariantPillFrostClass,
+} from "./pdp-type";
 
 type PdpColorSelectorColor = PdpColor | TabbyColorOption;
 
@@ -38,7 +47,16 @@ type PdpColorSelectorProps = {
   stretch?: boolean;
   /** Frosted pill on docked hero buy bar */
   frost?: boolean;
+  /** Override pill height so it matches sibling bottom-bar controls */
+  heightClass?: string;
+  /** Square the pill corners to match a squared Add to bag button */
+  squared?: boolean;
+  /** Lift the inline pill with the floating buy-bar shadow (scrolled state) */
+  elevated?: boolean;
 };
+
+/** Floating buy-bar elevation — matches the AR button drop shadow */
+const FLOATING_PILL_SHADOW = "shadow-[0_4px_14px_rgba(0,0,0,0.12)]";
 
 function PdpColorDropup({
   colors,
@@ -47,11 +65,28 @@ function PdpColorDropup({
   onOpenChange,
   stretch = false,
   frost = false,
+  heightClass,
+  squared = false,
+  elevated = false,
 }: Pick<
   PdpColorSelectorProps,
-  "colors" | "selectedId" | "onSelect" | "onOpenChange" | "stretch" | "frost"
+  | "colors"
+  | "selectedId"
+  | "onSelect"
+  | "onOpenChange"
+  | "stretch"
+  | "frost"
+  | "heightClass"
+  | "squared"
+  | "elevated"
 >) {
   const [open, setOpen] = useState(false);
+  const { productId } = useActiveProduct();
+  const tabby = useOptionalTabbyVariant();
+  const isTabbyProduct = productId === "tabby" && Boolean(tabby);
+  const colorGroups = isTabbyProduct
+    ? getTabbyColorSheetGroups(tabby!.styleId, tabby!.size)
+    : undefined;
   const selected =
     colors.find((color) => color.id === selectedId) ?? colors[0];
 
@@ -75,6 +110,17 @@ function PdpColorDropup({
 
   const coachColor = splitCoachColorName(selected.name);
 
+  const hasShapeOverride = Boolean(heightClass) || squared;
+  const pillClass = hasShapeOverride
+    ? cn(
+        frost ? pdpVariantPillFrostBaseClass : pdpVariantPillBaseClass,
+        heightClass ?? "h-12",
+        squared ? "rounded-none" : "rounded-full",
+      )
+    : frost
+      ? pdpVariantPillFrostClass
+      : pdpVariantPillClass;
+
   return (
     <div className={cn("relative", stretch ? "min-w-0 w-full flex-1" : "shrink-0")}>
       <PdpColorSheet
@@ -83,6 +129,13 @@ function PdpColorDropup({
         open={open}
         onClose={() => setSheetOpen(false)}
         onSelect={handleSelect}
+        groups={colorGroups}
+        currentSize={isTabbyProduct ? tabby!.size : undefined}
+        onSelectAtSize={
+          isTabbyProduct
+            ? (colorId, size) => tabby!.selectColorAtSize(colorId, size)
+            : undefined
+        }
       />
 
       <button
@@ -92,8 +145,10 @@ function PdpColorDropup({
         aria-label={`Color: ${coachColor.full}, ${pdpColorAvailabilityLabel(selected.availability)}. Choose another color.`}
         onClick={() => setSheetOpen(!open)}
         className={cn(
-          frost ? pdpVariantPillFrostClass : pdpVariantPillClass,
+          pillClass,
+          "transition-[background-color,box-shadow] duration-300 ease-out",
           stretch && "w-full max-w-none",
+          elevated && FLOATING_PILL_SHADOW,
         )}
       >
         <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
@@ -130,6 +185,9 @@ export function PdpColorSelector({
   onOpenChange,
   stretch = false,
   frost = false,
+  heightClass,
+  squared = false,
+  elevated = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
@@ -143,6 +201,9 @@ export function PdpColorSelector({
         onOpenChange={onOpenChange}
         stretch={stretch}
         frost={frost}
+        heightClass={heightClass}
+        squared={squared}
+        elevated={elevated}
       />
     );
   }

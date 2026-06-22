@@ -80,7 +80,7 @@ export function PdpUgcVideoCard({
     >
       <div
         data-coverflow-layer
-        className="pdp-ugc-coverflow-layer relative aspect-[9/16] w-full overflow-hidden rounded-[14px] bg-black"
+        className="pdp-ugc-coverflow-layer relative aspect-[9/16] w-full overflow-hidden bg-black"
       >
         {mounted ? (
           <PdpGalleryHeroVideo

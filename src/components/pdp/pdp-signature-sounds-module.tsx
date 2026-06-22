@@ -70,7 +70,7 @@ const SignatureSoundHeroCard = memo(function SignatureSoundHeroCard({
       aria-label={active ? `Stop ${sound.label}` : sound.label}
       className="group relative block w-full overflow-hidden bg-black text-left [-webkit-tap-highlight-color:transparent]"
     >
-      <div className="relative aspect-[4/5] w-full">
+      <div className="relative aspect-[2/1] w-full">
         <Image
           src={sound.imageSrc}
           alt={sound.imageAlt}
@@ -87,7 +87,7 @@ const SignatureSoundHeroCard = memo(function SignatureSoundHeroCard({
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/5"
         />
 
-        <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-4 p-4">
+        <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-3 px-4 py-3">
           <p className="font-extended min-w-0 flex-1 text-sm tracking-[0.2px] text-white">
             {sound.label}
           </p>
@@ -129,7 +129,7 @@ export function PdpSignatureSoundsModule() {
         <GridItem mobile={12} desktop={24}>
           <PdpModuleHeading>{title}</PdpModuleHeading>
 
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2">
             {sounds.map((sound, index) => (
               <li key={sound.id}>
                 <SignatureSoundHeroCard

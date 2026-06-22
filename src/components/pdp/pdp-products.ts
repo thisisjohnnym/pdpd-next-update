@@ -34,7 +34,15 @@ export type PdpProductDetail = {
 
 export type PdpProductHero =
   | { kind: "video"; videoSrc: string; poster: string; alt: string }
-  | { kind: "image"; src: string; alt: string; objectPosition?: string };
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      objectPosition?: string;
+      /** "immersive" = full-viewport video-style · "static" = framed product shot */
+      format?: "immersive" | "static";
+      aspect?: "4/5" | "9/16";
+    };
 
 export type PdpProductConfig = {
   id: PdpProductId;
@@ -71,37 +79,51 @@ const PDP_PRODUCTS: Record<PdpProductId, PdpProductConfig> = {
     layout: "stripped",
     summary: {
       name: "Kira Crossbody",
-      subtitle: "A compact crossbody in smooth leather.",
+      subtitle: "Quilted Leather",
       price: "$298",
     },
     hero: {
       kind: "image",
-      src: "/images/gallery/tabby-on-model-back.png",
-      alt: "Kira Crossbody worn over the shoulder with a brown bomber jacket and plaid skirt",
-      objectPosition: "center 28%",
+      format: "static",
+      aspect: "4/5",
+      src: "/images/gallery/kira-crossbody-product-hero.jpg",
+      alt: "Kira Crossbody in black pebbled leather with gold C hardware and wristlet strap on a studio grey background",
+      objectPosition: "center 72%",
     },
     slides: [
       {
-        src: "/images/similar/tabby-chain-crossbody.png",
-        alt: "Kira Crossbody in black leather with a gold chain strap",
+        src: "/images/gallery/kira-crossbody-wristlet-lifestyle.jpg",
+        alt: "Model in a signature C monogram trench coat and jeans holding Kira Crossbody by the wristlet strap",
         objectPosition: "center center",
         aspect: "4/5",
       },
       {
-        src: "/images/gallery/tabby-patio-pink-dress.png",
-        alt: "Kira Crossbody styled with a dress for an evening out",
-        objectPosition: "center 30%",
+        src: "/images/gallery/kira-crossbody-on-model-trench.png",
+        alt: "Model in a signature C monogram trench coat wearing Kira Crossbody in black pebbled leather with gold C hardware",
+        objectPosition: "center center",
+        aspect: "4/5",
+      },
+      {
+        src: "/images/gallery/kira-crossbody-interior-open.jpg",
+        alt: "Open interior of Kira Crossbody showing zip compartments, card slots, and gold hardware",
+        objectPosition: "center center",
+        aspect: "4/5",
+      },
+      {
+        src: "/images/gallery/kira-crossbody-hardware-detail.jpg",
+        alt: "Close-up of Kira Crossbody gold zippers, Coach-engraved pulls, and strap clasp on black pebbled leather",
+        objectPosition: "center center",
         aspect: "4/5",
       },
     ],
     detail: {
       heading: "Details",
-      body: "A pared-back everyday crossbody — smooth leather, signature C hardware, and an adjustable strap for hands-free carry.",
+      body: "A pared-back everyday crossbody — quilted leather, signature C hardware, and a chain strap for hands-free carry.",
       specs: [
         { label: "Size", value: '8.5" W x 5" H x 2" D' },
-        { label: "Strap", value: "Adjustable crossbody" },
-        { label: "Material", value: "Smooth leather" },
-        { label: "Closure", value: "Zip top" },
+        { label: "Strap", value: "Chain crossbody" },
+        { label: "Material", value: "Quilted leather" },
+        { label: "Closure", value: "C clasp turn-lock" },
       ],
     },
   },
@@ -111,6 +133,10 @@ export function getPdpProduct(id: PdpProductId): PdpProductConfig {
   return PDP_PRODUCTS[id] ?? PDP_PRODUCTS[DEFAULT_PRODUCT_ID];
 }
 
+export function isStaticImageHero(hero: PdpProductHero): boolean {
+  return hero.kind === "image" && hero.format === "static";
+}
+
 /**
  * Maps a "Recently viewed" card id to a switchable product. Cards without an
  * entry stay on the current PDP (no demo data behind them yet).
@@ -118,3 +144,7 @@ export function getPdpProduct(id: PdpProductId): PdpProductConfig {
 const RECENTLY_VIEWED_PRODUCT_MAP: Record<string, PdpProductId> = {
   "kira-crossbody": "kira",
 };
+
+export function getRecentlyViewedProductId(cardId: string): PdpProductId | null {
+  return RECENTLY_VIEWED_PRODUCT_MAP[cardId] ?? null;
+}

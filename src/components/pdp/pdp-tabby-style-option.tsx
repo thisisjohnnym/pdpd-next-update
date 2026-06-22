@@ -46,8 +46,10 @@ export function PdpTabbyStyleOption({
       disabled={disabled}
       onClick={() => onSelect(style.id)}
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden rounded-xl text-left transition-colors",
-        selected ? "bg-neutral-100" : "bg-white active:bg-neutral-50",
+        "flex h-full w-full flex-col overflow-hidden rounded-xl border text-left transition-colors",
+        selected
+          ? "border-black bg-neutral-50"
+          : "border-neutral-200 bg-white active:bg-neutral-50",
         disabled && "cursor-not-allowed opacity-50",
         !disabled && pdpPressableClass,
       )}

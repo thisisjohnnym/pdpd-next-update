@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
@@ -14,28 +14,23 @@ import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
 } from "./pdp-carousel";
-import {
-  PDP_MORE_LIKE_THIS,
-  PDP_SHOPPING_ASSISTANT_PROMPT,
-} from "./pdp-data";
+import { PdpCoachAiSheet, type PdpCoachAiAsk } from "./pdp-coach-ai-sheet";
+import { PDP_MORE_LIKE_THIS } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PdpAiConciergePanel } from "./pdp-product-search-module";
-import { PdpAiInsightCard } from "./pdp-ai-insight-card";
 import { pdpType, pdpPressableSolidClass } from "./pdp-type";
-import { PdpTextLinkCta } from "./pdp-text-link-cta";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
-type PdpShoppingDiscoveryModuleProps = {
+type PdpMoreLikeThisModuleProps = {
   onAddToBag?: () => void;
 };
 
-/** More like this and shopping assistant — on-page discovery rails */
-export function PdpShoppingDiscoveryModule({
+/** More like this — on-page product discovery rail */
+export function PdpMoreLikeThisModule({
   onAddToBag,
-}: PdpShoppingDiscoveryModuleProps) {
-  const [assistantOpen, setAssistantOpen] = useState(false);
+}: PdpMoreLikeThisModuleProps) {
   const { isAdded, confirmAdd } = useTransientAddedSet();
 
   const handleAdd = (id: string) => {
@@ -51,7 +46,9 @@ export function PdpShoppingDiscoveryModule({
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <div className={cn("flex flex-col gap-6", pdpCarouselBlockClass)}>
-            <PdpModuleHeading>{PDP_MORE_LIKE_THIS.eyebrow}</PdpModuleHeading>
+            <PdpModuleHeading spacing="none">
+              {PDP_MORE_LIKE_THIS.eyebrow}
+            </PdpModuleHeading>
 
             <PdpRevealItem className={pdpCarouselBlockClass}>
               <div className={pdpCarouselScrollWrapClass}>
@@ -117,37 +114,61 @@ export function PdpShoppingDiscoveryModule({
                 </ul>
               </div>
             </PdpRevealItem>
+          </div>
+        </GridItem>
+      </PageGrid>
+    </section>
+  );
+}
 
-            {assistantOpen ? (
-              <PdpRevealItem delay={140}>
+/** Coach AI — on-page shopping assistant */
+export function PdpCoachAiModule({
+  spacious = false,
+}: {
+  /** Roomier vertical padding when placed inline in the gallery scroll */
+  spacious?: boolean;
+} = {}) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const [ask, setAsk] = useState<PdpCoachAiAsk | null>(null);
+
+  const handleAsk = useCallback((question: string, promptId: string | null) => {
+    setAsk((current) => ({
+      token: (current?.token ?? 0) + 1,
+      question,
+      promptId,
+    }));
+    setChatOpen(true);
+  }, []);
+
+  return (
+    <section
+      data-header-surface="light"
+      className={cn(
+        pdpModuleSectionClass({ variant: "white" }),
+        spacious && "py-28",
+      )}
+    >
+      <PageGrid fullWidth>
+        <GridItem mobile={12} desktop={24} className="min-w-0">
+          <PdpRevealItem>
+            <div className="flex flex-col gap-3">
+              <PdpModuleHeading spacing="none">Coach AI</PdpModuleHeading>
               <PdpAiConciergePanel
                 idSuffix="-discovery"
                 showTitle={false}
                 variant="flat"
-                onClose={() => setAssistantOpen(false)}
+                onAsk={handleAsk}
               />
-              </PdpRevealItem>
-            ) : (
-              <PdpRevealItem delay={140}>
-              <PdpAiInsightCard
-                variant="minimal"
-                title={PDP_SHOPPING_ASSISTANT_PROMPT.title}
-                body={PDP_SHOPPING_ASSISTANT_PROMPT.body}
-                footer={
-                  <PdpTextLinkCta
-                    type="button"
-                    onClick={() => setAssistantOpen(true)}
-                    className={pdpType.micro}
-                  >
-                    {PDP_SHOPPING_ASSISTANT_PROMPT.cta}
-                  </PdpTextLinkCta>
-                }
-              />
-              </PdpRevealItem>
-            )}
-          </div>
+            </div>
+          </PdpRevealItem>
         </GridItem>
       </PageGrid>
+
+      <PdpCoachAiSheet
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        ask={ask}
+      />
     </section>
   );
 }

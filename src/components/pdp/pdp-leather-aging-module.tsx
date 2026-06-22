@@ -252,6 +252,8 @@ export function PdpLeatherAgingModule({
 
   const showSimulatedWear = !stage.image;
   const previewStageIndex = stageIndexFromProgress(dragProgress, maxIndex);
+  const displayStageIndex = isDragging ? previewStageIndex : stageIndex;
+  const displayStage = stages[displayStageIndex]!;
 
   return (
     <section data-header-surface="light" className={panel.className} style={panel.style}>
@@ -426,6 +428,26 @@ export function PdpLeatherAgingModule({
             })}
           </div>
 
+          <div className="mt-3 text-left">
+            <p
+              className={cn(
+                "font-extended text-sm tracking-[0.2px] text-black",
+                labelMotionClass,
+              )}
+            >
+              {displayStage.timeline}
+            </p>
+            <p
+              className={cn(
+                pdpType.caption,
+                "mt-1 text-neutral-600",
+                labelMotionClass,
+              )}
+            >
+              {displayStage.summary}
+            </p>
+          </div>
+
           {careProducts.length ? (
             <div
               className={cn(
@@ -435,7 +457,7 @@ export function PdpLeatherAgingModule({
                   : "transition-[max-height,margin,opacity] duration-500 ease-out",
                 stageIndex === 0
                   ? "max-h-0 opacity-0"
-                  : "mt-1 max-h-56 pt-3 opacity-100",
+                  : "mt-3 max-h-56 opacity-100",
               )}
               aria-hidden={stageIndex === 0}
             >

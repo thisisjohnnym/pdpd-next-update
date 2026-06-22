@@ -31,7 +31,8 @@ export function pdpModuleSectionClass({
 
   return cn(
     "relative w-full shrink-0",
-    variant === "muted" ? "bg-neutral-50" : "bg-white",
+    // Temporarily flatten muted modules to white — everything on white for now
+    "bg-white",
     first && PDP_MODULE_STACK_FIRST_PADDING,
     !first && isStackRhythm && PDP_MODULE_STACK_PADDING,
     !first && rhythm === "break" && PDP_MODULE_BREAK_PADDING,

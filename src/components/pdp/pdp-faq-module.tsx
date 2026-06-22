@@ -6,7 +6,9 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { PDP_FAQ, type PdpFaqItem } from "./pdp-data";
+import { type PdpFaqItem } from "./pdp-data";
+import { useActiveProduct } from "./pdp-active-product-context";
+import { getPdpFaqContent } from "./pdp-faq-content";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PdpTextReveal } from "./pdp-text-reveal";
@@ -69,7 +71,8 @@ function FaqAccordionItem({
 
 /** FAQs — expandable answers at the bottom of the PDP */
 export function PdpFaqModule() {
-  const { title, items } = PDP_FAQ;
+  const { productId } = useActiveProduct();
+  const { title, items } = getPdpFaqContent(productId);
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (

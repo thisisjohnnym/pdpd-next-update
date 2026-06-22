@@ -15,16 +15,21 @@ import {
   pdpBottomSheetPanelClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
-import { PDP_GALLERY_MORE_PHOTOS } from "./pdp-data";
+import { PDP_GALLERY_MORE_PHOTOS, type PdpGalleryPhoto } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 
 type PdpGalleryPhotosSheetProps = {
+  photos?: PdpGalleryPhoto[];
   open: boolean;
   onClose: () => void;
 };
 
 /** Bottom sheet — full product photo grid */
-export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetProps) {
+export function PdpGalleryPhotosSheet({
+  photos = PDP_GALLERY_MORE_PHOTOS,
+  open,
+  onClose,
+}: PdpGalleryPhotosSheetProps) {
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
 
@@ -97,7 +102,7 @@ export function PdpGalleryPhotosSheet({ open, onClose }: PdpGalleryPhotosSheetPr
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
           <ul className="m-0 grid list-none grid-cols-2 gap-1.5 p-0">
-            {PDP_GALLERY_MORE_PHOTOS.map((photo) => (
+            {photos.map((photo) => (
               <li key={photo.id} className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
                 <Image
                   src={photo.src}
