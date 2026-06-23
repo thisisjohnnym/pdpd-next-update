@@ -11,7 +11,6 @@ import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
-import { PdpFaqModule } from "./pdp-faq-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
 import {
   PdpCoachAiModule,
@@ -171,10 +170,14 @@ const ECOMM_MODULE_CLASS = "w-full shrink-0";
 export function PdpStrippedView({
   product,
   onOpenReviews,
+  onReadAllReviews,
+  onWriteReview,
   onAddSimilarToBag,
 }: {
   product: PdpProductConfig;
   onOpenReviews?: () => void;
+  onReadAllReviews?: () => void;
+  onWriteReview?: () => void;
   onAddSimilarToBag?: () => void;
 }) {
   const slides = product.slides ?? [];
@@ -267,8 +270,8 @@ export function PdpStrippedView({
       >
         <PdpReviewsModule
           first={!detail}
-          onReadAll={onOpenReviews}
-          onWriteReview={onOpenReviews}
+          onReadAll={onReadAllReviews ?? onOpenReviews}
+          onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
         />
       </PdpScrollReveal>
       <PdpScrollReveal
@@ -294,14 +297,6 @@ export function PdpStrippedView({
         reserveMinHeight="24dvh"
       >
         <PdpRecentlyViewedCarousel />
-      </PdpScrollReveal>
-      <PdpScrollReveal
-        className={ECOMM_MODULE_CLASS}
-        surface="light"
-        lazyMount
-        reserveMinHeight="32dvh"
-      >
-        <PdpFaqModule />
       </PdpScrollReveal>
       <PdpScrollReveal
         className={ECOMM_MODULE_CLASS}

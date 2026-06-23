@@ -328,7 +328,7 @@ export function PdpHeroActionRail({
         className={cn(playHeroEnter && "pdp-social-rail-item")}
         icon="chat_bubble"
         label={PDP_COMMENTS_SUMMARY.label}
-        ariaLabel={`Comments, ${PDP_COMMENTS_SUMMARY.label} comments`}
+        ariaLabel={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
         onClick={onOpenReviews}
       />
       <RailAction
@@ -386,10 +386,10 @@ function StaticActionRowTrack({
           className={STATIC_SOCIAL_PILL_CLASS}
         >
           <MaterialIcon
-            name="thumb_up"
+            name="favorite"
             size={STATIC_PILL_ICON_SIZE}
             filled={liked}
-            className={cn(liked && "text-neutral-900")}
+            className={cn(liked && "text-[#FE2C55]")}
           />
           <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
             {PDP_LIKE_SUMMARY.label}
@@ -398,7 +398,7 @@ function StaticActionRowTrack({
 
         <button
           type="button"
-          aria-label={`Comments, ${PDP_COMMENTS_SUMMARY.label} comments`}
+          aria-label={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
           onClick={onOpenReviews}
           className={STATIC_SOCIAL_PILL_CLASS}
         >

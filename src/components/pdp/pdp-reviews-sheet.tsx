@@ -14,24 +14,32 @@ import {
   pdpBottomSheetViewportFrameClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
-import { PdpReviewCommentBox } from "./pdp-review-comment";
+import { PdpReviewCommentBox, type PdpReviewFeedFilter } from "./pdp-review-comment";
 import { PdpReviewsBody, usePdpReviewsComments } from "./pdp-reviews-body";
 import { useBodyScrollLock, useVisualViewportFrame } from "./use-visual-viewport-frame";
 
 type PdpReviewsSheetProps = {
   open: boolean;
   onClose: () => void;
+  /** Which feed tab opens in the sheet */
+  openFeedFilter?: PdpReviewFeedFilter;
 };
 
-/** Bottom sheet — full comments tray matching inline page layout */
-export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
+/** Bottom sheet — full reviews tray matching inline page layout */
+export function PdpReviewsSheet({
+  open,
+  onClose,
+  openFeedFilter = "reviews",
+}: PdpReviewsSheetProps) {
   const titleId = useId();
   const composerInputRef = useRef<HTMLInputElement>(null);
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [feedFilter, setFeedFilter] = useState<PdpReviewFeedFilter>(openFeedFilter);
   const viewportFrame = useVisualViewportFrame(open);
 
   const {
+    allReviews,
     allComments,
     userReplies,
     replyTarget,
@@ -47,14 +55,25 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
   useEffect(() => {
     if (open) {
       setHasBeenOpen(true);
+      setFeedFilter(openFeedFilter);
     }
-  }, [open]);
+  }, [open, openFeedFilter]);
 
   useEffect(() => {
     if (!open) {
       clearReplyTarget();
     }
   }, [open, clearReplyTarget]);
+
+  useEffect(() => {
+    if (!open || openFeedFilter !== "comments") {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      composerInputRef.current?.focus();
+    });
+  }, [open, openFeedFilter]);
 
   useBodyScrollLock(open);
 
@@ -77,9 +96,10 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
   }, [open, onClose]);
 
   const handleWriteReview = () => {
-    composerInputRef.current?.focus();
-    composerInputRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    setFeedFilter("reviews");
   };
+
+  const showComposer = feedFilter === "comments";
 
   if (!mounted) {
     return null;
@@ -106,7 +126,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
       >
         <button
           type="button"
-          aria-label="Close comments"
+          aria-label="Close reviews"
           className="absolute inset-0"
           onClick={onClose}
           tabIndex={open ? 0 : -1}
@@ -121,7 +141,7 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
             "relative z-[1] min-h-0",
           )}
         >
-          <div className={pdpBottomSheetHeaderClass}>
+          <div className={cn(pdpBottomSheetHeaderClass, "pb-3")}>
             <div className={pdpBottomSheetGrabHandleClass} />
             <button
               type="button"
@@ -134,13 +154,17 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4 pt-2">
               {hasBeenOpen ? (
                 <PdpReviewsBody
                   titleId={titleId}
                   onWriteReview={handleWriteReview}
+                  showFeedFilters
+                  feedFilter={feedFilter}
+                  onFeedFilterChange={setFeedFilter}
                   showReadAll={false}
                   showInlineComposer={false}
+                  allReviews={allReviews}
                   allComments={allComments}
                   userReplies={userReplies}
                   replyTarget={replyTarget}
@@ -151,9 +175,10 @@ export function PdpReviewsSheet({ open, onClose }: PdpReviewsSheetProps) {
               ) : null}
             </div>
 
-            {hasBeenOpen ? (
+            {hasBeenOpen && showComposer ? (
               <PdpReviewCommentBox
                 onPost={handlePostComment}
+                composerIntent="comment"
                 pinned
                 refocusAfterPost={false}
                 keyboardOpen={viewportFrame.keyboardLikelyOpen}

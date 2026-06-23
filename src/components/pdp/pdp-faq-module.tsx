@@ -69,11 +69,33 @@ function FaqAccordionItem({
   );
 }
 
-/** FAQs — expandable answers at the bottom of the PDP */
-export function PdpFaqModule() {
+/** Compact FAQ accordion — for sheet tabs and inline embeds */
+export function PdpFaqAccordion({ className }: { className?: string }) {
   const { productId } = useActiveProduct();
-  const { title, items } = getPdpFaqContent(productId);
+  const { items } = getPdpFaqContent(productId);
   const [openId, setOpenId] = useState<string | null>(null);
+
+  return (
+    <div className={cn("border border-neutral-200 bg-white px-4", className)}>
+      {items.map((item, index) => (
+        <FaqAccordionItem
+          key={item.id}
+          item={item}
+          revealDelay={index * 70}
+          open={openId === item.id}
+          onToggle={() =>
+            setOpenId((current) => (current === item.id ? null : item.id))
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+/** FAQs — expandable answers at the bottom of the PDP */
+function PdpFaqModule() {
+  const { productId } = useActiveProduct();
+  const { title } = getPdpFaqContent(productId);
 
   return (
     <section
@@ -84,19 +106,7 @@ export function PdpFaqModule() {
         <GridItem mobile={12} desktop={24}>
           <PdpModuleHeading>{title}</PdpModuleHeading>
 
-          <div className="border border-neutral-200 bg-white px-4">
-            {items.map((item, index) => (
-              <FaqAccordionItem
-                key={item.id}
-                item={item}
-                revealDelay={index * 70}
-                open={openId === item.id}
-                onToggle={() =>
-                  setOpenId((current) => (current === item.id ? null : item.id))
-                }
-              />
-            ))}
-          </div>
+          <PdpFaqAccordion />
         </GridItem>
       </PageGrid>
     </section>

@@ -2737,7 +2737,7 @@ export type PdpUgcVideo = {
 
 /** Swipeable UGC clips in the gallery — TikTok-style vertical videos */
 export const PDP_UGC_VIDEO_CAROUSEL = {
-  title: "On TikTok",
+  title: "Carried by the community",
   followCta: {
     label: "Follow us on TikTok",
     href: "https://www.tiktok.com/@coach",
@@ -3009,10 +3009,23 @@ export function getCommentAuthorAvatar(author: string) {
   return PDP_COMMENT_AUTHOR_AVATARS[author.trim()];
 }
 
+export type PdpCustomerComment = {
+  id: string;
+  quote: string;
+  author: string;
+  date: string;
+  verified?: boolean;
+  photos?: PdpReviewPhoto[];
+  likes: number;
+};
+
 export type PdpFeaturedReview = {
   id: string;
-  rating: number;
+  rating?: number;
+  title?: string;
+  body?: string;
   quote: string;
+  recommendTags?: string[];
   author: string;
   date: string;
   verified?: boolean;
@@ -3022,24 +3035,12 @@ export type PdpFeaturedReview = {
 
 export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
-    id: "maren",
-    rating: 5,
-    quote: "me walking out with this bag 😭",
-    author: "Maren K.",
-    date: "Oct 12, 2025",
-    verified: true,
-    likes: 31_400,
-    photos: [
-      {
-        src: "/images/reviews/comment-cat.gif",
-        alt: "Nyan Cat uploaded with comment",
-      },
-    ],
-  },
-  {
     id: "jules",
     rating: 5,
+    title: "My go-to weekend bag",
+    body: "Took this on a long weekend — crossbody during travel, shoulder for dinners. The strap adjusts easily and the interior fits everything I need without looking bulky.",
     quote: "Weekend trip tested. Crossbody all day, zero issues 💯",
+    recommendTags: ["Weekend travel", "Strap versatility", "Everyday carry"],
     author: "Jules T.",
     date: "Sep 28, 2025",
     verified: true,
@@ -3048,7 +3049,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "priya",
     rating: 5,
+    title: "Even prettier in person",
+    body: "The pebbled leather has more depth in real life than the product photos show. The C clasp feels weighty and the quilt lines are crisp. I've worn it crossbody for two weeks straight.",
     quote: "The leather in person >>> photos 😍",
+    recommendTags: ["True to photos", "Leather quality", "Gift-worthy"],
     author: "Priya S.",
     date: "Sep 14, 2025",
     verified: true,
@@ -3063,7 +3067,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "elena",
     rating: 4,
+    title: "Beautiful hardware, snug pocket",
+    body: "The C clasp feels substantial and satisfying every time I open the bag. My only wish is a slightly roomier interior pocket, but the overall quality makes it an easy recommend.",
     quote: "C clasp feels so good. Pocket could be bigger but still obsessed 🤍",
+    recommendTags: ["Hardware quality", "Compact size"],
     author: "Elena R.",
     date: "Aug 30, 2025",
     likes: 19,
@@ -3071,7 +3078,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "danielle",
     rating: 5,
+    title: "Sleek but surprisingly spacious",
+    body: "Phone, wallet, keys, and sunglasses all fit without the bag losing its shape. The silhouette stays clean even when fully packed.",
     quote: "Phone, wallet, keys, sunglasses — all in, still looks sleek 👏",
+    recommendTags: ["Everyday carry", "Organization"],
     author: "Danielle M.",
     date: "Aug 18, 2025",
     likes: 34,
@@ -3079,7 +3089,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "sofia",
     rating: 5,
+    title: "The black goes with everything",
+    body: "Soft leather, easy to dress up or down. I reach for this more than any other bag in my closet right now.",
     quote: "Black goes with literally everything 🖤 soft leather too",
+    recommendTags: ["Versatile styling", "Soft leather"],
     author: "Sofia L.",
     date: "Jul 22, 2025",
     likes: 21,
@@ -3087,7 +3100,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "hannah",
     rating: 5,
+    title: "Worth the treat-yourself moment",
+    body: "Packaging felt premium from the moment it arrived. The cherry charm pairing sold me — this has become my default going-out bag.",
     quote: "Treat yourself purchase, zero regrets. Cherry charm = chef's kiss 🍒",
+    recommendTags: ["Gift-worthy", "Charm styling", "Premium feel"],
     author: "Hannah W.",
     date: "Jul 9, 2025",
     verified: true,
@@ -3096,7 +3112,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "taylor",
     rating: 4,
+    title: "Classic Tabby, easy strap swap",
+    body: "Shoulder to crossbody takes seconds. Hardware feels durable and the leather has held up well through daily use.",
     quote: "Classic Tabby vibes, easy strap swap shoulder ↔ crossbody 👌",
+    recommendTags: ["Strap versatility", "Durability"],
     author: "Taylor B.",
     date: "Jun 25, 2025",
     likes: 15,
@@ -3104,7 +3123,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "nicole",
     rating: 5,
+    title: "Perfect tote alternative",
+    body: "I downsized from a larger tote and this carries errands without feeling too small. The structure keeps everything easy to find.",
     quote: "Downsized from a tote and this is the one for errands 🙌",
+    recommendTags: ["Everyday carry", "Compact size"],
     author: "Nicole A.",
     date: "Jun 3, 2025",
     likes: 38,
@@ -3112,7 +3134,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "rachel",
     rating: 5,
+    title: "Gold on black is stunning",
+    body: "The hardware against the black leather photographs beautifully and looks even better in person. Gets compliments every time I wear it.",
     quote: "Gold hardware on black leather? Stunning ✨",
+    recommendTags: ["Hardware quality", "Statement piece"],
     author: "Rachel P.",
     date: "May 19, 2025",
     likes: 31,
@@ -3120,7 +3145,10 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "amanda",
     rating: 4,
+    title: "Beautiful unboxing, perfect strap drop",
+    body: "Arrived thoughtfully packaged. At 5'6\" the strap length sits exactly where I want it for shoulder carry.",
     quote: "Packaged beautifully, strap length is perfect on me (5'6\") 📦",
+    recommendTags: ["Strap fit", "Premium packaging"],
     author: "Amanda C.",
     date: "May 2, 2025",
     likes: 12,
@@ -3128,10 +3156,59 @@ export const PDP_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "lily",
     rating: 5,
+    title: "Brunch to dinner, one bag",
+    body: "Compact enough for daytime but polished enough for evening. This replaced two bags in my rotation.",
     quote: "Default going-out bag now. Coffee run to dinner 🥂",
+    recommendTags: ["Day to night", "Versatile styling"],
     author: "Lily H.",
     date: "Apr 14, 2025",
     likes: 26,
+  },
+];
+
+/** Reddit-style community comments — separate from formal buyer reviews */
+export const PDP_CUSTOMER_COMMENTS: PdpCustomerComment[] = [
+  {
+    id: "maren",
+    quote: "me walking out with this bag 😭",
+    author: "Maren K.",
+    date: "Oct 12, 2025",
+    verified: true,
+    likes: 31_400,
+    photos: [
+      {
+        src: "/images/reviews/comment-cat.gif",
+        alt: "Nyan Cat uploaded with comment",
+      },
+    ],
+  },
+  {
+    id: "devon",
+    quote: "the cherry charm with the silver tabby >>> 😭",
+    author: "Devon R.",
+    date: "Oct 5, 2025",
+    likes: 8_420,
+  },
+  {
+    id: "alex",
+    quote: "why is this sold out in black every time",
+    author: "Alex T.",
+    date: "Sep 30, 2025",
+    likes: 156,
+  },
+  {
+    id: "morgan",
+    quote: "manifesting this for my birthday 🎂",
+    author: "Morgan L.",
+    date: "Sep 22, 2025",
+    likes: 89,
+  },
+  {
+    id: "jordan",
+    quote: "quilted tabby or pebbled — help me choose",
+    author: "Jordan P.",
+    date: "Sep 18, 2025",
+    likes: 42,
   },
 ];
 
@@ -3144,8 +3221,8 @@ export type PdpReviewReply = {
   verified?: boolean;
 };
 
-/** Nested replies keyed by parent review id */
-export const PDP_REVIEW_REPLIES: Record<string, PdpReviewReply[]> = {
+/** Nested replies keyed by parent comment id */
+export const PDP_COMMENT_REPLIES: Record<string, PdpReviewReply[]> = {
   maren: [
     {
       id: "maren-r1",
@@ -3236,6 +3313,7 @@ const PDP_FEATURED_REVIEWS = PDP_CUSTOMER_REVIEWS.slice(0, 2);
 export const PDP_REVIEWS_SUMMARY = {
   average: 4.8,
   count: 128,
+  recommendPercent: 94,
 } as const;
 
 export const PDP_LIKE_SUMMARY = {

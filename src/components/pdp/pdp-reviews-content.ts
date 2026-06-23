@@ -1,8 +1,10 @@
 import {
+  PDP_COMMENT_REPLIES,
+  PDP_CUSTOMER_COMMENTS,
   PDP_CUSTOMER_REVIEWS,
-  PDP_REVIEW_REPLIES,
   PDP_REVIEWS_AI_SUMMARY,
   PDP_UGC_REVIEW_STORIES,
+  type PdpCustomerComment,
   type PdpFeaturedReview,
   type PdpReviewReply,
   type PdpUgcStory,
@@ -11,31 +13,20 @@ import type { PdpProductId } from "./pdp-products";
 
 export type PdpReviewsContent = {
   customerReviews: PdpFeaturedReview[];
-  reviewReplies: Record<string, PdpReviewReply[]>;
+  customerComments: PdpCustomerComment[];
+  commentReplies: Record<string, PdpReviewReply[]>;
   aiSummaryBody: string;
   ugcStories: PdpUgcStory[];
 };
 
 const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
-    id: "maren",
-    rating: 5,
-    quote: "me walking out with this bag 😭",
-    author: "Maren K.",
-    date: "Oct 12, 2025",
-    verified: true,
-    likes: 31_400,
-    photos: [
-      {
-        src: "/images/reviews/comment-cat.gif",
-        alt: "Nyan Cat uploaded with comment",
-      },
-    ],
-  },
-  {
     id: "jules",
     rating: 5,
+    title: "Perfect coffee-run size",
+    body: "Weekend errands tested — wristlet or crossbody, zero bulk. The pebbled leather feels polished without being fussy.",
     quote: "Weekend errands tested. Wristlet or crossbody, zero bulk 💯",
+    recommendTags: ["Everyday carry", "Wristlet", "Compact size"],
     author: "Jules T.",
     date: "Sep 28, 2025",
     verified: true,
@@ -44,7 +35,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "priya",
     rating: 5,
+    title: "Pebbled leather exceeds photos",
+    body: "The texture and gold C hardware read much richer in person. Fits my phone, card case, and keys with room to spare.",
     quote: "The pebbled leather in person >>> photos 😍",
+    recommendTags: ["True to photos", "Leather quality", "Organization"],
     author: "Priya S.",
     date: "Sep 14, 2025",
     verified: true,
@@ -59,7 +53,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "elena",
     rating: 4,
+    title: "Premium zippers, smart layout",
+    body: "Gold zippers feel smooth and premium. Interior layout fits phone plus card case easily for quick errands.",
     quote: "Gold zippers feel premium. Fits phone + card case easily 🤍",
+    recommendTags: ["Hardware quality", "Organization"],
     author: "Elena R.",
     date: "Aug 30, 2025",
     likes: 19,
@@ -67,7 +64,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "danielle",
     rating: 5,
+    title: "Compact but never cramped",
+    body: "Phone, wallet, and keys all fit without the bag losing its shape. Easy hands-free carry all day.",
     quote: "Phone, wallet, keys — compact but never cramped 👏",
+    recommendTags: ["Everyday carry", "Compact size"],
     author: "Danielle M.",
     date: "Aug 18, 2025",
     likes: 34,
@@ -75,7 +75,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "sofia",
     rating: 5,
+    title: "Black goes with everything",
+    body: "The wristlet drop is comfortable and the leather softens nicely. My default bag for casual days.",
     quote: "Black goes with literally everything 🖤 love the wristlet",
+    recommendTags: ["Versatile styling", "Soft leather"],
     author: "Sofia L.",
     date: "Jul 22, 2025",
     likes: 21,
@@ -83,7 +86,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "hannah",
     rating: 5,
+    title: "Zero regrets treat-yourself buy",
+    body: "Perfect coffee-run size that still feels elevated. The gold hardware against black pebbled leather is chef's kiss.",
     quote: "Treat yourself purchase, zero regrets. Perfect coffee-run size ☕",
+    recommendTags: ["Gift-worthy", "Everyday carry"],
     author: "Hannah W.",
     date: "Jul 9, 2025",
     verified: true,
@@ -92,7 +98,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "taylor",
     rating: 4,
+    title: "Classic Coach, easy carry",
+    body: "Hardware feels familiar and well-made. Hands-free crossbody carry makes this my go-to for errands.",
     quote: "Classic Coach hardware, easy hands-free carry 👌",
+    recommendTags: ["Everyday carry", "Durability"],
     author: "Taylor B.",
     date: "Jun 25, 2025",
     likes: 15,
@@ -100,7 +109,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "nicole",
     rating: 5,
+    title: "Downsized and never looked back",
+    body: "Moved from a larger tote to Kira for errands. Right size for essentials without feeling mini.",
     quote: "Downsized from a tote and this is the one for errands 🙌",
+    recommendTags: ["Compact size", "Everyday carry"],
     author: "Nicole A.",
     date: "Jun 3, 2025",
     likes: 38,
@@ -108,7 +120,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "rachel",
     rating: 5,
+    title: "Gold hardware stunner",
+    body: "The gold C against black leather photographs beautifully and gets compliments in person too.",
     quote: "Gold hardware on black leather? Stunning ✨",
+    recommendTags: ["Hardware quality", "Statement piece"],
     author: "Rachel P.",
     date: "May 19, 2025",
     likes: 31,
@@ -116,7 +131,10 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "amanda",
     rating: 4,
+    title: "Beautiful packaging, ideal wristlet drop",
+    body: "Arrived thoughtfully packaged. At 5'6\" the wristlet length sits exactly where I want it.",
     quote: "Packaged beautifully, wristlet drop is perfect on me (5'6\") 📦",
+    recommendTags: ["Premium packaging", "Strap fit"],
     author: "Amanda C.",
     date: "May 2, 2025",
     likes: 12,
@@ -124,14 +142,55 @@ const KIRA_CUSTOMER_REVIEWS: PdpFeaturedReview[] = [
   {
     id: "lily",
     rating: 5,
+    title: "Brunch to dinner bag",
+    body: "Default going-out bag now — compact enough for daytime, polished enough for dinner.",
     quote: "Default going-out bag now. Brunch to dinner 🥂",
+    recommendTags: ["Day to night", "Versatile styling"],
     author: "Lily H.",
     date: "Apr 14, 2025",
     likes: 26,
   },
 ];
 
-const KIRA_REVIEW_REPLIES: Record<string, PdpReviewReply[]> = {
+const KIRA_CUSTOMER_COMMENTS: PdpCustomerComment[] = [
+  {
+    id: "maren",
+    quote: "me walking out with this bag 😭",
+    author: "Maren K.",
+    date: "Oct 12, 2025",
+    verified: true,
+    likes: 31_400,
+    photos: [
+      {
+        src: "/images/reviews/comment-cat.gif",
+        alt: "Nyan Cat uploaded with comment",
+      },
+    ],
+  },
+  {
+    id: "devon",
+    quote: "gold hardware on the wristlet is everything ✨",
+    author: "Devon R.",
+    date: "Oct 5, 2025",
+    likes: 6_200,
+  },
+  {
+    id: "alex",
+    quote: "need the black pebbled back in stock pls",
+    author: "Alex T.",
+    date: "Sep 30, 2025",
+    likes: 124,
+  },
+  {
+    id: "morgan",
+    quote: "coffee run to dinner in one bag 🥂",
+    author: "Morgan L.",
+    date: "Sep 22, 2025",
+    likes: 73,
+  },
+];
+
+const KIRA_COMMENT_REPLIES: Record<string, PdpReviewReply[]> = {
   maren: [
     {
       id: "maren-r1",
@@ -255,14 +314,16 @@ const KIRA_UGC_REVIEW_STORIES: PdpUgcStory[] = [
 
 const TABBY_REVIEWS_CONTENT: PdpReviewsContent = {
   customerReviews: PDP_CUSTOMER_REVIEWS,
-  reviewReplies: PDP_REVIEW_REPLIES,
+  customerComments: PDP_CUSTOMER_COMMENTS,
+  commentReplies: PDP_COMMENT_REPLIES,
   aiSummaryBody: PDP_REVIEWS_AI_SUMMARY.body,
   ugcStories: PDP_UGC_REVIEW_STORIES,
 };
 
 const KIRA_REVIEWS_CONTENT: PdpReviewsContent = {
   customerReviews: KIRA_CUSTOMER_REVIEWS,
-  reviewReplies: KIRA_REVIEW_REPLIES,
+  customerComments: KIRA_CUSTOMER_COMMENTS,
+  commentReplies: KIRA_COMMENT_REPLIES,
   aiSummaryBody:
     "Many note that Kira Crossbody is a compact, well-crafted everyday bag that balances structure with ease. The pebbled leather and gold C hardware read polished without feeling fussy.",
   ugcStories: KIRA_UGC_REVIEW_STORIES,

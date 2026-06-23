@@ -39,7 +39,6 @@ import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpShopTheLookSheet } from "./pdp-shop-the-look-sheet";
 import { PdpLeatherAgingModule } from "./pdp-leather-aging-module";
-import { PdpFaqModule } from "./pdp-faq-module";
 import { PdpBagStoriesModule } from "./pdp-bag-stories-module";
 import { PdpStrapSimulationModule } from "./pdp-strap-simulation-module";
 import { PdpWeightFeelModule } from "./pdp-weight-feel-module";
@@ -616,6 +615,8 @@ function PdpGalleryVideoSlide({
 
 export function PdpGalleryView({
   onOpenReviews,
+  onReadAllReviews,
+  onWriteReview,
   onOpenArTryOn,
   onAddSimilarToBag,
   onAddBundle,
@@ -626,6 +627,8 @@ export function PdpGalleryView({
   omitHero = false,
 }: {
   onOpenReviews?: () => void;
+  onReadAllReviews?: () => void;
+  onWriteReview?: () => void;
   onOpenArTryOn?: () => void;
   onAddSimilarToBag?: () => void;
   onAddBundle?: (payload: PdpBundleAddPayload) => void;
@@ -868,8 +871,8 @@ export function PdpGalleryView({
           modules size to their own content. */}
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="40dvh">
         <PdpReviewsModule
-          onReadAll={onOpenReviews}
-          onWriteReview={onOpenReviews}
+          onReadAll={onReadAllReviews ?? onOpenReviews}
+          onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
         />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
@@ -889,9 +892,6 @@ export function PdpGalleryView({
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="24dvh">
         <PdpRecentlyViewedCarousel />
-      </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
-        <PdpFaqModule />
       </PdpScrollReveal>
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="28dvh">
         <PdpCoachPremiumModule />

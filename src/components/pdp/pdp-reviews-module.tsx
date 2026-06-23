@@ -15,13 +15,14 @@ type PdpReviewsModuleProps = {
   first?: boolean;
 };
 
-/** Inline reviews — summary, UGC, and social-style comments on the page */
+/** Inline reviews — same tabbed layout as the sheet tray */
 export function PdpReviewsModule({
   onReadAll,
   onWriteReview,
   first = true,
 }: PdpReviewsModuleProps) {
   const {
+    allReviews,
     allComments,
     userReplies,
     replyTarget,
@@ -39,9 +40,12 @@ export function PdpReviewsModule({
         <GridItem mobile={12} desktop={24} className="min-w-0">
           <PdpRevealItem>
             <PdpReviewsBody
-              commentLimit={PAGE_REVIEW_COUNT}
+              reviewLimit={PAGE_REVIEW_COUNT}
               onReadAll={onReadAll}
               onWriteReview={onWriteReview}
+              showFeedFilters
+              showInlineComposer
+              allReviews={allReviews}
               allComments={allComments}
               userReplies={userReplies}
               replyTarget={replyTarget}

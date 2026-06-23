@@ -72,6 +72,9 @@ function PdpSocialViewInner() {
   );
   const [navOpen, setNavOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
+  const [reviewsFeedFilter, setReviewsFeedFilter] = useState<
+    "reviews" | "comments"
+  >("reviews");
   const [bagSheetOpen, setBagSheetOpen] = useState(false);
   const [strapOptionsOpen, setStrapOptionsOpen] = useState(false);
   const [comparePickerOpen, setComparePickerOpen] = useState(false);
@@ -116,6 +119,11 @@ function PdpSocialViewInner() {
     setBagSheetOpen(true);
   };
 
+  const openReviews = (feed: "reviews" | "comments" = "reviews") => {
+    setReviewsFeedFilter(feed);
+    setReviewsOpen(true);
+  };
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
     setSelectedColorId(getDefaultColorId(productId));
@@ -150,14 +158,14 @@ function PdpSocialViewInner() {
           src={product.hero.src}
           alt={product.hero.alt}
           objectPosition={product.hero.objectPosition}
-          onOpenReviews={() => setReviewsOpen(true)}
+          onOpenReviews={() => openReviews("comments")}
         />
       ) : !isStaticHero && !tabbyColorHero && product.hero.kind === "video" ? (
         <PdpGalleryHero
           videoSrc={product.hero.videoSrc}
           poster={product.hero.poster}
           alt={product.hero.alt}
-          onOpenReviews={() => setReviewsOpen(true)}
+          onOpenReviews={() => openReviews("comments")}
           onOpenArTryOn={() => setArTryOnOpen(true)}
         />
       ) : null}
@@ -170,19 +178,21 @@ function PdpSocialViewInner() {
               objectPosition: getTabbyColorHeroObjectPosition(tabbyColorHero.id),
               aspect: "4/5",
             }}
-            onOpenReviews={() => setReviewsOpen(true)}
+            onOpenReviews={() => openReviews("comments")}
             onOpenArTryOn={() => setArTryOnOpen(true)}
           />
         ) : isStaticHero && product.hero.kind === "image" ? (
           <PdpStaticHero
             hero={product.hero}
-            onOpenReviews={() => setReviewsOpen(true)}
+            onOpenReviews={() => openReviews("comments")}
           />
         ) : null}
         {isStripped ? (
           <PdpStrippedView
             product={product}
-            onOpenReviews={() => setReviewsOpen(true)}
+            onOpenReviews={() => openReviews("comments")}
+            onReadAllReviews={() => openReviews("reviews")}
+            onWriteReview={() => openReviews("reviews")}
             onAddSimilarToBag={() => {
               setBagCount((count) => count + 1);
             }}
@@ -190,7 +200,9 @@ function PdpSocialViewInner() {
         ) : (
           <PdpGalleryView
             omitHero
-            onOpenReviews={() => setReviewsOpen(true)}
+            onOpenReviews={() => openReviews("comments")}
+            onReadAllReviews={() => openReviews("reviews")}
+            onWriteReview={() => openReviews("reviews")}
             onAddSimilarToBag={() => {
               setBagCount((count) => count + 1);
             }}
@@ -209,7 +221,11 @@ function PdpSocialViewInner() {
         suppressed={chromeSuppressed}
       />
       <PdpNavMenu open={navOpen} onClose={() => setNavOpen(false)} />
-      <PdpReviewsSheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} />
+      <PdpReviewsSheet
+        open={reviewsOpen}
+        onClose={() => setReviewsOpen(false)}
+        openFeedFilter={reviewsFeedFilter}
+      />
       {!isStripped ? (
         <PdpArTryOnSheet
           open={arTryOnOpen}

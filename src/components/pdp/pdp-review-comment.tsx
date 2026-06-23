@@ -17,6 +17,7 @@ import { PdpReviewLikeButton } from "./pdp-review-like-button";
 import { pdpPressableClass, pdpType } from "./pdp-type";
 import {
   getCommentAuthorAvatar,
+  type PdpCustomerComment,
   type PdpFeaturedReview,
   type PdpReviewReply,
 } from "./pdp-data";
@@ -67,11 +68,24 @@ export type PdpReplyTarget = {
 
 export type PdpReviewCommentData = Pick<
   PdpFeaturedReview,
-  "id" | "quote" | "author" | "date" | "verified" | "photos" | "likes"
+  | "id"
+  | "quote"
+  | "author"
+  | "date"
+  | "verified"
+  | "photos"
+  | "likes"
+  | "title"
+  | "body"
+  | "recommendTags"
 > & {
   rating?: number;
   replies?: PdpReviewReply[];
 };
+
+function isFormalReview(comment: PdpReviewCommentData) {
+  return comment.rating != null;
+}
 
 const INITIAL_VISIBLE_REPLIES = 2;
 
@@ -90,6 +104,96 @@ function isAnimatedCommentMedia(src: string) {
 
 function isCoachBrandAuthor(author: string) {
   return author.trim().toLowerCase() === "coach";
+}
+
+function isProductReviewPhoto(src: string) {
+  return !isAnimatedCommentMedia(src);
+}
+
+export type PdpReviewFeedFilter = "reviews" | "comments" | "questions" | "photos";
+
+const REVIEW_FEED_FILTERS: { id: PdpReviewFeedFilter; label: string }[] = [
+  { id: "reviews", label: "Reviews" },
+  { id: "comments", label: "Comments" },
+  { id: "questions", label: "Questions" },
+  { id: "photos", label: "Photos" },
+];
+
+function hasCoachReply(comment: PdpReviewCommentData) {
+  return (
+    comment.replies?.some((reply) => isCoachBrandAuthor(reply.author)) ?? false
+  );
+}
+
+export function filterCommentsByFeedFilter(
+  reviews: PdpReviewCommentData[],
+  comments: PdpReviewCommentData[],
+  filter: PdpReviewFeedFilter,
+): PdpReviewCommentData[] {
+  switch (filter) {
+    case "reviews":
+      return sortCommentsByLikes(reviews);
+    case "comments":
+      return sortCommentsByLikes(comments);
+    case "questions":
+      return sortCommentsByLikes(comments.filter((comment) => hasCoachReply(comment)));
+    case "photos":
+      return sortCommentsByLikes([
+        ...reviews.filter((comment) => Boolean(comment.photos?.length)),
+        ...comments.filter((comment) => Boolean(comment.photos?.length)),
+      ]);
+  }
+}
+
+export function feedFilterSupportsComposer(filter: PdpReviewFeedFilter) {
+  return filter === "comments";
+}
+
+type PdpReviewFeedFilterBarProps = {
+  value: PdpReviewFeedFilter;
+  onChange: (filter: PdpReviewFeedFilter) => void;
+  className?: string;
+};
+
+/** Sheet-only filters — reviews, comments, questions, and photos */
+export function PdpReviewFeedFilterBar({
+  value,
+  onChange,
+  className,
+}: PdpReviewFeedFilterBarProps) {
+  return (
+    <div
+      className={cn("-mx-1 overflow-x-auto overscroll-x-contain", className)}
+      role="tablist"
+      aria-label="Filter reviews"
+    >
+      <div className="flex w-max min-w-full gap-2 px-1 pb-1">
+        {REVIEW_FEED_FILTERS.map((filter) => {
+          const active = value === filter.id;
+
+          return (
+            <button
+              key={filter.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => onChange(filter.id)}
+              className={cn(
+                "shrink-0 rounded-full border px-3 py-1.5 transition-colors",
+                pdpType.micro,
+                pdpPressableClass,
+                active
+                  ? "border-black bg-black text-white"
+                  : "border-neutral-200 bg-white text-black active:bg-neutral-50",
+              )}
+            >
+              {filter.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function getCommentAuthorInitials(author: string) {
@@ -322,17 +426,19 @@ function CommentRow({
         ) : null}
 
         <div className="mt-1.5 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onReply}
-            className={cn(
-              "font-medium text-neutral-600 active:text-black",
-              pdpType.micro,
-              pdpPressableClass,
-            )}
-          >
-            Reply
-          </button>
+          {onReply ? (
+            <button
+              type="button"
+              onClick={onReply}
+              className={cn(
+                "font-medium text-neutral-600 active:text-black",
+                pdpType.micro,
+                pdpPressableClass,
+              )}
+            >
+              Reply
+            </button>
+          ) : null}
           <span className={`text-neutral-400 ${pdpType.micro}`}>
             {formatRelativeCommentDate(date)}
           </span>
@@ -391,6 +497,134 @@ function formatRelativeCommentDate(dateLabel: string) {
   return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function formatFormalReviewDate(dateLabel: string) {
+  if (dateLabel === "now") {
+    return "Just now";
+  }
+
+  const parsed = new Date(dateLabel);
+  if (Number.isNaN(parsed.getTime())) {
+    return dateLabel;
+  }
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+type FormalReviewCardProps = {
+  comment: PdpReviewCommentData;
+  variant: "compact" | "full";
+};
+
+/** Structured buyer review — title, description, stars, and recommend tags */
+function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const description = comment.body ?? comment.quote;
+  const clampLines = variant === "compact" ? 3 : expanded ? undefined : 5;
+  const canExpand =
+    variant === "full" && description.length > 160 && !expanded;
+  const photo = comment.photos?.find(
+    (entry) => !isAnimatedCommentMedia(entry.src),
+  );
+
+  return (
+    <div className="flex gap-3 py-4">
+      <CommentAvatar author={comment.author} />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+              <p className={cn("text-black", pdpType.label)}>{comment.author}</p>
+              {comment.verified ? (
+                <MaterialIcon
+                  name="verified"
+                  size={18}
+                  filled
+                  className="shrink-0 text-[#0095F6]"
+                  style={{ fontSize: 11 }}
+                  aria-label="Verified buyer"
+                  ariaHidden={false}
+                />
+              ) : null}
+            </div>
+            <p className={cn("mt-0.5 text-neutral-500", pdpType.micro)}>
+              {comment.verified ? "Verified buyer · " : null}
+              {formatFormalReviewDate(comment.date)}
+            </p>
+          </div>
+
+          <PdpReviewLikeButton
+            initialLikes={comment.likes}
+            layout="stacked"
+            className="shrink-0"
+          />
+        </div>
+
+        {comment.rating != null ? (
+          <div className="mt-2">
+            <PdpStarRating rating={comment.rating} size={18} />
+          </div>
+        ) : null}
+
+        <p
+          className={cn(
+            "mt-2 text-black",
+            pdpType.body,
+            clampLines === 3 && "line-clamp-3",
+            clampLines === 5 && "line-clamp-5",
+          )}
+        >
+          {description}
+          {canExpand ? (
+            <>
+              {" "}
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className={cn("text-neutral-500", pdpPressableClass)}
+              >
+                Read more
+              </button>
+            </>
+          ) : null}
+        </p>
+
+        {comment.recommendTags?.length ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {comment.recommendTags.map((tag) => (
+              <span
+                key={tag}
+                className={cn(
+                  "rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-neutral-700",
+                  pdpType.micro,
+                )}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        {photo ? (
+          <div className="relative mt-3 aspect-[4/3] w-full max-w-[220px] overflow-hidden bg-neutral-100">
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              className={cn("object-cover object-center", pdpCarouselImageClass)}
+              sizes="220px"
+            />
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /** Instagram-style comment — username above text, optional reply thread */
 export function PdpReviewComment({
   comment,
@@ -427,18 +661,22 @@ export function PdpReviewComment({
 
   return (
     <article>
-      <CommentRow
-        author={comment.author}
-        quote={comment.quote}
-        date={comment.date}
-        verified={comment.verified}
-        likes={comment.likes}
-        photos={comment.photos}
-        variant={variant}
-        onReply={handleReplyToComment}
-      />
+      {isFormalReview(comment) ? (
+        <FormalReviewCard comment={comment} variant={variant} />
+      ) : (
+        <CommentRow
+          author={comment.author}
+          quote={comment.quote}
+          date={comment.date}
+          verified={comment.verified}
+          likes={comment.likes}
+          photos={comment.photos}
+          variant={variant}
+          onReply={handleReplyToComment}
+        />
+      )}
 
-      {replies.length > 0 ? (
+      {!isFormalReview(comment) && replies.length > 0 ? (
         <ReplyThread
           footer={
             <>
@@ -481,7 +719,6 @@ export function PdpReviewComment({
 
 export function mapReviewToComment(
   review: PdpFeaturedReview,
-  reviewReplies: Record<string, PdpReviewReply[]>,
 ): PdpReviewCommentData {
   return {
     id: review.id,
@@ -492,7 +729,25 @@ export function mapReviewToComment(
     photos: review.photos,
     likes: review.likes,
     rating: review.rating,
-    replies: reviewReplies[review.id],
+    title: review.title,
+    body: review.body,
+    recommendTags: review.recommendTags,
+  };
+}
+
+export function mapCustomerCommentToData(
+  comment: PdpCustomerComment,
+  commentReplies: Record<string, PdpReviewReply[]>,
+): PdpReviewCommentData {
+  return {
+    id: comment.id,
+    quote: comment.quote,
+    author: comment.author,
+    date: comment.date,
+    verified: comment.verified,
+    photos: comment.photos,
+    likes: comment.likes,
+    replies: commentReplies[comment.id],
   };
 }
 
@@ -516,6 +771,49 @@ export function sortCommentsByLikes(
   comments: PdpReviewCommentData[],
 ): PdpReviewCommentData[] {
   return [...comments].sort((a, b) => b.likes - a.likes);
+}
+
+/** Inline PDP preview — top helpful formal reviews only */
+export function curateReviewsPreview(
+  reviews: PdpReviewCommentData[],
+  limit: number,
+): PdpReviewCommentData[] {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const picked: PdpReviewCommentData[] = [];
+  const pickedIds = new Set<string>();
+
+  const pick = (review: PdpReviewCommentData | undefined) => {
+    if (!review || pickedIds.has(review.id)) {
+      return;
+    }
+
+    picked.push(review);
+    pickedIds.add(review.id);
+  };
+
+  pick(
+    [...reviews]
+      .filter(
+        (review) =>
+          review.verified &&
+          review.photos?.some((photo) => isProductReviewPhoto(photo.src)),
+      )
+      .sort((a, b) => b.likes - a.likes)[0],
+  );
+
+  pick([...reviews].sort((a, b) => b.likes - a.likes)[0]);
+
+  for (const review of sortCommentsByLikes(reviews)) {
+    if (picked.length >= limit) {
+      break;
+    }
+    pick(review);
+  }
+
+  return picked.slice(0, limit);
 }
 
 type PdpReviewCommentsSectionProps = {
@@ -549,6 +847,8 @@ type PdpReviewCommentBoxProps = {
   replyTarget?: PdpReplyTarget | null;
   onCancelReply?: () => void;
   className?: string;
+  /** Root composer intent — review vs casual comment */
+  composerIntent?: "comment" | "review";
   /** Pinned to bottom of a sheet — border-top + safe area padding */
   pinned?: boolean;
   /** iOS keyboard visible — tighten bottom padding */
@@ -565,6 +865,7 @@ export function PdpReviewCommentBox({
   replyTarget = null,
   onCancelReply,
   className,
+  composerIntent = "comment",
   pinned = false,
   keyboardOpen = false,
   refocusAfterPost = true,
@@ -577,6 +878,16 @@ export function PdpReviewCommentBox({
 
   const trimmed = text.trim();
   const canPost = trimmed.length > 0;
+  const composerPlaceholder = replyTarget
+    ? "Add a reply..."
+    : composerIntent === "review"
+      ? "Share your review..."
+      : "Add a comment...";
+  const composerLabel = replyTarget
+    ? "Add a reply"
+    : composerIntent === "review"
+      ? "Write a review"
+      : "Add a comment";
 
   useEffect(() => {
     if (!replyTarget) {
@@ -651,7 +962,7 @@ export function PdpReviewCommentBox({
 
       <div className="flex items-center gap-2">
         <label htmlFor={inputId} className="sr-only">
-          {replyTarget ? "Add a reply" : "Add a comment"}
+          {composerLabel}
         </label>
         <input
           ref={inputRef}
@@ -671,7 +982,7 @@ export function PdpReviewCommentBox({
               handlePost();
             }
           }}
-          placeholder={replyTarget ? "Add a reply..." : "Add a comment..."}
+          placeholder={composerPlaceholder}
           className={cn(
             "pdp-comment-composer__input min-h-11 min-w-0 flex-1 rounded-full border-0 bg-[#f3f3f3] px-4 pt-3 pb-2.5",
             "font-extended text-base tracking-[0.2px] text-black outline-none",
