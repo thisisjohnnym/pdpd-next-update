@@ -21,6 +21,7 @@ import { PdpNavMenu } from "./pdp-nav-menu";
 import { PdpOverlayHeader } from "./pdp-overlay-header";
 import { PdpReviewsSheet } from "./pdp-reviews-sheet";
 import { PdpRuntimeProvider } from "./pdp-runtime-context";
+import { PdpSectionIndicator } from "./pdp-section-indicator";
 import { PdpStrippedHero, PdpStaticHero, PdpStrippedView } from "./pdp-stripped-view";
 import { isStaticImageHero } from "./pdp-products";
 import { TabbyVariantProvider, useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
@@ -153,6 +154,9 @@ function PdpSocialViewInner() {
         bagCount={bagCount}
         onOpenMenu={() => setNavOpen(true)}
       />
+      {!isStripped ? (
+        <PdpSectionIndicator suppressed={chromeSuppressed} />
+      ) : null}
       {tabbyColorHero ? null : isStripped && product.hero.kind === "image" && !isStaticHero ? (
         <PdpStrippedHero
           src={product.hero.src}

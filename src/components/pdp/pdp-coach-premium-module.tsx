@@ -7,26 +7,26 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PDP_COACH_PREMIUM, type PdpCoachPremiumPerk } from "./pdp-data";
-import { PdpModuleHeading } from "./pdp-module-heading";
-import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
+import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpToast } from "./pdp-toast";
-import { pdpType, pdpPressableSolidClass } from "./pdp-type";
+import { pdpType, pdpPressableClass } from "./pdp-type";
 
 function CoachPremiumPerkRow({ perk }: { perk: PdpCoachPremiumPerk }) {
   return (
-    <li className="flex items-start gap-3 border-t border-neutral-200 py-3.5 first:border-t-0">
-      <MaterialIcon
-        name={perk.icon}
-        size={20}
-        filled={perk.showVerifiedBadge}
-        className={cn(
-          "mt-0.5 shrink-0",
-          perk.showVerifiedBadge ? "text-[#0095F6]" : "text-black",
-        )}
+    <li className="flex items-center gap-3">
+      <span
         aria-hidden
-      />
-      <p className={`m-0 text-black ${pdpType.body}`}>
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10"
+      >
+        <MaterialIcon
+          name={perk.icon}
+          size={20}
+          filled={perk.showVerifiedBadge}
+          className={perk.showVerifiedBadge ? "text-[#1D9BF0]" : "text-white"}
+        />
+      </span>
+      <p className={`m-0 text-pretty text-white ${pdpType.body}`}>
         {perk.showVerifiedBadge ? (
           <>
             Blue checkmark{" "}
@@ -34,11 +34,10 @@ function CoachPremiumPerkRow({ perk }: { perk: PdpCoachPremiumPerk }) {
               name="verified"
               size={18}
               filled
-              className="inline-block align-middle text-[#0095F6]"
-              style={{ fontSize: 11 }}
-              aria-hidden
+              className="inline-block align-middle text-[#1D9BF0]"
+              style={{ fontSize: 13 }}
             />{" "}
-            on your comments
+            verified on your comments
           </>
         ) : (
           perk.label
@@ -48,61 +47,52 @@ function CoachPremiumPerkRow({ perk }: { perk: PdpCoachPremiumPerk }) {
   );
 }
 
-/** Coach Premium membership pitch — last block on the PDP */
-export function PdpCoachPremiumModule({ embedded = false }: { embedded?: boolean }) {
+/** Coach Premium membership pitch — dark card, last block on the PDP */
+export function PdpCoachPremiumModule() {
   const { title, body, perks, cta, toast } = PDP_COACH_PREMIUM;
   const [toastOpen, setToastOpen] = useState(false);
-
-  const IntroBlock = embedded ? "div" : PdpRevealItem;
-  const PerksBlock = embedded ? "div" : PdpRevealItem;
-  const CtaBlock = embedded ? "div" : PdpRevealItem;
-
-  const content = (
-    <div className={cn("flex flex-col", embedded ? "gap-4" : "gap-6")}>
-      <IntroBlock className="flex flex-col gap-3">
-        <PdpModuleHeading spacing="none">{title}</PdpModuleHeading>
-        <p className={`m-0 text-neutral-700 ${pdpType.caption}`}>{body}</p>
-      </IntroBlock>
-
-      <PerksBlock {...(embedded ? {} : { delay: 80 })}>
-        <ul className="m-0 list-none border border-neutral-200 bg-white px-4">
-          {perks.map((perk) => (
-            <CoachPremiumPerkRow key={perk.id} perk={perk} />
-          ))}
-        </ul>
-      </PerksBlock>
-
-      <CtaBlock {...(embedded ? {} : { delay: 140 })}>
-        <button
-          type="button"
-          onClick={() => setToastOpen(true)}
-          className={cn(
-            "font-extended flex h-12 w-full items-center justify-center rounded-full bg-black text-sm tracking-[0.2px] text-white transition-colors active:bg-neutral-800",
-            pdpPressableSolidClass,
-          )}
-        >
-          {cta}
-        </button>
-      </CtaBlock>
-    </div>
-  );
 
   return (
     <section
       data-header-surface="light"
-      className={
-        embedded
-          ? "relative w-full shrink-0 border-t border-neutral-200 pt-6 pb-8"
-          : pdpModuleSectionClass({ rhythm: "default" })
-      }
+      className={pdpModuleSectionClass({ rhythm: "default" })}
     >
-      {embedded ? (
-        content
-      ) : (
-        <PageGrid fullWidth>
-          <GridItem mobile={12} desktop={24}>{content}</GridItem>
-        </PageGrid>
-      )}
+      <PageGrid fullWidth>
+        <GridItem mobile={12} desktop={24}>
+          <PdpRevealItem className="flex flex-col gap-6 rounded-3xl bg-neutral-900 p-6">
+            <div className="flex flex-col items-center gap-2.5 text-center">
+              <h2 className="font-extended m-0 text-2xl font-normal tracking-[0.2px] text-balance text-white">
+                {title}
+              </h2>
+              <p className={`m-0 text-pretty text-white/65 ${pdpType.caption}`}>
+                {body}
+              </p>
+            </div>
+
+            <ul className="m-0 flex list-none flex-col gap-4 p-0">
+              {perks.map((perk) => (
+                <CoachPremiumPerkRow key={perk.id} perk={perk} />
+              ))}
+            </ul>
+
+            <div className="flex flex-col items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setToastOpen(true)}
+                className={cn(
+                  "font-extended flex h-12 w-full items-center justify-center rounded-full bg-white text-sm tracking-[0.2px] text-black",
+                  pdpPressableClass,
+                )}
+              >
+                {cta}
+              </button>
+              <p className={`m-0 text-center text-white/40 ${pdpType.label}`}>
+                {toast}
+              </p>
+            </div>
+          </PdpRevealItem>
+        </GridItem>
+      </PageGrid>
 
       <PdpToast
         message={toast}

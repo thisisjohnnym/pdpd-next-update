@@ -816,6 +816,55 @@ export const PDP_COACH_PREMIUM = {
   ] satisfies PdpCoachPremiumPerk[],
 } as const;
 
+export type PdpProductSpec = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+export type PdpProductDetailRow = {
+  id: string;
+  title: string;
+  /** Paragraphs separated by a blank line ("\n\n") */
+  body: string;
+};
+
+export const PDP_PRODUCT_DETAILS = {
+  eyebrow: "The details",
+  specs: [
+    { id: "dimensions", label: "Dimensions", value: '10" × 6"' },
+    { id: "weight", label: "Weight", value: "0.9 lb" },
+    { id: "drop", label: "Strap drop", value: '22"' },
+  ] satisfies PdpProductSpec[],
+  payOverTime: {
+    icon: "credit_card",
+    amount: "4 interest-free payments of $118.75",
+    body: "Pay over time with Afterpay. No impact to credit.",
+  },
+  rows: [
+    {
+      id: "materials",
+      title: "Materials & care",
+      body: "Full-grain pebbled cowhide leather with a polished refined finish. Fabric lining. Solid brass hardware in a brushed gold tone.\n\nWipe with a soft, dry cloth. Store in the dust bag away from direct sunlight. Avoid moisture and oils.",
+    },
+    {
+      id: "size",
+      title: "Size & fit",
+      body: "Holds a phone, cardholder, keys, and a compact with room to spare. An interior slip pocket keeps essentials in reach. Sits at the hip on the shoulder drop, higher worn cross-body.",
+    },
+    {
+      id: "strap",
+      title: "Strap & hardware",
+      body: "Includes an adjustable, detachable leather shoulder strap. Signature C turnlock closure in brushed brass. Swap in a chain or webbing strap to change the look.",
+    },
+    {
+      id: "shipping",
+      title: "Shipping & returns",
+      body: "Complimentary standard shipping and returns. Most orders arrive in 3–5 business days. Free 30-day returns in original, unworn condition.",
+    },
+  ] satisfies PdpProductDetailRow[],
+} as const;
+
 export type PdpSiteFooterLink = {
   label: string;
   href: string;

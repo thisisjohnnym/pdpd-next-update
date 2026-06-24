@@ -45,7 +45,7 @@ export function pdpModuleHeadingLeadClass() {
 }
 /** Primary H1 — modules, sheets, drawers */
 function pdpPageHeadingClass({ lead = true }: { lead?: boolean } = {}) {
-  return cn(pdpType.headline, "m-0", lead && "mb-4");
+  return cn(pdpType.headline, "m-0 text-balance", lead && "mb-4");
 }
 
 /** Sheet / drawer title — same scale as module H1s */

@@ -32,7 +32,9 @@ import {
   PdpMoreLikeThisModule,
 } from "./pdp-shopping-discovery-module";
 import { PdpReviewsModule } from "./pdp-reviews-module";
+import { PdpProductDetailsModule } from "./pdp-product-details-module";
 import { PdpCoachPremiumModule } from "./pdp-coach-premium-module";
+import { pdpChapterAnchorId } from "./pdp-section-chapters";
 import { PdpSiteFooter } from "./pdp-site-footer";
 import { PdpRecentlyViewedCarousel } from "./pdp-recently-viewed-carousel";
 import { PdpRevealItem } from "./pdp-reveal-item";
@@ -104,6 +106,18 @@ function gallerySection(
     >
       {child}
     </PdpScrollReveal>
+  );
+}
+
+/** Always-present wayfinding anchor for the section indicator (zero-height marker) */
+function ChapterAnchor({ id }: { id: string }) {
+  return (
+    <div
+      id={pdpChapterAnchorId(id)}
+      data-chapter={id}
+      aria-hidden
+      className="h-0 w-full shrink-0 scroll-mt-24"
+    />
   );
 }
 
@@ -685,6 +699,12 @@ export function PdpGalleryView({
     <div className={GALLERY_CLASS} style={galleryScrollPad}>
       {showTabbyExperiment ? <PdpTabbyVariantModule /> : null}
       <div className={GALLERY_MEDIA_STACK_CLASS}>
+        <ChapterAnchor id="overview" />
+        {/* Product Details — first content block after the hero (matches Paper) */}
+        <ChapterAnchor id="the-details" />
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light">
+          <PdpProductDetailsModule />
+        </PdpScrollReveal>
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
@@ -725,6 +745,7 @@ export function PdpGalleryView({
 
           if (slide.type === "leather-aging") {
             return [
+              <ChapterAnchor key={`anchor-the-feel-${index}`} id="the-feel" />,
               gallerySection(
                 `leather-aging-${index}`,
                 <PdpLeatherAgingModule
@@ -756,6 +777,10 @@ export function PdpGalleryView({
 
           if (slide.type === "strap-simulation") {
             return [
+              <ChapterAnchor
+                key={`anchor-make-it-yours-${index}`}
+                id="make-it-yours"
+              />,
               gallerySection(
                 `strap-simulation-${index}`,
                 <PdpStrapSimulationModule
@@ -869,6 +894,7 @@ export function PdpGalleryView({
 
       {/* Ecommerce — after desire + function gallery scroll. Free-form scroll;
           modules size to their own content. */}
+      <ChapterAnchor id="reviews" />
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="40dvh">
         <PdpReviewsModule
           onReadAll={onReadAllReviews ?? onOpenReviews}
@@ -878,9 +904,11 @@ export function PdpGalleryView({
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
         <PdpCoachAiModule />
       </PdpScrollReveal>
+      <ChapterAnchor id="more" />
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
         <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
       </PdpScrollReveal>
+      <ChapterAnchor id="the-family" />
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
         <PdpCompareModuleGate
           onAddToBag={() => onAddSimilarToBag?.()}
