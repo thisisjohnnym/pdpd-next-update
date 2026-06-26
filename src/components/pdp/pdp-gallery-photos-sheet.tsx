@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -17,6 +17,7 @@ import {
 } from "./pdp-bottom-sheet";
 import { PDP_GALLERY_MORE_PHOTOS, type PdpGalleryPhoto } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpGalleryPhotosSheetProps = {
   photos?: PdpGalleryPhoto[];
@@ -31,33 +32,7 @@ export function PdpGalleryPhotosSheet({
   onClose,
 }: PdpGalleryPhotosSheetProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
+  const mounted = useOverlayDismiss(open, onClose);
 
   if (!mounted) {
     return null;

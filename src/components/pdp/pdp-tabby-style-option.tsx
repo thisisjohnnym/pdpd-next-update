@@ -67,11 +67,15 @@ export function PdpTabbyStyleOption({
           className="object-cover object-center"
           sizes={imageSizes}
         />
-        {selected ? (
-          <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black text-white">
-            <MaterialIcon name="check" size={18} aria-hidden />
-          </span>
-        ) : null}
+        <span
+          aria-hidden
+          className={cn(
+            "absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black text-white transition-[opacity,scale] duration-200 ease-out",
+            selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+          )}
+        >
+          <MaterialIcon name="check" size={18} aria-hidden />
+        </span>
       </span>
       <span
         className={cn(

@@ -42,6 +42,7 @@ type PdpGalleryEditorialSlideProps = {
 };
 
 /** Inset editorial break — narrowed image or video + caption with generous margins */
+// fallow-ignore-next-line complexity
 export function PdpGalleryEditorialSlide({
   src,
   alt,
@@ -92,7 +93,7 @@ export function PdpGalleryEditorialSlide({
       className={cn(
         "relative flex w-full shrink-0 flex-col bg-white",
         panelScroll
-          ? cn("items-center justify-center px-3", galleryPanelClassName(isLastPanel))
+          ? cn("items-center justify-center", galleryPanelClassName(isLastPanel))
           : "py-10 lg:py-14",
       )}
       style={
@@ -105,8 +106,8 @@ export function PdpGalleryEditorialSlide({
     >
       <PageGrid fullWidth className={panelScroll ? "w-full" : undefined}>
         <GridItem
-          mobile={panelScroll ? 12 : 10}
-          mobileStart={panelScroll ? 1 : 2}
+          mobile={12}
+          mobileStart={1}
           desktop={panelScroll ? 24 : 14}
           desktopStart={panelScroll ? 1 : 6}
         >

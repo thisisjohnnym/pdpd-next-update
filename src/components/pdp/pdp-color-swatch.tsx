@@ -77,7 +77,7 @@ export function ColorSwatchCircle({
     <span
       aria-hidden
       className={cn(
-        "relative block shrink-0 overflow-hidden rounded-full border border-black/5 bg-neutral-100",
+        "relative block shrink-0 overflow-hidden rounded-full border border-black/5 bg-neutral-100 transition-opacity duration-200 ease-out",
         sizeClass,
         dimmed && "opacity-40",
       )}

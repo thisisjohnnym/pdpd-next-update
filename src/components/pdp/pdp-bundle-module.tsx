@@ -16,7 +16,7 @@ import {
   type PdpBundleAddPayload,
   type PdpBundleItem,
 } from "./pdp-data";
-import { pdpBodyRhythm, pdpType } from "./pdp-type";
+import { pdpType } from "./pdp-type";
 
 function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -38,28 +38,22 @@ type BundleRowProps = {
 
 function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
   return (
-    <div className="flex flex-col border-b border-neutral-200 pb-4">
-      <div className="flex items-center gap-3.5">
-        <span className="relative size-16 shrink-0 overflow-hidden bg-neutral-100">
-          <Image
-            src={item.imageSrc}
-            alt={item.imageAlt}
-            fill
-            className="object-cover object-center"
-            sizes="64px"
-          />
-        </span>
-
-        <div className="min-w-0 flex-1">
-          <p className={`font-extended text-base text-black ${pdpBodyRhythm}`}>
-            {item.name}
-          </p>
-        </div>
-
-        <p className="font-extended shrink-0 text-sm tracking-[0.2px] text-neutral-500">
-          {formatPrice(item.price)}
-        </p>
-      </div>
+    <div className="flex w-[132px] shrink-0 flex-col gap-2">
+      <span className="relative h-[160px] w-full shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+        <Image
+          src={item.imageSrc}
+          alt={item.imageAlt}
+          fill
+          className="object-cover object-center"
+          sizes="132px"
+        />
+      </span>
+      <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.body}`}>
+        {item.name}
+      </p>
+      <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.label}`}>
+        {formatPrice(item.price)}
+      </p>
     </div>
   );
 }
@@ -72,42 +66,50 @@ function AddonBundleRow({ item, selected, onToggle }: BundleRowProps) {
       disabled={item.locked}
       aria-pressed={selected}
       className={cn(
-        "flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors",
-        selected ? "bg-neutral-50" : "bg-white",
-        item.locked ? "cursor-default" : "active:bg-neutral-100",
+        "flex w-full items-center gap-2.5 rounded-lg border border-neutral-200 p-2 text-left transition-colors",
+        item.locked ? "cursor-default" : "active:bg-neutral-50",
       )}
     >
-      <span
-        className={cn(
-          "flex size-5 shrink-0 items-center justify-center border",
-          selected ? "border-black bg-black" : "border-neutral-300 bg-white",
-          item.locked && "opacity-70",
-        )}
-        aria-hidden
-      >
-        {selected ? (
-          <MaterialIcon name="check" size={18} className="text-white" />
-        ) : null}
-      </span>
-
-      <span className="relative size-12 shrink-0 overflow-hidden bg-neutral-100">
+      <span className="relative w-[38px] shrink-0 self-stretch overflow-hidden rounded bg-neutral-100">
         <Image
           src={item.imageSrc}
           alt={item.imageAlt}
           fill
           className="object-cover object-center"
-          sizes="48px"
+          sizes="38px"
         />
       </span>
 
-      <span className="min-w-0 flex-1">
-        <span className={`font-extended block text-black ${pdpType.body}`}>
+      <span className="flex min-w-0 grow flex-col gap-[7px]">
+        <span className={`font-extended leading-[1.1] text-black ${pdpType.label}`}>
           {item.name}
+        </span>
+        <span
+          className={`font-extended leading-[1.1] text-black opacity-50 ${pdpType.label}`}
+        >
+          {formatPrice(item.price)}
         </span>
       </span>
 
-      <span className={`font-extended shrink-0 text-neutral-500 ${pdpType.label}`}>
-        {formatPrice(item.price)}
+      <span
+        className={cn(
+          "flex size-[22px] shrink-0 items-center justify-center rounded transition-colors duration-200 ease-out",
+          selected
+            ? "bg-[#171717]"
+            : "border-[1.5px] border-[#CCCCCC] bg-transparent",
+          item.locked && "opacity-70",
+        )}
+        aria-hidden
+      >
+        <MaterialIcon
+          name="check"
+          size={18}
+          style={{ fontSize: 14 }}
+          className={cn(
+            "text-white transition-[opacity,scale] duration-200 ease-out",
+            selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+          )}
+        />
       </span>
     </button>
   );
@@ -178,71 +180,66 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <PdpModuleHeading>Build your bundle</PdpModuleHeading>
+          <PdpModuleHeading className="text-center">
+            Build your bundle
+          </PdpModuleHeading>
 
-          <div className="flex flex-col gap-6">
-            <PdpRevealItem className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <PdpRevealItem className="flex gap-3.5">
               {primaryItem ? <PrimaryBundleCard item={primaryItem} /> : null}
 
               {addonItems.length ? (
-                <div className="flex flex-col">
-                  <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200">
-                    {addonItems.map((item, index) => (
-                      <PdpRevealItem
-                        key={item.id}
-                        as="div"
-                        delay={index * 70}
-                      >
-                        <AddonBundleRow
-                          item={item}
-                          selected={selectedIds.has(item.id)}
-                          onToggle={toggleItem}
-                        />
-                      </PdpRevealItem>
-                    ))}
-                  </div>
+                <div className="flex grow flex-col gap-2">
+                  {addonItems.map((item, index) => (
+                    <PdpRevealItem key={item.id} as="div" delay={index * 70}>
+                      <AddonBundleRow
+                        item={item}
+                        selected={selectedIds.has(item.id)}
+                        onToggle={toggleItem}
+                      />
+                    </PdpRevealItem>
+                  ))}
                 </div>
               ) : null}
             </PdpRevealItem>
 
-            <PdpRevealItem delay={280} className="flex items-end justify-between gap-4">
-              <div>
-                <p className={`font-extended m-0 text-neutral-500 ${pdpType.label}`}>
-                  {justAdded
-                    ? `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} added to bag`
-                    : `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} selected`}
-                </p>
-                <div className="mt-1 flex items-baseline gap-2">
-                  {hasDiscount ? (
-                    <span className="font-extended text-sm tracking-[0.2px] text-neutral-400 line-through">
-                      {formatPrice(subtotal)}
-                    </span>
-                  ) : null}
-                  <span className="font-extended text-lg tracking-[0.2px] text-black">
-                    {formatPrice(total)}
+            <PdpRevealItem
+              delay={280}
+              className="flex items-center justify-between gap-4"
+            >
+              <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.body}`}>
+                {justAdded
+                  ? `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} added to bag`
+                  : `${selectedItems.length} item${selectedItems.length === 1 ? "" : "s"} selected`}
+              </p>
+              <div className="flex items-center gap-2">
+                {hasDiscount ? (
+                  <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black line-through opacity-50">
+                    {formatPrice(subtotal)}
                   </span>
-                </div>
+                ) : null}
+                <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black">
+                  {formatPrice(total)}
+                </span>
               </div>
             </PdpRevealItem>
 
             <PdpRevealItem delay={350}>
-            <button
-              type="button"
-              onClick={handleAddBundle}
-              disabled={selectedItems.length === 0 || justAdded}
-              className={cn(
-                "font-extended inline-flex w-full items-center justify-center gap-1.5 rounded-full py-3.5 text-sm tracking-[0.2px] transition-colors",
-                justAdded
-                  ? "bg-neutral-100 text-neutral-500"
-                  : "bg-black text-white",
-              )}
-            >
-              <span className="font-extended -translate-y-px">
+              <button
+                type="button"
+                onClick={handleAddBundle}
+                disabled={selectedItems.length === 0 || justAdded}
+                className={cn(
+                  "font-extended flex h-[52px] w-full items-center justify-center rounded-full text-base leading-none tracking-[0.2px] transition-colors",
+                  justAdded
+                    ? "bg-neutral-200 text-neutral-500"
+                    : "bg-[#171717] text-white active:bg-neutral-800",
+                )}
+              >
                 {justAdded
                   ? "Added to bag"
                   : `Add bundle to bag (${selectedItems.length})`}
-              </span>
-            </button>
+              </button>
             </PdpRevealItem>
           </div>
         </GridItem>

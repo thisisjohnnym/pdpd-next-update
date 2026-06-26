@@ -7,40 +7,17 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import {
-  PDP_CHAPTERS,
-  pdpChapterAnchorId,
-  type PdpChapter,
-} from "./pdp-section-chapters";
-import { useScrollSnapshot } from "./use-coalesced-scroll";
+import { pdpChapterAnchorId } from "./pdp-section-chapters";
+import { PDP_CHROME_HEADER_OFFSET, usePdpChromeMode } from "./use-pdp-chrome-mode";
+import { useMountTransition } from "./use-mount-transition";
+import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { pdpType, pdpPressableClass } from "./pdp-type";
-
-/** Approx header height (safe-area + nav row) — keeps the active probe + jump under the header */
-const HEADER_OFFSET = 72;
-
-type PresentChapter = PdpChapter & { top: number };
-
-function readPresentChapters(scrollY: number): PresentChapter[] {
-  if (typeof document === "undefined") {
-    return [];
-  }
-
-  return PDP_CHAPTERS.flatMap((chapter) => {
-    const el = document.getElementById(pdpChapterAnchorId(chapter.id));
-    if (!el) {
-      return [];
-    }
-    const top = el.getBoundingClientRect().top + scrollY;
-    return [{ ...chapter, top }];
-  }).sort((a, b) => a.top - b.top);
-}
 
 export function PdpSectionIndicator({
   suppressed = false,
 }: {
   suppressed?: boolean;
 }) {
-  const { scrollY, viewportHeight } = useScrollSnapshot();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,16 +25,9 @@ export function PdpSectionIndicator({
     setMounted(true);
   }, []);
 
-  // Derived during render from the live DOM — re-runs on every scroll snapshot,
-  // so no effect/setState loop is needed to track the active chapter.
-  const chapters = mounted ? readPresentChapters(scrollY) : [];
-  const probe = scrollY + HEADER_OFFSET + 8;
-  let activeIndex = 0;
-  chapters.forEach((chapter, index) => {
-    if (chapter.top <= probe) {
-      activeIndex = index;
-    }
-  });
+  const { chapters, activeIndex, active, jumpBarActive } =
+    usePdpChromeMode(mounted);
+  const menu = useMountTransition(menuOpen, 220);
 
   const jumpTo = useCallback((id: string) => {
     const scrollToAnchor = (behavior: ScrollBehavior) => {
@@ -65,7 +35,8 @@ export function PdpSectionIndicator({
       if (!el) {
         return;
       }
-      const top = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - PDP_CHROME_HEADER_OFFSET;
       window.scrollTo({ top: Math.max(0, top), behavior });
     };
 
@@ -80,79 +51,74 @@ export function PdpSectionIndicator({
     return null;
   }
 
-  // Clean on land — reveal only after scrolling past the hero.
-  const pastHero = viewportHeight > 0 && scrollY > viewportHeight * 0.85;
-  const visible = pastHero && !suppressed && chapters.length > 0;
-
-  const scrollMax =
-    document.documentElement.scrollHeight - viewportHeight || 1;
-  const progress = Math.min(1, Math.max(0, scrollY / scrollMax));
-  const active = chapters[activeIndex];
+  // Only show on scroll-down past the 2nd chapter (mutually exclusive with the
+  // CTA). Keep it up while the jump menu is open so it doesn't vanish mid-tap.
+  const visible = (jumpBarActive || menuOpen) && !suppressed;
 
   return createPortal(
     <>
       <div
         className={cn(
-          "fixed inset-x-0 z-[25] transition-[transform,opacity] duration-300 ease-out",
+          "pointer-events-none fixed inset-x-0 z-[41] transition-[transform,opacity] duration-300 ease-out",
           visible
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0",
+            : "translate-y-full opacity-0",
         )}
-        style={{ top: "calc(var(--pdp-safe-area-top) + 3.5rem)" }}
+        style={{
+          bottom: BOTTOM_CHROME_OFFSET,
+          paddingBottom: "0.625rem",
+          paddingLeft: "var(--hero-inset, 0px)",
+          paddingRight: "var(--hero-inset, 0px)",
+        }}
         aria-hidden={!visible}
       >
-        <PageGrid fullWidth>
-          <GridItem mobile={12} desktop={24}>
-            <div className="pdp-glass-light--cta flex flex-col gap-2 rounded-2xl px-3.5 py-2.5">
-              <div className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200/80">
-                <div
-                  className="h-full rounded-full bg-black transition-[width] duration-200 ease-out"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-baseline gap-2">
-                  <span className="font-extended truncate text-[13px] font-normal tracking-[0.2px] text-black">
-                    {active?.label}
-                  </span>
-                  <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
-                    {activeIndex + 1} of {chapters.length}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((open) => !open)}
-                  aria-expanded={menuOpen}
-                  aria-label="Jump to section"
-                  className={cn(
-                    "-my-2 flex min-h-10 shrink-0 items-center gap-1.5 py-2 text-neutral-600",
-                    pdpPressableClass,
-                  )}
-                >
-                  <span className={pdpType.label}>Jump to</span>
-                  <MaterialIcon
-                    name={menuOpen ? "close" : "menu"}
-                    size={18}
-                    className="text-neutral-700"
-                  />
-                </button>
-              </div>
-            </div>
-          </GridItem>
-        </PageGrid>
+        <div className="px-2 lg:px-5">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label="Jump to section"
+            className={cn(
+              "pdp-glass-light--cta pointer-events-auto inline-flex items-center gap-2.5 rounded-full py-2.5 pl-3.5 pr-3",
+              pdpPressableClass,
+            )}
+          >
+            <MaterialIcon name="list" size={18} className="text-neutral-700" />
+            <span className="flex items-baseline gap-2">
+              <span className="font-extended text-[13px] font-normal tracking-[0.2px] text-black">
+                {active?.label}
+              </span>
+              <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
+                {activeIndex + 1} / {chapters.length}
+              </span>
+            </span>
+            <MaterialIcon
+              name="expand_less"
+              size={18}
+              className={cn(
+                "text-neutral-600 transition-transform duration-300 ease-out",
+                menuOpen && "rotate-180",
+              )}
+            />
+          </button>
+        </div>
       </div>
 
-      {menuOpen ? (
+      {menu.mounted ? (
         <div className="fixed inset-0 z-[44]">
           <button
             type="button"
             aria-label="Close jump menu"
             onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 size-full bg-black/30"
+            className={cn(
+              "pdp-fade absolute inset-0 size-full bg-black/30",
+              menu.state === "open" ? "opacity-100" : "opacity-0",
+            )}
           />
           <div
-            className="absolute inset-x-0"
-            style={{ top: "calc(var(--pdp-safe-area-top) + 3.5rem)" }}
+            className="pdp-pop-up absolute inset-x-0"
+            data-state={menu.state}
+            style={{ bottom: BOTTOM_CHROME_OFFSET, paddingBottom: "0.625rem" }}
           >
             <PageGrid fullWidth>
               <GridItem mobile={12} desktop={24}>

@@ -14,13 +14,14 @@ import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
 } from "./pdp-carousel";
+import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpCoachAiSheet, type PdpCoachAiAsk } from "./pdp-coach-ai-sheet";
+import { getPdpCoachAiContent } from "./pdp-coach-ai-content";
 import { PDP_MORE_LIKE_THIS } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
-import { PdpAiConciergePanel } from "./pdp-product-search-module";
-import { pdpType, pdpPressableSolidClass } from "./pdp-type";
+import { pdpType, pdpPressableClass, pdpPressableSolidClass } from "./pdp-type";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
 type PdpMoreLikeThisModuleProps = {
@@ -121,13 +122,15 @@ export function PdpMoreLikeThisModule({
   );
 }
 
-/** Coach AI — on-page shopping assistant */
+/** Coach AI — on-page shopping assistant (dark card, Paper node 48O-0) */
 export function PdpCoachAiModule({
   spacious = false,
 }: {
   /** Roomier vertical padding when placed inline in the gallery scroll */
   spacious?: boolean;
 } = {}) {
+  const { productId } = useActiveProduct();
+  const { prompts } = getPdpCoachAiContent(productId);
   const [chatOpen, setChatOpen] = useState(false);
   const [ask, setAsk] = useState<PdpCoachAiAsk | null>(null);
 
@@ -150,15 +153,72 @@ export function PdpCoachAiModule({
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <PdpRevealItem>
-            <div className="flex flex-col gap-3">
-              <PdpModuleHeading spacing="none">Coach AI</PdpModuleHeading>
-              <PdpAiConciergePanel
-                idSuffix="-discovery"
-                showTitle={false}
-                variant="flat"
-                onAsk={handleAsk}
-              />
+          <PdpRevealItem className="flex flex-col gap-8 rounded-2xl bg-[#1C1C1C] px-4 pt-6 pb-4">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col items-center gap-2.5">
+                <MaterialIcon
+                  name="auto_awesome"
+                  size={26}
+                  filled
+                  style={{ fontSize: 32 }}
+                  className="text-white"
+                />
+                <PdpModuleHeading spacing="none" className="text-center text-white">
+                  Coach AI
+                </PdpModuleHeading>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChatOpen(true)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-2.5 rounded-full bg-white/[0.13] py-2 pr-2 pl-4 text-left",
+                  pdpPressableClass,
+                )}
+              >
+                <span className={`font-extended text-white ${pdpType.body}`}>
+                  Ask the AI Concierge
+                </span>
+                <span
+                  aria-hidden
+                  className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-white"
+                >
+                  <MaterialIcon
+                    name="arrow_upward"
+                    size={18}
+                    className="text-neutral-900"
+                  />
+                </span>
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {prompts.map((prompt, index) => (
+                <div key={prompt.id} className="flex flex-col gap-4">
+                  {index > 0 ? (
+                    <div aria-hidden className="h-px w-full bg-white/20" />
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => handleAsk(prompt.question, prompt.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 text-left",
+                      pdpPressableClass,
+                    )}
+                  >
+                    <span
+                      className={`font-extended flex-1 text-white ${pdpType.body}`}
+                    >
+                      {prompt.question}
+                    </span>
+                    <MaterialIcon
+                      name="search"
+                      size={20}
+                      className="shrink-0 text-white"
+                      aria-hidden
+                    />
+                  </button>
+                </div>
+              ))}
             </div>
           </PdpRevealItem>
         </GridItem>

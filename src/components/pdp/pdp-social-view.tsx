@@ -9,7 +9,10 @@ import { useActiveProduct, PdpActiveProductProvider } from "./pdp-active-product
 import { PdpAddToBagSheet } from "./pdp-add-to-bag-sheet";
 import { PdpArTryOnSheet } from "./pdp-ar-try-on-sheet";
 import { PdpBottomActions } from "./pdp-bottom-actions";
+import { PdpBrandBarReveal } from "./pdp-brand-bar-reveal";
 import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
+import { PdpHeroHug } from "./pdp-hero-hug";
+import { PdpHeroRevealProvider } from "./use-pdp-hero-reveal";
 import { getDefaultColorId } from "./pdp-product-colors";
 import {
   PdpProductUrlSync,
@@ -133,6 +136,8 @@ function PdpSocialViewInner() {
   const isStripped = product.layout === "stripped";
   const isStaticHero = isStripped && isStaticImageHero(product.hero);
   const isColorHero = Boolean(tabbyColorHero);
+  const showBrandBar =
+    !isStaticHero && !tabbyColorHero && product.hero.kind === "video";
   const chromeSuppressed =
     navOpen ||
     reviewsOpen ||
@@ -148,11 +153,13 @@ function PdpSocialViewInner() {
         isStaticHero || isColorHero ? "bg-white" : "bg-black",
       )}
     >
+      <PdpHeroRevealProvider enabled={showBrandBar}>
       <PdpBrowserChromeSync />
       <PdpProductUrlSync activeColorId={activeColorId} />
       <PdpOverlayHeader
         bagCount={bagCount}
         onOpenMenu={() => setNavOpen(true)}
+        hugBrandBar={showBrandBar}
       />
       {!isStripped ? (
         <PdpSectionIndicator suppressed={chromeSuppressed} />
@@ -164,16 +171,21 @@ function PdpSocialViewInner() {
           objectPosition={product.hero.objectPosition}
           onOpenReviews={() => openReviews("comments")}
         />
-      ) : !isStaticHero && !tabbyColorHero && product.hero.kind === "video" ? (
-        <PdpGalleryHero
-          videoSrc={product.hero.videoSrc}
-          poster={product.hero.poster}
-          alt={product.hero.alt}
-          onOpenReviews={() => openReviews("comments")}
-          onOpenArTryOn={() => setArTryOnOpen(true)}
-        />
+      ) : showBrandBar && product.hero.kind === "video" ? (
+        <>
+          <PdpBrandBarReveal />
+          <PdpHeroHug>
+            <PdpGalleryHero
+              videoSrc={product.hero.videoSrc}
+              poster={product.hero.poster}
+              alt={product.hero.alt}
+              onOpenReviews={() => openReviews("comments")}
+              onOpenArTryOn={() => setArTryOnOpen(true)}
+            />
+          </PdpHeroHug>
+        </>
       ) : null}
-      <SafeAreaMain className="bg-white" omitTop>
+      <SafeAreaMain className="bg-transparent" omitTop>
         {tabbyColorHero ? (
           <PdpStaticHero
             hero={{
@@ -249,6 +261,7 @@ function PdpSocialViewInner() {
         }}
         confirmation={bagConfirmation}
       />
+      </PdpHeroRevealProvider>
     </div>
   );
 }

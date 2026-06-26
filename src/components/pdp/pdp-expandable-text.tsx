@@ -1,6 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+
+import { useReducedMotion } from "./use-reduced-motion";
 
 type PdpExpandableTextProps = {
   text: string;
@@ -23,28 +25,49 @@ export function PdpExpandableText({
   const ref = useRef<HTMLParagraphElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
+  const [collapsedHeight, setCollapsedHeight] = useState<number>();
+  const [fullHeight, setFullHeight] = useState<number>();
+  const reducedMotion = useReducedMotion();
 
   useLayoutEffect(() => {
     const node = ref.current;
     if (!node) return;
-    const measure = () => setOverflowing(node.scrollHeight - 1 > node.clientHeight);
+    const measure = () => {
+      // While collapsed (clamp active + overflow hidden), scrollHeight is the
+      // full content height and clientHeight is the clamped height.
+      setFullHeight(node.scrollHeight);
+      if (!expanded) {
+        setCollapsedHeight(node.clientHeight);
+        setOverflowing(node.scrollHeight - 1 > node.clientHeight);
+      }
+    };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [text, clampLines, expanded]);
 
-  const clampStyle = expanded
-    ? undefined
-    : ({
+  // Keep the clamp (for the ellipsis) only while collapsed; height eases via max-height.
+  const collapsedClamp: CSSProperties = expanded
+    ? {}
+    : {
         display: "-webkit-box",
         WebkitBoxOrient: "vertical",
         WebkitLineClamp: clampLines,
-        overflow: "hidden",
-      } as const);
+      };
+
+  const animate = overflowing && !reducedMotion;
+  const paragraphStyle: CSSProperties = {
+    ...collapsedClamp,
+    overflow: "hidden",
+    maxHeight: expanded ? fullHeight : collapsedHeight,
+    transition: animate
+      ? "max-height 260ms cubic-bezier(0.2, 0, 0, 1)"
+      : undefined,
+  };
 
   return (
     <div>
-      <p ref={ref} className={className} style={clampStyle}>
+      <p ref={ref} className={className} style={paragraphStyle}>
         {text}
       </p>
       {overflowing || expanded ? (

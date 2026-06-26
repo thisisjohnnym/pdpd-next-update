@@ -822,47 +822,65 @@ export type PdpProductSpec = {
   value: string;
 };
 
-export type PdpProductDetailRow = {
+export type PdpProductDetailTile = {
   id: string;
   title: string;
-  /** Paragraphs separated by a blank line ("\n\n") */
-  body: string;
+  caption: string;
+  src: string;
+  alt: string;
 };
 
 export const PDP_PRODUCT_DETAILS = {
   eyebrow: "The details",
+  /** Full-bleed macro at the top of the module — "The details" overlay */
+  macro: {
+    src: "/images/gallery/tabby-detail-quilt.png",
+    alt: "Close-up of the quilted leather Tabby Shoulder Bag 26 with signature brass C hardware and chain",
+  },
   specs: [
     { id: "dimensions", label: "Dimensions", value: '10" × 6"' },
     { id: "weight", label: "Weight", value: "0.9 lb" },
     { id: "drop", label: "Strap drop", value: '22"' },
   ] satisfies PdpProductSpec[],
+  /** "A closer look" — 2×2 visual detail gallery (row-major order) */
+  closerLook: {
+    heading: "A closer look",
+    tiles: [
+      {
+        id: "leather",
+        title: "Pillowy quilted leather",
+        caption: "Full-grain, made to age",
+        src: "/images/gallery/tabby-detail-clasp.png",
+        alt: "Pillowy quilted full-grain leather with diamond stitching",
+      },
+      {
+        id: "interior",
+        title: "Roomy interior",
+        caption: "Slip pocket fits a phone",
+        src: "/images/gallery/tabby-leather-interior-open.png",
+        alt: "Open interior of the Tabby Shoulder Bag showing the slip pocket",
+      },
+      {
+        id: "hardware",
+        title: "Solid brass C-clasp",
+        caption: "Brushed gold, signature turn-lock",
+        src: "/images/gallery/tabby-leather-detail-hardware.png",
+        alt: "Brushed brass turn-lock hardware engraved with the Coach logo",
+      },
+      {
+        id: "patina",
+        title: "Ages beautifully",
+        caption: "Patina after 6 months",
+        src: "/images/gallery/tabby-leather-aging-six-months.png",
+        alt: "The Tabby Shoulder Bag showing a soft patina after six months of wear",
+      },
+    ] satisfies PdpProductDetailTile[],
+  },
   payOverTime: {
     icon: "credit_card",
     amount: "4 interest-free payments of $118.75",
     body: "Pay over time with Afterpay. No impact to credit.",
   },
-  rows: [
-    {
-      id: "materials",
-      title: "Materials & care",
-      body: "Full-grain pebbled cowhide leather with a polished refined finish. Fabric lining. Solid brass hardware in a brushed gold tone.\n\nWipe with a soft, dry cloth. Store in the dust bag away from direct sunlight. Avoid moisture and oils.",
-    },
-    {
-      id: "size",
-      title: "Size & fit",
-      body: "Holds a phone, cardholder, keys, and a compact with room to spare. An interior slip pocket keeps essentials in reach. Sits at the hip on the shoulder drop, higher worn cross-body.",
-    },
-    {
-      id: "strap",
-      title: "Strap & hardware",
-      body: "Includes an adjustable, detachable leather shoulder strap. Signature C turnlock closure in brushed brass. Swap in a chain or webbing strap to change the look.",
-    },
-    {
-      id: "shipping",
-      title: "Shipping & returns",
-      body: "Complimentary standard shipping and returns. Most orders arrive in 3–5 business days. Free 30-day returns in original, unworn condition.",
-    },
-  ] satisfies PdpProductDetailRow[],
 } as const;
 
 export type PdpSiteFooterLink = {
@@ -2246,7 +2264,7 @@ const PDP_LEATHER_AGING_TWO_YEARS_IMAGE = {
 
 export const PDP_LEATHER_AGING = {
   moment: "Material",
-  title: "How leather evolves over time",
+  title: "How it evolves over time",
   intro:
     "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
   image: PDP_LEATHER_AGING_NEW_IMAGE,
@@ -2256,7 +2274,7 @@ export const PDP_LEATHER_AGING = {
       label: "New",
       timeline: "Day one",
       summary:
-        "Crisp grain, structured shape, factory-fresh. Enjoy the break-in — no special care needed yet.",
+        "Crisp grain, structured shape and factory-fresh. No special care needed yet.",
       image: PDP_LEATHER_AGING_NEW_IMAGE,
       traits: [
         {

@@ -47,9 +47,12 @@ function FaqAccordionItem({
           {item.question}
         </PdpTextReveal>
         <MaterialIcon
-          name={open ? "expand_less" : "expand_more"}
+          name="expand_more"
           size={20}
-          className="shrink-0 text-neutral-500"
+          className={cn(
+            "shrink-0 text-neutral-500 transition-transform duration-300 ease-out",
+            open && "rotate-180",
+          )}
         />
       </button>
       <div

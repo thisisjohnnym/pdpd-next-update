@@ -4,15 +4,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
+import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { useActiveProduct } from "./pdp-active-product-context";
-import {
-  pdpCarouselCard15Class,
-  pdpCarouselImageClass,
-  pdpCarouselScrollClass,
-  pdpCarouselScrollWrapClass,
-} from "./pdp-carousel";
 import { PDP_RECENTLY_VIEWED, PDP_RECENTLY_VIEWED_SECTION } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
@@ -21,10 +16,9 @@ import { getDefaultColorId } from "./pdp-product-colors";
 import { productPath } from "./pdp-product-routes";
 import { getRecentlyViewedProductId } from "./pdp-products";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
-import { pdpType } from "./pdp-type";
-import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { pdpType, pdpPressableClass } from "./pdp-type";
 
-/** History rail — last block on the PDP, portrait cards with viewed-time chips */
+/** History rail — vertical list rows with viewed-time labels (Paper node 4CK-0) */
 export function PdpRecentlyViewedCarousel() {
   const router = useRouter();
   const { productId } = useActiveProduct();
@@ -51,85 +45,85 @@ export function PdpRecentlyViewedCarousel() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <PdpModuleHeading>{PDP_RECENTLY_VIEWED_SECTION.eyebrow}</PdpModuleHeading>
+          <PdpModuleHeading className="text-center">
+            {PDP_RECENTLY_VIEWED_SECTION.eyebrow}
+          </PdpModuleHeading>
 
-          <PdpRevealItem className={pdpCarouselScrollWrapClass}>
+          <PdpRevealItem>
             <ul
-              className={cn(
-                "m-0 flex list-none gap-2",
-                pdpCarouselScrollClass,
-              )}
+              className="m-0 flex list-none flex-col gap-3.5 p-0"
               aria-label="Recently viewed items"
             >
-              {PDP_RECENTLY_VIEWED.map((item, index) => {
+              {PDP_RECENTLY_VIEWED.map((item) => {
                 const isLinked = getRecentlyViewedProductId(item.id) !== null;
 
                 return (
-                <li
-                  key={item.id}
-                  className={cn("flex flex-col", pdpCarouselCard15Class)}
-                >
-                  <div className="group relative w-full">
-                    <div
-                      role={isLinked ? "button" : undefined}
-                      tabIndex={isLinked ? 0 : undefined}
-                      onClick={isLinked ? () => handleViewAgain(item.id) : undefined}
-                      onKeyDown={
-                        isLinked
-                          ? (event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                handleViewAgain(item.id);
-                              }
-                            }
-                          : undefined
+                  <li key={item.id} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={
+                        isLinked ? () => handleViewAgain(item.id) : undefined
                       }
+                      aria-label={`View again: ${item.name}, viewed ${item.viewedLabel}`}
                       className={cn(
-                        "relative w-full overflow-hidden bg-neutral-100",
-                        isLinked && "cursor-pointer",
+                        "flex min-w-0 grow items-center gap-2 text-left",
+                        isLinked && pdpPressableClass,
                       )}
-                      style={{ aspectRatio: "4 / 5" }}
+                      disabled={!isLinked}
                     >
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt}
-                      fill
+                      <span className="relative h-[70px] w-[56px] shrink-0 overflow-hidden rounded-md bg-neutral-100">
+                        <Image
+                          src={item.imageSrc}
+                          alt={item.imageAlt}
+                          fill
+                          className="object-cover object-center"
+                          sizes="56px"
+                        />
+                      </span>
+                      <span className="flex min-w-0 grow flex-col gap-2">
+                        <span
+                          className={`font-extended text-black/50 ${pdpType.micro}`}
+                        >
+                          {item.viewedLabel}
+                        </span>
+                        <span className="flex flex-col gap-0.5">
+                          <span
+                            className={`font-extended text-black ${pdpType.body}`}
+                          >
+                            {item.name}
+                          </span>
+                          <span
+                            className={`font-extended text-black ${pdpType.micro}`}
+                          >
+                            {item.price}
+                          </span>
+                        </span>
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={
+                        isLinked ? () => handleViewAgain(item.id) : undefined
+                      }
+                      aria-label={`View again: ${item.name}`}
+                      disabled={!isLinked}
                       className={cn(
-                        "object-cover object-center transition-[filter] duration-300 group-hover:brightness-[1.03]",
-                        pdpCarouselImageClass,
+                        "flex shrink-0 items-center gap-1.5 text-black",
+                        isLinked && pdpPressableClass,
                       )}
-                      sizes="45vw"
-                      priority={index === 0}
-                    />
-                    <span
-                      aria-hidden
-                      className={`font-extended pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center bg-white/90 px-2 py-0.5 leading-none text-neutral-700 shadow-sm backdrop-blur-sm ${pdpType.micro}`}
                     >
-                      {item.viewedLabel}
-                    </span>
-                  </div>
-                </div>
-                <p
-                  className={cn(
-                    `font-extended mt-2 line-clamp-2 text-black ${pdpType.label}`,
-                    isLinked && "cursor-pointer",
-                  )}
-                  onClick={isLinked ? () => handleViewAgain(item.id) : undefined}
-                >
-                  {item.name}
-                </p>
-                <p className={`font-extended mt-0.5 text-black ${pdpType.micro}`}>
-                  {item.price}
-                </p>
-                <PdpTextLinkCta
-                  type="button"
-                  className={cn("mt-2", pdpType.label, isLinked && "cursor-pointer")}
-                  aria-label={`View again: ${item.name}, viewed ${item.viewedLabel}`}
-                  onClick={() => handleViewAgain(item.id)}
-                >
-                  View again
-                </PdpTextLinkCta>
-              </li>
+                      <span className="font-extended text-[13px] leading-none">
+                        View again
+                      </span>
+                      <MaterialIcon
+                        name="arrow_forward"
+                        size={18}
+                        style={{ fontSize: 15 }}
+                        className="text-black"
+                      />
+                    </button>
+                  </li>
                 );
               })}
             </ul>

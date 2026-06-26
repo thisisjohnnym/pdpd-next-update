@@ -18,7 +18,7 @@ type PdpModuleSectionOptions = {
 /** Uniform vertical padding for stacked PDP modules */
 const PDP_MODULE_STACK_PADDING = "pt-16 pb-16";
 const PDP_MODULE_STACK_FIRST_PADDING = "pt-12 pb-16";
-const PDP_MODULE_BREAK_PADDING = "pt-16 pb-20";
+const PDP_MODULE_BREAK_PADDING = "pt-16 pb-12";
 
 /** Shared vertical rhythm for stacked bottom-of-page modules */
 export function pdpModuleSectionClass({

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -16,6 +16,7 @@ import {
 } from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpShopTheLookSheetProps = {
   look: PdpShopTheLookLook | null;
@@ -26,33 +27,7 @@ type PdpShopTheLookSheetProps = {
 /** Bottom sheet — outfit pieces from an on-model gallery photo */
 export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheetProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
+  const mounted = useOverlayDismiss(open, onClose);
 
   if (!look || !mounted) {
     return null;

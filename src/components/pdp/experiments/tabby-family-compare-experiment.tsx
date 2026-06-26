@@ -40,8 +40,8 @@ function ExplorerArrow({
       disabled={disabled}
       aria-label={isPrev ? "Previous Tabby style" : "Next Tabby style"}
       className={cn(
-        "absolute top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white/95 text-black shadow-sm backdrop-blur transition-opacity",
-        isPrev ? "left-1 lg:left-2" : "right-1 lg:right-2",
+        "absolute top-1/2 z-10 inline-flex size-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black backdrop-blur transition-opacity",
+        isPrev ? "left-2" : "right-2",
         disabled
           ? "cursor-not-allowed opacity-0"
           : cn("opacity-100", pdpPressableIconClass),
@@ -49,7 +49,7 @@ function ExplorerArrow({
     >
       <MaterialIcon
         name={isPrev ? "chevron_left" : "chevron_right"}
-        size={24}
+        size={20}
         className="leading-none"
       />
     </button>
@@ -130,8 +130,8 @@ export function TabbyFamilyCompareExperiment() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <div className="mb-6 flex flex-col gap-1">
-            <PdpModuleHeading spacing="none">
+          <div className="mb-6 flex flex-col items-center gap-1 text-center">
+            <PdpModuleHeading spacing="none" className="text-center">
               Explore the Tabby family
             </PdpModuleHeading>
             <p className={cn("m-0 text-neutral-500", pdpType.body)}>
@@ -150,7 +150,7 @@ export function TabbyFamilyCompareExperiment() {
                 className="animate-pdp-family-explorer-enter"
                 aria-live="polite"
               >
-                <div className="relative aspect-square w-full overflow-hidden bg-neutral-100 [transform:translateZ(0)]">
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-neutral-100 [transform:translateZ(0)]">
                   <Image
                     src={featured.imageSrc}
                     alt={featured.imageAlt}
@@ -159,6 +159,16 @@ export function TabbyFamilyCompareExperiment() {
                     sizes="(min-width: 1024px) 420px, 92vw"
                     priority={false}
                   />
+                  {featured.isCurrent ? (
+                    <span
+                      className={cn(
+                        "absolute left-2 top-2 z-10 inline-flex items-center rounded bg-white/90 px-2 pb-1 pt-1.5 leading-none text-black",
+                        pdpType.micro,
+                      )}
+                    >
+                      Current style
+                    </span>
+                  ) : null}
                   <ExplorerArrow
                     direction="prev"
                     disabled={atStart}
@@ -172,16 +182,6 @@ export function TabbyFamilyCompareExperiment() {
                 </div>
 
                 <div className="mt-5 text-center">
-                  {featured.isCurrent ? (
-                    <span
-                      className={cn(
-                        "mb-3 inline-flex items-center rounded-full bg-black px-3 py-1.5 text-white",
-                        pdpType.micro,
-                      )}
-                    >
-                      Current style
-                    </span>
-                  ) : null}
                   <h3 className={cn("m-0", pdpType.headline)}>{featured.name}</h3>
                   <p className={cn("mt-1.5 text-neutral-500", pdpType.body)}>
                     {featured.positioning}
@@ -190,19 +190,20 @@ export function TabbyFamilyCompareExperiment() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 flex justify-center">
               {featured.isCurrent ? (
                 <div
                   className={cn(
-                    "inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-4 py-3.5 text-neutral-500",
-                    pdpType.body,
+                    "inline-flex w-fit items-center gap-1.5 rounded-full bg-[#F0F0F0] py-2 pl-2 pr-3 text-neutral-500",
+                    pdpType.label,
                   )}
                   aria-disabled
                 >
                   <MaterialIcon
-                    name="check"
+                    name="check_circle"
+                    filled
                     size={18}
-                    className="leading-none"
+                    className="leading-none text-black"
                   />
                   <span className="font-extended">You&rsquo;re viewing this style</span>
                 </div>

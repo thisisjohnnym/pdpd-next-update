@@ -68,7 +68,6 @@ import type {
 import { pdpType } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import {
-  bottomCtaOffset,
   BOTTOM_CTA_OFFSET,
   HERO_IMMERSIVE_CLASS,
   HERO_IMMERSIVE_MEDIA_CLASS,
@@ -88,6 +87,12 @@ const GALLERY_MEDIA_STACK_CLASS = "flex flex-col bg-white";
 
 /** Bottom-of-page ecommerce modules — free-form scroll, sized to their content */
 const ECOMM_MODULE_CLASS = "w-full shrink-0";
+
+/**
+ * Gallery index after which "The details" module is injected. Per the r2 design
+ * it sits after the Studio Product (0) and Editorial (1) desire slides.
+ */
+const PDP_DETAILS_AFTER_SLIDE_INDEX = 1;
 
 type GallerySectionSurface = "dark" | "light" | "muted" | "transparent";
 
@@ -673,9 +678,6 @@ export function PdpGalleryView({
       ? getTabbyGalleryMorePhotosForColor(selectedColorId)
       : PDP_GALLERY_MORE_PHOTOS;
   const lastPanelSlideIndex = getLastGalleryPanelSlideIndex(gallerySlides);
-  const galleryScrollPad = {
-    paddingBottom: bottomCtaOffset(showTabbyExperiment),
-  } as const;
 
   useEffect(() => {
     onStrapOptionsOpenChange?.(strapOptionsId !== null);
@@ -696,18 +698,33 @@ export function PdpGalleryView({
       />
     ) : null}
 
-    <div className={GALLERY_CLASS} style={galleryScrollPad}>
+    <div className={GALLERY_CLASS}>
       {showTabbyExperiment ? <PdpTabbyVariantModule /> : null}
       <div className={GALLERY_MEDIA_STACK_CLASS}>
         <ChapterAnchor id="overview" />
-        {/* Product Details — first content block after the hero (matches Paper) */}
-        <ChapterAnchor id="the-details" />
-        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light">
-          <PdpProductDetailsModule />
-        </PdpScrollReveal>
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
+          // "The details" sits after the Studio Product + Editorial slides (matches r2).
+          const detailsBlock: ReactNode[] =
+            index === PDP_DETAILS_AFTER_SLIDE_INDEX
+              ? [
+                  <ChapterAnchor
+                    key={`anchor-the-details-${index}`}
+                    id="the-details"
+                  />,
+                  <PdpScrollReveal
+                    key={`product-details-${index}`}
+                    className={ECOMM_MODULE_CLASS}
+                    surface="light"
+                  >
+                    <PdpProductDetailsModule />
+                  </PdpScrollReveal>,
+                ]
+              : [];
+
+          // fallow-ignore-next-line complexity
+          const slideSections: ReactNode[] = (() => {
           if (slide.type === "editorial") {
             return [
               gallerySection(
@@ -888,6 +905,9 @@ export function PdpGalleryView({
               { surface: "light" },
             ),
           ];
+          })();
+
+          return [...slideSections, ...detailsBlock];
         })}
         <div ref={galleryEndRef} aria-hidden className="h-px w-full shrink-0" />
       </div>
@@ -924,7 +944,7 @@ export function PdpGalleryView({
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="28dvh">
         <PdpCoachPremiumModule />
       </PdpScrollReveal>
-      <PdpScrollReveal className="w-full shrink-0" surface="light" lazyMount reserveMinHeight="20dvh">
+      <PdpScrollReveal className="w-full shrink-0" surface="dark">
         <PdpSiteFooter />
       </PdpScrollReveal>
     </div>

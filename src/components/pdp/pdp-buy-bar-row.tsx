@@ -83,7 +83,7 @@ export function PdpBuyBarRow({
   return (
     <div className={cn("flex w-full items-stretch gap-2", className)}>
       {!hideColor ? (
-        <div className={cn("flex items-center", isTabbyProduct ? "min-w-0 flex-[2]" : "shrink-0")}>
+        <div className={cn("flex items-center", isTabbyProduct ? "min-w-0 flex-1" : "shrink-0")}>
           <PdpColorSelector
             colors={colors}
             selectedId={activeColorId}
@@ -102,9 +102,7 @@ export function PdpBuyBarRow({
         className={
           hideColor
             ? "min-w-0 w-full flex-1"
-            : isTabbyProduct
-              ? "min-w-0 flex-[3]"
-              : "min-w-0 flex-1"
+            : "min-w-0 flex-1"
         }
       >
         <button
@@ -130,7 +128,7 @@ export function PdpBuyBarRow({
               style={{ color: atbChrome.foreground }}
               aria-hidden
             />
-            <span className="translate-y-px text-[12px]">Add to bag</span>
+            <span className="translate-y-px text-[14px]">Add to bag</span>
           </span>
         </button>
       </div>

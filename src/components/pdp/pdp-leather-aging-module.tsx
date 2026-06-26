@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -161,7 +161,7 @@ export function PdpLeatherAgingModule({
   isLastPanel?: boolean;
   onQuickAdd?: () => void;
 }) {
-  const { image, stages, careNudge } = PDP_LEATHER_AGING;
+  const { image, stages, careNudge, title } = PDP_LEATHER_AGING;
   const panel = experiencePanelSectionProps(isLastPanel);
   const maxIndex = stages.length - 1;
   const [dragProgress, setDragProgress] = useState(0);
@@ -185,8 +185,8 @@ export function PdpLeatherAgingModule({
     [careNudge.productIds],
   );
 
-  const motionClass = isDragging ? "transition-none" : "transition-[width,left,opacity] duration-500 ease-out";
   const imageMotionClass = isDragging ? "transition-none" : "transition-opacity duration-500 ease-out";
+  const dotMotionClass = isDragging ? "transition-none" : "transition-[width,height,background-color] duration-300 ease-out";
   const labelMotionClass = isDragging ? "transition-none" : "transition-colors duration-200";
 
   const setDragProgressValue = useCallback((progress: number) => {
@@ -325,128 +325,111 @@ export function PdpLeatherAgingModule({
         className="shrink-0 bg-white px-4 pt-3.5"
         style={{ paddingBottom: `calc(0.75rem + var(--pdp-safe-area-bottom))` }}
       >
-        <div className="pdp-aging-timeline">
-          <div
-            role="slider"
-            tabIndex={0}
-            aria-valuemin={0}
-            aria-valuemax={maxIndex}
-            aria-valuenow={isDragging ? previewStageIndex : stageIndex}
-            aria-valuetext={
-              isDragging ? stages[previewStageIndex]!.label : stage.label
-            }
-            aria-label="Leather aging over time"
-            className={cn(
-              "relative mt-1 flex h-11 cursor-grab touch-none select-none items-center px-2 active:cursor-grabbing",
-              isDragging && "cursor-grabbing",
-            )}
-            onPointerDown={handleScrubPointerDown}
-            onPointerMove={handleScrubPointerMove}
-            onPointerUp={endScrub}
-            onPointerCancel={endScrub}
-            onKeyDown={(event) => {
-              if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
-                event.preventDefault();
-                commitStageIndex(Math.max(0, stageIndex - 1));
-              }
+        <div className="pdp-aging-timeline flex flex-col gap-4">
+          <h3 className={cn(pdpType.headline, "m-0 text-center")}>
+            {title}
+          </h3>
 
-              if (event.key === "ArrowRight" || event.key === "ArrowUp") {
-                event.preventDefault();
-                commitStageIndex(Math.min(maxIndex, stageIndex + 1));
-              }
-            }}
-          >
+          <div className="mx-auto flex w-[90%] flex-col gap-2.5">
             <div
-              ref={trackRef}
-              className="pdp-aging-timeline__track relative h-[3px] w-full rounded-full bg-neutral-200"
+              role="slider"
+              tabIndex={0}
+              aria-valuemin={0}
+              aria-valuemax={maxIndex}
+              aria-valuenow={isDragging ? previewStageIndex : stageIndex}
+              aria-valuetext={
+                isDragging ? stages[previewStageIndex]!.label : stage.label
+              }
+              aria-label="Leather aging over time"
+              className={cn(
+                "relative flex h-11 cursor-grab touch-none select-none items-center px-2 active:cursor-grabbing",
+                isDragging && "cursor-grabbing",
+              )}
+              onPointerDown={handleScrubPointerDown}
+              onPointerMove={handleScrubPointerMove}
+              onPointerUp={endScrub}
+              onPointerCancel={endScrub}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                  event.preventDefault();
+                  commitStageIndex(Math.max(0, stageIndex - 1));
+                }
+
+                if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                  event.preventDefault();
+                  commitStageIndex(Math.min(maxIndex, stageIndex + 1));
+                }
+              }}
             >
               <div
-                className={cn(
-                  "absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-neutral-950 via-neutral-800 to-[#7a5c32]",
-                  motionClass,
-                )}
-                style={{ width: `${dragProgress}%` }}
-              />
+                ref={trackRef}
+                className="pdp-aging-timeline__track relative flex w-full items-center"
+              >
+                {stages.map((item, index) => {
+                  const active = displayStageIndex === index;
+                  const isLast = index === maxIndex;
 
+                  return (
+                    <Fragment key={item.id}>
+                      <span
+                        aria-hidden
+                        className="flex size-[22px] shrink-0 items-center justify-center"
+                      >
+                        <span
+                          className={cn(
+                            "rounded-full",
+                            dotMotionClass,
+                            active
+                              ? "size-[22px] bg-[#c38980]"
+                              : "size-3 border-2 border-solid border-black bg-white",
+                          )}
+                        />
+                      </span>
+
+                      {!isLast ? (
+                        <span aria-hidden className="h-[2px] grow bg-[#e2e2e2]" />
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
               {stages.map((item, index) => {
                 const isFirst = index === 0;
                 const isLast = index === maxIndex;
 
                 return (
-                  <span
+                  <button
                     key={item.id}
-                    aria-hidden
+                    type="button"
+                    onClick={() => commitStageIndex(index)}
+                    aria-current={stageIndex === index ? "step" : undefined}
                     className={cn(
-                      "absolute top-1/2 size-2 -translate-y-1/2 rounded-full bg-neutral-300",
-                      isFirst && "left-0 -translate-x-1/2",
-                      isLast && "right-0 translate-x-1/2",
-                      !isFirst && !isLast && "left-1/2 -translate-x-1/2",
+                      pdpType.label,
+                      "flex-1 leading-[110%] text-black transition-colors active:text-neutral-600",
+                      isFirst && "text-left",
+                      isLast && "text-right",
+                      !isFirst && !isLast && "text-center",
                     )}
-                  />
+                  >
+                    {item.label}
+                  </button>
                 );
               })}
-
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neutral-950 will-change-[left,transform]",
-                  "shadow-[0_0_0_5px_rgba(0,0,0,0.08)]",
-                  isDragging
-                    ? "scale-125 shadow-[0_0_0_10px_rgba(0,0,0,0.14)] transition-[transform,box-shadow] duration-150 ease-out"
-                    : "transition-[left,transform,box-shadow] duration-500 ease-out",
-                )}
-                style={{ left: `${dragProgress}%` }}
-              />
             </div>
           </div>
 
-          <div className="mt-0.5 grid grid-cols-3">
-            {stages.map((item, index) => {
-              const isFirst = index === 0;
-              const isLast = index === maxIndex;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => commitStageIndex(index)}
-                  aria-current={stageIndex === index ? "step" : undefined}
-                  className={cn(
-                    "font-extended min-h-6 py-0 text-[10px] tracking-[0.2px]",
-                    labelMotionClass,
-                    isFirst && "text-left",
-                    isLast && "text-right",
-                    !isFirst && !isLast && "text-center",
-                    stageIndex === index
-                      ? "text-black"
-                      : "text-neutral-400 active:text-neutral-700",
-                  )}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-3 text-left">
-            <p
-              className={cn(
-                "font-extended text-sm tracking-[0.2px] text-black",
-                labelMotionClass,
-              )}
-            >
-              {displayStage.timeline}
-            </p>
-            <p
-              className={cn(
-                pdpType.caption,
-                "mt-1 text-neutral-600",
-                labelMotionClass,
-              )}
-            >
-              {displayStage.summary}
-            </p>
-          </div>
+          <p
+            className={cn(
+              pdpType.label,
+              "text-balance text-center text-black opacity-70",
+              labelMotionClass,
+            )}
+          >
+            {`${displayStage.timeline} — ${displayStage.summary}`}
+          </p>
 
           {careProducts.length ? (
             <div

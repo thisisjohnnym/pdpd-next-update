@@ -17,11 +17,11 @@ function CoachPremiumPerkRow({ perk }: { perk: PdpCoachPremiumPerk }) {
     <li className="flex items-center gap-3">
       <span
         aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10"
+        className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-white/[0.12]"
       >
         <MaterialIcon
           name={perk.icon}
-          size={20}
+          size={18}
           filled={perk.showVerifiedBadge}
           className={perk.showVerifiedBadge ? "text-[#1D9BF0]" : "text-white"}
         />
@@ -59,34 +59,36 @@ export function PdpCoachPremiumModule() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24}>
-          <PdpRevealItem className="flex flex-col gap-6 rounded-3xl bg-neutral-900 p-6">
-            <div className="flex flex-col items-center gap-2.5 text-center">
-              <h2 className="font-extended m-0 text-2xl font-normal tracking-[0.2px] text-balance text-white">
+          <PdpRevealItem className="flex flex-col gap-8 rounded-2xl bg-[#1C1C1C] px-4 pt-6 pb-4">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <h2 className="font-extended m-0 text-[28px] leading-[34px] font-normal tracking-[0.4px] text-balance text-white">
                 {title}
               </h2>
-              <p className={`m-0 text-pretty text-white/65 ${pdpType.caption}`}>
+              <p
+                className={`font-extended m-0 text-pretty text-white ${pdpType.body}`}
+              >
                 {body}
               </p>
             </div>
 
-            <ul className="m-0 flex list-none flex-col gap-4 p-0">
+            <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
               {perks.map((perk) => (
                 <CoachPremiumPerkRow key={perk.id} perk={perk} />
               ))}
             </ul>
 
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-stretch gap-2">
               <button
                 type="button"
                 onClick={() => setToastOpen(true)}
                 className={cn(
-                  "font-extended flex h-12 w-full items-center justify-center rounded-full bg-white text-sm tracking-[0.2px] text-black",
+                  "font-extended flex h-[50px] w-full items-center justify-center rounded-full bg-white text-base leading-none tracking-[0.2px] text-black",
                   pdpPressableClass,
                 )}
               >
                 {cta}
               </button>
-              <p className={`m-0 text-center text-white/40 ${pdpType.label}`}>
+              <p className={`m-0 text-center text-white/50 ${pdpType.micro}`}>
                 {toast}
               </p>
             </div>

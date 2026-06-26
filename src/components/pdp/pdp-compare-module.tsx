@@ -296,18 +296,30 @@ export function PdpCompareModule({
                           : "Show all differences"}
                       </span>
                       <MaterialIcon
-                        name={showAllDifferences ? "expand_less" : "expand_more"}
+                        name="expand_more"
                         size={18}
-                        className="shrink-0 leading-none"
+                        className={cn(
+                          "shrink-0 leading-none transition-transform duration-300 ease-out",
+                          showAllDifferences && "rotate-180",
+                        )}
                       />
                     </button>
-                    {showAllDifferences ? (
-                      <div className="flex flex-col divide-y divide-neutral-200 border-t border-neutral-200">
-                        {verbalRows.map((row) => (
-                          <DifferenceRow key={row.id} row={row} />
-                        ))}
+                    <div
+                      role="region"
+                      aria-hidden={!showAllDifferences}
+                      className={cn(
+                        "grid transition-[grid-template-rows] duration-200 ease-out",
+                        showAllDifferences ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                      )}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        <div className="flex flex-col divide-y divide-neutral-200 border-t border-neutral-200">
+                          {verbalRows.map((row) => (
+                            <DifferenceRow key={row.id} row={row} />
+                          ))}
+                        </div>
                       </div>
-                    ) : null}
+                    </div>
                   </div>
                 ) : null}
               </div>

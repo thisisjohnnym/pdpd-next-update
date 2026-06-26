@@ -3,7 +3,6 @@
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
 import { useActiveProduct } from "./pdp-active-product-context";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { heroProductHudOffset } from "./pdp-viewport-chrome";
@@ -21,11 +20,9 @@ export function PdpGalleryProductHud() {
   const visible = isHeroOverlayVisible(opacity);
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const tabbyExperiment = useTabbyFamilyCompareExperiment();
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
-  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
-  const hudBottom = heroProductHudOffset(showTabbyExperiment);
+  const hudBottom = heroProductHudOffset();
   const playHeroEnter = useHeroEnterOnce();
 
   return (
@@ -53,6 +50,8 @@ export function PdpGalleryProductHud() {
           bottom: hudBottom,
           opacity,
           visibility: visible ? "visible" : "hidden",
+          paddingLeft: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
+          paddingRight: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
         }}
       >
         <div className={cn(playHeroEnter && "pdp-hero-hud-enter")}>
@@ -69,7 +68,7 @@ export function PdpGalleryProductHud() {
                   <p className="shrink-0 tabular-nums">{summary.price}</p>
                 </div>
                 <p className="mt-0.5 text-xs font-normal leading-none tracking-[0.2px] text-white/75">
-                  {summary.subtitle}
+                  in {summary.subtitle}
                 </p>
               </div>
             </GridItem>

@@ -2,6 +2,12 @@
 
 Comprehensive inventory of the Product Detail Page (PDP) implementation for **Tabby 26** in PDP-NEXT. All components live under `src/components/pdp/`. Mock product data is centralized in `pdp-data.ts`.
 
+Implementation inventory only: this file is not the design authority.
+For design fidelity and parity decisions, use:
+
+- `docs/pdp-paper-source-of-truth.md`
+- `docs/pdp-paper-parity-audit-checklist.md`
+
 ---
 
 ## Page architecture
@@ -427,3 +433,5 @@ Based on git status and component implementation, the following features were bu
 - [Typography](design-system/typography.md)
 - [Icons](design-system/icons.md)
 - [Coach PDP sticky notes](design-workshop/coach-pdp-sticky-notes.md)
+- [PDP Paper Source Of Truth](pdp-paper-source-of-truth.md)
+- [PDP Paper Parity Audit Checklist](pdp-paper-parity-audit-checklist.md)

@@ -8,32 +8,54 @@ import {
   type ReactNode,
 } from "react";
 
+export type ScrollDirection = "up" | "down";
+
 export type ScrollSnapshot = {
   scrollY: number;
   viewportHeight: number;
+  /** Last sustained scroll direction (deadzoned to avoid jitter) */
+  direction: ScrollDirection;
 };
 
 type ScrollListener = (snapshot: ScrollSnapshot) => void;
 
+/** Ignore sub-threshold scroll deltas when deciding direction */
+const DIRECTION_THRESHOLD_PX = 4;
+
 /** Stable SSR snapshot — must be referentially identical across calls */
-const SERVER_SNAPSHOT: ScrollSnapshot = { scrollY: 0, viewportHeight: 0 };
+const SERVER_SNAPSHOT: ScrollSnapshot = {
+  scrollY: 0,
+  viewportHeight: 0,
+  direction: "down",
+};
 
 class ScrollBus {
   private listeners = new Set<() => void>();
   private frame = 0;
   private snapshot: ScrollSnapshot = SERVER_SNAPSHOT;
   private subscribed = false;
+  /** Last position the direction was committed from — only advances past the deadzone */
+  private directionAnchorY = 0;
+  private direction: ScrollDirection = "down";
 
   /** Returns true when values changed — assigns a new object for useSyncExternalStore */
+  // fallow-ignore-next-line complexity
   private commitSnapshot(scrollY: number, viewportHeight: number): boolean {
+    const delta = scrollY - this.directionAnchorY;
+    if (Math.abs(delta) >= DIRECTION_THRESHOLD_PX) {
+      this.direction = delta > 0 ? "down" : "up";
+      this.directionAnchorY = scrollY;
+    }
+
     if (
       this.snapshot.scrollY === scrollY &&
-      this.snapshot.viewportHeight === viewportHeight
+      this.snapshot.viewportHeight === viewportHeight &&
+      this.snapshot.direction === this.direction
     ) {
       return false;
     }
 
-    this.snapshot = { scrollY, viewportHeight };
+    this.snapshot = { scrollY, viewportHeight, direction: this.direction };
     return true;
   }
 
@@ -136,19 +158,6 @@ export function PdpScrollProvider({ children }: { children: ReactNode }) {
 
 function useScrollBus() {
   return useContext(ScrollBusContext);
-}
-
-/** Shared RAF-coalesced scroll subscription — one listener for all consumers */
-function useCoalescedScroll(listener: ScrollListener) {
-  const bus = useScrollBus();
-
-  useEffect(
-    () =>
-      bus.subscribe(() => {
-        listener(bus.getSnapshot());
-      }),
-    [bus, listener],
-  );
 }
 
 export function useScrollSnapshot(): ScrollSnapshot {

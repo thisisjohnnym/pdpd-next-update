@@ -1,19 +1,9 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { PdpSocialView } from "@/components/pdp/pdp-social-view";
-import {
-  resolveTabbyFamilyCompareExperiment,
-  TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG,
-} from "@/components/pdp/experiments/tabby-family-compare-resolve";
+import { PdpProductPageView } from "@/components/pdp/pdp-product-page-view";
 import { getPdpProduct } from "@/components/pdp/pdp-products";
+import { isKiraProductSlug } from "@/components/pdp/pdp-product-routes";
 import {
-  isKiraProductSlug,
-  resolveProductIdFromSlug,
-  resolveTabbySlugFromRoute,
-} from "@/components/pdp/pdp-product-routes";
-import {
-  DEFAULT_TABBY_SLUG,
   getTabbyProductTitle,
   getTabbyStyle,
   parseTabbySlug,
@@ -57,20 +47,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { slug } = await params;
-  const initialProductId = resolveProductIdFromSlug(slug);
-  const tabbySlug = resolveTabbySlugFromRoute(slug);
   const query = await searchParams;
-  const rawFlag = query[TABBY_FAMILY_COMPARE_EXPERIMENT_FLAG];
-  const searchParam = typeof rawFlag === "string" ? rawFlag : null;
-  const tabbyExperimentEnabled = resolveTabbyFamilyCompareExperiment(searchParam);
 
-  return (
-    <Suspense fallback={null}>
-      <PdpSocialView
-        slug={tabbySlug}
-        initialProductId={initialProductId}
-        tabbyExperimentEnabled={tabbyExperimentEnabled}
-      />
-    </Suspense>
-  );
+  return <PdpProductPageView slug={slug} searchParams={query} />;
 }

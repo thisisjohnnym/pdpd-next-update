@@ -56,7 +56,7 @@ const TYPING_DELAY_MS = 750;
 
 function UserBubble({ text }: { text: string }) {
   return (
-    <div className="flex justify-end">
+    <div className="pdp-msg-enter flex justify-end">
       <div
         className={cn(
           "max-w-[82%] rounded-[20px] rounded-br-md bg-black px-4 py-2.5 text-white",
@@ -72,7 +72,7 @@ function UserBubble({ text }: { text: string }) {
 
 function AiBubble({ answer }: { answer: ConciergeAnswer }) {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="pdp-msg-enter flex items-start gap-2.5">
       <div className="flex min-w-0 flex-col gap-3">
         <div>
           <p
@@ -129,7 +129,7 @@ function AiBubble({ answer }: { answer: ConciergeAnswer }) {
 
 function TypingBubble() {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="pdp-msg-enter flex items-start gap-2.5">
       <div className="flex items-center gap-1 py-2">
         {[0, 1, 2].map((dot) => (
           <span
