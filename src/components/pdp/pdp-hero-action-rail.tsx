@@ -6,9 +6,6 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_COMMENTS_SUMMARY, PDP_LIKE_SUMMARY, PDP_SAVE_SUMMARY } from "./pdp-data";
-import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
-import { useActiveProduct } from "./pdp-active-product-context";
-import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
@@ -278,11 +275,7 @@ export function PdpHeroActionRail({
 }) {
   const opacity = useHeroScrollOpacity();
   const visible = isHeroOverlayVisible(opacity);
-  const { docked, frostOpacity } = useBottomBarDocked();
-  const { productId } = useActiveProduct();
-  const tabby = useOptionalTabbyVariant();
-  const tabbyExperiment = useTabbyFamilyCompareExperiment();
-  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
+  const { docked } = useBottomBarDocked();
   const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -301,11 +294,12 @@ export function PdpHeroActionRail({
     <>
     <div
       className={cn(
-        "absolute right-3 z-20 flex flex-col items-center gap-4",
+        "absolute z-20 flex flex-col items-center gap-4",
         RAIL_GLYPH_SHADOW,
       )}
       style={{
-        bottom: heroActionRailOffset(showTabbyExperiment, docked),
+        right: "calc(0.5rem + var(--hero-inset, calc(var(--hero-reveal, 0) * 8px)))",
+        bottom: heroActionRailOffset(docked),
         opacity,
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",

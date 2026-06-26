@@ -814,99 +814,6 @@ html.pdp-drag-zoom-scroll-lock {
   .pdp-glass-light--cta {
     background-color: rgb(255 255 255 / 0.96);
   }
-
-  .pdp-bottom-frost-gradient::before {
-    background: linear-gradient(
-      to top,
-      rgb(255 255 255 / 0.96) 0%,
-      rgb(255 255 255 / 0.72) 45%,
-      transparent 100%
-    );
-  }
-}
-
-/* Bottom chrome — frosted fade behind floating CTAs */
-.pdp-bottom-frost-gradient {
-  position: relative;
-  pointer-events: none;
-}
-
-.pdp-bottom-frost-gradient::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-mask-image: linear-gradient(
-    to top,
-    black 0%,
-    rgb(0 0 0 / 0.85) 35%,
-    rgb(0 0 0 / 0.35) 65%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to top,
-    black 0%,
-    rgb(0 0 0 / 0.85) 35%,
-    rgb(0 0 0 / 0.35) 65%,
-    transparent 100%
-  );
-}
-
-.pdp-bottom-frost-gradient::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgb(255 255 255 / 0.82) 0%,
-    rgb(255 255 255 / 0.48) 38%,
-    rgb(255 255 255 / 0.12) 68%,
-    transparent 100%
-  );
-}
-
-.pdp-bottom-frost-gradient--prominent::before {
-  -webkit-backdrop-filter: blur(52px) saturate(220%);
-  backdrop-filter: blur(52px) saturate(220%);
-  -webkit-mask-image: linear-gradient(
-    to top,
-    black 0%,
-    black 30%,
-    rgb(0 0 0 / 0.96) 48%,
-    rgb(0 0 0 / 0.78) 66%,
-    rgb(0 0 0 / 0.42) 84%,
-    rgb(0 0 0 / 0.12) 94%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to top,
-    black 0%,
-    black 30%,
-    rgb(0 0 0 / 0.96) 48%,
-    rgb(0 0 0 / 0.78) 66%,
-    rgb(0 0 0 / 0.42) 84%,
-    rgb(0 0 0 / 0.12) 94%,
-    transparent 100%
-  );
-}
-
-.pdp-bottom-frost-gradient--prominent::after {
-  background: linear-gradient(
-    to top,
-    rgb(255 255 255 / 1) 0%,
-    rgb(255 255 255 / 0.98) 22%,
-    rgb(255 255 255 / 0.9) 40%,
-    rgb(255 255 255 / 0.68) 58%,
-    rgb(255 255 255 / 0.38) 76%,
-    rgb(255 255 255 / 0.14) 90%,
-    transparent 100%
-  );
-}
-
-.pdp-bottom-frost-gradient--docked::before,
-.pdp-bottom-frost-gradient--docked::after {
-  opacity: 0.35;
 }
 
 /* Full-viewport gallery panels snap on scroll (toggle in pdp-panel-scroll.ts) */
@@ -997,4 +904,120 @@ html.pdp-panel-scroll {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   transform: translateY(1px);
+}
+
+/* ---------------------------------------------------------------------------
+   Interaction polish — interruptible enter/exit + icon cross-fade
+   (make-interfaces-feel-better: CSS-only, no motion library)
+--------------------------------------------------------------------------- */
+:root {
+  --pdp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Backdrop / scrim fade behind menus and cards */
+.pdp-fade {
+  transition: opacity 200ms var(--pdp-ease-emphasized);
+}
+
+/* Pop surface — popovers, detail cards. Enter: fade + scale + unblur.
+   State is driven by useMountTransition via [data-state]. */
+.pdp-pop {
+  transition:
+    opacity 220ms var(--pdp-ease-emphasized),
+    transform 220ms var(--pdp-ease-emphasized),
+    filter 220ms var(--pdp-ease-emphasized);
+}
+.pdp-pop[data-state="closed"] {
+  opacity: 0;
+  transform: scale(0.96);
+  filter: blur(4px);
+}
+.pdp-pop[data-state="open"] {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* Pop that rises from the bottom (jump menu) — softer, directional */
+.pdp-pop-up {
+  transition:
+    opacity 220ms var(--pdp-ease-emphasized),
+    transform 220ms var(--pdp-ease-emphasized);
+}
+.pdp-pop-up[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.pdp-pop-up[data-state="open"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Contextual icon cross-fade — both icons stay mounted, one overlaid.
+   Exact values per skill: scale 0.25 -> 1, opacity 0 -> 1, blur 4px -> 0. */
+.pdp-icon-swap {
+  position: relative;
+  display: inline-flex;
+}
+.pdp-icon-swap__layer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 300ms var(--pdp-ease-emphasized),
+    transform 300ms var(--pdp-ease-emphasized),
+    filter 300ms var(--pdp-ease-emphasized);
+}
+.pdp-icon-swap__layer--overlay {
+  position: absolute;
+  inset: 0;
+}
+.pdp-icon-swap__layer[data-active="false"] {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+}
+.pdp-icon-swap__layer[data-active="true"] {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* One-shot enter for streamed content (chat bubbles) — keyframe is correct here
+   per skill: staged, runs once on mount, stable keys prevent re-trigger. */
+@keyframes pdp-msg-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+.pdp-msg-enter {
+  animation: pdp-msg-enter 280ms var(--pdp-ease-emphasized) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp-fade,
+  .pdp-pop,
+  .pdp-pop-up,
+  .pdp-icon-swap__layer {
+    transition: none;
+  }
+  .pdp-pop[data-state="closed"],
+  .pdp-pop-up[data-state="closed"] {
+    transform: none;
+    filter: none;
+  }
+  .pdp-icon-swap__layer[data-active="false"] {
+    transform: none;
+    filter: none;
+  }
+  .pdp-msg-enter {
+    animation: none;
+  }
 }
