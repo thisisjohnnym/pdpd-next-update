@@ -844,6 +844,13 @@ html.pdp-panel-scroll {
   height: var(--pdp-immersive-height, 100svh);
 }
 
+/* Inside PdpHeroShell — match inset media frame, not raw viewport */
+.pdp-hero-immersive--fill-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
 .pdp-edge-to-edge__media,
 .pdp-hero-immersive__media {
   position: absolute;
@@ -868,6 +875,22 @@ html.pdp-panel-scroll {
   z-index: 5;
   height: calc(var(--pdp-safe-area-top) + 4.5rem);
   background: linear-gradient(to bottom, rgb(0 0 0 / 0.42), transparent);
+}
+
+.pdp-hero-ui-chrome {
+  opacity: var(--hero-ui-opacity, 1);
+  filter: blur(var(--hero-ui-blur, 0));
+  transition:
+    opacity 180ms ease-out,
+    filter 180ms ease-out;
+}
+
+:root {
+  --pdp-hero-middle-gradient: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
 }
 
 .pdp-gallery-panel__frame {

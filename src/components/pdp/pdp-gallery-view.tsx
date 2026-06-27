@@ -59,6 +59,11 @@ import {
   PDP_STUDIO_BACKDROP_CLASS,
   PDP_STRAP_OPTIONS,
 } from "./pdp-data";
+import {
+  HERO_FILTER_GRADIENT,
+  HERO_MIDDLE_GRADIENT,
+  HERO_MIDDLE_HEIGHT_FRACTION,
+} from "./pdp-hero-tokens";
 import type {
   PdpBundleAddPayload,
   PdpInfluencerCredit,
@@ -134,6 +139,7 @@ export function PdpGalleryHero({
   onOpenReviews,
   onOpenArTryOn,
   isLastPanel = false,
+  fillFrame = false,
 }: {
   videoSrc: string;
   poster?: string;
@@ -141,6 +147,8 @@ export function PdpGalleryHero({
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
   isLastPanel?: boolean;
+  /** Size to parent media frame (PdpHeroShell) instead of 100svh */
+  fillFrame?: boolean;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [isActive, setIsActive] = useState(true);
@@ -168,8 +176,10 @@ export function PdpGalleryHero({
   return (
     <section
       ref={sectionRef}
+      data-hero-section
       className={cn(
         HERO_IMMERSIVE_CLASS,
+        fillFrame && "pdp-hero-immersive--fill-frame flex-1",
         "shrink-0",
         galleryPanelClassName(isLastPanel),
       )}
@@ -182,11 +192,11 @@ export function PdpGalleryHero({
             ariaLabel={alt}
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
-            priorityAutoplay
+            priorityAutoplay={true}
             skeletonTone="dark"
             showControls={false}
             showMuteControl={false}
-            tapToTogglePlayback
+            tapToTogglePlayback={true}
             className={cn(
               "pdp-gallery-panel__cover size-full object-cover object-center",
             )}
@@ -197,13 +207,29 @@ export function PdpGalleryHero({
         </div>
       </div>
 
-      <div aria-hidden className="pdp-hero-immersive__top-scrim" />
+      <div
+        aria-hidden
+        className="pdp-hero-ui-chrome pointer-events-none absolute inset-0 z-[10]"
+        style={{ backgroundImage: HERO_FILTER_GRADIENT }}
+      />
 
-      <PdpGalleryProductHud />
+      <div
+        aria-hidden
+        className="pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[8]"
+        style={{
+          height: `${HERO_MIDDLE_HEIGHT_FRACTION * 100}%`,
+          backgroundImage: HERO_MIDDLE_GRADIENT,
+        }}
+      />
+
+      <div aria-hidden className="pdp-hero-ui-chrome pdp-hero-immersive__top-scrim" />
+
       <PdpHeroActionRail
         onOpenReviews={onOpenReviews}
         onOpenArTryOn={onOpenArTryOn}
       />
+
+      <PdpGalleryProductHud />
     </section>
   );
 }

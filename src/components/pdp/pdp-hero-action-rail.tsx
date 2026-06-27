@@ -10,10 +10,9 @@ import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
 import {
-  isHeroOverlayVisible,
-  useHeroScrollOpacity,
-} from "./use-hero-scroll-opacity";
-import { useBottomBarDocked } from "./use-bottom-bar-docked";
+  isHeroUiChromeVisible,
+  useHeroUiChrome,
+} from "./use-hero-ui-chrome";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
 import { useReducedMotion } from "./use-reduced-motion";
 
@@ -273,9 +272,8 @@ export function PdpHeroActionRail({
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
 }) {
-  const opacity = useHeroScrollOpacity();
-  const visible = isHeroOverlayVisible(opacity);
-  const { docked } = useBottomBarDocked();
+  const { opacity } = useHeroUiChrome();
+  const visible = isHeroUiChromeVisible(opacity);
   const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -294,13 +292,12 @@ export function PdpHeroActionRail({
     <>
     <div
       className={cn(
-        "absolute z-20 flex flex-col items-center gap-4",
+        "pdp-hero-ui-chrome absolute z-20 flex flex-col items-center gap-4",
         RAIL_GLYPH_SHADOW,
       )}
       style={{
         right: "calc(0.5rem + var(--hero-inset, calc(var(--hero-reveal, 0) * 8px)))",
-        bottom: heroActionRailOffset(docked),
-        opacity,
+        bottom: heroActionRailOffset(),
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",
       }}

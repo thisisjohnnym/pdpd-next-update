@@ -29,6 +29,9 @@ If any item fails, the module is not done.
 
 ## P0 Priority Modules (Audit First)
 
+- [ ] **Hero chrome shell** — `PdpHeroShell`, `PdpBrandBarReveal` (`pdp-hero-shell.tsx`, `pdp-brand-bar-reveal.tsx`) — Paper [`6AJ-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/6AJ-0) / [`64P-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/64P-0); spec: `docs/pdp-hero-chrome.md`
+- [ ] **Hero video + overlays** — `PdpGalleryHero`, `PdpGalleryProductHud`, `PdpHeroActionRail` — gradients, 80% UI fade
+- [ ] **Floating CTA bar** — `PdpBottomActions`, `PdpBuyBarRow` — fixed sibling of Phone; 50px pills; hides only for sheets
 - [ ] `PdpCoachAiModule` (`src/components/pdp/pdp-shopping-discovery-module.tsx`)
 - [ ] `PdpCoachAiSheet` (`src/components/pdp/pdp-coach-ai-sheet.tsx`)
 - [ ] `PdpCoachPremiumModule` (`src/components/pdp/pdp-coach-premium-module.tsx`)

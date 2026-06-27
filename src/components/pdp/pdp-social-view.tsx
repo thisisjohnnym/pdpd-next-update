@@ -9,9 +9,8 @@ import { useActiveProduct, PdpActiveProductProvider } from "./pdp-active-product
 import { PdpAddToBagSheet } from "./pdp-add-to-bag-sheet";
 import { PdpArTryOnSheet } from "./pdp-ar-try-on-sheet";
 import { PdpBottomActions } from "./pdp-bottom-actions";
-import { PdpBrandBarReveal } from "./pdp-brand-bar-reveal";
 import { PdpBrowserChromeSync } from "./pdp-browser-chrome-sync";
-import { PdpHeroHug } from "./pdp-hero-hug";
+import { PdpHeroShell } from "./pdp-hero-shell";
 import { PdpHeroRevealProvider } from "./use-pdp-hero-reveal";
 import { getDefaultColorId } from "./pdp-product-colors";
 import {
@@ -35,6 +34,7 @@ import { DEFAULT_TABBY_SLUG } from "./pdp-tabby-variants";
 import type { PdpBundleAddPayload, PdpStrapSetAddPayload } from "./pdp-data";
 import { TabbyFamilyCompareExperimentProvider } from "./experiments/tabby-family-compare-flag";
 import { PdpScrollProvider } from "./use-coalesced-scroll";
+import { useHeroUiChromeVars } from "./use-hero-ui-chrome";
 
 type BagConfirmation =
   | { type: "product" }
@@ -129,6 +129,17 @@ function PdpSocialViewInner() {
   };
 
   useEffect(() => {
+    if (typeof history === "undefined" || !("scrollRestoration" in history)) {
+      return;
+    }
+    const previous = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    return () => {
+      history.scrollRestoration = previous;
+    };
+  }, []);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
     setSelectedColorId(getDefaultColorId(productId));
   }, [productId]);
@@ -146,14 +157,10 @@ function PdpSocialViewInner() {
     comparePickerOpen ||
     arTryOnOpen;
 
-  return (
-    <div
-      className={cn(
-        "relative min-h-svh w-full overflow-x-clip",
-        isStaticHero || isColorHero ? "bg-white" : "bg-black",
-      )}
-    >
-      <PdpHeroRevealProvider enabled={showBrandBar}>
+  useHeroUiChromeVars(showBrandBar && product.hero.kind === "video");
+
+  const pageBody = (
+    <>
       <PdpBrowserChromeSync />
       <PdpProductUrlSync activeColorId={activeColorId} />
       <PdpOverlayHeader
@@ -172,18 +179,16 @@ function PdpSocialViewInner() {
           onOpenReviews={() => openReviews("comments")}
         />
       ) : showBrandBar && product.hero.kind === "video" ? (
-        <>
-          <PdpBrandBarReveal />
-          <PdpHeroHug>
-            <PdpGalleryHero
-              videoSrc={product.hero.videoSrc}
-              poster={product.hero.poster}
-              alt={product.hero.alt}
-              onOpenReviews={() => openReviews("comments")}
-              onOpenArTryOn={() => setArTryOnOpen(true)}
-            />
-          </PdpHeroHug>
-        </>
+        <PdpHeroShell>
+          <PdpGalleryHero
+            videoSrc={product.hero.videoSrc}
+            poster={product.hero.poster}
+            alt={product.hero.alt}
+            onOpenReviews={() => openReviews("comments")}
+            onOpenArTryOn={() => setArTryOnOpen(true)}
+            fillFrame
+          />
+        </PdpHeroShell>
       ) : null}
       <SafeAreaMain className="bg-transparent" omitTop>
         {tabbyColorHero ? (
@@ -261,7 +266,21 @@ function PdpSocialViewInner() {
         }}
         confirmation={bagConfirmation}
       />
-      </PdpHeroRevealProvider>
+    </>
+  );
+
+  return (
+    <div
+      className={cn(
+        "relative min-h-svh w-full overflow-x-clip",
+        isStaticHero || isColorHero ? "bg-white" : "bg-black",
+      )}
+    >
+      {showBrandBar ? (
+        <PdpHeroRevealProvider>{pageBody}</PdpHeroRevealProvider>
+      ) : (
+        pageBody
+      )}
     </div>
   );
 }

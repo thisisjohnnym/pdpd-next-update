@@ -4,35 +4,41 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useState,
   useRef,
   type ReactNode,
 } from "react";
 
 import { PDP_BRAND_BAR_HEIGHT } from "./pdp-brand-bar";
+import {
+  HERO_INTRO_HOLD_MS,
+  HERO_SHRINK_TO_FULL_MS,
+} from "./pdp-hero-tokens";
 import { useReducedMotion } from "./use-reduced-motion";
 
 /**
- * Hero "reveal" — a single 0→1 value shared by the brand-bar overlay, the hero
- * hug (inset + top radius) and the overlay header offset.
- *
- * The shrink/switcher is NOT a passive `scrollY === 0` state. It is purposeful:
- *  - a one-time intro peek on load (visible ~1s, then animates away), and
- *  - an intentional pull-down at the very top (touch drag or wheel overscroll)
- *    with rubber-band resistance; it latches open only past a threshold.
- *
- * Just scrolling back up to the top rests at full-screen (reveal 0).
+ * Hero "reveal" — 0→1 value for shrunk↔full-bleed hero land (see docs/pdp-hero-chrome.md).
+ * Purposeful states: intro peek on load (3s hold, 1.8s collapse), pull-to-reveal at top
+ * (same hold + collapse after open animation), scroll-back rests full bleed.
  */
 
-const INTRO_HOLD_MS = 3000;
-/** Shrink (hugged) → full-bleed: a deliberate, gentle ~3s ease-out collapse */
-const SHRINK_TO_FULL_MS = 3000;
-const SETTLE_MS = 320;
+const INTRO_HOLD_MS = HERO_INTRO_HOLD_MS;
+const SHRINK_TO_FULL_MS = HERO_SHRINK_TO_FULL_MS;
 /** Drag distance is dampened so the switcher is not trivially triggered */
 const PULL_DAMPING = 0.42;
 /** Fraction of the bar height (after damping) needed to latch open */
 const LATCH_THRESHOLD = 0.5;
 /** Idle gap that ends a wheel "gesture" and decides latch vs spring-back */
 const WHEEL_END_MS = 140;
+/** User must have scrolled past this before scroll-back-to-top is recognized */
+const SCROLL_AWAY_THRESHOLD_PX = 8;
+/** Treat scrollY within this of 0 as "at top" (iOS rubber-band wobble) */
+const SCROLL_TOP_EPSILON_PX = 2;
+/** Block pull gestures after scroll-back or during scroll momentum (iOS) */
+const GESTURE_SUPPRESS_MS = 800;
+/** Scroll considered idle after this gap — ends "active scroll" window */
+const SCROLL_SETTLE_MS = 150;
 
 function clamp01(value: number): number {
   return value < 0 ? 0 : value > 1 ? 1 : value;
@@ -42,15 +48,27 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
+/** Settle duration scales with how far reveal still has to travel. */
+function gestureSettleDuration(from: number, to: number): number {
+  const distance = Math.abs(to - from);
+  return Math.max(200, SHRINK_TO_FULL_MS * distance);
+}
+
 class HeroRevealController {
-  private reveal = 0;
+  private reveal = 1;
   reducedMotion = false;
+  /** Blocks collapse until intro hold finishes — guards against stray gestures / Strict Mode. */
+  introCollapseAllowed = false;
+  introComplete = false;
+  /** Ignores pull-to-reveal after intro collapse or scroll-back-to-top. */
+  gestureSuppressUntil = 0;
   private readonly listeners = new Set<(reveal: number) => void>();
   private raf = 0;
   private from = 0;
   private to = 0;
   private start = 0;
   private duration = 0;
+  private autohideTimer = 0;
 
   getReveal(): number {
     return this.reveal;
@@ -77,10 +95,79 @@ class HeroRevealController {
     }
   }
 
-  /** Imperative set during an active drag (no tween). */
-  setDirect(value: number) {
+  private canMoveTo(next: number): boolean {
+    if (next < this.reveal && !this.introCollapseAllowed) {
+      return false;
+    }
+    return true;
+  }
+
+  cancelAutohide() {
+    if (this.autohideTimer) {
+      window.clearTimeout(this.autohideTimer);
+      this.autohideTimer = 0;
+    }
+  }
+
+  /** After pull-to-reveal opens fully, hold then collapse like the intro peek. */
+  private scheduleAutohideAfterOpen() {
+    if (!this.introComplete || this.reveal < 0.99) {
+      return;
+    }
+    this.cancelAutohide();
+    this.autohideTimer = window.setTimeout(() => {
+      this.autohideTimer = 0;
+      if (this.reveal < 0.99) {
+        return;
+      }
+      if (this.reducedMotion) {
+        this.setDirect(0, "autohide-hold-timer");
+        return;
+      }
+      this.animateTo(0, undefined, "autohide-hold-timer");
+    }, INTRO_HOLD_MS);
+  }
+
+  allowIntroCollapse() {
+    this.introCollapseAllowed = true;
+  }
+
+  suppressGestures(ms: number) {
+    this.gestureSuppressUntil = Math.max(
+      this.gestureSuppressUntil,
+      performance.now() + ms,
+    );
+  }
+
+  isGestureSuppressed(): boolean {
+    return performance.now() < this.gestureSuppressUntil;
+  }
+
+  finishIntro() {
+    this.introComplete = true;
+    this.suppressGestures(GESTURE_SUPPRESS_MS);
+  }
+
+  /** One-shot intro peek — always emits even when already at 1 (Strict Mode remount). */
+  rearmIntro() {
+    this.cancelAutohide();
     this.cancelAnim();
+    this.introCollapseAllowed = false;
+    this.introComplete = false;
+    this.reveal = 1;
+    this.emit();
+  }
+
+  /** Imperative set during an active drag (no tween). */
+  setDirect(value: number, source = "unknown") {
     const next = clamp01(value);
+    if (!this.canMoveTo(next)) {
+      return;
+    }
+    if (next < this.reveal) {
+      this.cancelAutohide();
+    }
+    this.cancelAnim();
     if (next === this.reveal) {
       return;
     }
@@ -89,20 +176,25 @@ class HeroRevealController {
   }
 
   // fallow-ignore-next-line complexity
-  animateTo(target: number, durationMs?: number) {
+  animateTo(target: number, durationMs?: number, source = "unknown") {
     const next = clamp01(target);
-    // Collapsing toward full-bleed (reveal decreasing) is the deliberate ~3s
-    // shrink→full-bleed animation; expanding back to the shrink stays snappy.
+    if (!this.canMoveTo(next)) {
+      return;
+    }
+    if (next < this.reveal) {
+      this.cancelAutohide();
+    }
     const collapsing = next < this.reveal;
     const resolved =
       durationMs ??
-      (collapsing
-        ? this.reducedMotion
-          ? 0
-          : SHRINK_TO_FULL_MS
-        : SETTLE_MS);
+      (this.reducedMotion && collapsing
+        ? 0
+        : gestureSettleDuration(this.reveal, next));
     if (resolved <= 0 || typeof performance === "undefined") {
-      this.setDirect(next);
+      this.setDirect(next, source);
+      if (next >= 0.99 && this.introComplete) {
+        this.scheduleAutohideAfterOpen();
+      }
       return;
     }
     this.from = this.reveal;
@@ -116,13 +208,21 @@ class HeroRevealController {
 
   private tick = (now: number) => {
     const t = this.duration <= 0 ? 1 : Math.min(1, (now - this.start) / this.duration);
-    this.reveal = this.from + (this.to - this.from) * easeOutCubic(t);
+    const next = this.from + (this.to - this.from) * easeOutCubic(t);
+    if (!this.canMoveTo(next)) {
+      this.cancelAnim();
+      return;
+    }
+    this.reveal = next;
     this.emit();
     if (t < 1) {
       this.raf = requestAnimationFrame(this.tick);
     } else {
       this.raf = 0;
       this.reveal = this.to;
+      if (this.to >= 0.99 && this.introComplete) {
+        this.scheduleAutohideAfterOpen();
+      }
       this.emit();
     }
   };
@@ -131,73 +231,155 @@ class HeroRevealController {
 const HeroRevealContext = createContext<HeroRevealController | null>(null);
 
 export function PdpHeroRevealProvider({
-  enabled,
   children,
 }: {
-  enabled: boolean;
   children: ReactNode;
 }) {
   const reducedMotion = useReducedMotion();
-  const controllerRef = useRef<HeroRevealController | null>(null);
-  if (!controllerRef.current) {
-    controllerRef.current = new HeroRevealController();
-  }
-  const controller = controllerRef.current;
+  const [controller] = useState(() => new HeroRevealController());
 
-  // Publish the normalized reveal progress as a CSS variable so fixed/overlay
-  // chrome can animate with the same timing curve as the hero hug.
   useEffect(() => {
+    controller.reducedMotion = reducedMotion;
+  }, [reducedMotion, controller]);
+
+  // Publish reveal + run intro in one layout pass so subscribers never miss the peek.
+  useLayoutEffect(() => {
     if (typeof document === "undefined") {
       return;
     }
+
     const unsub = controller.subscribe((reveal) => {
       document.documentElement.style.setProperty("--hero-reveal", `${reveal}`);
     });
+
+    let cancelled = false;
+    let collapseTimer = 0;
+    controller.rearmIntro();
+
+    const holdTimer = window.setTimeout(() => {
+      if (cancelled) {
+        return;
+      }
+
+      controller.allowIntroCollapse();
+
+      if (controller.reducedMotion) {
+        controller.setDirect(0);
+        controller.finishIntro();
+        return;
+      }
+
+      controller.animateTo(0, undefined, "intro-hold-timer");
+      collapseTimer = window.setTimeout(() => {
+        if (!cancelled) {
+          controller.finishIntro();
+        }
+      }, SHRINK_TO_FULL_MS + 32);
+    }, INTRO_HOLD_MS);
+
     return () => {
+      cancelled = true;
+      controller.cancelAutohide();
+      window.clearTimeout(holdTimer);
+      window.clearTimeout(collapseTimer);
       unsub();
-      document.documentElement.style.removeProperty("--hero-reveal");
     };
   }, [controller]);
 
-  // One-time intro peek: show the switcher for ~1s, then let it slip away.
+  // Pull-to-reveal: intentional overscroll at top only — scroll-back rests full bleed.
   useEffect(() => {
-    controller.reducedMotion = reducedMotion;
-    if (!enabled) {
-      controller.setDirect(0);
-      return;
-    }
-    controller.setDirect(1);
-    const timer = window.setTimeout(() => {
-      if (reducedMotion) {
-        controller.setDirect(0);
-      } else {
-        controller.animateTo(0);
-      }
-    }, INTRO_HOLD_MS);
-    return () => window.clearTimeout(timer);
-  }, [enabled, reducedMotion, controller]);
-
-  // Pull-to-reveal: only fires as an *overscroll* past the top, so plain
-  // scroll-up to the hero stays full-screen.
-  useEffect(() => {
-    if (!enabled || typeof window === "undefined") {
+    if (typeof window === "undefined") {
       return;
     }
 
     const barHeight = PDP_BRAND_BAR_HEIGHT;
     const latchPx = barHeight * LATCH_THRESHOLD;
-    const atTop = () => window.scrollY <= 0;
+    const atTop = () => window.scrollY <= SCROLL_TOP_EPSILON_PX;
+    const canTouchPull = () => controller.introComplete;
+    /** Wheel pull only after the user has scrolled — blocks load-time trackpad noise. */
+    const canWheelPull = () => controller.introComplete && hasScrolledAwayFromTop;
 
     let touching = false;
     let startY = 0;
     let dragPx = 0;
+    let wheelAccum = 0;
+    let wheelTimer = 0;
+    let scrollEndTimer = 0;
+    let isScrollActive = false;
+    /** Latched once the user scrolls past the top threshold — enables wheel pull-to-reveal. */
+    let hasScrolledAwayFromTop = false;
+    /** Only set by scroll events — never from initial scrollY (avoids false arrival on load) */
+    let wasAwayFromTop = false;
+
+    const blockTouchPull = () => {
+      if (!canTouchPull()) {
+        return true;
+      }
+      if (controller.isGestureSuppressed()) {
+        return true;
+      }
+      if (isScrollActive && window.scrollY > SCROLL_AWAY_THRESHOLD_PX) {
+        return true;
+      }
+      return false;
+    };
+
+    const blockWheelPull = () => {
+      if (!canWheelPull()) {
+        return true;
+      }
+      if (controller.isGestureSuppressed()) {
+        return true;
+      }
+      if (isScrollActive && window.scrollY > SCROLL_AWAY_THRESHOLD_PX) {
+        return true;
+      }
+      return false;
+    };
+
+    const onArrivedAtTopViaScroll = () => {
+      if (!controller.introComplete) {
+        return;
+      }
+      wheelAccum = 0;
+      controller.setDirect(0, "scroll-back-to-top");
+      controller.suppressGestures(GESTURE_SUPPRESS_MS);
+    };
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      isScrollActive = true;
+      window.clearTimeout(scrollEndTimer);
+      scrollEndTimer = window.setTimeout(() => {
+        isScrollActive = false;
+      }, SCROLL_SETTLE_MS);
+
+      if (y > SCROLL_AWAY_THRESHOLD_PX) {
+        if (controller.introComplete) {
+          hasScrolledAwayFromTop = true;
+        }
+        wasAwayFromTop = true;
+      } else if (atTop() && wasAwayFromTop) {
+        wasAwayFromTop = false;
+        onArrivedAtTopViaScroll();
+      }
+    };
 
     // fallow-ignore-next-line complexity
     const onTouchStart = (event: TouchEvent) => {
+      if (blockTouchPull()) {
+        touching = false;
+        return;
+      }
       if (!atTop() && controller.getReveal() <= 0) {
         touching = false;
         return;
       }
+      if (window.scrollY > SCROLL_AWAY_THRESHOLD_PX && controller.getReveal() <= 0) {
+        touching = false;
+        return;
+      }
+      controller.cancelAutohide();
       touching = true;
       startY = event.touches[0]?.clientY ?? 0;
       dragPx = 0;
@@ -205,7 +387,7 @@ export function PdpHeroRevealProvider({
 
     // fallow-ignore-next-line complexity
     const onTouchMove = (event: TouchEvent) => {
-      if (!touching) {
+      if (!touching || blockTouchPull()) {
         return;
       }
       const dy = (event.touches[0]?.clientY ?? 0) - startY;
@@ -214,8 +396,7 @@ export function PdpHeroRevealProvider({
         return;
       }
       dragPx = dy;
-      const damped = dy * PULL_DAMPING;
-      controller.setDirect(damped / barHeight);
+      controller.setDirect(clamp01(dy / barHeight), "touch-move");
       if (dy > 0) {
         event.preventDefault();
       }
@@ -226,20 +407,49 @@ export function PdpHeroRevealProvider({
         return;
       }
       touching = false;
+
+      if (blockTouchPull()) {
+        return;
+      }
+
       const damped = dragPx * PULL_DAMPING;
-      controller.animateTo(damped >= latchPx ? 1 : 0);
+      const reveal = controller.getReveal();
+      if (damped >= latchPx) {
+        controller.animateTo(
+          1,
+          gestureSettleDuration(reveal, 1),
+          "touch-end",
+        );
+      } else {
+        controller.animateTo(
+          0,
+          gestureSettleDuration(reveal, 0),
+          "touch-end",
+        );
+      }
     };
 
-    let wheelAccum = 0;
-    let wheelTimer = 0;
-
     const decideWheel = () => {
+      if (blockWheelPull()) {
+        wheelAccum = 0;
+        return;
+      }
+
       const damped = wheelAccum * PULL_DAMPING;
+      const reveal = controller.getReveal();
       if (damped >= latchPx) {
-        controller.animateTo(1);
+        controller.animateTo(
+          1,
+          gestureSettleDuration(reveal, 1),
+          "wheel-end-latch",
+        );
         wheelAccum = barHeight / PULL_DAMPING;
       } else {
-        controller.animateTo(0);
+        controller.animateTo(
+          0,
+          gestureSettleDuration(reveal, 0),
+          "wheel-end-spring",
+        );
         wheelAccum = 0;
       }
     };
@@ -253,18 +463,26 @@ export function PdpHeroRevealProvider({
     const onWheel = (event: WheelEvent) => {
       const reveal = controller.getReveal();
       if (event.deltaY < 0 && atTop()) {
+        if (blockWheelPull()) {
+          return;
+        }
+        controller.cancelAutohide();
         wheelAccum += -event.deltaY;
-        controller.setDirect((wheelAccum * PULL_DAMPING) / barHeight);
+        controller.setDirect(clamp01(wheelAccum / barHeight), "wheel-pull");
         event.preventDefault();
         scheduleWheelEnd();
       } else if (event.deltaY > 0 && reveal > 0) {
+        if (blockWheelPull()) {
+          return;
+        }
         wheelAccum = Math.max(0, wheelAccum - event.deltaY);
-        controller.setDirect((wheelAccum * PULL_DAMPING) / barHeight);
+        controller.setDirect(clamp01(wheelAccum / barHeight), "wheel-push");
         event.preventDefault();
         scheduleWheelEnd();
       }
     };
 
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
@@ -272,18 +490,23 @@ export function PdpHeroRevealProvider({
     window.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("wheel", onWheel);
       window.clearTimeout(wheelTimer);
+      window.clearTimeout(scrollEndTimer);
+      controller.cancelAutohide();
     };
-  }, [enabled, controller]);
+  }, [controller]);
 
   return (
     <HeroRevealContext.Provider value={controller}>
-      {children}
+      <div data-hero-reveal-provider="" style={{ display: "contents" }}>
+        {children}
+      </div>
     </HeroRevealContext.Provider>
   );
 }
@@ -301,9 +524,8 @@ export function useHeroRevealApplier(applier: (reveal: number) => void) {
   const applierRef = useRef(applier);
   applierRef.current = applier;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!controller) {
-      applierRef.current(0);
       return;
     }
     return controller.subscribe((value) => applierRef.current(value));

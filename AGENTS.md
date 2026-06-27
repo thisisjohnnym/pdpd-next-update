@@ -17,6 +17,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Use `PageShell`, `PageGrid`, `GridItem` from `@/components/grid/page-grid`. See `docs/design-system/grid.md`.
 
+## Hero chrome
+
+Tabby video hero land (inset shell, floating CTA): `docs/pdp-hero-chrome.md`.
+
 ## Typography
 
 All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/design-system/typography.md`.

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { DevCacheBust } from "@/components/dev-cache-bust";
 import "./globals.css";
 
 const helveticaNeueLTPro = localFont({
@@ -60,6 +61,7 @@ export default function RootLayout({
       className={`${helveticaNeueLTPro.variable} ${helveticaNeueLTProExtended.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-black font-sans text-neutral-900">
+        {process.env.NODE_ENV === "development" ? <DevCacheBust /> : null}
         {children}
       </body>
     </html>

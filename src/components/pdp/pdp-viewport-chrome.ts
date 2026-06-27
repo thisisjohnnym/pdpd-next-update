@@ -1,31 +1,32 @@
+import { CTA_BAR_PADDING_PX, CTA_PILL_HEIGHT_PX } from "./pdp-hero-tokens";
+
 /** Fixed bottom chrome sits above Safari toolbars + home indicator */
 export const BOTTOM_CHROME_OFFSET = "var(--pdp-fixed-bottom-offset)";
 
-/** Floating pill height (gallery scroll) */
-const BOTTOM_PILL_HEIGHT_PX = 48;
+/** Floating CTA bar content height — Paper pill row */
+const CTA_ROW_HEIGHT_PX = CTA_PILL_HEIGHT_PX;
 
-/** Docked hero bar — single row (color + ATB) */
-const BOTTOM_DOCKED_HEIGHT_PX = 54;
+const CTA_BAR_FALLBACK_PX = CTA_ROW_HEIGHT_PX + CTA_BAR_PADDING_PX * 2;
 
-/** Space for fixed bottom CTAs (buttons + spacing + browser chrome) */
-export const BOTTOM_CTA_OFFSET = `calc(${BOTTOM_PILL_HEIGHT_PX}px + 0.625rem + var(--pdp-fixed-bottom-offset))`;
+/** Space for fixed bottom CTAs (pills + container padding + browser chrome) */
+export const BOTTOM_CTA_OFFSET = `calc(${CTA_ROW_HEIGHT_PX}px + ${CTA_BAR_PADDING_PX * 2}px + var(--pdp-fixed-bottom-offset))`;
 
-/** Hero product HUD — clears docked bar with room for title + subtitle */
-const HERO_PRODUCT_HUD_GAP = "1rem";
-const HERO_PRODUCT_HUD_OFFSET = `calc(${BOTTOM_DOCKED_HEIGHT_PX}px + ${HERO_PRODUCT_HUD_GAP} + var(--pdp-fixed-bottom-offset))`;
+/**
+ * Hero product HUD bottom — reveal-aware (Paper `6CU-0` / `670-0`):
+ * shrunk: flush to media frame bottom; inner `pb-2` matches row paddingBottom 8px
+ * full bleed: HeroMiddle paddingBottom = cta-bar-height + safe-area (Paper `66F-0` 64px)
+ */
+const HERO_PRODUCT_HUD_OFFSET = `calc((1 - var(--hero-reveal, 0)) * (var(--cta-bar-height, ${CTA_BAR_FALLBACK_PX}px) + var(--pdp-fixed-bottom-offset)))`;
 
-/** Hero action rail — clears title/price/material on the left */
-const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 5rem)`;
-
-/** Hero action rail when bottom bar floats — clears pill + product HUD */
-const HERO_ACTION_RAIL_FLOATING_OFFSET = `calc(${BOTTOM_CTA_OFFSET} + 9rem)`;
+/** Hero action rail — stacked above product name block */
+const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 4.5rem)`;
 
 export function heroProductHudOffset(): string {
   return HERO_PRODUCT_HUD_OFFSET;
 }
 
-export function heroActionRailOffset(docked = true): string {
-  return docked ? HERO_ACTION_RAIL_OFFSET : HERO_ACTION_RAIL_FLOATING_OFFSET;
+export function heroActionRailOffset(): string {
+  return HERO_ACTION_RAIL_OFFSET;
 }
 
 /** Full layout viewport — immersive panels fill visible screen on mobile Safari */
@@ -38,10 +39,6 @@ export const SCREEN_HEIGHT_STYLE = {
 /** Immersive hero — edge-to-edge under notch / Dynamic Island (opt-out of SafeAreaMain) */
 export const HERO_IMMERSIVE_CLASS = "pdp-hero-immersive";
 export const HERO_IMMERSIVE_MEDIA_CLASS = "pdp-hero-immersive__media";
-
-/** Generic edge-to-edge section (galleries, fullscreen experiences) */
-const EDGE_TO_EDGE_CLASS = "pdp-edge-to-edge";
-const EDGE_TO_EDGE_MEDIA_CLASS = "pdp-edge-to-edge__media";
 
 export const PANEL_MEDIA_FRAME_CLASS = "pdp-gallery-panel__frame";
 export const PANEL_MEDIA_FILL_CLASS = "relative size-full";

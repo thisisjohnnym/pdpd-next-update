@@ -16,27 +16,27 @@ The app entry point (`src/app/page.tsx`) renders **`PdpSocialView`**, which is t
 
 ```
 PdpSocialView (page shell — client)
+├── PdpHeroShell (Phone + brand bar + hero media frame — reveal-driven inset/radius)
+│   └── PdpGalleryHero (video hero slide — Paper gradients)
+│       ├── PdpGalleryHeroVideo
+│       ├── PdpGalleryProductHud
+│       └── PdpHeroActionRail
 ├── PdpGalleryView (scrollable gallery + bottom modules)
-│   ├── Hero + gallery slides (inline)
+│   ├── Additional gallery slides (inline)
 │   ├── PdpGalleryViewMorePhotos
-│   ├── PdpSimilarItemsCarousel
-│   ├── PdpCompareModule
-│   ├── PdpBundleModule
-│   ├── PdpBagSizeModule
-│   ├── PdpReviewsModule
-│   │   └── PdpReviewLikeButton (per review)
-│   ├── PdpRecentlyViewedCarousel
-│   ├── PdpProductSearchModule
+│   ├── …bottom modules…
 │   ├── PdpGalleryPhotosSheet
 │   └── PdpShopTheLookSheet
-├── PdpOverlayHeader (fixed)
-├── PdpBottomActions (fixed)
-│   └── PdpColorSelector
+├── PdpOverlayHeader (fixed — mirrors --hero-inset, hero UI fade/blur)
+├── PdpBottomActions (fixed floating CTA bar — sibling of Phone, not inside hero)
+│   └── PdpColorSelector + PdpBuyBarRow
 ├── PdpReviewsSheet
 └── PdpAddToBagSheet
 ```
 
-**Hero slide internals** (inside `PdpGalleryView`):
+Canonical hero chrome spec: `docs/pdp-hero-chrome.md`.
+
+**Hero slide internals** (inside `PdpGalleryHero` via `PdpHeroShell`):
 
 ```
 PdpHeroSlide
@@ -63,12 +63,14 @@ PdpGalleryPortraitSlide
 |-----------|------|------|---------|
 | **Views & shells** |
 | `PdpSocialView` | `pdp-social-view.tsx` | Client | Main PDP page shell — state for color, bag count, reviews sheet, add-to-bag sheet |
+| `PdpHeroShell` | `pdp-hero-shell.tsx` | Client | Phone wrapper — drives `--hero-inset`, radii, brand bar slot, CTA-aware padding |
 | `PdpGalleryView` | `pdp-gallery-view.tsx` | Client | Scrollable gallery feed + ordered bottom modules; owns sheet state for photos & shop-the-look |
 | `PdpCommunityView` | `pdp-community-view.tsx` | Server | Full-viewport wrapper for community media feed (alternate tab/view) |
 | `PdpMediaFeed` | `pdp-media-feed.tsx` | Client | Vertical snap-scroll media feed from `PDP_MEDIA_SLIDES` |
 | **Fixed chrome** |
-| `PdpOverlayHeader` | `pdp-overlay-header.tsx` | Client | Fixed top nav — menu, Coach logo, search, bag badge; auto light/dark contrast |
-| `PdpBottomActions` | `pdp-bottom-actions.tsx` | Client | Fixed bottom bar — inline color picker + Add to Bag CTA; gradient scrim when scrolled |
+| `PdpOverlayHeader` | `pdp-overlay-header.tsx` | Client | Fixed top nav — menu, Coach logo, search, bag badge; mirrors hero inset; fades/blurs on scroll |
+| `PdpBottomActions` | `pdp-bottom-actions.tsx` | Client | Fixed floating CTA bar — color pill + Add to Bag; always visible except when sheets open |
+| `PdpBrandBarReveal` | `pdp-brand-bar-reveal.tsx` | Client | Coach brand strip — absolute in Phone; slides up with reveal |
 | **Gallery slides** |
 | `PdpGalleryProductHud` | `pdp-gallery-product-hud.tsx` | Client | Hero product name, subtitle, price overlay; fades with scroll |
 | `PdpHeroActionRail` | `pdp-hero-action-rail.tsx` | Client | Hero social actions (like burst, save, comments); opens reviews |
@@ -103,7 +105,9 @@ PdpGalleryPortraitSlide
 | `pdp-data.ts` | `pdp-data.ts` | Shared | All mock product data, types, and constants |
 | `useHeaderContrast` | `use-header-contrast.ts` | Client | Samples backdrop luminance to flip header foreground light/dark |
 | `useScrollNavVisibility` | `use-scroll-nav-visibility.ts` | Client | Hide header on scroll down, reveal on scroll up |
-| `useHeroScrollOpacity` | `use-hero-scroll-opacity.ts` | Client | Hero overlay fade curve based on scroll position |
+| `usePdpHeroReveal` / `PdpHeroRevealProvider` | `use-pdp-hero-reveal.tsx` | Client | Intro shrink → full bleed (3s hold + 1.8s collapse); pull-to-reveal at top only — **not** on scroll-back |
+| `useCtaBarHeight` | `use-cta-bar-height.ts` | Client | `ResizeObserver` → `--cta-bar-height` on floating CTA |
+| `useHeroUiChrome` / `useHeroUiChromeVars` | `use-hero-ui-chrome.ts` | Client | 80%→100% viewport scroll fade + blur for hero overlays |
 
 \*No `"use client"` directive but only imported by client components — effectively client-rendered.
 
@@ -127,7 +131,7 @@ PdpGalleryPortraitSlide
 | `PdpAddToBagSheet` | `open`, `onClose`, `selectedColorId`, `onQuickAdd?`, `confirmation?: BagConfirmation` |
 | `PdpReviewsSheet` | `open`, `onClose` |
 | `PdpGalleryPhotosSheet` | `open`, `onClose` |
-| `PdpShopTheLookSheet` | `look: PdpShopTheLookLook \| null`, `open`, `onClose` |
+| `PdpShopTheLookSheet` | `look: PdpShopTheLookLook | null`, `open`, `onClose` |
 
 `BagConfirmation` union:
 
@@ -315,7 +319,7 @@ See also: `docs/design-system/grid.md`, `.cursor/skills/pdp-grid-system/SKILL.md
 
 - `data-header-surface="light"` on light-background sections signals header to use dark foreground
 - `useHeaderContrast` samples backdrop luminance under the fixed header via `@/lib/header-contrast`
-- `useScrollNavVisibility` hides header on scroll down, reveals on scroll up (always visible within 32px of top)
+- `useScrollNavVisibility` hides header on scroll down, reveals on scroll up (always visible within 32px of top) — **does not** control hero reveal or brand switcher; see `docs/pdp-hero-chrome.md`
 
 ### Hero overlay fade
 

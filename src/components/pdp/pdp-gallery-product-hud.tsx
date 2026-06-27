@@ -1,23 +1,23 @@
 "use client";
 
-import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { useActiveProduct } from "./pdp-active-product-context";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { HERO_FRAME_BOTTOM_PAD_PX } from "./pdp-hero-tokens";
 import { heroProductHudOffset } from "./pdp-viewport-chrome";
-import {
-  isHeroOverlayVisible,
-  useHeroScrollOpacity,
-} from "./use-hero-scroll-opacity";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
+import {
+  isHeroUiChromeVisible,
+  useHeroUiChrome,
+} from "./use-hero-ui-chrome";
 
 const heroHudTextShadow = "drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]";
 
-/** Product info + scrim — hero only, fades on scroll */
+/** Product name + price inside hero video frame (docs/pdp-hero-chrome.md). */
 export function PdpGalleryProductHud() {
-  const opacity = useHeroScrollOpacity();
-  const visible = isHeroOverlayVisible(opacity);
+  const { opacity } = useHeroUiChrome();
+  const visible = isHeroUiChromeVisible(opacity);
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
   const summary =
@@ -26,55 +26,34 @@ export function PdpGalleryProductHud() {
   const playHeroEnter = useHeroEnterOnce();
 
   return (
-    <>
+    <div
+      className="pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 z-[38]"
+      style={{
+        bottom: hudBottom,
+        visibility: visible ? "visible" : "hidden",
+        paddingLeft: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
+        paddingRight: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
+      }}
+    >
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[15]"
-        style={{
-          height: `calc(8rem + ${hudBottom})`,
-          opacity,
-          visibility: visible ? "visible" : "hidden",
-        }}
+        className={cn("px-2", playHeroEnter && "pdp-hero-hud-enter")}
+        style={{ paddingBottom: HERO_FRAME_BOTTOM_PAD_PX }}
       >
         <div
           className={cn(
-            "absolute inset-0 bg-[linear-gradient(to_top,rgb(0_0_0)_0%,rgb(0_0_0/0.82)_34%,rgb(0_0_0/0.42)_62%,transparent_90%)]",
-            playHeroEnter && "pdp-hero-scrim-enter",
+            "font-extended tracking-[0.2px] text-white",
+            heroHudTextShadow,
           )}
-        />
-      </div>
-
-      <div
-        className="pointer-events-none absolute inset-x-0 z-[38]"
-        style={{
-          bottom: hudBottom,
-          opacity,
-          visibility: visible ? "visible" : "hidden",
-          paddingLeft: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
-          paddingRight: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
-        }}
-      >
-        <div className={cn(playHeroEnter && "pdp-hero-hud-enter")}>
-          <PageGrid fullWidth className="pb-2.5">
-            <GridItem mobile={12} desktop={24}>
-              <div
-                className={cn(
-                  "font-extended tracking-[0.2px] text-white",
-                  heroHudTextShadow,
-                )}
-              >
-                <div className="flex items-center justify-between gap-4 text-base font-normal leading-none">
-                  <p className="min-w-0 truncate">{summary.name}</p>
-                  <p className="shrink-0 tabular-nums">{summary.price}</p>
-                </div>
-                <p className="mt-0.5 text-xs font-normal leading-none tracking-[0.2px] text-white/75">
-                  in {summary.subtitle}
-                </p>
-              </div>
-            </GridItem>
-          </PageGrid>
+        >
+          <div className="flex items-center justify-between gap-4 text-base font-normal leading-none">
+            <p className="min-w-0 truncate">{summary.name}</p>
+            <p className="shrink-0 tabular-nums">{summary.price}</p>
+          </div>
+          <p className="mt-0.5 text-xs font-normal leading-none tracking-[0.2px] text-white/75">
+            in {summary.subtitle}
+          </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
@@ -18,27 +16,19 @@ type PdpBuyBarRowProps = {
   onColorSelect: (id: string) => void;
   onAddToBag: () => void;
   onColorSheetOpenChange?: (open: boolean) => void;
-  /** Square corners to match docked Tabby bar */
-  squared?: boolean;
-  /** Floating shadow on the color pill */
-  elevated?: boolean;
-  /** Configurator layout — ATB only, full width */
   hideColor?: boolean;
   className?: string;
 };
 
-/** Color pill + Add to bag — shared by hero in-flow and fixed bottom chrome */
+/** Color pill + Add to bag — floating CTA row (docs/pdp-hero-chrome.md). */
 export function PdpBuyBarRow({
   selectedColorId,
   onColorSelect,
   onAddToBag,
   onColorSheetOpenChange,
-  squared = false,
-  elevated = false,
   hideColor = false,
   className,
 }: PdpBuyBarRowProps) {
-  const [colorSheetOpen, setColorSheetOpen] = useState(false);
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
@@ -50,10 +40,8 @@ export function PdpBuyBarRow({
       ? tabby!.colors.find((entry) => entry.id === activeColorId)
       : colors.find((entry) => entry.id === activeColorId)) ?? colors[0];
   const atbChrome = getAtbChromeFromColorSample(selectedColor?.chromeSample ?? "#0a0a0a");
-  const usesRoundedPill = !squared;
 
   const handleColorSheetOpenChange = (open: boolean) => {
-    setColorSheetOpen(open);
     onColorSheetOpenChange?.(open);
   };
 
@@ -81,7 +69,7 @@ export function PdpBuyBarRow({
   };
 
   return (
-    <div className={cn("flex w-full items-stretch gap-2", className)}>
+    <div className={cn("flex w-full items-stretch gap-2.5", className)}>
       {!hideColor ? (
         <div className={cn("flex items-center", isTabbyProduct ? "min-w-0 flex-1" : "shrink-0")}>
           <PdpColorSelector
@@ -91,28 +79,19 @@ export function PdpBuyBarRow({
             inline
             stretch={isTabbyProduct}
             onOpenChange={handleColorSheetOpenChange}
-            heightClass={usesRoundedPill ? "h-12" : "h-[54px]"}
-            squared={squared}
-            elevated={elevated}
+            heightClass="h-[50px]"
           />
         </div>
       ) : null}
 
-      <div
-        className={
-          hideColor
-            ? "min-w-0 w-full flex-1"
-            : "min-w-0 flex-1"
-        }
-      >
+      <div className={hideColor ? "min-w-0 w-full flex-1" : "min-w-0 flex-1"}>
         <button
           type="button"
           onClick={onAddToBag}
           className={cn(
-            "font-extended relative isolate flex min-w-0 w-full items-center justify-center gap-2 overflow-hidden text-center leading-none transition-[border-radius,background-color,color,box-shadow,transform,filter] duration-300",
+            "font-extended relative isolate flex h-[50px] min-w-0 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
             pdpPressableSolidClass,
             "active:brightness-90",
-            usesRoundedPill ? "h-12 rounded-full px-3" : "h-[54px] rounded-none px-4",
           )}
           style={{
             backgroundColor: atbChrome.background,

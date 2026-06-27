@@ -49,6 +49,7 @@ export function PdpOverlayHeader({
       data-header-chrome
       className={cn(
         "pointer-events-none fixed inset-x-0 top-0 z-30 transition-transform duration-300 ease-out",
+        hugBrandBar && "pdp-hero-ui-chrome",
         visible ? "translate-y-0" : "-translate-y-full",
       )}
     >

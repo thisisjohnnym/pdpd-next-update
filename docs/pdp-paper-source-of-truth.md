@@ -88,6 +88,13 @@ A PDP module is done only when all are true:
 
 ---
 
+## Hero chrome (Tabby video land)
+
+- Paper nodes: **shrunk** `6AJ-0` · **full bleed** `64P-0` on page `updates - r2`
+- Implementation companion: [`docs/pdp-hero-chrome.md`](pdp-hero-chrome.md)
+
+---
+
 ## Required Companion Checklist
 
 Use `docs/pdp-paper-parity-audit-checklist.md` on every PDP module pass.
