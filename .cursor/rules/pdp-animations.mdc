@@ -1,0 +1,40 @@
+---
+description: >-
+  PDP Next animation and motion — mandatory make-interfaces-feel-better skill,
+  validation checklist, and project utilities. Load for any animation, transition,
+  enter/exit, stagger, scroll fade, micro-interaction, or motion polish work.
+alwaysApply: false
+---
+
+# PDP Next — Animation & Motion
+
+Animation work is **not done** until **make-interfaces-feel-better** is implemented and validated.
+
+## Mandatory workflow
+
+1. Read `.agents/skills/make-interfaces-feel-better/SKILL.md` (and category files that apply).
+2. Read `docs/design-system/animations.md` for PDP utilities and definition of done.
+3. Implement the requested motion **and** all applicable skill principles (radius, press scale, tabular nums, etc.).
+4. Hand off with Before | After tables per the skill's Review Output Format.
+5. Verify in browser (Safari, 375px) for visual changes.
+
+Skill entry: `.cursor/skills/make-interfaces-feel-better/SKILL.md`
+
+## Stack
+
+- **CSS `transition`** on specific properties for interactive state (interruptible) — default for hover, toggle, press.
+- **CSS `@keyframes`** for one-shot enters and ambient loops.
+- **GSAP** + `@gsap/react` (`useGSAP`, `gsap.context()`) for timelines, scroll, sequenced enters.
+- **`PdpIconSwap`** + `useMountTransition` for icon cross-fades and CSS presence.
+- `useRafLerp` + `useReducedMotion` from `@/components/pdp/`.
+- **Do not** add `motion` or `framer-motion`.
+
+## Reduced motion
+
+Always wire `useReducedMotion()` or `prefers-reduced-motion` for new motion. List new decorative keyframe classes in the reduced-motion block in `globals.css`.
+
+## Related specs
+
+- Hero reveal / intro: `docs/pdp-hero-chrome.md`
+- Progressive blur: `progressive-blur.mdc`
+- Layout (separate concern): `docs/design-system/grid.md`

@@ -10,6 +10,7 @@ import { CTA_BAR_GAP_PX, CTA_BAR_PADDING_PX } from "./pdp-hero-tokens";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { useCtaBarHeight } from "./use-cta-bar-height";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
+import { usePdpChromeMode } from "./use-pdp-chrome-mode";
 
 type PdpBottomActionsProps = {
   selectedColorId: string;
@@ -31,6 +32,8 @@ export function PdpBottomActions({
   const barRef = useRef<HTMLDivElement>(null);
   const playHeroEnter = useHeroEnterOnce();
 
+  const { jumpBarActive } = usePdpChromeMode(mounted);
+
   useCtaBarHeight(barRef, mounted);
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export function PdpBottomActions({
     return null;
   }
 
-  const chromeHidden = suppressed || colorSheetOpen;
+  const chromeHidden = suppressed || colorSheetOpen || jumpBarActive;
 
   return createPortal(
     <footer

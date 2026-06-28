@@ -208,7 +208,7 @@ export function PdpGalleryHeroVideo({
             className={cn(
               "flex size-[4.25rem] items-center justify-center rounded-full bg-black/55 pdp-backdrop-blur-degrade",
               playbackHint && "motion-safe:animate-[pdp-playback-hint_650ms_ease-out_both]",
-              showFrozenPlayOverlay && "transition-transform active:scale-95",
+              showFrozenPlayOverlay && "transition-transform active:scale-[0.96]",
             )}
           >
             <MaterialIcon

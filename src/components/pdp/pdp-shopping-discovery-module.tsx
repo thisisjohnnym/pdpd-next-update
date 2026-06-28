@@ -85,7 +85,7 @@ export function PdpMoreLikeThisModule({
                         >
                           {item.name}
                         </p>
-                        <p className={`font-extended mt-0.5 text-black ${pdpType.micro}`}>
+                        <p className={`font-extended mt-0.5 text-black tabular-nums ${pdpType.micro}`}>
                           {item.price}
                         </p>
                         <button

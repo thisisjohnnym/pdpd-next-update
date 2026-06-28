@@ -186,7 +186,7 @@ Exit animations should be softer and less attention-grabbing than enter animatio
 
 When icons appear or disappear contextually (on hover, on state change), animate them with `opacity`, `scale`, and `blur` rather than just toggling visibility.
 
-### Motion Example
+### Motion Example (reference only — not used in PDP Next)
 
 ```tsx
 import { AnimatePresence, motion } from "motion/react";
@@ -261,7 +261,46 @@ The non-absolute icon (InactiveIcon) defines the layout size. The absolute icon 
 | **Spring physics** | Yes | No — use `cubic-bezier(0.2, 0, 0, 1)` as approximation |
 | **When to use** | Project already uses `motion/react` | No motion dependency, or keeping bundle small |
 
-**Rule:** Check the project's `package.json` for `motion` or `framer-motion`. If present, use the Motion approach. If not, use the CSS cross-fade pattern — don't add a dependency just for icon transitions.
+**Rule:** Check the project's `package.json` for `motion` or `framer-motion`. If present, use the Motion approach. If not, use the CSS cross-fade pattern — don't add a dependency just for icon transitions. **PDP Next uses GSAP for orchestrated motion and `PdpIconSwap` for icon swaps — see GSAP section below.**
+
+### GSAP (PDP Next)
+
+For timelines, scroll-driven motion, and sequenced enters. Use `useGSAP` from `@gsap/react` with `gsap.context()` cleanup. Never add `motion` / `framer-motion`.
+
+**Contextual icon swap** (when CSS `PdpIconSwap` is not practical):
+
+```tsx
+gsap.fromTo(
+  el,
+  { opacity: 0, scale: 0.25, filter: "blur(4px)" },
+  { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.3, ease: "power2.out" },
+);
+```
+
+**Staggered enter:**
+
+```tsx
+useGSAP(() => {
+  gsap.from(".stagger-item", {
+    opacity: 0,
+    y: 12,
+    filter: "blur(4px)",
+    stagger: 0.1,
+    duration: 0.4,
+    ease: "power2.out",
+  });
+}, { scope: containerRef });
+```
+
+**Subtle exit** (shorter than enter):
+
+```tsx
+gsap.to(el, { opacity: 0, y: -12, filter: "blur(4px)", duration: 0.15, ease: "power2.in" });
+```
+
+**Reduced motion:** gate with `useReducedMotion()` and `gsap.matchMedia("(prefers-reduced-motion: reduce)")` — snap to end state, kill running tweens.
+
+**Skip first-paint enter:** don't auto-play intro timelines on mount for default-state toggles; only animate on subsequent state changes.
 
 ### When to Animate Icons
 

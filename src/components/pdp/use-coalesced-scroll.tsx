@@ -169,3 +169,12 @@ export function useScrollSnapshot(): ScrollSnapshot {
     () => bus.getServerSnapshot(),
   );
 }
+
+/** Imperative access for non-React chrome logic that shares the scroll bus */
+export function subscribeScrollSnapshot(onStoreChange: () => void): () => void {
+  return scrollBus.subscribe(onStoreChange);
+}
+
+export function getScrollSnapshot(): ScrollSnapshot {
+  return scrollBus.getSnapshot();
+}

@@ -83,6 +83,24 @@ Product name sits inside the video frame on HeroMiddle, not on a white strip bel
 - Color pill: white fill, `1px` `#E5E5E5` border, `8px` / `16px` padding
 - Height published to `--cta-bar-height` via `ResizeObserver`
 
+## Bottom chrome swap
+
+From **The Details** onward, the floating CTA (`PdpBottomActions`) swaps with the jump bar (`PdpSectionIndicator`). Logic lives in `use-pdp-chrome-mode.ts`.
+
+| Step | Scroll action | Bottom chrome |
+|------|---------------|---------------|
+| Land | — | CTA |
+| Down (hero) | — | CTA |
+| Reach The Details | — | Jump bar (immediate) |
+| Up (1st swipe) | — | Jump bar persists |
+| Up (2nd swipe) | — | CTA |
+| Down (1st swipe, still in Details) | — | Jump bar (immediate) |
+
+- **Zone:** past hero (`scrollY > 0.85 × viewport`) and active chapter ≥ The Details.
+- **Dismiss:** two upward swipes — first is buffered, second swaps to CTA immediately during scroll.
+- **Restore:** one downward swipe while still in the zone — jump bar returns immediately during scroll (no second-scroll wait).
+- **Above zone:** scrolling back before The Details always shows CTA and resets dismiss state.
+
 ## Chrome suppression
 
 Hide floating CTA when: nav menu, reviews sheet, add-to-bag sheet, strap options, compare picker, AR try-on, or inline color sheet is open.
@@ -102,6 +120,7 @@ Do **not** hide CTA for `jumpBarActive` (section indicator swap).
 | Floating CTA | `src/components/pdp/pdp-bottom-actions.tsx` |
 | CTA height | `src/components/pdp/use-cta-bar-height.ts` |
 | UI scroll chrome | `src/components/pdp/use-hero-ui-chrome.ts` |
+| Bottom chrome swap | `src/components/pdp/use-pdp-chrome-mode.ts` |
 | Video | `src/components/pdp/pdp-gallery-hero-video.tsx` |
 
 ## Out of scope

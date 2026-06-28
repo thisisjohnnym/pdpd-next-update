@@ -108,7 +108,7 @@ function HoldRing({ icon, tone, progress, active, durationMs }: HoldRingProps) {
         size={18}
         filled={engaged}
         className={cn(colors.icon, "transition-transform duration-150")}
-        style={{ transform: engaged ? "scale(0.92)" : "scale(1)" }}
+        style={{ transform: engaged ? "scale(0.96)" : "scale(1)" }}
       />
     </span>
   );
@@ -155,7 +155,7 @@ export function PdpHoldChip<T extends ElementType = "button">({
     <Tag
       className={cn(
         "inline-flex select-none items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5",
-        "transition-transform duration-150 active:scale-[0.97]",
+        "transition-transform duration-150 active:scale-[0.96]",
         CHIP_TONE[tone],
         pressed && "scale-[1.04]",
         className,

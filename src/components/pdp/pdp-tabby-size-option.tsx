@@ -87,7 +87,7 @@ export function PdpTabbySizeOption({
         {disabled ? (
           <span className={cn("text-neutral-400", pdpType.micro)}>{unavailableLabel}</span>
         ) : (
-          <span className={cn("text-neutral-900", pdpType.micro)}>{option.price}</span>
+          <span className={cn("text-neutral-900 tabular-nums", pdpType.micro)}>{option.price}</span>
         )}
       </span>
     </button>

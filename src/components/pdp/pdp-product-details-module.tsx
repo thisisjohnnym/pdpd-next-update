@@ -36,7 +36,7 @@ function MacroHero() {
       <div className="pointer-events-none absolute inset-x-5 bottom-5">
         <PdpTextReveal
           as="h2"
-          className="font-extended m-0 text-[2.5rem] font-normal leading-[0.95] tracking-[-0.01em] text-white"
+          className="font-extended m-0 text-[2.5rem] font-normal leading-[0.95] tracking-[-0.01em] text-balance text-white"
         >
           {eyebrow}
         </PdpTextReveal>
@@ -116,7 +116,7 @@ function PayOverTimeCard() {
         <span className="font-extended text-balance text-sm font-normal leading-[18px] tracking-[0.2px] text-black tabular-nums">
           {amount}
         </span>
-        <span className="font-extended text-balance text-[11px] leading-4 text-neutral-500">
+        <span className="font-extended text-pretty text-[11px] leading-4 text-neutral-500">
           {body}
         </span>
       </span>
@@ -149,7 +149,7 @@ export function PdpProductDetailsModule() {
       <PdpRevealItem delay={80} className="flex flex-col gap-4 px-2 pb-2 pt-[30px]">
         <PdpTextReveal
           as="h3"
-          className="font-extended m-0 text-xl font-normal leading-6 tracking-[-0.01em] text-neutral-900"
+          className="font-extended m-0 text-xl font-normal leading-6 tracking-[-0.01em] text-balance text-neutral-900"
         >
           {closerLook.heading}
         </PdpTextReveal>

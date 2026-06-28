@@ -36,7 +36,7 @@ function NavHighlightCard({ highlight }: { highlight: PdpNavHighlight }) {
           src={highlight.imageSrc}
           alt={highlight.imageAlt}
           fill
-          className="object-cover object-center transition-transform duration-500 group-active:scale-[1.02]"
+          className="object-cover object-center transition-transform duration-500 group-active:scale-[0.96]"
           sizes={highlight.layout === "full" ? "100vw" : "50vw"}
         />
       </div>

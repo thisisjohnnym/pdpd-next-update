@@ -159,16 +159,6 @@ export function TabbyFamilyCompareExperiment() {
                     sizes="(min-width: 1024px) 420px, 92vw"
                     priority={false}
                   />
-                  {featured.isCurrent ? (
-                    <span
-                      className={cn(
-                        "absolute left-2 top-2 z-10 inline-flex items-center rounded bg-white/90 px-2 pb-1 pt-1.5 leading-none text-black",
-                        pdpType.micro,
-                      )}
-                    >
-                      Current style
-                    </span>
-                  ) : null}
                   <ExplorerArrow
                     direction="prev"
                     disabled={atStart}
@@ -190,7 +180,7 @@ export function TabbyFamilyCompareExperiment() {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex min-h-[52px] w-full items-center justify-center">
               {featured.isCurrent ? (
                 <div
                   className={cn(

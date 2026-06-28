@@ -116,7 +116,7 @@ export function PdpComparePickerSheet({
                       <p className={`font-extended text-black ${pdpType.body}`}>
                         {item.name}
                       </p>
-                      <p className={`mt-0.5 font-extended text-black ${pdpType.label}`}>
+                      <p className={`mt-0.5 font-extended text-black tabular-nums ${pdpType.label}`}>
                         {item.price}
                       </p>
                     </div>

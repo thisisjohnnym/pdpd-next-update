@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useShouldRun } from "./use-should-run";
+import { useReducedMotion } from "./use-reduced-motion";
 
 type UseWeightLiftOptions = {
   holdMs: number;
@@ -15,6 +16,7 @@ const SCROLL_CANCEL_PX = 12;
 /** Press-and-hold lift — progress fills, haptic at completion, resets on release */
 export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
   const shouldRun = useShouldRun();
+  const reducedMotion = useReducedMotion();
   const holdMsRef = useRef(holdMs);
   const onLiftRef = useRef(onLift);
   const isHoldingRef = useRef(false);
@@ -59,6 +61,10 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
         return;
       }
 
+      if (reducedMotion) {
+        return;
+      }
+
       const elapsed = now - startTimeRef.current;
       const nextProgress = Math.min(elapsed / holdMsRef.current, 1);
       setProgress(nextProgress);
@@ -72,7 +78,7 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
         rafRef.current = requestAnimationFrame(runTick);
       }
     },
-    [shouldRun],
+    [shouldRun, reducedMotion],
   );
 
   const commitHold = useCallback(
@@ -91,8 +97,24 @@ export function useWeightLift({ holdMs, onLift }: UseWeightLiftOptions) {
         /* pointer may have lifted */
       }
 
-      rafRef.current = requestAnimationFrame(tick);    },
-    [cancelAnimation, tick],
+      if (reducedMotion) {
+        commitTimerRef.current = setTimeout(() => {
+          commitTimerRef.current = null;
+          if (!isHoldingRef.current) {
+            return;
+          }
+          setProgress(1);
+          if (!hapticFiredRef.current) {
+            hapticFiredRef.current = true;
+            onLiftRef.current?.();
+          }
+        }, holdMsRef.current);
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    },
+    [cancelAnimation, reducedMotion, tick],
   );
 
   const handlePointerDown = useCallback(

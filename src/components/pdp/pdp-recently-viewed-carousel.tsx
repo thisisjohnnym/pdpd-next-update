@@ -93,7 +93,7 @@ export function PdpRecentlyViewedCarousel() {
                             {item.name}
                           </span>
                           <span
-                            className={`font-extended text-black ${pdpType.micro}`}
+                            className={`font-extended text-black tabular-nums ${pdpType.micro}`}
                           >
                             {item.price}
                           </span>

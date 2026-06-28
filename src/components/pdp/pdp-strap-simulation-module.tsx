@@ -254,7 +254,7 @@ function BuildSelectionRow({
       </span>
       <span
         className={cn(
-          "font-extended shrink-0",
+          "font-extended shrink-0 tabular-nums",
           pdpType.label,
           value === "Included" ? "text-neutral-500" : "text-black",
         )}
@@ -378,8 +378,8 @@ export function PdpStrapSimulationModule({
           src={preview.src}
           alt={preview.alt}
           fill
-          className="object-contain transition-opacity duration-500 ease-out"
-          style={{ objectPosition: preview.objectPosition ?? "center 37%" }}
+          className="object-cover object-center transition-opacity duration-500 ease-out"
+          style={{ objectPosition: preview.objectPosition ?? "center center" }}
           sizes="100vw"
           priority
           draggable={false}
@@ -484,7 +484,7 @@ export function PdpStrapSimulationModule({
           <span className={`font-extended text-neutral-500 ${pdpType.label}`}>
             Total
           </span>
-          <span className={`font-extended text-black ${pdpType.label}`}>
+          <span className={`font-extended text-black tabular-nums ${pdpType.label}`}>
             {formatSetPrice(setTotal)}
           </span>
         </div>

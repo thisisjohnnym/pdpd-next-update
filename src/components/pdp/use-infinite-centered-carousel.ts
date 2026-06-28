@@ -2,6 +2,8 @@
 
 import { type RefObject, useEffect, useState } from "react";
 
+import { useReducedMotion } from "./use-reduced-motion";
+
 const LOOP_REPETITIONS = 3;
 
 type InfiniteCenteredCarouselOptions = {
@@ -173,15 +175,13 @@ function clampNumber(value: number, min: number, max: number): number {
  * scroll snapping.
  */
 export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>) {
+  const reducedMotion = useReducedMotion();
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) {
       return;
     }
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
 
     const children = () => Array.from(el.children) as HTMLElement[];
 
@@ -201,7 +201,7 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       }
     };
 
-    if (prefersReducedMotion) {
+    if (reducedMotion) {
       resetStyles();
       return;
     }
@@ -337,7 +337,7 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       running = false;
       resetStyles();
     };
-  }, [scrollRef]);
+  }, [scrollRef, reducedMotion]);
 }
 
 /** Maps center-snapped scroll position to the active source item index */

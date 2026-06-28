@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -16,6 +16,7 @@ import {
 } from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpShopTheLookSheetProps = {
@@ -27,9 +28,15 @@ type PdpShopTheLookSheetProps = {
 /** Bottom sheet — outfit pieces from an on-model gallery photo */
 export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheetProps) {
   const titleId = useId();
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, 300);
+  const lastLookRef = useRef(look);
+  if (look) {
+    lastLookRef.current = look;
+  }
+  const displayLook = look ?? lastLookRef.current;
 
-  if (!look || !mounted) {
+  if (!overlayReady || !transition.mounted || !displayLook) {
     return null;
   }
 
@@ -58,11 +65,11 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-4")}>
-            {look.title}
+            {displayLook.title}
           </h2>
 
           <ul className="flex flex-col">
-            {look.items.map((item) => (
+            {displayLook.items.map((item) => (
               <li key={item.id} className="border-t border-neutral-200 first:border-t-0">
                 <a
                   href={item.href}
@@ -84,7 +91,7 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
                     <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
                       {item.name}
                     </p>
-                    <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+                    <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600 tabular-nums">
                       {item.price}
                     </p>
                   </div>

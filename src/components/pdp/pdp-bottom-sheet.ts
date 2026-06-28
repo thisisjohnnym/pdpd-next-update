@@ -65,6 +65,6 @@ export const pdpBottomSheetGrabHandleClass =
   "mx-auto mb-6 h-[3px] w-[50px] rounded-full bg-black/70";
 
 export const pdpBottomSheetCloseButtonClass =
-  "absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full text-neutral-900";
+  "absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full text-neutral-900 pdp-pressable";
 
 export const PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE = 24;

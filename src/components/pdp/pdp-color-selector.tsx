@@ -17,6 +17,7 @@ import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import {
   pdpPressableIconClass,
   pdpVariantPillBaseClass,
@@ -169,10 +170,22 @@ function PdpColorDropup({
             {coachColor.shade}
           </span>
         </span>
-        <MaterialIcon
-          name={open ? "expand_less" : "expand_more"}
-          size={18}
-          className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+        <PdpIconSwap
+          active={open}
+          activeIcon={
+            <MaterialIcon
+              name="expand_less"
+              size={18}
+              className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+            />
+          }
+          inactiveIcon={
+            <MaterialIcon
+              name="expand_more"
+              size={18}
+              className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+            />
+          }
         />
       </button>
     </div>

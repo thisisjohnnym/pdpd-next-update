@@ -1,5 +1,6 @@
 /** Coach body copy rhythm — sizes vary; leading + tracking match coach.com PDP (16px / 21.6px ref) */
-export const pdpBodyRhythm = "font-normal leading-[1.35] tracking-[0.2px]" as const;
+export const pdpBodyRhythm =
+  "font-normal leading-[1.35] tracking-[0.2px] text-pretty" as const;
 
 /** Mobile-first PDP copy — Helvetica Extended everywhere */
 export const pdpType = {
@@ -8,7 +9,7 @@ export const pdpType = {
    * (coach.com ref: 32px / 1.15 / 0.2px — PDP keeps mobile text-xl scale)
    */
   headline:
-    "font-extended text-xl font-normal tracking-[0.4px] text-black",
+    "font-extended text-xl font-normal tracking-[0.4px] text-balance text-black",
   /** Captions, quotes, descriptive paragraphs */
   caption: `font-extended text-sm ${pdpBodyRhythm} lg:text-xs`,
   /** Product names, spec values, list rows */

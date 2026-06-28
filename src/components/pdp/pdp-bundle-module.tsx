@@ -16,7 +16,7 @@ import {
   type PdpBundleAddPayload,
   type PdpBundleItem,
 } from "./pdp-data";
-import { pdpType } from "./pdp-type";
+import { pdpType, pdpPressableClass } from "./pdp-type";
 
 function formatPrice(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;
@@ -51,7 +51,7 @@ function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
       <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.body}`}>
         {item.name}
       </p>
-      <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.label}`}>
+      <p className={`font-extended m-0 leading-[1.1] text-black tabular-nums ${pdpType.label}`}>
         {formatPrice(item.price)}
       </p>
     </div>
@@ -68,6 +68,7 @@ function AddonBundleRow({ item, selected, onToggle }: BundleRowProps) {
       className={cn(
         "flex w-full items-center gap-2.5 rounded-lg border border-neutral-200 p-2 text-left transition-colors",
         item.locked ? "cursor-default" : "active:bg-neutral-50",
+        !item.locked && pdpPressableClass,
       )}
     >
       <span className="relative w-[38px] shrink-0 self-stretch overflow-hidden rounded bg-neutral-100">
@@ -85,7 +86,7 @@ function AddonBundleRow({ item, selected, onToggle }: BundleRowProps) {
           {item.name}
         </span>
         <span
-          className={`font-extended leading-[1.1] text-black opacity-50 ${pdpType.label}`}
+          className={`font-extended leading-[1.1] text-black opacity-50 tabular-nums ${pdpType.label}`}
         >
           {formatPrice(item.price)}
         </span>
@@ -214,11 +215,11 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
               </p>
               <div className="flex items-center gap-2">
                 {hasDiscount ? (
-                  <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black line-through opacity-50">
+                  <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black line-through opacity-50 tabular-nums">
                     {formatPrice(subtotal)}
                   </span>
                 ) : null}
-                <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black">
+                <span className="font-extended text-sm leading-[1.1] tracking-[0.2px] text-black tabular-nums">
                   {formatPrice(total)}
                 </span>
               </div>
@@ -230,7 +231,8 @@ export function PdpBundleModule({ onAddBundle }: PdpBundleModuleProps) {
                 onClick={handleAddBundle}
                 disabled={selectedItems.length === 0 || justAdded}
                 className={cn(
-                  "font-extended flex h-[52px] w-full items-center justify-center rounded-full text-base leading-none tracking-[0.2px] transition-colors",
+                  "font-extended flex h-[52px] w-full items-center justify-center rounded-full text-base leading-none tracking-[0.2px] transition-colors tabular-nums",
+                  pdpPressableClass,
                   justAdded
                     ? "bg-neutral-200 text-neutral-500"
                     : "bg-[#171717] text-white active:bg-neutral-800",

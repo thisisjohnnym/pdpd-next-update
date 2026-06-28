@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { PdpJumpBarTitle } from "./pdp-jump-bar-title";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpChapterAnchorId } from "./pdp-section-chapters";
 import { PDP_CHROME_HEADER_OFFSET, usePdpChromeMode } from "./use-pdp-chrome-mode";
 import { useMountTransition } from "./use-mount-transition";
+import { useRafLerp } from "./use-raf-lerp";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { pdpType, pdpPressableClass } from "./pdp-type";
 
@@ -25,9 +28,42 @@ export function PdpSectionIndicator({
     setMounted(true);
   }, []);
 
-  const { chapters, activeIndex, active, jumpBarActive } =
+  const { chapters, activeIndex, active, jumpBarActive, sectionProgress } =
     usePdpChromeMode(mounted);
   const menu = useMountTransition(menuOpen, 220);
+
+  // Show on scroll-down from "The Details" onward (mutually exclusive with the
+  // CTA). Keep it up while the jump menu is open so it doesn't vanish mid-tap.
+  const visible = (jumpBarActive || menuOpen) && !suppressed;
+
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [targetWidth, setTargetWidth] = useState<number | null>(null);
+  const labels = chapters.map((chapter) => chapter.label);
+  const activeLabel = active?.label ?? "";
+
+  const lerpedSectionProgress = useRafLerp(sectionProgress, { enabled: visible });
+  const smoothedWidth = useRafLerp(targetWidth ?? 0, {
+    enabled: targetWidth !== null && visible,
+  });
+
+  useEffect(() => {
+    const node = measureRef.current;
+    if (!node) {
+      return;
+    }
+
+    const measure = () => {
+      setTargetWidth(node.offsetWidth);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeLabel, activeIndex, chapters.length]);
 
   const jumpTo = useCallback((id: string) => {
     const scrollToAnchor = (behavior: ScrollBehavior) => {
@@ -51,10 +87,6 @@ export function PdpSectionIndicator({
     return null;
   }
 
-  // Only show on scroll-down past the 2nd chapter (mutually exclusive with the
-  // CTA). Keep it up while the jump menu is open so it doesn't vanish mid-tap.
-  const visible = (jumpBarActive || menuOpen) && !suppressed;
-
   return createPortal(
     <>
       <div
@@ -72,34 +104,59 @@ export function PdpSectionIndicator({
         }}
         aria-hidden={!visible}
       >
-        <div className="px-2 lg:px-5">
+        <div className="relative px-2 lg:px-5">
+          <div
+            ref={measureRef}
+            aria-hidden
+            className="pointer-events-none invisible absolute flex items-center gap-2.5 whitespace-nowrap py-2.5 pl-3.5 pr-3"
+          >
+            <MaterialIcon name="list" size={18} />
+            <span className="flex items-baseline gap-2">
+              <span className="font-extended text-[13px] font-normal tracking-[0.2px]">
+                {activeLabel}
+              </span>
+              <span className="shrink-0 tabular-nums text-[11px]">
+                {activeIndex + 1} / {chapters.length}
+              </span>
+            </span>
+            <MaterialIcon name="expand_less" size={18} />
+          </div>
+
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-label="Jump to section"
             className={cn(
-              "pdp-glass-light--cta pointer-events-auto inline-flex items-center gap-2.5 rounded-full py-2.5 pl-3.5 pr-3",
+              "pdp-glass-light--jump-bar pointer-events-auto relative overflow-hidden rounded-full py-2.5 pl-3.5 pr-3",
               pdpPressableClass,
             )}
+            style={{
+              width: targetWidth !== null ? Math.ceil(smoothedWidth) : undefined,
+            }}
           >
-            <MaterialIcon name="list" size={18} className="text-neutral-700" />
-            <span className="flex items-baseline gap-2">
-              <span className="font-extended text-[13px] font-normal tracking-[0.2px] text-black">
-                {active?.label}
-              </span>
-              <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
-                {activeIndex + 1} / {chapters.length}
-              </span>
-            </span>
-            <MaterialIcon
-              name="expand_less"
-              size={18}
-              className={cn(
-                "text-neutral-600 transition-transform duration-300 ease-out",
-                menuOpen && "rotate-180",
-              )}
+            <div
+              aria-hidden
+              className="absolute inset-y-0 left-0 z-0 rounded-full bg-neutral-900/10"
+              style={{ width: `${lerpedSectionProgress * 100}%` }}
             />
+            <span className="relative z-10 flex items-center gap-2.5">
+              <MaterialIcon name="list" size={18} className="text-neutral-700" />
+              <span className="flex items-baseline gap-2">
+                <PdpJumpBarTitle labels={labels} activeIndex={activeIndex} />
+                <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
+                  {activeIndex + 1} / {chapters.length}
+                </span>
+              </span>
+              <MaterialIcon
+                name="expand_less"
+                size={18}
+                className={cn(
+                  "text-neutral-600 transition-transform duration-300 ease-out",
+                  menuOpen && "rotate-180",
+                )}
+              />
+            </span>
           </button>
         </div>
       </div>
@@ -154,27 +211,27 @@ export function PdpSectionIndicator({
                               pdpPressableClass,
                             )}
                           >
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "flex size-5 shrink-0 items-center justify-center",
-                              )}
-                            >
-                              {index < activeIndex ? (
+                            <PdpIconSwap
+                              active={index < activeIndex}
+                              activeIcon={
                                 <MaterialIcon
                                   name="check"
                                   size={18}
                                   className="text-neutral-400"
                                 />
-                              ) : (
-                                <span
-                                  className={cn(
-                                    "size-2 rounded-full",
-                                    isActive ? "bg-black" : "bg-neutral-300",
-                                  )}
-                                />
-                              )}
-                            </span>
+                              }
+                              inactiveIcon={
+                                <span className="flex size-5 items-center justify-center">
+                                  <span
+                                    className={cn(
+                                      "size-2 rounded-full",
+                                      isActive ? "bg-black" : "bg-neutral-300",
+                                    )}
+                                  />
+                                </span>
+                              }
+                              className="flex size-5 shrink-0 items-center justify-center"
+                            />
                             <span className="flex min-w-0 flex-1 flex-col">
                               <span className="font-extended text-[15px] font-normal tracking-[0.2px] text-black">
                                 {chapter.label}

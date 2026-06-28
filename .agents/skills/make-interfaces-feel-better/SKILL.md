@@ -7,6 +7,26 @@ description: Design engineering principles for making interfaces feel polished. 
 
 Great interfaces rarely come from a single thing. It's usually a collection of small details that compound into a great experience. Apply these principles when building or reviewing UI code.
 
+## PDP Next — mandatory validation
+
+In this repository, animation and motion work **must** implement this skill and pass validation before handoff. See `docs/design-system/animations.md` for the definition of done, PDP utilities (`useRafLerp`, `useReducedMotion`), and agent routing. Handoff requires Before | After tables per [Review Output Format](#review-output-format) for every principle you applied.
+
+### PDP Next — motion routing
+
+Skill **values** are normative; **which tool** implements them is project-specific:
+
+| Need | Use | Avoid |
+| --- | --- | --- |
+| Hover, toggle, open/close, press | CSS `transition` on specific properties | GSAP tweens users can reverse mid-gesture |
+| Contextual icon swap | `PdpIconSwap` (CSS cross-fade) | `motion` / `framer-motion` |
+| One-shot enter / stagger / timelines | **GSAP** via `useGSAP` + `gsap.context()` | `motion` / `framer-motion` |
+| Scroll-linked / pinned / scrub | **GSAP ScrollTrigger** | Raw `setState` on scroll |
+| Scroll-linked numeric chase (chrome) | `useRafLerp` until migrated | — |
+| Skip enter on first paint (default-state toggles) | Don't auto-play intro timeline on mount; use `useMountTransition` for CSS presence | `AnimatePresence initial={false}` |
+| Reduced motion | `useReducedMotion()` + `gsap.matchMedia("(prefers-reduced-motion: reduce)")` + CSS `@media` | Decorative motion with no gate |
+
+**Never add** `motion` or `framer-motion` for PDP work.
+
 ## Quick Reference
 
 | Category | When to Use |
@@ -44,7 +64,7 @@ Use a small fixed `translateY` instead of full height. Exits should be softer th
 
 ### 7. Contextual Icon Animations
 
-Animate icons with `opacity`, `scale`, and `blur` instead of toggling visibility. Use exactly these values: scale from `0.25` to `1`, opacity from `0` to `1`, blur from `4px` to `0px`. If the project has `motion` or `framer-motion` in `package.json`, use `transition: { type: "spring", duration: 0.3, bounce: 0 }` — bounce must always be `0`. If no motion library is installed, keep both icons in the DOM (one absolute-positioned) and cross-fade with CSS transitions using `cubic-bezier(0.2, 0, 0, 1)` — this gives both enter and exit animations without any dependency.
+Animate icons with `opacity`, `scale`, and `blur` instead of toggling visibility. Use exactly these values: scale from `0.25` to `1`, opacity from `0` to `1`, blur from `4px` to `0px`. **PDP Next:** use `PdpIconSwap` (CSS cross-fade with `cubic-bezier(0.2, 0, 0, 1)`) or GSAP `fromTo` with `duration: 0.3`, `ease: "power2.out"` — see [animations.md](animations.md). **Other projects:** if `motion` or `framer-motion` is in `package.json`, use `transition: { type: "spring", duration: 0.3, bounce: 0 }` — bounce must always be `0`. Otherwise use the CSS cross-fade pattern (both icons in the DOM, one absolute-positioned).
 
 ### 8. Font Smoothing
 
@@ -68,7 +88,7 @@ A subtle `scale(0.96)` on click gives buttons tactile feedback. Always use `0.96
 
 ### 13. Skip Animation on Page Load
 
-Use `initial={false}` on `AnimatePresence` to prevent enter animations on first render. Verify it doesn't break intentional entrance animations.
+Don't play enter animations on first render for elements already in their default state — only on subsequent state changes. **PDP Next:** use `useMountTransition` for CSS presence, or don't auto-play GSAP intro timelines on mount. **Motion projects:** `initial={false}` on `AnimatePresence`. Verify it doesn't break intentional entrance animations (e.g. hero land sequences).
 
 ### 14. Never Use `transition: all`
 
@@ -92,7 +112,7 @@ Interactive elements need at least 40×40px hit area. Extend with a pseudo-eleme
 | Jarring enter/exit animations | Split, stagger, and keep exits subtle |
 | Numbers cause layout shift | Apply `tabular-nums` |
 | Heavy text on macOS | Apply `antialiased` to root |
-| Animation plays on page load | Add `initial={false}` to `AnimatePresence` |
+| Animation plays on page load | Skip first-paint enter (`useMountTransition`, or don't auto-play intro timeline on mount) |
 | `transition: all` on elements | Specify exact properties |
 | First-frame animation stutter | Add `will-change: transform` (sparingly) |
 | Tiny hit areas on small controls | Extend with pseudo-element to 40×40px |
@@ -135,7 +155,7 @@ Rows should cite the specific file and the specific property that changed when i
 - [ ] Headings use text-wrap: balance
 - [ ] Images have subtle outlines
 - [ ] Buttons use scale on press where appropriate
-- [ ] AnimatePresence uses `initial={false}` for default-state elements
+- [ ] Default-state elements skip enter animation on first paint
 - [ ] No `transition: all` — only specific properties
 - [ ] `will-change` only on transform/opacity/filter, never `all`
 - [ ] Interactive elements have at least 40×40px hit area

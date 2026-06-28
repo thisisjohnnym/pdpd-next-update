@@ -7,7 +7,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import type { PdpStrapOptionsSet } from "./pdp-data";
-import { pdpType } from "./pdp-type";
+import { pdpType, pdpPressableClass } from "./pdp-type";
 
 type PdpGalleryStrapCardProps = {
   set: PdpStrapOptionsSet;
@@ -33,7 +33,7 @@ export function PdpGalleryStrapCard({ set, onOpen }: PdpGalleryStrapCardProps) {
             type="button"
             aria-label="Tuck away strap options"
             onClick={() => setExpanded(false)}
-            className="absolute -left-2 -top-2 z-10 flex size-6 items-center justify-center rounded-full border border-white/60 bg-white/90 text-neutral-600 shadow-sm backdrop-blur-md"
+            className="absolute -left-2 -top-2 z-10 flex size-6 items-center justify-center rounded-full border border-white/60 bg-white/90 text-neutral-600 shadow-sm backdrop-blur-md pdp-pressable"
           >
             <MaterialIcon name="close" size={18} />
           </button>
@@ -44,6 +44,7 @@ export function PdpGalleryStrapCard({ set, onOpen }: PdpGalleryStrapCardProps) {
             className={cn(
               "flex max-w-[min(calc(100vw-2rem),13.5rem)] items-center gap-2.5 rounded-2xl border border-white/50 bg-white/55 py-2 pl-2 pr-2 text-left text-neutral-900 shadow-[0_4px_20px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-150 transition-colors active:bg-white/70",
               pdpType.label,
+              pdpPressableClass,
             )}
             aria-label={`${set.title}, ${set.options.length} options. Shop and add to bag.`}
             aria-expanded
@@ -69,6 +70,7 @@ export function PdpGalleryStrapCard({ set, onOpen }: PdpGalleryStrapCardProps) {
           className={cn(
             "flex items-center gap-1 rounded-l-2xl border border-r-0 border-white/45 bg-white/50 py-1.5 pl-2 pr-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] backdrop-blur-2xl backdrop-saturate-150 transition-colors active:bg-white/65",
             pdpType.label,
+            pdpPressableClass,
           )}
           aria-label={`${set.title}, ${set.options.length} strap options. Tap to expand.`}
           aria-expanded={false}

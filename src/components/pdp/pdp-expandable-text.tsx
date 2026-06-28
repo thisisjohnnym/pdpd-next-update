@@ -2,6 +2,9 @@
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
+import { cn } from "@/lib/cn";
+
+import { pdpPressableClass } from "./pdp-type";
 import { useReducedMotion } from "./use-reduced-motion";
 
 type PdpExpandableTextProps = {
@@ -67,7 +70,7 @@ export function PdpExpandableText({
 
   return (
     <div>
-      <p ref={ref} className={className} style={paragraphStyle}>
+      <p ref={ref} className={cn("text-pretty", className)} style={paragraphStyle}>
         {text}
       </p>
       {overflowing || expanded ? (
@@ -75,7 +78,10 @@ export function PdpExpandableText({
           type="button"
           onClick={() => setExpanded((value) => !value)}
           aria-expanded={expanded}
-          className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-500 underline underline-offset-2 transition-colors hover:text-neutral-800 active:text-neutral-800"
+          className={cn(
+            "font-extended mt-1 text-xs tracking-[0.2px] text-neutral-500 underline underline-offset-2 transition-colors hover:text-neutral-800 active:text-neutral-800",
+            pdpPressableClass,
+          )}
         >
           {expanded ? lessLabel : moreLabel}
         </button>

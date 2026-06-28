@@ -97,6 +97,10 @@ body {
 /* Bag count overlay — extended face without .font-extended position nudge */
 .pdp-bag-badge {
   font-family: var(--font-extended);
+  inset: auto;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
 }
 
 /* Root layout — never offset the document; font-extended nudge is for labels only */
@@ -455,23 +459,20 @@ html.font-extended {
 }
 
 .pdp-pressable--solid:active:not(:disabled) {
-  transform: scale(0.976);
+  transform: scale(0.96);
 }
 
 @media (hover: none) and (pointer: coarse) {
   .pdp-pressable:active:not(:disabled) {
-    transform: scale(0.972);
-    opacity: 0.9;
+    transform: scale(0.96);
   }
 
   .pdp-pressable--solid:active:not(:disabled) {
-    transform: scale(0.976);
-    opacity: 1;
+    transform: scale(0.96);
   }
 
   .pdp-pressable--icon:active:not(:disabled) {
-    transform: scale(0.94);
-    opacity: 1;
+    transform: scale(0.96);
   }
 }
 
@@ -676,6 +677,76 @@ html.pdp-drag-zoom-scroll-lock {
   border-radius: 0.5rem;
 }
 
+/* Jump bar — vertical title push with fade/blur overflow masking */
+.pdp-jump-bar-title {
+  display: inline-block;
+  min-width: 0;
+}
+
+.pdp-jump-bar-title__clip {
+  display: block;
+  overflow: hidden;
+  height: 1.125rem;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 28%,
+    #000 72%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 28%,
+    #000 72%,
+    transparent 100%
+  );
+}
+
+.pdp-jump-bar-title__track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.pdp-jump-bar-title__track--animating {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pdp-jump-bar-title__label {
+  display: block;
+  flex-shrink: 0;
+  height: 1.125rem;
+  line-height: 1.125rem;
+  white-space: nowrap;
+}
+
+.pdp-jump-bar-title__label--outgoing {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pdp-jump-bar-title__label--outgoing-active {
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.pdp-jump-bar-title__label--incoming {
+  opacity: 0;
+  filter: blur(4px);
+  transition:
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pdp-jump-bar-title__label--incoming-active {
+  opacity: 1;
+  filter: blur(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pdp-material-lens > div:first-child {
     animation: none;
@@ -731,6 +802,15 @@ html.pdp-drag-zoom-scroll-lock {
   }
 
   .pdp-toast {
+    transform: none !important;
+  }
+
+  .pdp-jump-bar-title__track--animating,
+  .pdp-jump-bar-title__label--outgoing,
+  .pdp-jump-bar-title__label--incoming {
+    transition: none !important;
+    filter: none !important;
+    opacity: 1 !important;
     transform: none !important;
   }
 }
@@ -798,6 +878,19 @@ html.pdp-drag-zoom-scroll-lock {
   text-shadow: 0 1px 0 rgb(255 255 255 / 0.65);
 }
 
+/* Jump bar — lighter frost so section progress reads clearly */
+.pdp-glass-light--jump-bar {
+  border: none;
+  background-color: rgb(255 255 255 / 0.72);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  backdrop-filter: blur(40px) saturate(150%);
+  box-shadow:
+    0 6px 24px rgb(0 0 0 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2);
+  color: #0a0a0a;
+}
+
 @supports not (backdrop-filter: blur(1px)) {
   .pdp-glass-dark {
     background-color: rgb(23 23 23 / 0.94);
@@ -813,6 +906,10 @@ html.pdp-drag-zoom-scroll-lock {
 
   .pdp-glass-light--cta {
     background-color: rgb(255 255 255 / 0.96);
+  }
+
+  .pdp-glass-light--jump-bar {
+    background-color: rgb(255 255 255 / 0.9);
   }
 }
 

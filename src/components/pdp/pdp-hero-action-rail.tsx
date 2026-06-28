@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
+import {
+  PdpHeroArGlyph,
+  PdpHeroBookmarkGlyph,
+  PdpHeroCommentGlyph,
+  PdpHeroLikeGlyph,
+} from "@/components/icons/pdp-hero-glyphs";
 import { cn } from "@/lib/cn";
 
 import { PDP_COMMENTS_SUMMARY, PDP_LIKE_SUMMARY, PDP_SAVE_SUMMARY } from "./pdp-data";
 import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import {
   isHeroUiChromeVisible,
   useHeroUiChrome,
@@ -52,13 +58,6 @@ const HEART_BURST_PARTICLES = [
   { rise: 102, sway: -14, size: 11, delay: 125, spin: -12 },
   { rise: 84, sway: 6, size: 9, delay: 220, spin: 8 },
 ] as const;
-
-function railIconStyle(filled = false, size = RAIL_ICON_SIZE): CSSProperties {
-  return {
-    fontSize: size,
-    fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${size}`,
-  };
-}
 
 type HeartBurstParticleProps = {
   rise: number;
@@ -113,36 +112,30 @@ function HeartBurstParticle({ rise, sway, size, delay, spin }: HeartBurstParticl
     <span
       ref={particleRef}
       className="pointer-events-none absolute left-1/2 top-[54%] will-change-transform"
-      style={{ color: LIKE_RED } as CSSProperties}
+      style={{ color: LIKE_RED } as React.CSSProperties}
     >
-      <MaterialIcon
-        name="favorite"
-        size={18}
+      <PdpHeroLikeGlyph
         filled
+        size={size}
         className="text-[#FE2C55]"
-        style={{ fontSize: size }}
       />
     </span>
   );
 }
 
 type RailActionProps = {
-  icon: string;
   label: string;
   ariaLabel?: string;
-  filled?: boolean;
-  iconClassName?: string;
   onClick?: () => void;
   pressed?: boolean;
   className?: string;
+  icon: ReactNode;
 };
 
 function RailAction({
   icon,
   label,
   ariaLabel,
-  filled = false,
-  iconClassName,
   onClick,
   pressed,
   className,
@@ -159,13 +152,7 @@ function RailAction({
         className,
       )}
     >
-      <MaterialIcon
-        name={icon}
-        size={RAIL_ICON_SIZE}
-        filled={filled}
-        style={railIconStyle(filled)}
-        className={cn("text-white", iconClassName)}
-      />
+      {icon}
       <span className="font-extended text-[11px] leading-none tracking-[0.2px] text-white">
         {label}
       </span>
@@ -245,16 +232,24 @@ function LikeRailAction({
             ))}
           </span>
         ) : null}
-        <MaterialIcon
-          name="favorite"
-          size={RAIL_ICON_SIZE}
-          filled={liked}
-          style={railIconStyle(liked)}
-          className={cn(
-            "relative z-10 transition-colors duration-200",
-            liked ? "text-[#FE2C55]" : "text-white",
-            bursting && !reducedMotion && "motion-safe:animate-heart-pop",
-          )}
+        <PdpIconSwap
+          active={liked}
+          activeIcon={
+            <PdpHeroLikeGlyph
+              filled
+              size={RAIL_ICON_SIZE}
+              className={cn(
+                "relative z-10 text-[#FE2C55]",
+                bursting && !reducedMotion && "motion-safe:animate-heart-pop",
+              )}
+            />
+          }
+          inactiveIcon={
+            <PdpHeroLikeGlyph
+              size={RAIL_ICON_SIZE}
+              className="relative z-10 text-white"
+            />
+          }
         />
       </span>
       <span className="font-extended text-[11px] leading-none tracking-[0.2px] text-white">
@@ -317,24 +312,37 @@ export function PdpHeroActionRail({
       />
       <RailAction
         className={cn(playHeroEnter && "pdp-social-rail-item")}
-        icon="chat_bubble"
+        icon={<PdpHeroCommentGlyph size={RAIL_ICON_SIZE} className="text-white" />}
         label={PDP_COMMENTS_SUMMARY.label}
         ariaLabel={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
         onClick={onOpenReviews}
       />
       <RailAction
         className={cn(playHeroEnter && "pdp-social-rail-item")}
-        icon="bookmark"
+        icon={
+          <PdpIconSwap
+            active={saved}
+            activeIcon={
+              <PdpHeroBookmarkGlyph
+                saved
+                size={RAIL_ICON_SIZE}
+                className="text-white"
+              />
+            }
+            inactiveIcon={
+              <PdpHeroBookmarkGlyph size={RAIL_ICON_SIZE} className="text-white" />
+            }
+          />
+        }
         label={PDP_SAVE_SUMMARY.label}
         ariaLabel={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
-        filled={saved}
         pressed={saved}
         onClick={handleSave}
       />
       {onOpenArTryOn ? (
         <RailAction
           className={cn("mt-4", playHeroEnter && "pdp-social-rail-item")}
-          icon="view_in_ar"
+          icon={<PdpHeroArGlyph size={RAIL_ICON_SIZE} className="text-white" />}
           label="Try On"
           ariaLabel="Try on with AI"
           onClick={onOpenArTryOn}
@@ -376,11 +384,18 @@ function StaticActionRowTrack({
           onClick={onToggleLike}
           className={STATIC_SOCIAL_PILL_CLASS}
         >
-          <MaterialIcon
-            name="favorite"
-            size={STATIC_PILL_ICON_SIZE}
-            filled={liked}
-            className={cn(liked && "text-[#FE2C55]")}
+          <PdpIconSwap
+            active={liked}
+            activeIcon={
+              <PdpHeroLikeGlyph
+                filled
+                size={STATIC_PILL_ICON_SIZE}
+                className="text-[#FE2C55]"
+              />
+            }
+            inactiveIcon={
+              <PdpHeroLikeGlyph size={STATIC_PILL_ICON_SIZE} />
+            }
           />
           <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
             {PDP_LIKE_SUMMARY.label}
@@ -393,7 +408,7 @@ function StaticActionRowTrack({
           onClick={onOpenReviews}
           className={STATIC_SOCIAL_PILL_CLASS}
         >
-          <MaterialIcon name="chat_bubble" size={STATIC_PILL_ICON_SIZE} />
+          <PdpHeroCommentGlyph size={STATIC_PILL_ICON_SIZE} />
           <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
             {PDP_COMMENTS_SUMMARY.label}
           </span>
@@ -406,10 +421,12 @@ function StaticActionRowTrack({
           onClick={onToggleSave}
           className={STATIC_SOCIAL_PILL_CLASS}
         >
-          <MaterialIcon
-            name="bookmark"
-            size={STATIC_PILL_ICON_SIZE}
-            filled={saved}
+          <PdpIconSwap
+            active={saved}
+            activeIcon={
+              <PdpHeroBookmarkGlyph saved size={STATIC_PILL_ICON_SIZE} />
+            }
+            inactiveIcon={<PdpHeroBookmarkGlyph size={STATIC_PILL_ICON_SIZE} />}
           />
           <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
             {PDP_SAVE_SUMMARY.label}
@@ -423,7 +440,7 @@ function StaticActionRowTrack({
             onClick={onOpenArTryOn}
             className={STATIC_SOCIAL_PILL_CLASS}
           >
-            <MaterialIcon name="view_in_ar" size={STATIC_PILL_ICON_SIZE} />
+            <PdpHeroArGlyph size={STATIC_PILL_ICON_SIZE} />
             <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>Try On</span>
           </button>
         ) : null}

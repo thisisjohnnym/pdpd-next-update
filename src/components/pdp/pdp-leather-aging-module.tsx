@@ -11,7 +11,8 @@ import {
   EXPERIENCE_PANEL_MEDIA_CLASS,
   experiencePanelSectionProps,
 } from "./pdp-experience-panel";
-import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
+import { pdpType, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass, pdpPressableClass } from "./pdp-type";
+import { useMountTransition } from "./use-mount-transition";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
 function formatCarePrice(amount: number): string {
@@ -66,7 +67,7 @@ function AgingCareUpsellRow({
           {product.name}
         </p>
 
-        <p className="font-extended shrink-0 text-sm tracking-[0.2px] text-black">
+        <p className="font-extended shrink-0 text-sm tracking-[0.2px] text-black tabular-nums">
           {formatCarePrice(product.price)}
         </p>
 
@@ -102,6 +103,7 @@ function AgingCareHelp({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const tooltip = useMountTransition(open, 220);
 
   useEffect(() => {
     if (!open) {
@@ -128,17 +130,21 @@ function AgingCareHelp({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-controls="aging-care-help-tooltip"
-        className="inline-flex items-center gap-1.5 text-left text-neutral-500 transition-colors active:text-neutral-700"
+        className={cn(
+          "inline-flex items-center gap-1.5 text-left text-neutral-500 transition-colors active:text-neutral-700",
+          pdpPressableClass,
+        )}
       >
         <MaterialIcon name="help_outline" size={18} className="shrink-0 text-neutral-500" />
         <span className={pdpType.micro}>{label}</span>
       </button>
 
-      {open ? (
+      {tooltip.mounted ? (
         <div
           id="aging-care-help-tooltip"
           role="tooltip"
-          className="absolute bottom-full left-0 z-20 mb-2 w-[min(17rem,calc(100vw-2rem))] rounded-lg border border-neutral-200 bg-white px-3 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
+          data-state={tooltip.state}
+          className="pdp-pop-up absolute bottom-full left-0 z-20 mb-2 w-[min(17rem,calc(100vw-2rem))] rounded-lg border border-neutral-200 bg-white px-3 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
         >
           <div className="flex flex-col gap-1.5">
             {lines.map((line) => (

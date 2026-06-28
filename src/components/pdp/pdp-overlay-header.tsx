@@ -2,8 +2,8 @@
 
 import { useRef } from "react";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
+import { PdpHeroBagGlyph, PdpHeroMenuGlyph } from "@/components/icons/pdp-hero-glyphs";
 import { cn } from "@/lib/cn";
 
 import { useHeaderContrast } from "./use-header-contrast";
@@ -12,16 +12,19 @@ import { PDP_BRAND_BAR_HEIGHT } from "./pdp-brand-bar";
 import { pdpPressableIconClass } from "./pdp-type";
 import { useScrollNavVisibility } from "./use-scroll-nav-visibility";
 import { useHeroRevealApplier } from "./use-pdp-hero-reveal";
+import { PdpIconSwap } from "./pdp-icon-swap";
 
 const HEADER_ICON_SIZE = 24;
 const HEADER_ROW_HEIGHT = 24;
 
 export function PdpOverlayHeader({
   bagCount = 0,
+  menuOpen = false,
   onOpenMenu,
   hugBrandBar = false,
 }: {
   bagCount?: number;
+  menuOpen?: boolean;
   onOpenMenu?: () => void;
   /** When the brand bar is above the hero, ride below it then scrub to top */
   hugBrandBar?: boolean;
@@ -68,7 +71,8 @@ export function PdpOverlayHeader({
           >
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
               onClick={onOpenMenu}
               className={cn(
                 "flex items-center justify-self-start transition-colors duration-300",
@@ -77,7 +81,11 @@ export function PdpOverlayHeader({
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
             >
-              <MaterialIcon name="menu" size={HEADER_ICON_SIZE} />
+              <PdpIconSwap
+                active={menuOpen}
+                activeIcon={<PdpHeroMenuGlyph open size={HEADER_ICON_SIZE} />}
+                inactiveIcon={<PdpHeroMenuGlyph size={HEADER_ICON_SIZE} />}
+              />
             </button>
 
             <CoachWordmark
@@ -101,28 +109,20 @@ export function PdpOverlayHeader({
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
             >
-              <span
-                className="relative inline-flex shrink-0 items-center justify-center"
-                style={{ width: HEADER_ICON_SIZE, height: HEADER_ICON_SIZE }}
-              >
-                <MaterialIcon
-                  name="shopping_bag"
-                  size={HEADER_ICON_SIZE}
-                  filled={bagCount > 0}
-                />
-                {bagCount > 0 ? (
+              <PdpIconSwap
+                active={bagCount > 0}
+                activeIcon={
                   <span
                     key={bagCount}
-                    aria-hidden
-                    className={cn(
-                      "pdp-bag-badge animate-bag-badge-pop pointer-events-none absolute inset-0 z-10 flex items-center justify-center pt-[30%] text-[9px] font-semibold leading-none tracking-[0.1px] tabular-nums transition-colors duration-300",
-                      isLight ? "text-black" : "text-white",
-                    )}
+                    className="motion-safe:animate-bag-badge-pop inline-flex size-6 items-center justify-center"
                   >
-                    {bagCount > 9 ? "9+" : bagCount}
+                    <PdpHeroBagGlyph count={bagCount} size={HEADER_ICON_SIZE} />
                   </span>
-                ) : null}
-              </span>
+                }
+                inactiveIcon={
+                  <PdpHeroBagGlyph count={0} size={HEADER_ICON_SIZE} />
+                }
+              />
             </button>
           </div>
         </GridItem>

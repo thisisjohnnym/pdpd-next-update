@@ -165,6 +165,7 @@ function PdpSocialViewInner() {
       <PdpProductUrlSync activeColorId={activeColorId} />
       <PdpOverlayHeader
         bagCount={bagCount}
+        menuOpen={navOpen}
         onOpenMenu={() => setNavOpen(true)}
         hugBrandBar={showBrandBar}
       />

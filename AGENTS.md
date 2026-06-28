@@ -28,3 +28,15 @@ All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/desi
 ## Icons
 
 All icons use **Google Material Symbols** via `MaterialIcon`. See `docs/design-system/icons.md`.
+
+## Animation & motion
+
+Any animation, transition, enter/exit, stagger, scroll fade, or micro-interaction work **must** implement and validate the **make-interfaces-feel-better** skill before handoff.
+
+- JS-orchestrated motion uses **GSAP**; see `docs/design-system/animations.md`
+- Full reference: `docs/design-system/animations.md`
+- Skill: `.agents/skills/make-interfaces-feel-better/SKILL.md` · Cursor: `.cursor/skills/make-interfaces-feel-better/SKILL.md`
+- Hero timing/reveal: `docs/pdp-hero-chrome.md`
+- Progressive blur: load `progressive-blur.mdc` when building fade-to-blur chrome
+
+Work is not complete until the skill Review Checklist passes and handoff includes Before | After tables for every applied principle.

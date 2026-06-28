@@ -60,7 +60,7 @@ export function pdpModuleHeadingClass({
 }: { lead?: boolean; size?: "lg" | "sm" } = {}) {
   if (size === "sm") {
     return cn(
-      `font-extended m-0 text-sm ${pdpBodyRhythm} text-black`,
+      `font-extended m-0 text-sm text-balance ${pdpBodyRhythm} text-black`,
       lead && "mb-3",
     );
   }
