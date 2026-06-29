@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import {
@@ -12,7 +11,6 @@ import {
 } from "./pdp-data";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
-import { pdpType, pdpPressableClass } from "./pdp-type";
 
 /** Full-bleed macro — close-up of the bag with "The details" overlaid */
 function MacroHero() {
@@ -28,6 +26,11 @@ function MacroHero() {
         unoptimized
         sizes="(min-width: 1024px) 1024px, 100vw"
         className="object-cover object-center"
+        style={{
+          objectPosition: macro.objectPosition ?? "center",
+          transform: `scale(${macro.scale ?? 1})`,
+          transformOrigin: "center center",
+        }}
       />
       <div
         aria-hidden
@@ -95,41 +98,7 @@ function DetailTile({ tile }: { tile: PdpProductDetailTile }) {
   );
 }
 
-function PayOverTimeCard() {
-  const { icon, amount, body } = PDP_PRODUCT_DETAILS.payOverTime;
-
-  return (
-    <button
-      type="button"
-      aria-label={`${amount}. ${body}`}
-      className={cn(
-        "flex w-full items-center gap-3.5 rounded-2xl bg-neutral-100 px-[18px] py-4 text-left",
-        pdpPressableClass,
-      )}
-    >
-      <MaterialIcon
-        name={icon}
-        size={24}
-        className="shrink-0 text-neutral-700"
-      />
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="font-extended text-balance text-sm font-normal leading-[18px] tracking-[0.2px] text-black tabular-nums">
-          {amount}
-        </span>
-        <span className="font-extended text-pretty text-[11px] leading-4 text-neutral-500">
-          {body}
-        </span>
-      </span>
-      <MaterialIcon
-        name="chevron_right"
-        size={20}
-        className="shrink-0 text-neutral-400"
-      />
-    </button>
-  );
-}
-
-/** Product details — macro hero, spec row, a 2×2 visual gallery, and pay-over-time */
+/** Product details — macro hero, spec row, and 2×2 visual gallery */
 export function PdpProductDetailsModule() {
   const { specs, closerLook } = PDP_PRODUCT_DETAILS;
 
@@ -158,10 +127,6 @@ export function PdpProductDetailsModule() {
             <DetailTile key={tile.id} tile={tile} />
           ))}
         </div>
-      </PdpRevealItem>
-
-      <PdpRevealItem delay={140} className="px-2">
-        <PayOverTimeCard />
       </PdpRevealItem>
     </section>
   );

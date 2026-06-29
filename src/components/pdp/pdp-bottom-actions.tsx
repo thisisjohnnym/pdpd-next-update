@@ -57,8 +57,8 @@ export function PdpBottomActions({
       style={{
         bottom: BOTTOM_CHROME_OFFSET,
         padding: CTA_BAR_PADDING_PX,
-        paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, calc(var(--hero-reveal, 0) * 8px)))`,
-        paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, calc(var(--hero-reveal, 0) * 8px)))`,
+        paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+        paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
       }}
     >
       <div

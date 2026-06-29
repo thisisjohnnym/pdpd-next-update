@@ -59,8 +59,8 @@ export function PdpOverlayHeader({
       <div
         ref={hugRef}
         style={{
-          paddingLeft: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
-          paddingRight: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
+          paddingLeft: "var(--hero-inset, 0px)",
+          paddingRight: "var(--hero-inset, 0px)",
         }}
       >
       <PageGrid fullWidth className="pointer-events-auto relative pb-2.5 pt-[calc(var(--pdp-safe-area-top)+0.75rem)]">

@@ -13,6 +13,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { pdpCarouselImageClass } from "./pdp-carousel";
+import { PdpParallaxMedia, refreshPdpParallax } from "./pdp-parallax-media";
 import { PdpReviewLikeButton } from "./pdp-review-like-button";
 import { pdpPressableClass, pdpType } from "./pdp-type";
 import {
@@ -610,15 +611,16 @@ function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
         ) : null}
 
         {photo ? (
-          <div className="relative mt-3 aspect-[4/3] w-full max-w-[220px] overflow-hidden bg-neutral-100">
+          <PdpParallaxMedia className="relative mt-3 aspect-[4/3] w-full max-w-[220px] bg-neutral-100">
             <Image
               src={photo.src}
               alt={photo.alt}
               fill
               className={cn("object-cover object-center", pdpCarouselImageClass)}
               sizes="220px"
+              onLoadingComplete={refreshPdpParallax}
             />
-          </div>
+          </PdpParallaxMedia>
         ) : null}
       </div>
     </div>

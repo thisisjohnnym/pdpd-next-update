@@ -29,8 +29,9 @@ If any item fails, the module is not done.
 
 ## P0 Priority Modules (Audit First)
 
-- [ ] **Hero chrome shell** — `PdpHeroShell`, `PdpBrandBarReveal` (`pdp-hero-shell.tsx`, `pdp-brand-bar-reveal.tsx`) — Paper [`6AJ-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/6AJ-0) / [`64P-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/64P-0); spec: `docs/pdp-hero-chrome.md`
-- [ ] **Hero video + overlays** — `PdpGalleryHero`, `PdpGalleryProductHud`, `PdpHeroActionRail` — gradients, 80% UI fade
+- [ ] **Hero chrome shell** — `PdpHeroShell`, `PdpBrandBarReveal` (`pdp-hero-shell.tsx`, `pdp-brand-bar-reveal.tsx`) — Paper [`6AJ-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/6AJ-0) / [`64P-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/64P-0); subtle shrunk peek (brand bar + 52px top + 16px top radius only); spec: `docs/pdp-hero-chrome.md`
+- [ ] **Hero gallery + overlays** — `PdpHeroGallery`, `PdpGalleryProductHud`, `PdpHeroActionRail` — side-scrolling 16-slide gallery; gradients, 80% UI fade; per-slide nav contrast (white on video, dark on stills); shot-type framing
+- [ ] **Hero slide indicator** — `PdpHeroGalleryIndicator` — Paper [`6JV-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0/6JV-0); 2px ticks, active bar, max 8 visible with auto-scrolling rail
 - [ ] **Floating CTA bar** — `PdpBottomActions`, `PdpBuyBarRow` — fixed sibling of Phone; 50px pills; hides only for sheets
 - [ ] `PdpCoachAiModule` (`src/components/pdp/pdp-shopping-discovery-module.tsx`)
 - [ ] `PdpCoachAiSheet` (`src/components/pdp/pdp-coach-ai-sheet.tsx`)

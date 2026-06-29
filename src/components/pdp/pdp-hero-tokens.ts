@@ -1,13 +1,13 @@
 import { PDP_BRAND_BAR_HEIGHT } from "./pdp-brand-bar";
 
-/** Side inset of the hugged hero when fully revealed (px) — Paper `--space-margin` adjacent */
-export const HERO_INSET_PX = 8;
+/** Side inset of the hugged hero when fully revealed (px) — Paper `6AJ-0` is edge-to-edge */
+export const HERO_INSET_PX = 0;
 
 /** Top corner radius when shrunk — Paper `--radius-card` */
 export const HERO_RADIUS_TOP_PX = 16;
 
-/** Bottom corner radius when shrunk — Paper `59D-0` / `6BA-0` */
-export const HERO_RADIUS_BOTTOM_PX = 8;
+/** Bottom corner radius when shrunk — Paper `6BA-0` uses top radius only */
+export const HERO_RADIUS_BOTTOM_PX = 0;
 
 /** Room for brand bar above inset hero — matches `PDP_BRAND_BAR_HEIGHT` */
 export const HERO_TOP_PADDING_PX = PDP_BRAND_BAR_HEIGHT;
@@ -16,10 +16,10 @@ export const HERO_TOP_PADDING_PX = PDP_BRAND_BAR_HEIGHT;
 export const BRAND_BAR_HIDE_OFFSET_PX = 64;
 
 /** Intro peek duration before collapse to full bleed */
-export const HERO_INTRO_HOLD_MS = 3000;
+export const HERO_INTRO_HOLD_MS = 2000;
 
 /** Shrunk → full-bleed collapse duration */
-export const HERO_SHRINK_TO_FULL_MS = 1800;
+export const HERO_SHRINK_TO_FULL_MS = 1000;
 
 /** Floating CTA pill height — Paper `5BB-0` / `676-0` */
 export const CTA_PILL_HEIGHT_PX = 50;

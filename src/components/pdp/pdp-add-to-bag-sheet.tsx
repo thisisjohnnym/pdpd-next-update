@@ -26,6 +26,7 @@ import { useActiveProduct } from "./pdp-active-product-context";
 import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
 import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
@@ -357,6 +358,12 @@ export function PdpAddToBagSheet({
           ) : (
             <BagProductCard selectedColor={selectedColor} product={product} />
           )}
+
+          {!isBundle ? (
+            <div className="pb-4">
+              <PdpPayOverTimeCard />
+            </div>
+          ) : null}
 
           <div className="flex gap-2 py-4">
             <button

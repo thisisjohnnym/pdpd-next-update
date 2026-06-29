@@ -65,6 +65,20 @@ Module order in both code flows matches Paper. No reordering needed.
 - Link groups stack vertically; titles full-white, links white/50.
 - Social row centered; legal links stacked; copyright white/50.
 
+## Hero gallery (new scope, post-tail)
+
+The single-video hero was converted to a side-scrolling 16-slide gallery
+(`PdpHeroGallery`). Spec and DOM live in `docs/pdp-hero-chrome.md`.
+
+- **Slides** — slide 0 lifestyle video + 15 tabby26 studio/on-model stills and
+  spin/grain videos (`PDP_HERO_GALLERY_SLIDES`, `pdp-hero-gallery-data.ts`).
+- **Nav contrast** — per-slide `headerSurface` on the gallery section: video slide
+  → `dark` (white nav, fixes dark-on-load); stills/spins → `light` (dark nav).
+- **Framing** — shot-type presets (`pdp-hero-framing.ts`): full bag + spec frames
+  use `contain` on the seamless `#f0f0f0` ground; close-ups/on-model use `cover`.
+- **Indicator** — Paper `6JV-0`: 2px ticks, active bar, max 8 visible with an
+  auto-scrolling rail (`PdpHeroGalleryIndicator`).
+
 ## Remaining deltas (deferred)
 
 - **Footer social glyphs** — Paper uses brand-accurate outline marks
@@ -73,6 +87,8 @@ Module order in both code flows matches Paper. No reordering needed.
   brand marks are approved for the footer.
 - **Page inset** — Paper cards use an 8px artboard inset; implementation uses
   the project grid margin (12px mobile) per the grid system rule.
+- **Hero shrunk side inset** — resolved: Paper `6AJ-0` is edge-to-edge horizontally;
+  code no longer applies 8px side gutters or phone bottom padding on reveal.
 
 ## Verification
 

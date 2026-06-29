@@ -61,6 +61,13 @@ export const PDP_BAG_UPSELLS: PdpBagUpsell[] = [
   },
 ];
 
+/** Afterpay messaging in the add-to-bag confirmation tray */
+export const PDP_PAY_OVER_TIME = {
+  icon: "credit_card",
+  amount: "4 interest-free payments of $118.75",
+  body: "Pay over time with Afterpay. No impact to credit.",
+} as const;
+
 export type PdpBundleItem = {
   id: string;
   name: string;
@@ -836,6 +843,9 @@ export const PDP_PRODUCT_DETAILS = {
   macro: {
     src: "/images/gallery/tabby-detail-quilt.png",
     alt: "Close-up of the quilted leather Tabby Shoulder Bag 26 with signature brass C hardware and chain",
+    /** Paper `4O6-0` — backgroundSize ~149% crops side letterboxing */
+    objectPosition: "center",
+    scale: 1.49067,
   },
   specs: [
     { id: "dimensions", label: "Dimensions", value: '10" × 6"' },
@@ -875,11 +885,6 @@ export const PDP_PRODUCT_DETAILS = {
         alt: "The Tabby Shoulder Bag showing a soft patina after six months of wear",
       },
     ] satisfies PdpProductDetailTile[],
-  },
-  payOverTime: {
-    icon: "credit_card",
-    amount: "4 interest-free payments of $118.75",
-    body: "Pay over time with Afterpay. No impact to credit.",
   },
 } as const;
 
@@ -1132,13 +1137,6 @@ const PDP_PRODUCT_SEARCH = {
   title: PDP_AI_CONCIERGE.title,
   placeholder: PDP_AI_CONCIERGE.placeholder,
   suggestions: PDP_AI_CONCIERGE.prompts.map((prompt) => prompt.question),
-} as const;
-
-/** Hero framing — centered portrait; slight upward bias keeps face + bag above bottom chrome */
-export const PDP_GALLERY_HERO_IMAGE_FOCUS = {
-  objectPosition: "center 40%",
-  scale: 1,
-  translateY: "0%",
 } as const;
 
 /** Immersive hero — full-bleed 9:16 on-model lifestyle video */

@@ -14,11 +14,10 @@ import { cn } from "@/lib/cn";
 import { PdpGalleryEditorialSlide } from "./pdp-gallery-editorial-slide";
 import { PdpGalleryProductCollage } from "./pdp-gallery-product-collage";
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
+import { PdpHeroGallery } from "./pdp-hero-gallery";
 import { PdpGalleryPhotosSheet } from "./pdp-gallery-photos-sheet";
-import { PdpGalleryProductHud } from "./pdp-gallery-product-hud";
 import { PdpGalleryStrapCard } from "./pdp-gallery-strap-card";
 import { PdpGalleryViewMorePhotos } from "./pdp-gallery-view-more-photos";
-import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpProductHotspots } from "./pdp-product-hotspots";
 import { PdpBundleModule } from "./pdp-bundle-module";
 import { PdpCompareModuleGate } from "./pdp-compare-module-gate";
@@ -50,7 +49,6 @@ import { PdpUgcVideoCarouselModule } from "./pdp-ugc-video-carousel-module";
 import { PdpAsSeenOnModule } from "./pdp-as-seen-on-module";
 import { PdpStrapOptionsSheet } from "./pdp-strap-options-sheet";
 import {
-  PDP_GALLERY_HERO_IMAGE_FOCUS,
   PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
   PDP_GALLERY_MORE_PHOTOS,
@@ -59,11 +57,6 @@ import {
   PDP_STUDIO_BACKDROP_CLASS,
   PDP_STRAP_OPTIONS,
 } from "./pdp-data";
-import {
-  HERO_FILTER_GRADIENT,
-  HERO_MIDDLE_GRADIENT,
-  HERO_MIDDLE_HEIGHT_FRACTION,
-} from "./pdp-hero-tokens";
 import type {
   PdpBundleAddPayload,
   PdpInfluencerCredit,
@@ -74,8 +67,6 @@ import { pdpType } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import {
   BOTTOM_CTA_OFFSET,
-  HERO_IMMERSIVE_CLASS,
-  HERO_IMMERSIVE_MEDIA_CLASS,
   PANEL_MEDIA_COVER_CLASS,
   PANEL_MEDIA_FILL_CLASS,
   PANEL_MEDIA_FRAME_CLASS,
@@ -131,106 +122,34 @@ function ChapterAnchor({ id }: { id: string }) {
   );
 }
 
-/** Hero only — full-screen immersive video, edge-to-edge under device safe areas */
+/**
+ * Hero land — side-scrolling gallery of the lifestyle video + studio stills.
+ * Thin wrapper over `PdpHeroGallery` (docs/pdp-hero-chrome.md). Legacy single-video
+ * props are accepted for callers but the slide set comes from PDP_HERO_GALLERY_SLIDES.
+ */
 export function PdpGalleryHero({
-  videoSrc,
-  poster,
-  alt,
   onOpenReviews,
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
 }: {
-  videoSrc: string;
+  /** @deprecated slide 0 lives in PDP_HERO_GALLERY_SLIDES */
+  videoSrc?: string;
   poster?: string;
-  alt: string;
+  alt?: string;
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
   isLastPanel?: boolean;
   /** Size to parent media frame (PdpHeroShell) instead of 100svh */
   fillFrame?: boolean;
 }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [isActive, setIsActive] = useState(true);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsActive(entry.isIntersecting && entry.intersectionRatio >= 0.25);
-      },
-      { threshold: [0, 0.25, 0.5] },
-    );
-
-    observer.observe(section);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   return (
-    <section
-      ref={sectionRef}
-      data-hero-section
-      className={cn(
-        HERO_IMMERSIVE_CLASS,
-        fillFrame && "pdp-hero-immersive--fill-frame flex-1",
-        "shrink-0",
-        galleryPanelClassName(isLastPanel),
-      )}
-    >
-      <div className={HERO_IMMERSIVE_MEDIA_CLASS}>
-        <div className={PANEL_MEDIA_FILL_CLASS}>
-          <PdpGalleryHeroVideo
-            src={videoSrc}
-            poster={poster}
-            ariaLabel={alt}
-            isActive={isActive}
-            preload={isActive ? "auto" : "metadata"}
-            priorityAutoplay={true}
-            skeletonTone="dark"
-            showControls={false}
-            showMuteControl={false}
-            tapToTogglePlayback={true}
-            className={cn(
-              "pdp-gallery-panel__cover size-full object-cover object-center",
-            )}
-            style={{
-              objectPosition: PDP_GALLERY_HERO_IMAGE_FOCUS.objectPosition,
-            }}
-          />
-        </div>
-      </div>
-
-      <div
-        aria-hidden
-        className="pdp-hero-ui-chrome pointer-events-none absolute inset-0 z-[10]"
-        style={{ backgroundImage: HERO_FILTER_GRADIENT }}
-      />
-
-      <div
-        aria-hidden
-        className="pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[8]"
-        style={{
-          height: `${HERO_MIDDLE_HEIGHT_FRACTION * 100}%`,
-          backgroundImage: HERO_MIDDLE_GRADIENT,
-        }}
-      />
-
-      <div aria-hidden className="pdp-hero-ui-chrome pdp-hero-immersive__top-scrim" />
-
-      <PdpHeroActionRail
-        onOpenReviews={onOpenReviews}
-        onOpenArTryOn={onOpenArTryOn}
-      />
-
-      <PdpGalleryProductHud />
-    </section>
+    <PdpHeroGallery
+      onOpenReviews={onOpenReviews}
+      onOpenArTryOn={onOpenArTryOn}
+      isLastPanel={isLastPanel}
+      fillFrame={fillFrame}
+    />
   );
 }
 

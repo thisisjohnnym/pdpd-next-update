@@ -291,7 +291,7 @@ export function PdpHeroActionRail({
         RAIL_GLYPH_SHADOW,
       )}
       style={{
-        right: "calc(0.5rem + var(--hero-inset, calc(var(--hero-reveal, 0) * 8px)))",
+        right: "calc(0.5rem + var(--hero-inset, 0px))",
         bottom: heroActionRailOffset(),
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",

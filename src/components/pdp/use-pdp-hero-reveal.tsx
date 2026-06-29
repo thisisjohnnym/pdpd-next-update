@@ -19,7 +19,7 @@ import { useReducedMotion } from "./use-reduced-motion";
 
 /**
  * Hero "reveal" — 0→1 value for shrunk↔full-bleed hero land (see docs/pdp-hero-chrome.md).
- * Purposeful states: intro peek on load (3s hold, 1.8s collapse), pull-to-reveal at top
+ * Purposeful states: intro peek on load (2s hold, 1s collapse), pull-to-reveal at top
  * (same hold + collapse after open animation), scroll-back rests full bleed.
  */
 

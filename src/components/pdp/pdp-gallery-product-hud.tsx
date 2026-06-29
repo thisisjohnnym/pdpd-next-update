@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 
 import { useActiveProduct } from "./pdp-active-product-context";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { PdpHeroGalleryIndicator } from "./pdp-hero-gallery-indicator";
 import { HERO_FRAME_BOTTOM_PAD_PX } from "./pdp-hero-tokens";
 import { heroProductHudOffset } from "./pdp-viewport-chrome";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
@@ -31,14 +32,17 @@ export function PdpGalleryProductHud() {
       style={{
         bottom: hudBottom,
         visibility: visible ? "visible" : "hidden",
-        paddingLeft: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
-        paddingRight: "var(--hero-inset, calc(var(--hero-reveal, 0) * 8px))",
+        paddingLeft: "var(--hero-inset, 0px)",
+        paddingRight: "var(--hero-inset, 0px)",
       }}
     >
       <div
         className={cn("px-2", playHeroEnter && "pdp-hero-hud-enter")}
         style={{ paddingBottom: HERO_FRAME_BOTTOM_PAD_PX }}
       >
+        <div className="mb-4 flex">
+          <PdpHeroGalleryIndicator />
+        </div>
         <div
           className={cn(
             "font-extended tracking-[0.2px] text-white",

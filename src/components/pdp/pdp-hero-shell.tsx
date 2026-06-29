@@ -29,18 +29,11 @@ function applyHeroShellLayout(
   const radiusTop = lerpHeroReveal(reveal, HERO_RADIUS_TOP_PX);
   const radiusBottom = lerpHeroReveal(reveal, HERO_RADIUS_BOTTOM_PX);
   const paddingTop = lerpHeroReveal(reveal, HERO_TOP_PADDING_PX);
-  const ctaHeight = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--cta-bar-height"),
-  );
-  const resolvedCtaHeight = Number.isFinite(ctaHeight) ? ctaHeight : 0;
 
   document.documentElement.style.setProperty("--hero-inset", `${inset}px`);
   document.documentElement.style.setProperty("--hero-radius-top", `${radiusTop}px`);
   document.documentElement.style.setProperty("--hero-radius-bottom", `${radiusBottom}px`);
   document.documentElement.style.setProperty("--hero-padding-top", `${paddingTop}px`);
-
-  phone.style.paddingBottom =
-    reveal > 0 && resolvedCtaHeight > 0 ? `${reveal * resolvedCtaHeight}px` : "0px";
 
   hero.style.paddingLeft = `${inset}px`;
   hero.style.paddingRight = `${inset}px`;
@@ -76,19 +69,6 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
   useHeroRevealApplier((reveal) => {
     applyHeroShellLayout(reveal, phoneRef, heroRef, mediaFrameRef);
   });
-
-  useEffect(() => {
-    const refresh = () => {
-      const reveal = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue("--hero-reveal"),
-      );
-      if (Number.isFinite(reveal)) {
-        applyHeroShellLayout(reveal, phoneRef, heroRef, mediaFrameRef);
-      }
-    };
-    window.addEventListener("pdp-cta-bar-height", refresh);
-    return () => window.removeEventListener("pdp-cta-bar-height", refresh);
-  }, []);
 
   return (
     <div
