@@ -1,26 +1,27 @@
 ---
-description: PDP v1/v2 version boundaries — read before any PDP edit. Keeps the frozen /v1 baseline safe while building the v2 pivot.
+description: PDP v1/v2/v3 version boundaries — read before any PDP edit. Keeps the frozen /v1 and /v2 baselines safe while building the v3 pivot.
 alwaysApply: true
 ---
 
-# PDP Versions (v1 frozen, v2 pivot)
+# PDP Versions (v1 frozen, v2 frozen, v3 pivot)
 
-The PDP ships two versions on the same codebase:
+The PDP ships three versions on the same codebase:
 
 - **v1** (`/v1`, legacy `/`) — frozen current design. The brand-team baseline.
-- **v2** (`/v2`) — stakeholder pivot. All new pivot work goes here.
+- **v2** (`/v2`) — stakeholder pivot baseline. Frozen once v3 work began.
+- **v3** (`/v3`) — Paper r4 pivot. All new pivot work goes here.
 
 Full reference: `docs/pdp-versions.md`.
 
 ## Rules
 
 - Read `docs/pdp-versions.md` before editing any PDP code.
-- v2 changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1 defaults.
-- Do not branch on `version === "v2"` across the codebase. Add a flag to `PdpVersionConfig` and read it.
-- Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for v2 needs. Those are the frozen v1 data.
-- Never add v2-only CSS to `globals.css`. Put it in `src/app/v2/pdp-v2.css`, scoped under `[data-pdp-version="v2"]`.
+- v3 changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1/v2 defaults.
+- Do not branch on `version === "v2"` / `version === "v3"` across the codebase. Add a flag to `PdpVersionConfig` and read it.
+- Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for v2/v3 needs. Those are the frozen v1 data.
+- Never add version-only CSS to `globals.css`. Put it in `src/app/v2/pdp-v2.css` or `src/app/v3/pdp-v3.css`, scoped under `[data-pdp-version="v2"]` / `[data-pdp-version="v3"]`.
 - The shared design system (grid, typography, icons, motion tokens) stays shared — do not fork it per version.
-- After any v2 change, confirm `/v1` still matches the baseline, then run `pnpm check:versions`.
+- After any v3 change, confirm `/v1` and `/v2` still match their baselines, then run `pnpm check:versions`.
 
 ## Quick map
 
@@ -28,4 +29,5 @@ Full reference: `docs/pdp-versions.md`.
 - Config adapter: `src/components/pdp/version/pdp-version-config.ts` (`getPdpVersionConfig(version)`)
 - v2 slides: `src/components/pdp/version/pdp-data-v2.ts`
 - v2 chapters: `src/components/pdp/version/pdp-section-chapters-v2.ts`
+- v3 hero/CTA/color-sheet: `src/components/pdp/version/pdp-v3-*.tsx`
 - Boundary checks: `scripts/check-pdp-version-boundaries.mjs`

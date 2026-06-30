@@ -2,7 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 
-export type PdpVersion = "v1" | "v2";
+export type PdpVersion = "v1" | "v2" | "v3";
 
 const PdpVersionContext = createContext<PdpVersion>("v1");
 

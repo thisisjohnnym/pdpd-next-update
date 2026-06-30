@@ -76,6 +76,36 @@ export type PdpVersionConfig = {
    * when the gesture is predominantly horizontal.
    */
   heroRevealDeferToHorizontalGallery: boolean;
+  /**
+   * Use the v2 reshaped gallery slide list (UGC after hero, grouped craft
+   * carousel, removed modules). True for v2 and v3 — v3 inherits v2 modules.
+   */
+  galleryUsesV2Slides: boolean;
+  /**
+   * Hero land scrolls with the page (Paper r4 `F9R-0`) instead of sitting as a
+   * fixed 100svh chrome island above the scroll document.
+   */
+  heroScrollsWithPage: boolean;
+  /**
+   * Color + Add to bag dock inside the hero footer (Paper r4 `FGQ-0`) rather
+   * than only as the floating bar.
+   */
+  heroDockedBuyBar: boolean;
+  /**
+   * Floating buy bar appears only after the hero scrolls out of view (Paper r4
+   * `F5Z-0`). When false, the floating bar is always mounted (v1/v2).
+   */
+  floatingBuyBarWhenHeroHidden: boolean;
+  /**
+   * Render the progressive in-context color drawer (Paper r4 `EU5-0` / `EIE-0`)
+   * instead of the flat `PdpColorSheet`.
+   */
+  useV3ColorSheet: boolean;
+  /**
+   * Show the section jump bar (replaces the CTA past "The Details"). r4 keeps the
+   * floating buy bar instead, so v3 disables the jump bar entirely.
+   */
+  showSectionJumpBar: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -101,6 +131,12 @@ const V1_CONFIG: PdpVersionConfig = {
   fixedHeaderSurface: "auto",
   useStableInfiniteCarousel: false,
   heroRevealDeferToHorizontalGallery: false,
+  galleryUsesV2Slides: false,
+  heroScrollsWithPage: false,
+  heroDockedBuyBar: false,
+  floatingBuyBarWhenHeroHidden: false,
+  useV3ColorSheet: false,
+  showSectionJumpBar: true,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -135,11 +171,35 @@ const V2_CONFIG: PdpVersionConfig = {
   fixedHeaderSurface: "auto",
   useStableInfiniteCarousel: true,
   heroRevealDeferToHorizontalGallery: true,
+  // v2 reshapes the gallery (UGC after hero, grouped craft carousel, removals).
+  galleryUsesV2Slides: true,
+  heroScrollsWithPage: false,
+  heroDockedBuyBar: false,
+  floatingBuyBarWhenHeroHidden: false,
+  useV3ColorSheet: false,
+  showSectionJumpBar: true,
+};
+
+/**
+ * v3 — Paper r4 pivot. Inherits the v2 module order, then layers the r4 hero
+ * (docked buy bar in document flow), the floating-on-scroll CTA, and the
+ * progressive in-context color drawer. See docs/pdp-versions.md.
+ */
+const V3_CONFIG: PdpVersionConfig = {
+  ...V2_CONFIG,
+  // r4 hero land: docked CTA in scroll flow, floating bar returns on scroll.
+  heroScrollsWithPage: true,
+  heroDockedBuyBar: true,
+  floatingBuyBarWhenHeroHidden: true,
+  useV3ColorSheet: true,
+  // r4 surfaces the floating buy bar past the hero, not the chapter jump bar.
+  showSectionJumpBar: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
+  v3: V3_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

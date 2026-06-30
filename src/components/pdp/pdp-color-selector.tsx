@@ -17,6 +17,9 @@ import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { PdpV3ColorSheet } from "./version/pdp-v3-color-sheet";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import {
   pdpPressableIconClass,
@@ -85,6 +88,8 @@ function PdpColorDropup({
   const { productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
+  const useV3Sheet =
+    getPdpVersionConfig(usePdpVersion()).useV3ColorSheet && isTabbyProduct;
   const colorGroups = isTabbyProduct
     ? getTabbyColorSheetGroups(tabby!.styleId, tabby!.size)
     : undefined;
@@ -124,20 +129,24 @@ function PdpColorDropup({
 
   return (
     <div className={cn("relative", stretch ? "min-w-0 w-full flex-1" : "shrink-0")}>
-      <PdpColorSheet
-        colors={colors}
-        selectedId={selectedId}
-        open={open}
-        onClose={() => setSheetOpen(false)}
-        onSelect={handleSelect}
-        groups={colorGroups}
-        currentSize={isTabbyProduct ? tabby!.size : undefined}
-        onSelectAtSize={
-          isTabbyProduct
-            ? (colorId, size) => tabby!.selectColorAtSize(colorId, size)
-            : undefined
-        }
-      />
+      {useV3Sheet ? (
+        <PdpV3ColorSheet open={open} onClose={() => setSheetOpen(false)} />
+      ) : (
+        <PdpColorSheet
+          colors={colors}
+          selectedId={selectedId}
+          open={open}
+          onClose={() => setSheetOpen(false)}
+          onSelect={handleSelect}
+          groups={colorGroups}
+          currentSize={isTabbyProduct ? tabby!.size : undefined}
+          onSelectAtSize={
+            isTabbyProduct
+              ? (colorId, size) => tabby!.selectColorAtSize(colorId, size)
+              : undefined
+          }
+        />
+      )}
 
       <button
         type="button"

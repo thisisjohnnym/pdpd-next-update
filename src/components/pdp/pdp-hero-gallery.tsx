@@ -35,6 +35,7 @@ import {
 } from "./use-infinite-centered-carousel";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
 
 function HeroSlideMedia({
   slide,
@@ -107,7 +108,9 @@ export function PdpHeroGallery({
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const loopedSlides = useMemo(() => loopCarouselItems(slides), [slides]);
-  const { useStableInfiniteCarousel } = getPdpVersionConfig(usePdpVersion());
+  const { useStableInfiniteCarousel, heroDockedBuyBar } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
   const { activeIndex, activeLoopedIndex } = useInfiniteFullBleedCarousel(
     trackRef,
     slides.length,
@@ -195,12 +198,18 @@ export function PdpHeroGallery({
           }}
         />
 
-        <PdpHeroActionRail
-          onOpenReviews={onOpenReviews}
-          onOpenArTryOn={onOpenArTryOn}
-        />
+        {heroDockedBuyBar ? (
+          <PdpV3GalleryOverlay onOpenArTryOn={onOpenArTryOn} />
+        ) : (
+          <>
+            <PdpHeroActionRail
+              onOpenReviews={onOpenReviews}
+              onOpenArTryOn={onOpenArTryOn}
+            />
 
-        <PdpGalleryProductHud />
+            <PdpGalleryProductHud />
+          </>
+        )}
       </section>
     </PdpHeroGalleryProvider>
   );

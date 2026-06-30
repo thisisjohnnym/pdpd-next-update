@@ -182,3 +182,48 @@ Do **not** hide CTA for `jumpBarActive` (section indicator swap).
 
 - Stripped layout / static hero variants (`pdp-stripped-view.tsx`)
 - Workshop sticky notes for hero land (Paper frames above are authoritative)
+
+---
+
+## Appendix — v3 hero variant (Paper r4)
+
+The `/v3` route (see `docs/pdp-versions.md`) keeps the reveal controller, brand bar, and hero gallery but restructures the hero chrome. v1/v2 hero behavior above is unchanged. v3 is flag-gated — it only applies on the Tabby video hero land.
+
+### Scroll model — hero in the document
+
+v1/v2 hero is a fixed 100svh chrome island with an always-on floating CTA. v3 (`heroScrollsWithPage`) renders the hero as one scrollable block inside `PdpHeroShell`:
+
+```
+PdpHeroShell  (brand bar + reveal preserved)
+└── media frame (flex column)
+    ├── PdpHeroGallery (fillFrame, flex-1)   — gallery overlay: slide indicator + AR
+    ├── footer (white, ~107px)               — product name/price + docked PdpBuyBarRow (FGQ-0)
+    └── sentinel (1px)                        — drives the floating bar handoff
+```
+
+The gallery fills the remaining height, so on a ~812px screen the gallery is ~705px and the footer ~107px (Paper `F39-0`). The shrunk state (`CPE-0`) still comes from the reveal controller.
+
+### Gallery overlay (`F3D-0`)
+
+`heroDockedBuyBar` swaps the legacy product HUD + right-edge action rail for `PdpV3GalleryOverlay`: the slide indicator pinned bottom-left and the `PdpV3ArButton` ("Try On") bottom-right, both fading with the existing `pdp-hero-ui-chrome` scroll fade. The product name/price moves out of the gallery into the white footer.
+
+### CTA handoff (`F9R-0` → `F5Z-0`)
+
+- The docked buy bar lives in the hero footer and scrolls away with the hero.
+- `use-hero-buy-bar-visibility.ts` observes the sentinel; once it passes above the viewport top, `showFloatingBuyBar` flips true.
+- `PdpBottomActions` is suppressed (`suppressed || !showFloatingBuyBar`) until then, so the floating bar returns exactly as the docked bar leaves.
+- The docked and floating bars share one set of color/Add-to-bag handlers via the Tabby variant context, so color state stays in sync.
+
+### Jump bar
+
+`showSectionJumpBar: false` for v3. `PdpSectionIndicator` does not mount, and `PdpBottomActions` ignores `jumpBarActive`, so the floating buy bar — not the chapter jump bar — is the persistent chrome past the hero.
+
+### v3 code map
+
+| Piece | File |
+|-------|------|
+| Hero layout (gallery + footer) | `src/components/pdp/version/pdp-v3-hero-layout.tsx` |
+| Gallery overlay (indicator + AR) | `src/components/pdp/version/pdp-v3-gallery-overlay.tsx` |
+| AR button | `src/components/pdp/version/pdp-v3-ar-button.tsx` |
+| Floating bar handoff | `src/components/pdp/version/use-hero-buy-bar-visibility.ts` |
+| Color drawer | `docs/pdp-v3-color-sheet.md` |

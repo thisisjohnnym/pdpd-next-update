@@ -1,13 +1,13 @@
-# PDP Versions (v1 / v2)
+# PDP Versions (v1 / v2 / v3)
 
-Single source of truth for the two PDP designs that ship from this codebase. Read this before any PDP edit.
+Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the stakeholder pivot.
-- Brand team compares them at **`/v1`** and **`/v2`** on the same deploy.
-- `main` is untouched. Pivot work lives on the **`v2`** git branch.
-- v2 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1.
+- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot.
+- Brand team compares them at **`/v1`**, **`/v2`**, and **`/v3`** on the same deploy.
+- v2 and v3 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2.
+- v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 
 ---
 
@@ -128,6 +128,7 @@ Bundle and Compare are not in the v2 Paper design — they are hidden via `showB
 |---|---|---|
 | `updates - r2` (page `3-0`) | v1 frozen baseline — parity target for `/v1` | `/v1` |
 | `updates - r3` (page `4-0`) | v2 pivot baseline — visual tweak surface | `/v2` |
+| `updates - r4` (page `5-0`) | v3 pivot baseline — r4 hero/CTA/color drawer | `/v3` |
 
 **R3 export rules**
 
@@ -183,11 +184,58 @@ Then in Safari (via the `user-safari` MCP): screenshot `/v1` and `/v2` for the T
 
 ---
 
-## 7. Sunset plan
+## 8. v3 — Paper r4 pivot
+
+v3 is the stakeholder pivot from Paper page `updates - r4` (`5-0`). It **inherits the v2 module order** below the hero (it spreads `V2_CONFIG`) and adds three r4 UX changes. Nothing in v1 or v2 changes.
+
+### What v3 changes
+
+1. **Restructured hero** (`F39-0` / `CPE-0`) — the gallery sits in the scroll document with a white footer carrying the product name/price and a **docked** Color + Add to bag row (`FGQ-0`). The slide indicator and AR button move into the gallery overlay (`F3D-0`); the right-edge social rail is gone.
+2. **CTA scroll model** (`F9R-0` / `F5Z-0`) — the docked buy bar scrolls away with the hero. A sentinel at the bottom of the hero block drives a floating buy bar (`PdpBottomActions`) that returns once the hero passes the viewport top. The chapter jump bar is disabled in v3 so it never replaces the floating CTA.
+3. **Progressive color drawer** (`EU5-0` / `EIE-0`) — a full-height in-context sheet with **Popular colors** (3 shown, expands to all), **Explore materials** (4 shown, expands), and a horizontal **Bag size** row. Replaces the flat `PdpColorSheet` for Tabby.
+
+### v3-only files
+
+| File | Role |
+|------|------|
+| `src/app/v3/` | Route folder — `layout.tsx` sets `data-pdp-version="v3"` and imports `pdp-v3.css`; pages pass `version="v3"` |
+| `src/app/v3/pdp-v3.css` | v3-scoped CSS (animation suppressions inherited from v2 calm land) |
+| `src/app/v3/pdp-v3-root-marker.tsx` | Marks `<html>` so portaled chrome (floating CTA) gets v3 CSS |
+| `src/components/pdp/version/pdp-v3-hero-layout.tsx` | r4 hero: gallery + white footer (name/price + docked `PdpBuyBarRow`) + scroll sentinel |
+| `src/components/pdp/version/pdp-v3-gallery-overlay.tsx` | Gallery-overlay slide indicator + AR button (replaces HUD + rail) |
+| `src/components/pdp/version/pdp-v3-ar-button.tsx` | r4 AR "Try On" button in the gallery overlay |
+| `src/components/pdp/version/use-hero-buy-bar-visibility.ts` | `IntersectionObserver` sentinel → floating bar handoff |
+| `src/components/pdp/version/pdp-v3-color-sheet.tsx` | Progressive color drawer |
+| `src/components/pdp/version/pdp-v3-color-sheet-sections.ts` | Maps the frozen Tabby catalog into Popular / Materials / Sizes |
+
+### v3 feature flags (`pdp-version-config.ts`)
+
+`V3_CONFIG` spreads `V2_CONFIG` then sets:
+
+| Flag | v1 | v2 | v3 | Purpose |
+|------|----|----|----|---------|
+| `galleryUsesV2Slides` | false | true | true | Use the v2 reshaped gallery slide list (replaces the old `version === "v2"` check in `pdp-tabby-color-media.ts`) |
+| `heroScrollsWithPage` | false | false | true | Hero land is in the scroll document, not a fixed 100svh island |
+| `heroDockedBuyBar` | false | false | true | Color + Add to bag dock in the hero footer; gallery uses the v3 overlay |
+| `floatingBuyBarWhenHeroHidden` | false | false | true | Floating bar mounts only after the hero scrolls past |
+| `useV3ColorSheet` | false | false | true | Render the progressive drawer instead of `PdpColorSheet` |
+| `showSectionJumpBar` | true | true | **false** | r4 keeps the floating buy bar instead of the chapter jump bar |
+
+Shared components read these flags; v1/v2 paths are untouched. The flags only take effect on the Tabby video hero land (`showBrandBar && hero.kind === "video"`). On a stripped PDP (e.g. Kira) `/v3` falls back to the same stripped behavior as v1/v2.
+
+### v3 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1/v2 routes must not import any `*-v3` module, and `pdp-v3.css` selectors must be scoped under `[data-pdp-version="v3"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v3"`. Add a flag to `PdpVersionConfig`.
+- Detailed specs: hero/CTA in `docs/pdp-hero-chrome.md` (v3 appendix); color drawer in `docs/pdp-v3-color-sheet.md`.
+
+---
+
+## 9. Sunset plan
 
 When stakeholders pick a winner:
 
-- **v1 wins** — delete `src/components/pdp/version/`, the `/v2` route, `pdp-v2.css`, and the version props/flags; restore plain component calls.
-- **v2 wins** — promote v2 to default: fold the v2 flags into the shared components as the new baseline, then remove the `/v1` route and the adapter layer.
+- **v1 wins** — delete `src/components/pdp/version/`, the `/v2` and `/v3` routes, `pdp-v2.css` / `pdp-v3.css`, and the version props/flags; restore plain component calls.
+- **a pivot wins** — promote it to default: fold its flags into the shared components as the new baseline, then remove the other routes and the adapter layer.
 
 Either way, remove the boundary script and Cursor rule once a single version remains.

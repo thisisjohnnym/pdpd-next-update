@@ -11,6 +11,8 @@ import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { useCtaBarHeight } from "./use-cta-bar-height";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
 import { usePdpChromeMode } from "./use-pdp-chrome-mode";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 type PdpBottomActionsProps = {
   selectedColorId: string;
@@ -32,6 +34,7 @@ export function PdpBottomActions({
   const barRef = useRef<HTMLDivElement>(null);
   const playHeroEnter = useHeroEnterOnce();
 
+  const { showSectionJumpBar } = getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
 
   useCtaBarHeight(barRef, mounted);
@@ -44,7 +47,9 @@ export function PdpBottomActions({
     return null;
   }
 
-  const chromeHidden = suppressed || colorSheetOpen || jumpBarActive;
+  // r4 (v3) keeps the floating buy bar instead of swapping to the jump bar.
+  const hiddenByJumpBar = showSectionJumpBar && jumpBarActive;
+  const chromeHidden = suppressed || colorSheetOpen || hiddenByJumpBar;
 
   return createPortal(
     <footer

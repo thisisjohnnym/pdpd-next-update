@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -38,6 +38,8 @@ import { PdpScrollProvider } from "./use-coalesced-scroll";
 import { useHeroUiChromeVars } from "./use-hero-ui-chrome";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { PdpV3HeroLayout } from "./version/pdp-v3-hero-layout";
+import { useHeroBuyBarVisibility } from "./version/use-hero-buy-bar-visibility";
 
 type BagConfirmation =
   | { type: "product" }
@@ -128,7 +130,11 @@ function PdpSocialViewInner() {
     setBagSheetOpen(true);
   };
 
-  const { showReviewComments } = getPdpVersionConfig(usePdpVersion());
+  const versionConfig = getPdpVersionConfig(usePdpVersion());
+  const { showReviewComments, heroScrollsWithPage, floatingBuyBarWhenHeroHidden } =
+    versionConfig;
+
+  const heroSentinelRef = useRef<HTMLDivElement>(null);
 
   const openReviews = (feed: "reviews" | "comments" = "reviews") => {
     // v2 has no comments feed — always land on reviews.
@@ -167,6 +173,18 @@ function PdpSocialViewInner() {
 
   useHeroUiChromeVars(showBrandBar && product.hero.kind === "video");
 
+  // v3 hero scrolls with the page — the floating bar returns only once the hero
+  // (with its docked CTA) has scrolled past the viewport top.
+  const heroScrolledAway = useHeroBuyBarVisibility(
+    heroSentinelRef,
+    floatingBuyBarWhenHeroHidden,
+  );
+  const showFloatingBuyBar = floatingBuyBarWhenHeroHidden
+    ? heroScrolledAway
+    : true;
+  const useV3Hero =
+    heroScrollsWithPage && showBrandBar && product.hero.kind === "video";
+
   const pageBody = (
     <>
       <PdpBrowserChromeSync />
@@ -177,7 +195,7 @@ function PdpSocialViewInner() {
         onOpenMenu={() => setNavOpen(true)}
         hugBrandBar={showBrandBar}
       />
-      {!isStripped ? (
+      {!isStripped && versionConfig.showSectionJumpBar ? (
         <PdpSectionIndicator suppressed={chromeSuppressed} />
       ) : null}
       {tabbyColorHero ? null : isStripped && product.hero.kind === "image" && !isStaticHero ? (
@@ -186,6 +204,15 @@ function PdpSocialViewInner() {
           alt={product.hero.alt}
           objectPosition={product.hero.objectPosition}
           onOpenReviews={() => openReviews("comments")}
+        />
+      ) : useV3Hero ? (
+        <PdpV3HeroLayout
+          selectedColorId={activeColorId}
+          onColorSelect={setSelectedColorId}
+          onAddToBag={handleAddToBag}
+          onOpenReviews={() => openReviews("comments")}
+          onOpenArTryOn={() => setArTryOnOpen(true)}
+          sentinelRef={heroSentinelRef}
         />
       ) : showBrandBar && product.hero.kind === "video" ? (
         <PdpHeroShell>
@@ -248,7 +275,7 @@ function PdpSocialViewInner() {
         selectedColorId={activeColorId}
         onColorSelect={setSelectedColorId}
         onAddToBag={handleAddToBag}
-        suppressed={chromeSuppressed}
+        suppressed={chromeSuppressed || !showFloatingBuyBar}
       />
       <PdpNavMenu open={navOpen} onClose={() => setNavOpen(false)} />
       <PdpReviewsSheet
