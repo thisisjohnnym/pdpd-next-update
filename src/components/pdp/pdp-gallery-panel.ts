@@ -12,7 +12,7 @@ function isGalleryPanelSlide(_slide: PdpGallerySlide): boolean {
 }
 
 export function getLastGalleryPanelSlideIndex(
-  slides: PdpGallerySlide[],
+  slides: readonly unknown[],
 ): number {
   if (!PDP_PANEL_SCROLL) {
     return -1;

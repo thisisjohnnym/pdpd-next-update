@@ -12,6 +12,8 @@ import {
   pdpBottomSheetGrabHandleClass,
   pdpBottomSheetHeaderClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetBodyClass,
+  pdpBottomSheetScrollRegionClass,
   pdpBottomSheetViewportFrameClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
@@ -367,7 +369,7 @@ export function PdpCoachAiSheet({ open, onClose, ask }: PdpCoachAiSheetProps) {
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-50 overscroll-none transition-opacity duration-300",
         open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
       aria-hidden={!open}
@@ -412,10 +414,11 @@ export function PdpCoachAiSheet({ open, onClose, ask }: PdpCoachAiSheetProps) {
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className={pdpBottomSheetBodyClass}>
             <div
               ref={scrollRef}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pt-2"
+              data-pdp-sheet-scroll
+              className={pdpBottomSheetScrollRegionClass("px-3 pt-2")}
             >
               {isEmpty ? (
                 <div className="flex flex-col gap-3 pb-3">

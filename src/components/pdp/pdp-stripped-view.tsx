@@ -24,6 +24,9 @@ import { pdpModuleSectionClass } from "./pdp-module-section";
 import type { PdpProductConfig, PdpProductHero, PdpProductSummary } from "./pdp-products";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { pdpType } from "./pdp-type";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
 import {
   BOTTOM_CTA_OFFSET,
   HERO_IMMERSIVE_CLASS,
@@ -182,6 +185,7 @@ export function PdpStrippedView({
 }) {
   const slides = product.slides ?? [];
   const detail = product.detail;
+  const versionConfig = getPdpVersionConfig(usePdpVersion());
 
   return (
     <div className="w-full overflow-x-clip bg-white" style={STRIPPED_SCROLL_PAD}>
@@ -262,6 +266,16 @@ export function PdpStrippedView({
         </PdpScrollReveal>
       ) : null}
 
+      {versionConfig.showReviewInterstitial ? (
+        <PdpScrollReveal
+          className={ECOMM_MODULE_CLASS}
+          surface="muted"
+          lazyMount
+          reserveMinHeight="20dvh"
+        >
+          <PdpReviewInterstitial onReadAll={onReadAllReviews ?? onOpenReviews} />
+        </PdpScrollReveal>
+      ) : null}
       <PdpScrollReveal
         className={ECOMM_MODULE_CLASS}
         surface="light"
@@ -274,14 +288,16 @@ export function PdpStrippedView({
           onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
         />
       </PdpScrollReveal>
-      <PdpScrollReveal
-        className={ECOMM_MODULE_CLASS}
-        surface="light"
-        lazyMount
-        reserveMinHeight="32dvh"
-      >
-        <PdpCoachAiModule />
-      </PdpScrollReveal>
+      {versionConfig.showCoachAi ? (
+        <PdpScrollReveal
+          className={ECOMM_MODULE_CLASS}
+          surface="light"
+          lazyMount
+          reserveMinHeight="32dvh"
+        >
+          <PdpCoachAiModule />
+        </PdpScrollReveal>
+      ) : null}
       <PdpScrollReveal
         className={ECOMM_MODULE_CLASS}
         surface="muted"
@@ -298,14 +314,16 @@ export function PdpStrippedView({
       >
         <PdpRecentlyViewedCarousel />
       </PdpScrollReveal>
-      <PdpScrollReveal
-        className={ECOMM_MODULE_CLASS}
-        surface="muted"
-        lazyMount
-        reserveMinHeight="28dvh"
-      >
-        <PdpCoachPremiumModule />
-      </PdpScrollReveal>
+      {versionConfig.showCoachPremium ? (
+        <PdpScrollReveal
+          className={ECOMM_MODULE_CLASS}
+          surface="muted"
+          lazyMount
+          reserveMinHeight="28dvh"
+        >
+          <PdpCoachPremiumModule />
+        </PdpScrollReveal>
+      ) : null}
       <PdpScrollReveal
         className="w-full shrink-0"
         surface="light"

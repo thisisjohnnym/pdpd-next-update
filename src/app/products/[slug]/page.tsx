@@ -49,5 +49,5 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const { slug } = await params;
   const query = await searchParams;
 
-  return <PdpProductPageView slug={slug} searchParams={query} />;
+  return <PdpProductPageView slug={slug} searchParams={query} version="v1" />;
 }

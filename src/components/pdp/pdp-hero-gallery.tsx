@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useLayoutEffect } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -19,6 +19,11 @@ import {
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
 import {
+  HERO_SCRIM_TRANSITION_CLASS,
+  useSetHeroChromeSurface,
+} from "./pdp-hero-chrome-surface";
+import { useReducedMotion } from "./use-reduced-motion";
+import {
   HERO_FILTER_GRADIENT,
   HERO_MIDDLE_GRADIENT,
   HERO_MIDDLE_HEIGHT_FRACTION,
@@ -28,6 +33,8 @@ import {
   loopCarouselItems,
   useInfiniteFullBleedCarousel,
 } from "./use-infinite-centered-carousel";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 function HeroSlideMedia({
   slide,
@@ -100,13 +107,22 @@ export function PdpHeroGallery({
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const loopedSlides = useMemo(() => loopCarouselItems(slides), [slides]);
+  const { useStableInfiniteCarousel } = getPdpVersionConfig(usePdpVersion());
   const { activeIndex, activeLoopedIndex } = useInfiniteFullBleedCarousel(
     trackRef,
     slides.length,
+    { stableLoop: useStableInfiniteCarousel },
   );
+  const setHeroChromeSurface = useSetHeroChromeSurface();
+  const reducedMotion = useReducedMotion();
 
   const surface = slides[activeIndex]?.headerSurface ?? "dark";
   const scrimVisible = surface === "dark";
+  const scrimTransitionClass = reducedMotion ? undefined : HERO_SCRIM_TRANSITION_CLASS;
+
+  useLayoutEffect(() => {
+    setHeroChromeSurface(surface);
+  }, [setHeroChromeSurface, surface]);
 
   const galleryState = useMemo(
     () => ({ activeIndex, count: slides.length, surface }),
@@ -127,6 +143,7 @@ export function PdpHeroGallery({
       >
         <div
           ref={trackRef}
+          data-hero-gallery-track
           className={cn(
             "absolute inset-0 z-0 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x_pan-y]",
@@ -152,7 +169,10 @@ export function PdpHeroGallery({
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-[10] transition-opacity duration-300 ease-out"
+          className={cn(
+            "pointer-events-none absolute inset-0 z-[10]",
+            scrimTransitionClass,
+          )}
           style={{ opacity: scrimVisible ? 1 : 0 }}
         >
           <div
@@ -164,10 +184,14 @@ export function PdpHeroGallery({
 
         <div
           aria-hidden
-          className="pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[8]"
+          className={cn(
+            "pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[8]",
+            scrimTransitionClass,
+          )}
           style={{
             height: `${HERO_MIDDLE_HEIGHT_FRACTION * 100}%`,
             backgroundImage: HERO_MIDDLE_GRADIENT,
+            opacity: scrimVisible ? 1 : 0,
           }}
         />
 

@@ -11,6 +11,8 @@ import { PdpJumpBarTitle } from "./pdp-jump-bar-title";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpChapterAnchorId } from "./pdp-section-chapters";
 import { PDP_CHROME_HEADER_OFFSET, usePdpChromeMode } from "./use-pdp-chrome-mode";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { useMountTransition } from "./use-mount-transition";
 import { useRafLerp } from "./use-raf-lerp";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
@@ -28,8 +30,9 @@ export function PdpSectionIndicator({
     setMounted(true);
   }, []);
 
+  const { sectionChapters } = getPdpVersionConfig(usePdpVersion());
   const { chapters, activeIndex, active, jumpBarActive, sectionProgress } =
-    usePdpChromeMode(mounted);
+    usePdpChromeMode(mounted, sectionChapters);
   const menu = useMountTransition(menuOpen, 220);
 
   // Show on scroll-down from "The Details" onward (mutually exclusive with the

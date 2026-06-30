@@ -10,6 +10,36 @@ For design fidelity and parity decisions, use:
 
 ---
 
+## Versions (v1 / v2)
+
+This inventory describes **v1** (the frozen current design). The **v2** stakeholder pivot reuses these same components, gated by `pdp-version-config.ts`. See `docs/pdp-versions.md` for the full version map.
+
+Module availability per version:
+
+| Module | v1 | v2 | Notes |
+|--------|----|----|-------|
+| Hero social rail (like / comment / save) | yes | no | AR Try On stays |
+| `PdpUgcVideoCarouselModule` (v1 ugc-videos) | yes | no | v2 uses `PdpV2UgcCommunity` instead |
+| `PdpV2UgcCommunity` ("Carried by the community") | no | yes | v2-only; right after the hero (Paper AFC-0) |
+| `PdpV2EditorialCarousel` (4-card editorial) | no | yes | v2-only; replaces grouped craft carousel (Paper AN3-0) |
+| `PdpV2LeatherAging` (card layout) | no | yes | v2-only; warm header/image/controls (Paper AP5-0) |
+| `PdpV2Reviews` (reviews only) | no | yes | v2-only; replaces tabbed reviews (Paper AYJ-0) |
+| `PdpV2FullSlide` (trench portrait) | no | yes | v2-only; 100svh image (Paper B39-0) |
+| `PdpV2MoreLikeThis` (158px cards) | no | yes | v2-only; replaces `PdpMoreLikeThisModule` (Paper B6C-0) |
+| `PdpV2RecentlyViewed` (vertical list) | no | yes | v2-only; replaces `PdpRecentlyViewedCarousel` (Paper BC6-0) |
+| `PdpStrapSimulationModule` ("Make it Yours") | yes | no | dropped from v2 slide list |
+| `PdpGalleryViewMorePhotos` | yes | no | dropped from v2 slide list |
+| `PdpSignatureSoundsModule` ("Sounds of Tabby") | yes | no | dropped from v2 slide list |
+| `PdpWeightFeelModule` | yes | no | dropped from v2 slide list |
+| Reviews comments tab / composer / likes | yes | no | v2 is reviews-only |
+| `PdpCoachAiModule` | yes | no | unmounted in v2 |
+| `PdpCoachPremiumModule` | yes | no | unmounted in v2 |
+| Bundle, Compare | yes | no | hidden in v2 (`showBundle` / `showCompare` false) |
+
+v2 section order (Paper ADB-0): hero → UGC community → The Details → studio product slide (100svh) → editorial carousel → leather aging → Reviews → trench portrait slide (100svh) → More like this → Recently viewed → footer.
+
+---
+
 ## Page architecture
 
 The app entry point (`src/app/page.tsx`) renders **`PdpSocialView`**, which is the primary PDP shell. An alternate **`PdpCommunityView`** (TikTok-style media feed) exists but is not wired to the main route.

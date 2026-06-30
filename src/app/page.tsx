@@ -33,5 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home({ searchParams }: HomeProps) {
   const query = await searchParams;
 
-  return <PdpProductPageView slug={DEFAULT_TABBY_SLUG} searchParams={query} />;
+  return (
+    <PdpProductPageView slug={DEFAULT_TABBY_SLUG} searchParams={query} version="v1" />
+  );
 }

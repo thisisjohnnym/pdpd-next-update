@@ -24,6 +24,8 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetBodyClass,
+  pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { ColorSwatchCircle } from "./pdp-color-swatch";
@@ -378,8 +380,11 @@ export function PdpColorSheet({
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pt-0.5">
+          <div className={pdpBottomSheetBodyClass}>
+            <div
+              data-pdp-sheet-scroll
+              className={pdpBottomSheetScrollRegionClass("px-3 pt-0.5")}
+            >
               <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-3")}>
                 Select a color
               </h2>

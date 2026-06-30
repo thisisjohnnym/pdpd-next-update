@@ -13,6 +13,7 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
 } from "./pdp-bottom-sheet";
 
 import {
@@ -337,7 +338,12 @@ export function PdpAddToBagSheet({
           <div className={pdpBottomSheetGrabHandleClass} />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           {hasBeenOpen ? (
           <>
           <div className="flex items-center gap-2 pb-4">

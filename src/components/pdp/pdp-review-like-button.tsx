@@ -7,6 +7,8 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { pdpType, pdpPressableClass } from "./pdp-type";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { cn } from "@/lib/cn";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 type PdpReviewLikeButtonProps = {
   initialLikes: number;
@@ -15,14 +17,19 @@ type PdpReviewLikeButtonProps = {
   className?: string;
 };
 
-/** Toggle like on a customer review */
+/** Toggle like on a customer review — hidden when the version disables review likes */
 export function PdpReviewLikeButton({
   initialLikes,
   layout = "stacked",
   className,
 }: PdpReviewLikeButtonProps) {
+  const { showReviewLikes } = getPdpVersionConfig(usePdpVersion());
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialLikes);
+
+  if (!showReviewLikes) {
+    return null;
+  }
 
   const handleToggle = () => {
     setLiked((current) => {

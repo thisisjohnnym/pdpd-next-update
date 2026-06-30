@@ -12,11 +12,13 @@ const CTA_BAR_FALLBACK_PX = CTA_ROW_HEIGHT_PX + CTA_BAR_PADDING_PX * 2;
 export const BOTTOM_CTA_OFFSET = `calc(${CTA_ROW_HEIGHT_PX}px + ${CTA_BAR_PADDING_PX * 2}px + var(--pdp-fixed-bottom-offset))`;
 
 /**
- * Hero product HUD bottom — reveal-aware (Paper `6CU-0` / `670-0`):
- * shrunk: flush to media frame bottom; inner `pb-2` matches row paddingBottom 8px
- * full bleed: HeroMiddle paddingBottom = cta-bar-height + safe-area (Paper `66F-0` 64px)
+ * Hero product HUD bottom — always clears the floating CTA (Paper `66F-0`).
+ * Intentionally not tied to `--hero-reveal`: when the brand switcher is visible the
+ * media frame still shares the viewport bottom with the fixed CTA bar, so lifting
+ * the HUD by the measured bar height keeps product info readable without shifting
+ * between shrunk and full-bleed.
  */
-const HERO_PRODUCT_HUD_OFFSET = `calc((1 - var(--hero-reveal, 0)) * (var(--cta-bar-height, ${CTA_BAR_FALLBACK_PX}px) + var(--pdp-fixed-bottom-offset)))`;
+const HERO_PRODUCT_HUD_OFFSET = `calc(var(--cta-bar-height, ${CTA_BAR_FALLBACK_PX}px) + var(--pdp-fixed-bottom-offset))`;
 
 /** Hero action rail — stacked above product name block */
 const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 4.5rem)`;

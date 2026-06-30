@@ -154,6 +154,8 @@ type PdpReviewFeedFilterBarProps = {
   value: PdpReviewFeedFilter;
   onChange: (filter: PdpReviewFeedFilter) => void;
   className?: string;
+  /** Hide the Comments tab (v2 removes comments from reviews) */
+  hideComments?: boolean;
 };
 
 /** Sheet-only filters — reviews, comments, questions, and photos */
@@ -161,7 +163,12 @@ export function PdpReviewFeedFilterBar({
   value,
   onChange,
   className,
+  hideComments = false,
 }: PdpReviewFeedFilterBarProps) {
+  const filters = hideComments
+    ? REVIEW_FEED_FILTERS.filter((filter) => filter.id !== "comments")
+    : REVIEW_FEED_FILTERS;
+
   return (
     <div
       className={cn("-mx-1 overflow-x-auto overscroll-x-contain", className)}
@@ -169,7 +176,7 @@ export function PdpReviewFeedFilterBar({
       aria-label="Filter reviews"
     >
       <div className="flex w-max min-w-full gap-2 px-1 pb-1">
-        {REVIEW_FEED_FILTERS.map((filter) => {
+        {filters.map((filter) => {
           const active = value === filter.id;
 
           return (

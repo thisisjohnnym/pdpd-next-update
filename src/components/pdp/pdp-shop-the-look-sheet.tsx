@@ -13,6 +13,7 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
 } from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
@@ -63,7 +64,12 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
           <div className={pdpBottomSheetGrabHandleClass} />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-4")}>
             {displayLook.title}
           </h2>

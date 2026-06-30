@@ -90,7 +90,8 @@ A PDP module is done only when all are true:
 
 ## Hero chrome (Tabby video land)
 
-- Paper nodes: **shrunk** `6AJ-0` · **full bleed** `64P-0` on page `updates - r2`
+- Paper nodes: **shrunk** `6AJ-0` · **full bleed** `64P-0` on page `updates - r2` (v1 baseline)
+- For v2 Paper work, see [`docs/pdp-versions.md`](pdp-versions.md) → Paper page mapping (`updates - r3`)
 - Implementation companion: [`docs/pdp-hero-chrome.md`](pdp-hero-chrome.md)
 
 ---

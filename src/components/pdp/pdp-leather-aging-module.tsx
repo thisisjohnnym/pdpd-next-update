@@ -163,9 +163,12 @@ function AgingCareHelp({
 export function PdpLeatherAgingModule({
   isLastPanel = false,
   onQuickAdd,
+  showCareUpsell = true,
 }: {
   isLastPanel?: boolean;
   onQuickAdd?: () => void;
+  /** Show leather care product upsell rows (hidden in v2 — Paper AP5-0). Defaults true for v1. */
+  showCareUpsell?: boolean;
 }) {
   const { image, stages, careNudge, title } = PDP_LEATHER_AGING;
   const panel = experiencePanelSectionProps(isLastPanel);
@@ -437,7 +440,7 @@ export function PdpLeatherAgingModule({
             {`${displayStage.timeline} — ${displayStage.summary}`}
           </p>
 
-          {careProducts.length ? (
+          {showCareUpsell && careProducts.length ? (
             <div
               className={cn(
                 "overflow-hidden",

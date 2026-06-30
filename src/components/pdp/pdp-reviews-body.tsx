@@ -39,6 +39,8 @@ import {
 } from "./pdp-review-comment";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 export function usePdpReviewsComments(onRootPost?: () => void) {
   const { productId } = useActiveProduct();
@@ -118,6 +120,20 @@ type PdpReviewsBodyProps = {
   onCancelReply: () => void;
 };
 
+/** Stars + "4.8 · 128 reviews · 96% recommend" — shared by full reviews and the v2 interstitial */
+export function PdpReviewRatingSummary({ className }: { className?: string }) {
+  const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
+
+  return (
+    <div className={cn("flex flex-wrap items-center gap-x-2 gap-y-1", className)}>
+      <PdpStarRating rating={average} />
+      <p className="font-extended m-0 text-sm tracking-[0.2px] text-black">
+        {average.toFixed(1)} · {count} reviews · {recommendPercent}% recommend
+      </p>
+    </div>
+  );
+}
+
 /** Shared reviews layout — summary, UGC, formal reviews, or Reddit-style comments */
 export function PdpReviewsBody({
   titleId,
@@ -145,10 +161,16 @@ export function PdpReviewsBody({
 }: PdpReviewsBodyProps) {
   const { productId } = useActiveProduct();
   const { aiSummaryBody, ugcStories } = getPdpReviewsContent(productId);
-  const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
+  const { count } = PDP_REVIEWS_SUMMARY;
+  const { showReviewComments: allowComments } = getPdpVersionConfig(usePdpVersion());
   const [internalFeedFilter, setInternalFeedFilter] =
     useState<PdpReviewFeedFilter>("reviews");
-  const feedFilter = feedFilterProp ?? internalFeedFilter;
+  const requestedFeedFilter = feedFilterProp ?? internalFeedFilter;
+  // v2 removes comments — never land on the comments feed even if requested externally.
+  const feedFilter =
+    !allowComments && requestedFeedFilter === "comments"
+      ? "reviews"
+      : requestedFeedFilter;
   const setFeedFilter = onFeedFilterChange ?? setInternalFeedFilter;
 
   const userPhotos = useMemo(
@@ -179,13 +201,13 @@ export function PdpReviewsBody({
   }, [allComments, allReviews, feedFilter, reviewLimit, showFeedFilters]);
 
   const showComposer =
-    showInlineComposer && feedFilterSupportsComposer(feedFilter);
+    showInlineComposer && feedFilterSupportsComposer(feedFilter) && allowComments;
   const showAiSummary =
     !showFeedFilters || feedFilter === "reviews";
   const showUgcCarousel = !showFeedFilters;
   const showPhotoList = showFeedFilters && feedFilter === "photos";
   const showReviewFeed = !showFeedFilters || feedFilter === "reviews";
-  const showCommentFeed = showFeedFilters && feedFilter === "comments";
+  const showCommentFeed = showFeedFilters && feedFilter === "comments" && allowComments;
   const showFaq = showFeedFilters && feedFilter === "questions";
   const feedAriaLabel =
     feedFilter === "comments"
@@ -218,16 +240,15 @@ export function PdpReviewsBody({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <PdpStarRating rating={average} />
-          <p className="font-extended m-0 text-sm tracking-[0.2px] text-black">
-            {average.toFixed(1)} · {count} reviews · {recommendPercent}% recommend
-          </p>
-        </div>
+        <PdpReviewRatingSummary />
       </div>
 
       {showFeedFilters ? (
-        <PdpReviewFeedFilterBar value={feedFilter} onChange={setFeedFilter} />
+        <PdpReviewFeedFilterBar
+          value={feedFilter}
+          onChange={setFeedFilter}
+          hideComments={!allowComments}
+        />
       ) : null}
 
       {showAiSummary ? (

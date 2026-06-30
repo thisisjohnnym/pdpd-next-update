@@ -9,6 +9,7 @@ import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
 import { PdpIconSwap } from "./pdp-icon-swap";
+import { pdpBottomSheetScrollRegionClass } from "./pdp-bottom-sheet";
 import { PDP_NAV, type PdpNavCategory, type PdpNavHighlight } from "./pdp-nav-data";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "./pdp-type";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
@@ -136,7 +137,7 @@ export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-50 overscroll-none transition-opacity duration-300",
         open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
       aria-hidden={!open}
@@ -202,7 +203,10 @@ export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[var(--pdp-safe-area-bottom)]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass("pb-[var(--pdp-safe-area-bottom)]")}
+        >
           <PageGrid fullWidth className="py-4">
             <GridItem mobile={12} desktop={24}>
               <label className="relative mb-5 block">

@@ -75,6 +75,17 @@ import {
 import { PDP_PANEL_SCROLL } from "./pdp-panel-scroll";
 import { galleryPanelClassName, getLastGalleryPanelSlideIndex } from "./pdp-gallery-panel";
 import { usePanelScrollRelease } from "./use-panel-scroll-release";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
+import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
+import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
+import { PdpV2UgcCommunity } from "./version/pdp-v2-ugc-community";
+import { PdpV2FullSlide } from "./version/pdp-v2-full-slide";
+import { PdpV2Reviews } from "./version/pdp-v2-reviews";
+import { PdpV2MoreLikeThis } from "./version/pdp-v2-more-like-this";
+import { PdpV2LeatherAging } from "./version/pdp-v2-leather-aging";
+import { PdpV2RecentlyViewed } from "./version/pdp-v2-recently-viewed";
 
 const GALLERY_CLASS = "w-full overflow-x-clip bg-white";
 
@@ -83,12 +94,6 @@ const GALLERY_MEDIA_STACK_CLASS = "flex flex-col bg-white";
 
 /** Bottom-of-page ecommerce modules — free-form scroll, sized to their content */
 const ECOMM_MODULE_CLASS = "w-full shrink-0";
-
-/**
- * Gallery index after which "The details" module is injected. Per the r2 design
- * it sits after the Studio Product (0) and Editorial (1) desire slides.
- */
-const PDP_DETAILS_AFTER_SLIDE_INDEX = 1;
 
 type GallerySectionSurface = "dark" | "light" | "muted" | "transparent";
 
@@ -614,10 +619,12 @@ export function PdpGalleryView({
   const tabby = useOptionalTabbyVariant();
   const tabbyExperiment = useTabbyFamilyCompareExperiment();
   const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
-  const gallerySlides =
+  const version = usePdpVersion();
+  const versionConfig = getPdpVersionConfig(version);
+  const gallerySlides: PdpGallerySlideV2[] =
     productId === "tabby"
-      ? getTabbyGallerySlidesForColor(selectedColorId)
-      : PDP_GALLERY_SLIDES;
+      ? getTabbyGallerySlidesForColor(selectedColorId, version)
+      : versionConfig.gallerySlides;
   const galleryMorePhotos =
     productId === "tabby"
       ? getTabbyGalleryMorePhotosForColor(selectedColorId)
@@ -652,7 +659,7 @@ export function PdpGalleryView({
 
           // "The details" sits after the Studio Product + Editorial slides (matches r2).
           const detailsBlock: ReactNode[] =
-            index === PDP_DETAILS_AFTER_SLIDE_INDEX
+            index === versionConfig.detailsAfterSlideIndex
               ? [
                   <ChapterAnchor
                     key={`anchor-the-details-${index}`}
@@ -663,7 +670,7 @@ export function PdpGalleryView({
                     className={ECOMM_MODULE_CLASS}
                     surface="light"
                   >
-                    <PdpProductDetailsModule />
+                    <PdpProductDetailsModule showHeading={versionConfig.showDetailsHeading} />
                   </PdpScrollReveal>,
                 ]
               : [];
@@ -710,10 +717,15 @@ export function PdpGalleryView({
               <ChapterAnchor key={`anchor-the-feel-${index}`} id="the-feel" />,
               gallerySection(
                 `leather-aging-${index}`,
-                <PdpLeatherAgingModule
-                  isLastPanel={isLastPanel}
-                  onQuickAdd={() => onAddSimilarToBag?.()}
-                />,
+                versionConfig.useSimplifiedLeatherAging ? (
+                  <PdpV2LeatherAging />
+                ) : (
+                  <PdpLeatherAgingModule
+                    isLastPanel={isLastPanel}
+                    onQuickAdd={() => onAddSimilarToBag?.()}
+                    showCareUpsell={versionConfig.showLeatherCareUpsell}
+                  />
+                ),
                 {}
               ),
             ];
@@ -803,11 +815,31 @@ export function PdpGalleryView({
             ];
           }
 
+          if (slide.type === "ugc-community") {
+            return [
+              gallerySection(
+                `ugc-community-${index}`,
+                <PdpV2UgcCommunity />,
+                { surface: "light" },
+              ),
+            ];
+          }
+
           if (slide.type === "as-seen-on") {
             return [
               gallerySection(
                 `as-seen-on-${index}`,
                 <PdpAsSeenOnModule isLastPanel={isLastPanel} />,
+                { surface: "light" },
+              ),
+            ];
+          }
+
+          if (slide.type === "editorial-carousel-v2") {
+            return [
+              gallerySection(
+                `editorial-carousel-${index}`,
+                <PdpV2EditorialCarousel />,
                 { surface: "light" },
               ),
             ];
@@ -859,36 +891,74 @@ export function PdpGalleryView({
 
       {/* Ecommerce — after desire + function gallery scroll. Free-form scroll;
           modules size to their own content. */}
+      {versionConfig.showReviewInterstitial ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="20dvh">
+          <PdpReviewInterstitial onReadAll={onReadAllReviews ?? onOpenReviews} />
+        </PdpScrollReveal>
+      ) : null}
       <ChapterAnchor id="reviews" />
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="40dvh">
-        <PdpReviewsModule
-          onReadAll={onReadAllReviews ?? onOpenReviews}
-          onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
-        />
+        {versionConfig.useSimplifiedReviews ? (
+          <PdpV2Reviews
+            onReadAll={onReadAllReviews ?? onOpenReviews}
+            onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
+          />
+        ) : (
+          <PdpReviewsModule
+            onReadAll={onReadAllReviews ?? onOpenReviews}
+            onWriteReview={onWriteReview ?? onReadAllReviews ?? onOpenReviews}
+          />
+        )}
       </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
-        <PdpCoachAiModule />
-      </PdpScrollReveal>
+      {versionConfig.showCoachAi ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="32dvh">
+          <PdpCoachAiModule />
+        </PdpScrollReveal>
+      ) : null}
       <ChapterAnchor id="more" />
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
-      </PdpScrollReveal>
+      {versionConfig.showBundle ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
+          <PdpBundleModule onAddBundle={(payload) => onAddBundle?.(payload)} />
+        </PdpScrollReveal>
+      ) : null}
       <ChapterAnchor id="the-family" />
+      {versionConfig.showCompare ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
+          <PdpCompareModuleGate
+            onAddToBag={() => onAddSimilarToBag?.()}
+            onPickerOpenChange={onComparePickerOpenChange}
+          />
+        </PdpScrollReveal>
+      ) : null}
+      {/* v2 trench portrait slide — full-viewport image between reviews and More like this (Paper B39-0) */}
+      {versionConfig.trenchPortraitSlide ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="dark" lazyMount>
+          <PdpV2FullSlide
+            src={versionConfig.trenchPortraitSlide.src}
+            alt={versionConfig.trenchPortraitSlide.alt}
+            objectPosition={versionConfig.trenchPortraitSlide.objectPosition}
+          />
+        </PdpScrollReveal>
+      ) : null}
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpCompareModuleGate
-          onAddToBag={() => onAddSimilarToBag?.()}
-          onPickerOpenChange={onComparePickerOpenChange}
-        />
+        {versionConfig.useSimplifiedMoreLikeThis ? (
+          <PdpV2MoreLikeThis onAddToBag={() => onAddSimilarToBag?.()} />
+        ) : (
+          <PdpMoreLikeThisModule onAddToBag={() => onAddSimilarToBag?.()} />
+        )}
       </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">
-        <PdpMoreLikeThisModule onAddToBag={() => onAddSimilarToBag?.()} />
+      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface={versionConfig.useSimplifiedRecentlyViewed ? "light" : "muted"} lazyMount reserveMinHeight="24dvh">
+        {versionConfig.useSimplifiedRecentlyViewed ? (
+          <PdpV2RecentlyViewed />
+        ) : (
+          <PdpRecentlyViewedCarousel />
+        )}
       </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="24dvh">
-        <PdpRecentlyViewedCarousel />
-      </PdpScrollReveal>
-      <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="28dvh">
-        <PdpCoachPremiumModule />
-      </PdpScrollReveal>
+      {versionConfig.showCoachPremium ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="28dvh">
+          <PdpCoachPremiumModule />
+        </PdpScrollReveal>
+      ) : null}
       <PdpScrollReveal className="w-full shrink-0" surface="dark">
         <PdpSiteFooter />
       </PdpScrollReveal>

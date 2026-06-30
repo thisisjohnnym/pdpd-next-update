@@ -558,6 +558,11 @@ html.pdp-drag-zoom-scroll-lock {
   overscroll-behavior: none;
 }
 
+html.pdp-overlay-scroll-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .pdp-material-explore img {
   -webkit-touch-callout: none;
   -webkit-user-drag: none;

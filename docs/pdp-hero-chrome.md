@@ -39,7 +39,7 @@ PdpHeroShell
 |----------|--------|---------|
 | `--hero-reveal` | Intro + pull-to-reveal (`0` = full bleed, `1` = shrunk) | Lerp radius, brand bar, hero top padding |
 | `--hero-inset` | `reveal × 0px` | Reserved for horizontal chrome alignment (edge-to-edge per Paper `6AJ-0`) |
-| `--cta-bar-height` | `ResizeObserver` on floating CTA | Product HUD lift at full bleed |
+| `--cta-bar-height` | `ResizeObserver` on floating CTA | Product HUD + action rail lift above fixed CTA |
 | `--hero-ui-opacity` | Scroll through hero | Fade hero overlays (not video/CTA) |
 | `--hero-ui-blur` | Scroll through hero | Blur hero overlays |
 
@@ -61,6 +61,7 @@ Shrunk vs full bleed is intentionally subtle — brand switcher, top offset, and
 - Hold: **2s**
 - Collapse to full bleed: **1.0s** ease-out, then pull gestures unlock
 - Pull-to-reveal at scroll top restores shrunk state (existing gesture)
+- Pull distance is **dampened during the gesture** (`PULL_DAMPING` 0.42) — ~124px pull for full reveal, not 52px; trackpad wheel deltas are capped per frame
 
 Docs describe behavior only — they do not affect runtime. If land behavior disagrees with this file, fix `use-pdp-hero-reveal.tsx`.
 

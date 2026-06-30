@@ -30,11 +30,14 @@ import { TabbyVariantProvider, useOptionalTabbyVariant } from "./pdp-tabby-varia
 import { hasTabbyColorHeroOverride } from "./pdp-tabby-colors";
 import { getTabbyColorHeroObjectPosition } from "./pdp-tabby-color-media";
 import { PdpHeroEnterProvider } from "./use-hero-enter-once";
+import { PdpHeroChromeSurfaceProvider } from "./pdp-hero-chrome-surface";
 import { DEFAULT_TABBY_SLUG } from "./pdp-tabby-variants";
 import type { PdpBundleAddPayload, PdpStrapSetAddPayload } from "./pdp-data";
 import { TabbyFamilyCompareExperimentProvider } from "./experiments/tabby-family-compare-flag";
 import { PdpScrollProvider } from "./use-coalesced-scroll";
 import { useHeroUiChromeVars } from "./use-hero-ui-chrome";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 type BagConfirmation =
   | { type: "product" }
@@ -56,9 +59,11 @@ export function PdpSocialView({
           <Suspense fallback={null}>
             <TabbyFamilyCompareExperimentProvider initialEnabled={tabbyExperimentEnabled}>
               <TabbyVariantProvider slug={slug}>
-                <PdpHeroEnterProvider>
-                  <PdpSocialViewInner />
-                </PdpHeroEnterProvider>
+                <PdpHeroChromeSurfaceProvider>
+                  <PdpHeroEnterProvider>
+                    <PdpSocialViewInner />
+                  </PdpHeroEnterProvider>
+                </PdpHeroChromeSurfaceProvider>
               </TabbyVariantProvider>
             </TabbyFamilyCompareExperimentProvider>
           </Suspense>
@@ -123,8 +128,11 @@ function PdpSocialViewInner() {
     setBagSheetOpen(true);
   };
 
+  const { showReviewComments } = getPdpVersionConfig(usePdpVersion());
+
   const openReviews = (feed: "reviews" | "comments" = "reviews") => {
-    setReviewsFeedFilter(feed);
+    // v2 has no comments feed — always land on reviews.
+    setReviewsFeedFilter(showReviewComments ? feed : "reviews");
     setReviewsOpen(true);
   };
 

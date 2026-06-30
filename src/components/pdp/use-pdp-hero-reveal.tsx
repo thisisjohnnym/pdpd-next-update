@@ -11,6 +11,8 @@ import {
 } from "react";
 
 import { PDP_BRAND_BAR_HEIGHT } from "./pdp-brand-bar";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import {
   HERO_INTRO_HOLD_MS,
   HERO_SHRINK_TO_FULL_MS,
@@ -27,6 +29,10 @@ const INTRO_HOLD_MS = HERO_INTRO_HOLD_MS;
 const SHRINK_TO_FULL_MS = HERO_SHRINK_TO_FULL_MS;
 /** Drag distance is dampened so the switcher is not trivially triggered */
 const PULL_DAMPING = 0.42;
+/** Cap per-wheel tick so trackpad inertia cannot snap reveal to 1 in one frame */
+const WHEEL_DELTA_CAP_PX = 20;
+/** Minimum settle duration for latch open/close (make-interfaces-feel-better) */
+const GESTURE_SETTLE_MIN_MS = 300;
 /** Fraction of the bar height (after damping) needed to latch open */
 const LATCH_THRESHOLD = 0.5;
 /** Idle gap that ends a wheel "gesture" and decides latch vs spring-back */
@@ -39,6 +45,8 @@ const SCROLL_TOP_EPSILON_PX = 2;
 const GESTURE_SUPPRESS_MS = 800;
 /** Scroll considered idle after this gap — ends "active scroll" window */
 const SCROLL_SETTLE_MS = 150;
+/** Horizontal movement past this wins over pull-to-reveal (v2 gallery track) */
+const HORIZONTAL_GESTURE_DOMINANCE_PX = 8;
 
 function clamp01(value: number): number {
   return value < 0 ? 0 : value > 1 ? 1 : value;
@@ -51,7 +59,23 @@ function easeOutCubic(t: number): number {
 /** Settle duration scales with how far reveal still has to travel. */
 function gestureSettleDuration(from: number, to: number): number {
   const distance = Math.abs(to - from);
-  return Math.max(200, SHRINK_TO_FULL_MS * distance);
+  return Math.max(GESTURE_SETTLE_MIN_MS, SHRINK_TO_FULL_MS * distance);
+}
+
+/** Map raw pull pixels to reveal — damping applies to live drag, not only latch. */
+function revealFromPullPixels(pullPx: number, barHeight: number): number {
+  return clamp01((pullPx * PULL_DAMPING) / barHeight);
+}
+
+function isOnHeroGalleryTrack(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    Boolean(target.closest("[data-hero-gallery-track]"))
+  );
+}
+
+function isHorizontalDominantGesture(dx: number, dy: number): boolean {
+  return Math.abs(dx) > Math.abs(dy) + HORIZONTAL_GESTURE_DOMINANCE_PX;
 }
 
 class HeroRevealController {
@@ -236,6 +260,9 @@ export function PdpHeroRevealProvider({
   children: ReactNode;
 }) {
   const reducedMotion = useReducedMotion();
+  const { heroRevealDeferToHorizontalGallery } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
   const [controller] = useState(() => new HeroRevealController());
 
   useEffect(() => {
@@ -300,6 +327,7 @@ export function PdpHeroRevealProvider({
     const canWheelPull = () => controller.introComplete && hasScrolledAwayFromTop;
 
     let touching = false;
+    let startX = 0;
     let startY = 0;
     let dragPx = 0;
     let wheelAccum = 0;
@@ -371,6 +399,13 @@ export function PdpHeroRevealProvider({
         touching = false;
         return;
       }
+      if (
+        heroRevealDeferToHorizontalGallery &&
+        isOnHeroGalleryTrack(event.target)
+      ) {
+        touching = false;
+        return;
+      }
       if (!atTop() && controller.getReveal() <= 0) {
         touching = false;
         return;
@@ -381,6 +416,7 @@ export function PdpHeroRevealProvider({
       }
       controller.cancelAutohide();
       touching = true;
+      startX = event.touches[0]?.clientX ?? 0;
       startY = event.touches[0]?.clientY ?? 0;
       dragPx = 0;
     };
@@ -390,13 +426,25 @@ export function PdpHeroRevealProvider({
       if (!touching || blockTouchPull()) {
         return;
       }
-      const dy = (event.touches[0]?.clientY ?? 0) - startY;
+      const touch = event.touches[0];
+      const dx = (touch?.clientX ?? 0) - startX;
+      const dy = (touch?.clientY ?? 0) - startY;
+      if (
+        heroRevealDeferToHorizontalGallery &&
+        isHorizontalDominantGesture(dx, dy)
+      ) {
+        touching = false;
+        return;
+      }
       if (dy <= 0 && controller.getReveal() <= 0) {
         touching = false;
         return;
       }
       dragPx = dy;
-      controller.setDirect(clamp01(dy / barHeight), "touch-move");
+      controller.setDirect(
+        revealFromPullPixels(dy, barHeight),
+        "touch-move",
+      );
       if (dy > 0) {
         event.preventDefault();
       }
@@ -461,22 +509,37 @@ export function PdpHeroRevealProvider({
 
     // fallow-ignore-next-line complexity
     const onWheel = (event: WheelEvent) => {
+      if (
+        heroRevealDeferToHorizontalGallery &&
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      ) {
+        return;
+      }
       const reveal = controller.getReveal();
       if (event.deltaY < 0 && atTop()) {
         if (blockWheelPull()) {
           return;
         }
         controller.cancelAutohide();
-        wheelAccum += -event.deltaY;
-        controller.setDirect(clamp01(wheelAccum / barHeight), "wheel-pull");
+        wheelAccum += Math.min(-event.deltaY, WHEEL_DELTA_CAP_PX);
+        controller.setDirect(
+          revealFromPullPixels(wheelAccum, barHeight),
+          "wheel-pull",
+        );
         event.preventDefault();
         scheduleWheelEnd();
       } else if (event.deltaY > 0 && reveal > 0) {
         if (blockWheelPull()) {
           return;
         }
-        wheelAccum = Math.max(0, wheelAccum - event.deltaY);
-        controller.setDirect(clamp01(wheelAccum / barHeight), "wheel-push");
+        wheelAccum = Math.max(
+          0,
+          wheelAccum - Math.min(event.deltaY, WHEEL_DELTA_CAP_PX),
+        );
+        controller.setDirect(
+          revealFromPullPixels(wheelAccum, barHeight),
+          "wheel-push",
+        );
         event.preventDefault();
         scheduleWheelEnd();
       }
@@ -500,7 +563,7 @@ export function PdpHeroRevealProvider({
       window.clearTimeout(scrollEndTimer);
       controller.cancelAutohide();
     };
-  }, [controller]);
+  }, [controller, heroRevealDeferToHorizontalGallery]);
 
   return (
     <HeroRevealContext.Provider value={controller}>

@@ -22,9 +22,11 @@ export function PdpBrandBarReveal() {
     if (!outer) {
       return;
     }
-    outer.style.transform = `translateY(${(1 - reveal) * -BRAND_BAR_HIDE_OFFSET_PX}px)`;
-    outer.style.opacity = String(reveal);
-    outer.style.pointerEvents = reveal > 0.35 ? "auto" : "none";
+      outer.style.transform = `translateY(${(1 - reveal) * -BRAND_BAR_HIDE_OFFSET_PX}px)`;
+      outer.style.opacity = String(reveal);
+      outer.style.pointerEvents = reveal > 0.35 ? "auto" : "none";
+      outer.style.willChange =
+        reveal > 0 && reveal < 1 ? "transform, opacity" : "";
   });
 
   return (

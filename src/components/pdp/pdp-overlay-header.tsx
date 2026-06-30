@@ -13,9 +13,18 @@ import { pdpPressableIconClass } from "./pdp-type";
 import { useScrollNavVisibility } from "./use-scroll-nav-visibility";
 import { useHeroRevealApplier } from "./use-pdp-hero-reveal";
 import { PdpIconSwap } from "./pdp-icon-swap";
+import {
+  heroUsesLightChrome,
+  HERO_CHROME_COLOR_TRANSITION_CLASS,
+  useHeroChromeSurface,
+} from "./pdp-hero-chrome-surface";
+import { useScrollSnapshot } from "./use-coalesced-scroll";
+import { useReducedMotion } from "./use-reduced-motion";
 
 const HEADER_ICON_SIZE = 24;
 const HEADER_ROW_HEIGHT = 24;
+/** Nav follows slide chrome while the hero land is in view */
+const HERO_LAND_SCROLL_FRACTION = 0.85;
 
 export function PdpOverlayHeader({
   bagCount = 0,
@@ -31,9 +40,19 @@ export function PdpOverlayHeader({
 }) {
   const headerRef = useRef<HTMLElement>(null);
   const hugRef = useRef<HTMLDivElement>(null);
+  const heroSurface = useHeroChromeSurface();
+  const { scrollY, viewportHeight } = useScrollSnapshot();
+  const reducedMotion = useReducedMotion();
   const visible = useScrollNavVisibility();
-  const foreground = useHeaderContrast(headerRef);
-  const isLight = foreground === "light";
+  const contrastForeground = useHeaderContrast(headerRef);
+  const overHeroLand =
+    viewportHeight > 0 && scrollY < viewportHeight * HERO_LAND_SCROLL_FRACTION;
+  const isLight = overHeroLand
+    ? heroUsesLightChrome(heroSurface)
+    : contrastForeground === "light";
+  const chromeTransitionClass = reducedMotion
+    ? undefined
+    : HERO_CHROME_COLOR_TRANSITION_CLASS;
 
   // Ride below the brand switcher while it is revealed, then sit at the top.
   useHeroRevealApplier((reveal) => {
@@ -66,7 +85,10 @@ export function PdpOverlayHeader({
       <PageGrid fullWidth className="pointer-events-auto relative pb-2.5 pt-[calc(var(--pdp-safe-area-top)+0.75rem)]">
         <GridItem mobile={12} desktop={24}>
           <div
-            className="pdp-hero-header-enter grid grid-cols-[1fr_auto_1fr] items-center transition-colors duration-300"
+            className={cn(
+              "pdp-hero-header-enter grid grid-cols-[1fr_auto_1fr] items-center",
+              chromeTransitionClass,
+            )}
             style={{ height: HEADER_ROW_HEIGHT }}
           >
             <button
@@ -75,8 +97,9 @@ export function PdpOverlayHeader({
               aria-expanded={menuOpen}
               onClick={onOpenMenu}
               className={cn(
-                "flex items-center justify-self-start transition-colors duration-300",
+                "flex items-center justify-self-start",
                 pdpPressableIconClass,
+                chromeTransitionClass,
                 isLight ? "text-white" : "text-neutral-900",
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
@@ -90,7 +113,8 @@ export function PdpOverlayHeader({
 
             <CoachWordmark
               className={cn(
-                "h-2.5 w-auto transition-colors duration-300",
+                "h-2.5 w-auto",
+                chromeTransitionClass,
                 isLight ? "text-white" : "text-neutral-900",
               )}
             />
@@ -103,8 +127,9 @@ export function PdpOverlayHeader({
                   : "Shopping bag"
               }
               className={cn(
-                "relative flex items-center justify-center justify-self-end transition-colors duration-300",
+                "relative flex items-center justify-center justify-self-end",
                 pdpPressableIconClass,
+                chromeTransitionClass,
                 isLight ? "text-white" : "text-neutral-900",
               )}
               style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}

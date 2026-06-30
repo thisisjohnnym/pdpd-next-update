@@ -8,7 +8,31 @@ const LOOP_REPETITIONS = 3;
 
 type InfiniteCenteredCarouselOptions = {
   initialIndex?: number;
+  /**
+   * Preserve the logical slide across resize, commit active index when scroll
+   * settles, and track pointer (touch + mouse) before loop teleport.
+   */
+  stableLoop?: boolean;
 };
+
+function readLoopedSlideIndex(el: HTMLElement): number {
+  const width = el.clientWidth;
+  if (width <= 0) {
+    return 0;
+  }
+  return Math.round(el.scrollLeft / width);
+}
+
+function readLogicalSlideIndex(loopedIndex: number, itemCount: number): number {
+  if (itemCount <= 0) {
+    return 0;
+  }
+  return ((loopedIndex % itemCount) + itemCount) % itemCount;
+}
+
+function supportsScrollEndEvent(): boolean {
+  return typeof window !== "undefined" && "onscrollend" in window;
+}
 
 function getCenteredScrollLeft(
   container: HTMLElement,
@@ -405,6 +429,7 @@ export function useInfiniteFullBleedCarousel(
   options?: InfiniteCenteredCarouselOptions,
 ): InfiniteFullBleedCarouselState {
   const initialIndex = options?.initialIndex ?? 0;
+  const stableLoop = options?.stableLoop ?? false;
   const [activeLoopedIndex, setActiveLoopedIndex] = useState(
     itemCount > 1 ? itemCount + initialIndex : initialIndex,
   );
@@ -431,13 +456,30 @@ export function useInfiniteFullBleedCarousel(
     const startIndex =
       itemCount > 1 ? itemCount + initialIndex : initialIndex;
 
+    const scrollToLogicalIndex = (logicalIndex: number) => {
+      const target =
+        itemCount > 1 ? itemCount + logicalIndex : logicalIndex;
+      scrollToChild(target);
+      setActiveLoopedIndex(target);
+    };
+
     requestAnimationFrame(() => {
       scrollToChild(startIndex);
       setActiveLoopedIndex(startIndex);
     });
 
     if (itemCount < 2) {
-      const onResize = () => scrollToChild(startIndex);
+      const onResize = () => {
+        if (stableLoop) {
+          const logical = readLogicalSlideIndex(
+            readLoopedSlideIndex(el),
+            itemCount,
+          );
+          scrollToLogicalIndex(logical);
+        } else {
+          scrollToChild(startIndex);
+        }
+      };
       const ro = new ResizeObserver(onResize);
       ro.observe(el);
       return () => ro.disconnect();
@@ -446,6 +488,7 @@ export function useInfiniteFullBleedCarousel(
     const edgeBuffer = 12;
     let blockWidth = 0;
     let maxScrollLeft = 0;
+    const scrollEndSupported = stableLoop && supportsScrollEndEvent();
 
     const measure = () => {
       const blockStart = getChild(itemCount);
@@ -484,11 +527,25 @@ export function useInfiniteFullBleedCarousel(
     };
 
     const scheduleIdleCheck = () => {
-      updateActiveLoopedIndex();
+      if (!stableLoop) {
+        updateActiveLoopedIndex();
+      }
       if (idleTimer) {
         window.clearTimeout(idleTimer);
       }
-      idleTimer = window.setTimeout(recenterIfAtEdge, 90);
+      if (!scrollEndSupported) {
+        idleTimer = window.setTimeout(() => {
+          if (stableLoop) {
+            updateActiveLoopedIndex();
+          }
+          recenterIfAtEdge();
+        }, 90);
+      }
+    };
+
+    const onScrollEnd = () => {
+      updateActiveLoopedIndex();
+      recenterIfAtEdge();
     };
 
     const onPointerDown = () => {
@@ -497,37 +554,68 @@ export function useInfiniteFullBleedCarousel(
 
     const onPointerUp = () => {
       pointerDown = false;
+      if (scrollEndSupported) {
+        return;
+      }
       scheduleIdleCheck();
     };
 
     const onResize = () => {
+      const logicalIndex = stableLoop
+        ? readLogicalSlideIndex(readLoopedSlideIndex(el), itemCount)
+        : initialIndex;
       measure();
-      scrollToChild(itemCount + initialIndex);
-      setActiveLoopedIndex(itemCount + initialIndex);
+      if (stableLoop) {
+        scrollToLogicalIndex(logicalIndex);
+      } else {
+        scrollToChild(itemCount + initialIndex);
+        setActiveLoopedIndex(itemCount + initialIndex);
+      }
     };
 
     const ro = new ResizeObserver(onResize);
     ro.observe(el);
 
     measure();
-    el.addEventListener("scroll", scheduleIdleCheck, { passive: true });
-    el.addEventListener("scrollend", recenterIfAtEdge);
-    el.addEventListener("touchstart", onPointerDown, { passive: true });
-    el.addEventListener("touchend", onPointerUp, { passive: true });
-    el.addEventListener("touchcancel", onPointerUp, { passive: true });
+    if (scrollEndSupported) {
+      el.addEventListener("scrollend", onScrollEnd);
+    } else {
+      el.addEventListener("scroll", scheduleIdleCheck, { passive: true });
+      el.addEventListener("scrollend", recenterIfAtEdge);
+    }
+
+    if (stableLoop) {
+      el.addEventListener("pointerdown", onPointerDown, { passive: true });
+      el.addEventListener("pointerup", onPointerUp, { passive: true });
+      el.addEventListener("pointercancel", onPointerUp, { passive: true });
+    } else {
+      el.addEventListener("touchstart", onPointerDown, { passive: true });
+      el.addEventListener("touchend", onPointerUp, { passive: true });
+      el.addEventListener("touchcancel", onPointerUp, { passive: true });
+    }
 
     return () => {
       if (idleTimer) {
         window.clearTimeout(idleTimer);
       }
-      el.removeEventListener("scroll", scheduleIdleCheck);
-      el.removeEventListener("scrollend", recenterIfAtEdge);
-      el.removeEventListener("touchstart", onPointerDown);
-      el.removeEventListener("touchend", onPointerUp);
-      el.removeEventListener("touchcancel", onPointerUp);
+      if (scrollEndSupported) {
+        el.removeEventListener("scrollend", onScrollEnd);
+      } else {
+        el.removeEventListener("scroll", scheduleIdleCheck);
+        el.removeEventListener("scrollend", recenterIfAtEdge);
+      }
+      if (stableLoop) {
+        el.removeEventListener("pointerdown", onPointerDown);
+        el.removeEventListener("pointerup", onPointerUp);
+        el.removeEventListener("pointercancel", onPointerUp);
+      } else {
+        el.removeEventListener("touchstart", onPointerDown);
+        el.removeEventListener("touchend", onPointerUp);
+        el.removeEventListener("touchcancel", onPointerUp);
+      }
       ro.disconnect();
     };
-  }, [scrollRef, itemCount, initialIndex]);
+  }, [scrollRef, itemCount, initialIndex, stableLoop]);
 
   return { activeIndex, activeLoopedIndex };
 }

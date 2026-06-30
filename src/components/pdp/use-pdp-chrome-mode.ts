@@ -32,12 +32,15 @@ const SCROLL_GESTURE_IDLE_MS = 140;
 export type PresentChapter = PdpChapter & { top: number };
 
 /** Chapters currently mounted in the DOM, sorted by document position */
-function readPresentChapters(scrollY: number): PresentChapter[] {
+function readPresentChapters(
+  scrollY: number,
+  chapterList: PdpChapter[] = PDP_CHAPTERS,
+): PresentChapter[] {
   if (typeof document === "undefined") {
     return [];
   }
 
-  return PDP_CHAPTERS.flatMap((chapter) => {
+  return chapterList.flatMap((chapter) => {
     const el = document.getElementById(pdpChapterAnchorId(chapter.id));
     if (!el) {
       return [];
@@ -252,11 +255,14 @@ export type PdpChromeMode = {
  * chapter and whether the jump bar (rather than the CTA) should be visible.
  */
 // fallow-ignore-next-line complexity
-export function usePdpChromeMode(mounted: boolean): PdpChromeMode {
+export function usePdpChromeMode(
+  mounted: boolean,
+  chapterList: PdpChapter[] = PDP_CHAPTERS,
+): PdpChromeMode {
   const { scrollY, viewportHeight, direction } = useScrollSnapshot();
   const jumpBarActive = useJumpBarLatched();
 
-  const chapters = mounted ? readPresentChapters(scrollY) : [];
+  const chapters = mounted ? readPresentChapters(scrollY, chapterList) : [];
   const probe = scrollY + PDP_CHROME_HEADER_OFFSET + 8;
   let activeIndex = 0;
   chapters.forEach((chapter, index) => {
