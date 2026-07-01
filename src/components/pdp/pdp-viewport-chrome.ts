@@ -1,60 +1,34 @@
+import { CTA_BAR_PADDING_PX, CTA_PILL_HEIGHT_PX } from "./pdp-hero-tokens";
+
 /** Fixed bottom chrome sits above Safari toolbars + home indicator */
 export const BOTTOM_CHROME_OFFSET = "var(--pdp-fixed-bottom-offset)";
 
-/** Floating pill height (gallery scroll) */
-const BOTTOM_PILL_HEIGHT_PX = 48;
+/** Floating CTA bar content height — Paper pill row */
+const CTA_ROW_HEIGHT_PX = CTA_PILL_HEIGHT_PX;
 
-/** Docked hero bar — single row (color + ATB) */
-const BOTTOM_DOCKED_HEIGHT_PX = 54;
+const CTA_BAR_FALLBACK_PX = CTA_ROW_HEIGHT_PX + CTA_BAR_PADDING_PX * 2;
 
-/** Docked Tabby experiment bar — Style · Size · Color row + ATB row */
-const BOTTOM_TABBY_DOCKED_HEIGHT_PX = BOTTOM_DOCKED_HEIGHT_PX * 2;
+/** Space for fixed bottom CTAs (pills + container padding + browser chrome) */
+export const BOTTOM_CTA_OFFSET = `calc(${CTA_ROW_HEIGHT_PX}px + ${CTA_BAR_PADDING_PX * 2}px + var(--pdp-fixed-bottom-offset))`;
 
-/** Floating Tabby experiment bar — two pill rows + gap */
-const BOTTOM_TABBY_FLOATING_HEIGHT_PX = BOTTOM_PILL_HEIGHT_PX * 2 + 4;
+/**
+ * Hero product HUD bottom — always clears the floating CTA (Paper `66F-0`).
+ * Intentionally not tied to `--hero-reveal`: when the brand switcher is visible the
+ * media frame still shares the viewport bottom with the fixed CTA bar, so lifting
+ * the HUD by the measured bar height keeps product info readable without shifting
+ * between shrunk and full-bleed.
+ */
+const HERO_PRODUCT_HUD_OFFSET = `calc(var(--cta-bar-height, ${CTA_BAR_FALLBACK_PX}px) + var(--pdp-fixed-bottom-offset))`;
 
-/** Space for fixed bottom CTAs (buttons + spacing + browser chrome) */
-export const BOTTOM_CTA_OFFSET = `calc(${BOTTOM_PILL_HEIGHT_PX}px + 0.625rem + var(--pdp-fixed-bottom-offset))`;
+/** Hero action rail — stacked above product name block */
+const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 4.5rem)`;
 
-/** Floating Tabby experiment chrome — Style · Size · Color row + Add to bag */
-const BOTTOM_CTA_OFFSET_TABBY = `calc(${BOTTOM_TABBY_FLOATING_HEIGHT_PX}px + 0.625rem + var(--pdp-fixed-bottom-offset))`;
-
-/** Hero product HUD — clears docked bar with room for title + subtitle */
-const HERO_PRODUCT_HUD_GAP = "1rem";
-const HERO_PRODUCT_HUD_OFFSET = `calc(${BOTTOM_DOCKED_HEIGHT_PX}px + ${HERO_PRODUCT_HUD_GAP} + var(--pdp-fixed-bottom-offset))`;
-
-/** Hero product HUD — clears two-row Tabby experiment docked bar */
-const HERO_PRODUCT_HUD_TABBY_OFFSET = `calc(${BOTTOM_TABBY_DOCKED_HEIGHT_PX}px + ${HERO_PRODUCT_HUD_GAP} + var(--pdp-fixed-bottom-offset))`;
-
-/** Hero action rail — clears title/price/material on the left */
-const HERO_ACTION_RAIL_OFFSET = `calc(${HERO_PRODUCT_HUD_OFFSET} + 5rem)`;
-
-const HERO_ACTION_RAIL_TABBY_OFFSET = `calc(${HERO_PRODUCT_HUD_TABBY_OFFSET} + 5rem)`;
-
-/** Hero action rail when bottom bar floats — clears pill + product HUD */
-const HERO_ACTION_RAIL_FLOATING_OFFSET = `calc(${BOTTOM_CTA_OFFSET} + 9rem)`;
-
-const HERO_ACTION_RAIL_TABBY_FLOATING_OFFSET = `calc(${BOTTOM_CTA_OFFSET_TABBY} + 9rem)`;
-
-export function heroProductHudOffset(tabbyExperiment = false): string {
-  return tabbyExperiment ? HERO_PRODUCT_HUD_TABBY_OFFSET : HERO_PRODUCT_HUD_OFFSET;
+export function heroProductHudOffset(): string {
+  return HERO_PRODUCT_HUD_OFFSET;
 }
 
-export function heroActionRailOffset(
-  tabbyExperiment = false,
-  docked = true,
-): string {
-  if (docked) {
-    return tabbyExperiment ? HERO_ACTION_RAIL_TABBY_OFFSET : HERO_ACTION_RAIL_OFFSET;
-  }
-
-  return tabbyExperiment
-    ? HERO_ACTION_RAIL_TABBY_FLOATING_OFFSET
-    : HERO_ACTION_RAIL_FLOATING_OFFSET;
-}
-
-export function bottomCtaOffset(tabbyExperiment = false): string {
-  return tabbyExperiment ? BOTTOM_CTA_OFFSET_TABBY : BOTTOM_CTA_OFFSET;
+export function heroActionRailOffset(): string {
+  return HERO_ACTION_RAIL_OFFSET;
 }
 
 /** Full layout viewport — immersive panels fill visible screen on mobile Safari */
@@ -67,10 +41,6 @@ export const SCREEN_HEIGHT_STYLE = {
 /** Immersive hero — edge-to-edge under notch / Dynamic Island (opt-out of SafeAreaMain) */
 export const HERO_IMMERSIVE_CLASS = "pdp-hero-immersive";
 export const HERO_IMMERSIVE_MEDIA_CLASS = "pdp-hero-immersive__media";
-
-/** Generic edge-to-edge section (galleries, fullscreen experiences) */
-const EDGE_TO_EDGE_CLASS = "pdp-edge-to-edge";
-const EDGE_TO_EDGE_MEDIA_CLASS = "pdp-edge-to-edge__media";
 
 export const PANEL_MEDIA_FRAME_CLASS = "pdp-gallery-panel__frame";
 export const PANEL_MEDIA_FILL_CLASS = "relative size-full";

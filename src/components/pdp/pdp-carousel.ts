@@ -22,10 +22,6 @@ export const pdpCarouselScrollClass = cn(
 /** Outer wrapper for bleed carousels — pair with pdpCarouselScrollClass */
 export const pdpCarouselScrollWrapClass = pdpCarouselBleedWrapClass;
 
-/** 1.5 cards visible — gap-3 (12px) */
-export const pdpCarouselCard15Class =
-  "w-[calc((100vw-1.5rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.75rem)/3)]";
-
 /** 1.5 cards visible — gap-2 (8px) */
 export const pdpCarouselCard15Gap2Class =
   "w-[calc((100vw-1.25rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";

@@ -15,6 +15,8 @@ type PdpTextLinkCtaBaseProps = {
   variant?: "primary" | "muted";
   className?: string;
   iconSize?: 18 | 24 | 26 | 20;
+  /** Material Symbols glyph for the trailing arrow */
+  icon?: string;
 };
 
 type PdpTextLinkCtaButtonProps = PdpTextLinkCtaBaseProps & {
@@ -30,6 +32,7 @@ export function PdpTextLinkCta({
   variant = "primary",
   className,
   iconSize = 18,
+  icon = "arrow_forward",
   as = "button",
   ...props
 }: PdpTextLinkCtaButtonProps | PdpTextLinkCtaAnchorProps) {
@@ -44,7 +47,7 @@ export function PdpTextLinkCta({
   const content = (
     <>
       <span className={labelClass}>{children}</span>
-      <MaterialIcon name="arrow_forward" size={iconSize} className="shrink-0 text-current" />
+      <MaterialIcon name={icon} size={iconSize} className="shrink-0 text-current" />
     </>
   );
 

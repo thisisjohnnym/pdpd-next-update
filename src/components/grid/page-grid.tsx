@@ -24,7 +24,7 @@ export function PageGrid({
   return (
     <Component
       className={cn(
-        "pdp-grid mx-auto grid w-full grid-cols-12 gap-1 px-3 lg:grid-cols-24 lg:gap-2 lg:px-5",
+        "pdp-grid mx-auto grid w-full grid-cols-12 gap-1 px-2 lg:grid-cols-24 lg:gap-2 lg:px-5",
         fullWidth ? "max-w-none lg:max-w-none" : "max-w-[375px] lg:max-w-[90rem]",
         className,
       )}

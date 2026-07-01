@@ -122,7 +122,7 @@ export function PdpTabbyVariantModule() {
                       disabled={!isSelectable}
                       onClick={() => isSelectable && setSelectedColorId(color.id)}
                       className={cn(
-                        "rounded-full p-0.5 transition-all",
+                        "rounded-full p-0.5 transition-[box-shadow] duration-200 ease-out",
                         isActive ? "ring-2 ring-black ring-offset-2" : "",
                         !isSelectable && "cursor-not-allowed opacity-40",
                         isSelectable && pdpPressableClass,

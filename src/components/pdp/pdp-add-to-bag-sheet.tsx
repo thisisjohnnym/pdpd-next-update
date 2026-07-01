@@ -13,6 +13,7 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
 } from "./pdp-bottom-sheet";
 
 import {
@@ -26,6 +27,7 @@ import { useActiveProduct } from "./pdp-active-product-context";
 import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
 import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
@@ -58,15 +60,15 @@ function BagBundlePricing({
   return (
     <div className="flex shrink-0 flex-col items-end">
       {hasDiscount ? (
-        <span className="font-extended text-xs tracking-[0.2px] text-neutral-400 line-through">
+        <span className="font-extended text-xs tracking-[0.2px] text-neutral-400 line-through tabular-nums">
           {formatPrice(bundle.subtotal)}
         </span>
       ) : null}
-      <span className="font-extended text-base tracking-[0.2px] text-black">
+      <span className="font-extended text-base tracking-[0.2px] text-black tabular-nums">
         {formatPrice(bundle.total)}
       </span>
       {hasDiscount ? (
-        <span className="font-extended mt-0.5 text-[11px] tracking-[0.2px] text-neutral-600">
+        <span className="font-extended mt-0.5 text-[11px] tracking-[0.2px] text-neutral-600 tabular-nums">
           You saved {formatPrice(savings)}
         </span>
       ) : null}
@@ -122,7 +124,7 @@ function BagBundleSummary({
                 {item.name}
               </p>
             </div>
-            <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black">
+            <span className="font-extended shrink-0 text-xs tracking-[0.2px] text-black tabular-nums">
               {formatPrice(item.price)}
             </span>
           </li>
@@ -165,7 +167,7 @@ function BagProductCard({
         <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
           {selectedColor.name} · {product.summary.subtitle}
         </p>
-        <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black">
+        <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black tabular-nums">
           {product.summary.price}
         </p>
       </div>
@@ -231,7 +233,7 @@ function BagUpsellItem({
           <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
             {item.name}
           </p>
-          <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
+          <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600 tabular-nums">
             {item.price}
           </p>
         </div>
@@ -336,7 +338,12 @@ export function PdpAddToBagSheet({
           <div className={pdpBottomSheetGrabHandleClass} />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           {hasBeenOpen ? (
           <>
           <div className="flex items-center gap-2 pb-4">
@@ -357,6 +364,12 @@ export function PdpAddToBagSheet({
           ) : (
             <BagProductCard selectedColor={selectedColor} product={product} />
           )}
+
+          {!isBundle ? (
+            <div className="pb-4">
+              <PdpPayOverTimeCard />
+            </div>
+          ) : null}
 
           <div className="flex gap-2 py-4">
             <button

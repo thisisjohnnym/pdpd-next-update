@@ -26,6 +26,10 @@ import {
 // fallow-ignore-next-line complexity
 export function PdpUgcVideoCarouselModule() {
   const { title, followCta, videos } = PDP_UGC_VIDEO_CAROUSEL;
+  // Paper 433-0 wraps the title so the last word drops to a second line
+  const lastSpace = title.lastIndexOf(" ");
+  const titleLead = lastSpace > -1 ? title.slice(0, lastSpace) : title;
+  const titleTail = lastSpace > -1 ? title.slice(lastSpace + 1) : "";
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
   const loopedVideos = useMemo(() => loopCarouselItems(videos), [videos]);
@@ -45,14 +49,23 @@ export function PdpUgcVideoCarouselModule() {
     >
       <PageGrid fullWidth>
         <GridItem mobile={12} desktop={24} className="min-w-0">
-          <div className="flex items-end justify-between gap-3">
-            <PdpModuleHeading spacing="none">{title}</PdpModuleHeading>
+          <div className="flex items-center justify-between gap-3">
+            <PdpModuleHeading spacing="none">
+              {titleLead}
+              {titleTail ? (
+                <>
+                  <br />
+                  {titleTail}
+                </>
+              ) : null}
+            </PdpModuleHeading>
             <PdpTextReveal as="div" delay={100} className="shrink-0">
               <PdpTextLinkCta
                 as="a"
                 href={followCta.href}
                 target="_blank"
                 rel="noopener noreferrer"
+                icon="arrow_outward"
                 className={pdpType.label}
               >
                 {followCta.label}

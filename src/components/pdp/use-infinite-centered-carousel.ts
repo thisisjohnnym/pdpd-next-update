@@ -2,11 +2,37 @@
 
 import { type RefObject, useEffect, useState } from "react";
 
+import { useReducedMotion } from "./use-reduced-motion";
+
 const LOOP_REPETITIONS = 3;
 
 type InfiniteCenteredCarouselOptions = {
   initialIndex?: number;
+  /**
+   * Preserve the logical slide across resize, commit active index when scroll
+   * settles, and track pointer (touch + mouse) before loop teleport.
+   */
+  stableLoop?: boolean;
 };
+
+function readLoopedSlideIndex(el: HTMLElement): number {
+  const width = el.clientWidth;
+  if (width <= 0) {
+    return 0;
+  }
+  return Math.round(el.scrollLeft / width);
+}
+
+function readLogicalSlideIndex(loopedIndex: number, itemCount: number): number {
+  if (itemCount <= 0) {
+    return 0;
+  }
+  return ((loopedIndex % itemCount) + itemCount) % itemCount;
+}
+
+function supportsScrollEndEvent(): boolean {
+  return typeof window !== "undefined" && "onscrollend" in window;
+}
 
 function getCenteredScrollLeft(
   container: HTMLElement,
@@ -173,15 +199,13 @@ function clampNumber(value: number, min: number, max: number): number {
  * scroll snapping.
  */
 export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>) {
+  const reducedMotion = useReducedMotion();
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) {
       return;
     }
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
 
     const children = () => Array.from(el.children) as HTMLElement[];
 
@@ -201,7 +225,7 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       }
     };
 
-    if (prefersReducedMotion) {
+    if (reducedMotion) {
       resetStyles();
       return;
     }
@@ -337,7 +361,7 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
       running = false;
       resetStyles();
     };
-  }, [scrollRef]);
+  }, [scrollRef, reducedMotion]);
 }
 
 /** Maps center-snapped scroll position to the active source item index */
@@ -385,4 +409,213 @@ function useCarouselActiveIndex(
   }, [scrollRef, itemCount]);
 
   return activeIndex;
+}
+
+type InfiniteFullBleedCarouselState = {
+  /** Logical slide index (0 … itemCount − 1) for indicator + nav contrast */
+  activeIndex: number;
+  /** Index into the tripled DOM rail — only this clone should play video */
+  activeLoopedIndex: number;
+};
+
+/**
+ * Full-viewport snap slides (`w-full` + `snap-center`) on a tripled rail.
+ * Starts in the middle block; teleports scroll position at the edges so the
+ * carousel loops seamlessly in both directions.
+ */
+export function useInfiniteFullBleedCarousel(
+  scrollRef: RefObject<HTMLDivElement | null>,
+  itemCount: number,
+  options?: InfiniteCenteredCarouselOptions,
+): InfiniteFullBleedCarouselState {
+  const initialIndex = options?.initialIndex ?? 0;
+  const stableLoop = options?.stableLoop ?? false;
+  const [activeLoopedIndex, setActiveLoopedIndex] = useState(
+    itemCount > 1 ? itemCount + initialIndex : initialIndex,
+  );
+
+  const activeIndex =
+    itemCount > 0 ? activeLoopedIndex % itemCount : 0;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || itemCount === 0) {
+      return;
+    }
+
+    const getChild = (index: number) => el.children[index] as HTMLElement | undefined;
+
+    const scrollToChild = (index: number) => {
+      const child = getChild(index);
+      if (!child) {
+        return;
+      }
+      el.scrollLeft = child.offsetLeft;
+    };
+
+    const startIndex =
+      itemCount > 1 ? itemCount + initialIndex : initialIndex;
+
+    const scrollToLogicalIndex = (logicalIndex: number) => {
+      const target =
+        itemCount > 1 ? itemCount + logicalIndex : logicalIndex;
+      scrollToChild(target);
+      setActiveLoopedIndex(target);
+    };
+
+    requestAnimationFrame(() => {
+      scrollToChild(startIndex);
+      setActiveLoopedIndex(startIndex);
+    });
+
+    if (itemCount < 2) {
+      const onResize = () => {
+        if (stableLoop) {
+          const logical = readLogicalSlideIndex(
+            readLoopedSlideIndex(el),
+            itemCount,
+          );
+          scrollToLogicalIndex(logical);
+        } else {
+          scrollToChild(startIndex);
+        }
+      };
+      const ro = new ResizeObserver(onResize);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+
+    const edgeBuffer = 12;
+    let blockWidth = 0;
+    let maxScrollLeft = 0;
+    const scrollEndSupported = stableLoop && supportsScrollEndEvent();
+
+    const measure = () => {
+      const blockStart = getChild(itemCount);
+      const nextBlockStart = getChild(2 * itemCount);
+      blockWidth =
+        blockStart && nextBlockStart
+          ? nextBlockStart.offsetLeft - blockStart.offsetLeft
+          : itemCount * el.clientWidth;
+      maxScrollLeft = el.scrollWidth - el.clientWidth;
+    };
+
+    const updateActiveLoopedIndex = () => {
+      const width = el.clientWidth;
+      if (width <= 0) {
+        return;
+      }
+      const next = Math.round(el.scrollLeft / width);
+      setActiveLoopedIndex((prev) => (prev === next ? prev : next));
+    };
+
+    let pointerDown = false;
+    let idleTimer = 0;
+
+    const recenterIfAtEdge = () => {
+      if (blockWidth <= 0 || pointerDown) {
+        return;
+      }
+
+      if (el.scrollLeft <= edgeBuffer) {
+        el.scrollLeft += blockWidth;
+      } else if (el.scrollLeft >= maxScrollLeft - edgeBuffer) {
+        el.scrollLeft -= blockWidth;
+      }
+
+      updateActiveLoopedIndex();
+    };
+
+    const scheduleIdleCheck = () => {
+      if (!stableLoop) {
+        updateActiveLoopedIndex();
+      }
+      if (idleTimer) {
+        window.clearTimeout(idleTimer);
+      }
+      if (!scrollEndSupported) {
+        idleTimer = window.setTimeout(() => {
+          if (stableLoop) {
+            updateActiveLoopedIndex();
+          }
+          recenterIfAtEdge();
+        }, 90);
+      }
+    };
+
+    const onScrollEnd = () => {
+      updateActiveLoopedIndex();
+      recenterIfAtEdge();
+    };
+
+    const onPointerDown = () => {
+      pointerDown = true;
+    };
+
+    const onPointerUp = () => {
+      pointerDown = false;
+      if (scrollEndSupported) {
+        return;
+      }
+      scheduleIdleCheck();
+    };
+
+    const onResize = () => {
+      const logicalIndex = stableLoop
+        ? readLogicalSlideIndex(readLoopedSlideIndex(el), itemCount)
+        : initialIndex;
+      measure();
+      if (stableLoop) {
+        scrollToLogicalIndex(logicalIndex);
+      } else {
+        scrollToChild(itemCount + initialIndex);
+        setActiveLoopedIndex(itemCount + initialIndex);
+      }
+    };
+
+    const ro = new ResizeObserver(onResize);
+    ro.observe(el);
+
+    measure();
+    if (scrollEndSupported) {
+      el.addEventListener("scrollend", onScrollEnd);
+    } else {
+      el.addEventListener("scroll", scheduleIdleCheck, { passive: true });
+      el.addEventListener("scrollend", recenterIfAtEdge);
+    }
+
+    if (stableLoop) {
+      el.addEventListener("pointerdown", onPointerDown, { passive: true });
+      el.addEventListener("pointerup", onPointerUp, { passive: true });
+      el.addEventListener("pointercancel", onPointerUp, { passive: true });
+    } else {
+      el.addEventListener("touchstart", onPointerDown, { passive: true });
+      el.addEventListener("touchend", onPointerUp, { passive: true });
+      el.addEventListener("touchcancel", onPointerUp, { passive: true });
+    }
+
+    return () => {
+      if (idleTimer) {
+        window.clearTimeout(idleTimer);
+      }
+      if (scrollEndSupported) {
+        el.removeEventListener("scrollend", onScrollEnd);
+      } else {
+        el.removeEventListener("scroll", scheduleIdleCheck);
+        el.removeEventListener("scrollend", recenterIfAtEdge);
+      }
+      if (stableLoop) {
+        el.removeEventListener("pointerdown", onPointerDown);
+        el.removeEventListener("pointerup", onPointerUp);
+        el.removeEventListener("pointercancel", onPointerUp);
+      } else {
+        el.removeEventListener("touchstart", onPointerDown);
+        el.removeEventListener("touchend", onPointerUp);
+        el.removeEventListener("touchcancel", onPointerUp);
+      }
+      ro.disconnect();
+    };
+  }, [scrollRef, itemCount, initialIndex, stableLoop]);
+
+  return { activeIndex, activeLoopedIndex };
 }

@@ -2,6 +2,42 @@
 
 Comprehensive inventory of the Product Detail Page (PDP) implementation for **Tabby 26** in PDP-NEXT. All components live under `src/components/pdp/`. Mock product data is centralized in `pdp-data.ts`.
 
+Implementation inventory only: this file is not the design authority.
+For design fidelity and parity decisions, use:
+
+- `docs/pdp-paper-source-of-truth.md`
+- `docs/pdp-paper-parity-audit-checklist.md`
+
+---
+
+## Versions (v1 / v2)
+
+This inventory describes **v1** (the frozen current design). The **v2** stakeholder pivot reuses these same components, gated by `pdp-version-config.ts`. See `docs/pdp-versions.md` for the full version map.
+
+Module availability per version:
+
+| Module | v1 | v2 | Notes |
+|--------|----|----|-------|
+| Hero social rail (like / comment / save) | yes | no | AR Try On stays |
+| `PdpUgcVideoCarouselModule` (v1 ugc-videos) | yes | no | v2 uses `PdpV2UgcCommunity` instead |
+| `PdpV2UgcCommunity` ("Carried by the community") | no | yes | v2-only; right after the hero (Paper AFC-0) |
+| `PdpV2EditorialCarousel` (4-card editorial) | no | yes | v2-only; replaces grouped craft carousel (Paper AN3-0) |
+| `PdpV2LeatherAging` (card layout) | no | yes | v2-only; warm header/image/controls (Paper AP5-0) |
+| `PdpV2Reviews` (reviews only) | no | yes | v2-only; replaces tabbed reviews (Paper AYJ-0) |
+| `PdpV2FullSlide` (trench portrait) | no | yes | v2-only; 100svh image (Paper B39-0) |
+| `PdpV2MoreLikeThis` (158px cards) | no | yes | v2-only; replaces `PdpMoreLikeThisModule` (Paper B6C-0) |
+| `PdpV2RecentlyViewed` (vertical list) | no | yes | v2-only; replaces `PdpRecentlyViewedCarousel` (Paper BC6-0) |
+| `PdpStrapSimulationModule` ("Make it Yours") | yes | no | dropped from v2 slide list |
+| `PdpGalleryViewMorePhotos` | yes | no | dropped from v2 slide list |
+| `PdpSignatureSoundsModule` ("Sounds of Tabby") | yes | no | dropped from v2 slide list |
+| `PdpWeightFeelModule` | yes | no | dropped from v2 slide list |
+| Reviews comments tab / composer / likes | yes | no | v2 is reviews-only |
+| `PdpCoachAiModule` | yes | no | unmounted in v2 |
+| `PdpCoachPremiumModule` | yes | no | unmounted in v2 |
+| Bundle, Compare | yes | no | hidden in v2 (`showBundle` / `showCompare` false) |
+
+v2 section order (Paper ADB-0): hero → UGC community → The Details → studio product slide (100svh) → editorial carousel → leather aging → Reviews → trench portrait slide (100svh) → More like this → Recently viewed → footer.
+
 ---
 
 ## Page architecture
@@ -10,34 +46,39 @@ The app entry point (`src/app/page.tsx`) renders **`PdpSocialView`**, which is t
 
 ```
 PdpSocialView (page shell — client)
+├── PdpHeroShell (Phone + brand bar + hero media frame — reveal-driven top padding/radius)
+│   └── PdpGalleryHero → PdpHeroGallery (side-scrolling hero gallery — Paper gradients)
+│       ├── Track (16 slides: PdpGalleryHeroVideo + next/image stills)
+│       ├── PdpGalleryProductHud (+ PdpHeroGalleryIndicator)
+│       └── PdpHeroActionRail
 ├── PdpGalleryView (scrollable gallery + bottom modules)
-│   ├── Hero + gallery slides (inline)
+│   ├── Additional gallery slides (inline)
 │   ├── PdpGalleryViewMorePhotos
-│   ├── PdpSimilarItemsCarousel
-│   ├── PdpCompareModule
-│   ├── PdpBundleModule
-│   ├── PdpBagSizeModule
-│   ├── PdpReviewsModule
-│   │   └── PdpReviewLikeButton (per review)
-│   ├── PdpRecentlyViewedCarousel
-│   ├── PdpProductSearchModule
+│   ├── …bottom modules…
 │   ├── PdpGalleryPhotosSheet
 │   └── PdpShopTheLookSheet
-├── PdpOverlayHeader (fixed)
-├── PdpBottomActions (fixed)
-│   └── PdpColorSelector
+├── PdpOverlayHeader (fixed — edge-to-edge; hero UI fade/blur)
+├── PdpBottomActions (fixed floating CTA bar — sibling of Phone, not inside hero)
+│   └── PdpColorSelector + PdpBuyBarRow
 ├── PdpReviewsSheet
 └── PdpAddToBagSheet
 ```
 
-**Hero slide internals** (inside `PdpGalleryView`):
+Canonical hero chrome spec: `docs/pdp-hero-chrome.md`.
+
+**Hero gallery internals** (inside `PdpGalleryHero` → `PdpHeroGallery` via `PdpHeroShell`):
 
 ```
-PdpHeroSlide
-├── Image (full-viewport lifestyle)
-├── PdpGalleryProductHud (name, subtitle, price — fades on scroll)
-└── PdpHeroActionRail (like / save / comment — fades on scroll)
-    └── PdpToast
+PdpHeroGallery (section, data-header-surface = active slide)
+├── Track (horizontal snap, 16 slides)
+│   ├── Slide 0 — PdpGalleryHeroVideo (lifestyle, white nav)
+│   └── Slide 1..15 — next/image stills + spin/grain videos (dark nav)
+├── Scrim wrapper (filter + top scrim — fades on light slides)
+├── HeroMiddle bottom gradient
+├── PdpHeroActionRail (like / save / comment — fades on scroll)
+│   └── PdpToast
+└── PdpGalleryProductHud (name, subtitle, price — fades on scroll)
+    └── PdpHeroGalleryIndicator (8-visible tick rail, auto-scroll)
 ```
 
 **Portrait slide internals**:
@@ -57,12 +98,18 @@ PdpGalleryPortraitSlide
 |-----------|------|------|---------|
 | **Views & shells** |
 | `PdpSocialView` | `pdp-social-view.tsx` | Client | Main PDP page shell — state for color, bag count, reviews sheet, add-to-bag sheet |
+| `PdpHeroShell` | `pdp-hero-shell.tsx` | Client | Phone wrapper — drives radii, brand bar slot, hero top padding |
 | `PdpGalleryView` | `pdp-gallery-view.tsx` | Client | Scrollable gallery feed + ordered bottom modules; owns sheet state for photos & shop-the-look |
 | `PdpCommunityView` | `pdp-community-view.tsx` | Server | Full-viewport wrapper for community media feed (alternate tab/view) |
 | `PdpMediaFeed` | `pdp-media-feed.tsx` | Client | Vertical snap-scroll media feed from `PDP_MEDIA_SLIDES` |
 | **Fixed chrome** |
-| `PdpOverlayHeader` | `pdp-overlay-header.tsx` | Client | Fixed top nav — menu, Coach logo, search, bag badge; auto light/dark contrast |
-| `PdpBottomActions` | `pdp-bottom-actions.tsx` | Client | Fixed bottom bar — inline color picker + Add to Bag CTA; gradient scrim when scrolled |
+| `PdpOverlayHeader` | `pdp-overlay-header.tsx` | Client | Fixed top nav — menu, Coach logo, search, bag badge; edge-to-edge; fades/blurs on scroll |
+| `PdpBottomActions` | `pdp-bottom-actions.tsx` | Client | Fixed floating CTA bar — color pill + Add to Bag; always visible except when sheets open |
+| `PdpBrandBarReveal` | `pdp-brand-bar-reveal.tsx` | Client | Coach brand strip — absolute in Phone; slides up with reveal |
+| **Hero gallery** |
+| `PdpGalleryHero` | `pdp-gallery-view.tsx` | Client | Thin wrapper that renders `PdpHeroGallery` for the hero land |
+| `PdpHeroGallery` | `pdp-hero-gallery.tsx` | Client | Side-scrolling hero carousel; tracks active slide → nav contrast, video playback, scrim fade, indicator |
+| `PdpHeroGalleryIndicator` | `pdp-hero-gallery-indicator.tsx` | Client | Paper `6JV-0` tick indicator; max 8 visible with auto-scrolling rail |
 | **Gallery slides** |
 | `PdpGalleryProductHud` | `pdp-gallery-product-hud.tsx` | Client | Hero product name, subtitle, price overlay; fades with scroll |
 | `PdpHeroActionRail` | `pdp-hero-action-rail.tsx` | Client | Hero social actions (like burst, save, comments); opens reviews |
@@ -97,7 +144,9 @@ PdpGalleryPortraitSlide
 | `pdp-data.ts` | `pdp-data.ts` | Shared | All mock product data, types, and constants |
 | `useHeaderContrast` | `use-header-contrast.ts` | Client | Samples backdrop luminance to flip header foreground light/dark |
 | `useScrollNavVisibility` | `use-scroll-nav-visibility.ts` | Client | Hide header on scroll down, reveal on scroll up |
-| `useHeroScrollOpacity` | `use-hero-scroll-opacity.ts` | Client | Hero overlay fade curve based on scroll position |
+| `usePdpHeroReveal` / `PdpHeroRevealProvider` | `use-pdp-hero-reveal.tsx` | Client | Intro shrink → full bleed (2s hold + 1s collapse); pull-to-reveal at top only — **not** on scroll-back |
+| `useCtaBarHeight` | `use-cta-bar-height.ts` | Client | `ResizeObserver` → `--cta-bar-height` on floating CTA |
+| `useHeroUiChrome` / `useHeroUiChromeVars` | `use-hero-ui-chrome.ts` | Client | 80%→100% viewport scroll fade + blur for hero overlays |
 
 \*No `"use client"` directive but only imported by client components — effectively client-rendered.
 
@@ -121,7 +170,7 @@ PdpGalleryPortraitSlide
 | `PdpAddToBagSheet` | `open`, `onClose`, `selectedColorId`, `onQuickAdd?`, `confirmation?: BagConfirmation` |
 | `PdpReviewsSheet` | `open`, `onClose` |
 | `PdpGalleryPhotosSheet` | `open`, `onClose` |
-| `PdpShopTheLookSheet` | `look: PdpShopTheLookLook \| null`, `open`, `onClose` |
+| `PdpShopTheLookSheet` | `look: PdpShopTheLookLook | null`, `open`, `onClose` |
 
 `BagConfirmation` union:
 
@@ -194,6 +243,8 @@ type PdpModuleSectionOptions = {
 | `PDP_GALLERY_HERO_IMAGE` | const | City street lifestyle hero |
 | `PDP_GALLERY_HERO_IMAGE_FOCUS` | const | Crop/scale/translate for hero framing |
 | `PDP_GALLERY_SLIDES` | `PdpGallerySlide[]` | 5 slides: video, 2 immersive, editorial, product immersive |
+| `PDP_HERO_GALLERY_SLIDES` | `PdpHeroGallerySlide[]` | 16 hero land slides (video + stills + spins) with `shotType` + `headerSurface` — `pdp-hero-gallery-data.ts` |
+| `resolveHeroFraming` | fn | Maps `shotType` → `object-fit` / `object-position` — `pdp-hero-framing.ts` |
 | `PDP_GALLERY_MORE_PHOTOS` | `PdpGalleryPhoto[]` | 15 extended gallery photos |
 | `PDP_PRODUCT_IMMERSIVE_HOTSPOTS` | `PdpProductHotspot[]` | 3 detail hotspots on product shot |
 | `PDP_SHOP_THE_LOOK` | `Record<string, PdpShopTheLookLook>` | Outfit looks keyed by id (e.g. `"denim-daytime"`) |
@@ -247,7 +298,7 @@ type PdpGallerySlide = PdpGalleryImmersiveSlide | PdpGalleryEditorialSlide | Pdp
 
 | # | Section | Rhythm tier | Notes |
 |---|---------|-------------|-------|
-| 1 | **Hero slide** (`100dvh`) | — | City street lifestyle; HUD + action rail |
+| 1 | **Hero gallery** (`100dvh`) | — | Side-scrolling: lifestyle video + 15 studio/on-model slides; HUD + action rail + tick indicator |
 | 2 | **360° video slide** | — | IntersectionObserver-gated autoplay |
 | 3 | **Patio lifestyle** (immersive) | — | `insetMargins: true` — 12px white inset |
 | 4 | **Denim daytime** (immersive) | — | Shop the look CTA → sheet |
@@ -309,7 +360,7 @@ See also: `docs/design-system/grid.md`, `.cursor/skills/pdp-grid-system/SKILL.md
 
 - `data-header-surface="light"` on light-background sections signals header to use dark foreground
 - `useHeaderContrast` samples backdrop luminance under the fixed header via `@/lib/header-contrast`
-- `useScrollNavVisibility` hides header on scroll down, reveals on scroll up (always visible within 32px of top)
+- `useScrollNavVisibility` hides header on scroll down, reveals on scroll up (always visible within 32px of top) — **does not** control hero reveal or brand switcher; see `docs/pdp-hero-chrome.md`
 
 ### Hero overlay fade
 
@@ -427,3 +478,5 @@ Based on git status and component implementation, the following features were bu
 - [Typography](design-system/typography.md)
 - [Icons](design-system/icons.md)
 - [Coach PDP sticky notes](design-workshop/coach-pdp-sticky-notes.md)
+- [PDP Paper Source Of Truth](pdp-paper-source-of-truth.md)
+- [PDP Paper Parity Audit Checklist](pdp-paper-parity-audit-checklist.md)

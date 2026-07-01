@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { PdpGalleryDragZoomImage } from "./pdp-gallery-drag-zoom-image";
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
+import { PdpParallaxMedia, refreshPdpParallax } from "./pdp-parallax-media";
 import { BOTTOM_CTA_OFFSET, SCREEN_HEIGHT_STYLE } from "./pdp-viewport-chrome";
 import { pdpType } from "./pdp-type";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
@@ -42,6 +43,7 @@ type PdpGalleryEditorialSlideProps = {
 };
 
 /** Inset editorial break — narrowed image or video + caption with generous margins */
+// fallow-ignore-next-line complexity
 export function PdpGalleryEditorialSlide({
   src,
   alt,
@@ -92,7 +94,7 @@ export function PdpGalleryEditorialSlide({
       className={cn(
         "relative flex w-full shrink-0 flex-col bg-white",
         panelScroll
-          ? cn("items-center justify-center px-3", galleryPanelClassName(isLastPanel))
+          ? cn("items-center justify-center", galleryPanelClassName(isLastPanel))
           : "py-10 lg:py-14",
       )}
       style={
@@ -105,8 +107,8 @@ export function PdpGalleryEditorialSlide({
     >
       <PageGrid fullWidth className={panelScroll ? "w-full" : undefined}>
         <GridItem
-          mobile={panelScroll ? 12 : 10}
-          mobileStart={panelScroll ? 1 : 2}
+          mobile={12}
+          mobileStart={1}
           desktop={panelScroll ? 24 : 14}
           desktopStart={panelScroll ? 1 : 6}
         >
@@ -117,13 +119,13 @@ export function PdpGalleryEditorialSlide({
             )}
           >
             <div ref={mediaRef} className="w-full">
-              <PdpRevealItem
-                className={cn(
-                  "relative w-full overflow-hidden bg-neutral-100",
-                  panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
-                )}
-              >
-                {videoSrc ? (
+              {videoSrc ? (
+                <PdpRevealItem
+                  className={cn(
+                    "relative w-full overflow-hidden bg-neutral-100",
+                    panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
+                  )}
+                >
                   <PdpGalleryHeroVideo
                     src={videoSrc}
                     poster={src}
@@ -135,14 +137,28 @@ export function PdpGalleryEditorialSlide({
                     showMuteControl={showMuteControl}
                     className="size-full object-cover object-center"
                   />
-                ) : dragZoom ? (
+                </PdpRevealItem>
+              ) : dragZoom ? (
+                <PdpRevealItem
+                  className={cn(
+                    "relative w-full overflow-hidden bg-neutral-100",
+                    panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
+                  )}
+                >
                   <PdpGalleryDragZoomImage
                     src={src}
                     alt={alt}
                     objectPosition={objectPosition}
                     scale={scale}
                   />
-                ) : (
+                </PdpRevealItem>
+              ) : (
+                <PdpParallaxMedia
+                  className={cn(
+                    "relative w-full bg-neutral-100",
+                    panelScroll ? "aspect-[4/5] max-h-[52dvh]" : "aspect-[4/5]",
+                  )}
+                >
                   <Image
                     src={src}
                     alt={alt}
@@ -150,9 +166,10 @@ export function PdpGalleryEditorialSlide({
                     className="object-cover"
                     style={{ objectPosition }}
                     sizes="(max-width: 1023px) 78vw, 42vw"
+                    onLoadingComplete={refreshPdpParallax}
                   />
-                )}
-              </PdpRevealItem>
+                </PdpParallaxMedia>
+              )}
             </div>
 
             <div

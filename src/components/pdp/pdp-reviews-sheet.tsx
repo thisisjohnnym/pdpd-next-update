@@ -11,6 +11,8 @@ import {
   pdpBottomSheetGrabHandleClass,
   pdpBottomSheetHeaderClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetBodyClass,
+  pdpBottomSheetScrollRegionClass,
   pdpBottomSheetViewportFrameClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
@@ -108,7 +110,7 @@ export function PdpReviewsSheet({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-50 overscroll-none transition-opacity duration-300",
         open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
       aria-hidden={!open}
@@ -153,8 +155,11 @@ export function PdpReviewsSheet({
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4 pt-2">
+          <div className={pdpBottomSheetBodyClass}>
+            <div
+              data-pdp-sheet-scroll
+              className={pdpBottomSheetScrollRegionClass("px-3 pb-4 pt-2")}
+            >
               {hasBeenOpen ? (
                 <PdpReviewsBody
                   titleId={titleId}

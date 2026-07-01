@@ -1,24 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
+import {
+  PdpHeroArGlyph,
+  PdpHeroBookmarkGlyph,
+  PdpHeroCommentGlyph,
+  PdpHeroLikeGlyph,
+} from "@/components/icons/pdp-hero-glyphs";
 import { cn } from "@/lib/cn";
 
 import { PDP_COMMENTS_SUMMARY, PDP_LIKE_SUMMARY, PDP_SAVE_SUMMARY } from "./pdp-data";
-import { useTabbyFamilyCompareExperiment } from "./experiments/tabby-family-compare-flag";
-import { useActiveProduct } from "./pdp-active-product-context";
-import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { heroActionRailOffset } from "./pdp-viewport-chrome";
 import { pdpPressableIconClass } from "./pdp-type";
 import { PdpToast } from "./pdp-toast";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import {
-  isHeroOverlayVisible,
-  useHeroScrollOpacity,
-} from "./use-hero-scroll-opacity";
-import { useBottomBarDocked } from "./use-bottom-bar-docked";
+  isHeroUiChromeVisible,
+  useHeroUiChrome,
+} from "./use-hero-ui-chrome";
 import { useHeroEnterOnce } from "./use-hero-enter-once";
+import {
+  heroUsesLightChrome,
+  HERO_CHROME_COLOR_TRANSITION_CLASS,
+  HERO_SCRIM_TRANSITION_CLASS,
+  useHeroChromeSurface,
+} from "./pdp-hero-chrome-surface";
 import { useReducedMotion } from "./use-reduced-motion";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 const LIKE_RED = "#FE2C55";
 
@@ -27,8 +37,11 @@ const LIKE_RED = "#FE2C55";
  * read even before the soft rail scrim. A hard 1px + a small blur keeps edges
  * crisp on busy or bright media.
  */
-const RAIL_GLYPH_SHADOW =
+const RAIL_GLYPH_LIGHT_SHADOW =
   "[filter:drop-shadow(0_0_1px_rgba(0,0,0,0.55))_drop-shadow(0_1px_3px_rgba(0,0,0,0.45))]";
+
+const RAIL_GLYPH_DARK_SHADOW =
+  "[filter:drop-shadow(0_0_1px_rgba(255,255,255,0.45))_drop-shadow(0_1px_3px_rgba(255,255,255,0.25))]";
 
 const BURST_DURATION_MS = 1700;
 const BURST_EASING = "cubic-bezier(0.22, 0.92, 0.24, 1)";
@@ -56,13 +69,6 @@ const HEART_BURST_PARTICLES = [
   { rise: 102, sway: -14, size: 11, delay: 125, spin: -12 },
   { rise: 84, sway: 6, size: 9, delay: 220, spin: 8 },
 ] as const;
-
-function railIconStyle(filled = false, size = RAIL_ICON_SIZE): CSSProperties {
-  return {
-    fontSize: size,
-    fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${size}`,
-  };
-}
 
 type HeartBurstParticleProps = {
   rise: number;
@@ -117,39 +123,37 @@ function HeartBurstParticle({ rise, sway, size, delay, spin }: HeartBurstParticl
     <span
       ref={particleRef}
       className="pointer-events-none absolute left-1/2 top-[54%] will-change-transform"
-      style={{ color: LIKE_RED } as CSSProperties}
+      style={{ color: LIKE_RED } as React.CSSProperties}
     >
-      <MaterialIcon
-        name="favorite"
-        size={18}
+      <PdpHeroLikeGlyph
         filled
+        size={size}
         className="text-[#FE2C55]"
-        style={{ fontSize: size }}
       />
     </span>
   );
 }
 
 type RailActionProps = {
-  icon: string;
   label: string;
   ariaLabel?: string;
-  filled?: boolean;
-  iconClassName?: string;
   onClick?: () => void;
   pressed?: boolean;
   className?: string;
+  icon: ReactNode;
+  lightChrome?: boolean;
+  chromeTransitionClass?: string;
 };
 
 function RailAction({
   icon,
   label,
   ariaLabel,
-  filled = false,
-  iconClassName,
   onClick,
   pressed,
   className,
+  lightChrome = true,
+  chromeTransitionClass,
 }: RailActionProps) {
   return (
     <button
@@ -158,19 +162,21 @@ function RailAction({
       aria-label={ariaLabel ?? label}
       aria-pressed={pressed}
       className={cn(
-        "flex flex-col items-center gap-1 text-white",
+        "flex flex-col items-center gap-1",
+        chromeTransitionClass,
+        lightChrome ? "text-white" : "text-neutral-900",
         pdpPressableIconClass,
         className,
       )}
     >
-      <MaterialIcon
-        name={icon}
-        size={RAIL_ICON_SIZE}
-        filled={filled}
-        style={railIconStyle(filled)}
-        className={cn("text-white", iconClassName)}
-      />
-      <span className="font-extended text-[11px] leading-none tracking-[0.2px] text-white">
+      {icon}
+      <span
+        className={cn(
+          "font-extended text-[11px] leading-none tracking-[0.2px]",
+          chromeTransitionClass,
+          lightChrome ? "text-white" : "text-neutral-900",
+        )}
+      >
         {label}
       </span>
     </button>
@@ -183,6 +189,8 @@ type LikeRailActionProps = {
   liked: boolean;
   onToggle: () => void;
   className?: string;
+  lightChrome?: boolean;
+  chromeTransitionClass?: string;
 };
 
 function LikeRailAction({
@@ -191,6 +199,8 @@ function LikeRailAction({
   liked,
   onToggle,
   className,
+  lightChrome = true,
+  chromeTransitionClass,
 }: LikeRailActionProps) {
   const [bursting, setBursting] = useState(false);
   const [burstKey, setBurstKey] = useState(0);
@@ -225,7 +235,9 @@ function LikeRailAction({
       aria-label={ariaLabel}
       aria-pressed={liked}
       className={cn(
-        "flex flex-col items-center gap-1 text-white",
+        "flex flex-col items-center gap-1",
+        chromeTransitionClass,
+        lightChrome ? "text-white" : "text-neutral-900",
         pdpPressableIconClass,
         className,
       )}
@@ -249,19 +261,36 @@ function LikeRailAction({
             ))}
           </span>
         ) : null}
-        <MaterialIcon
-          name="favorite"
-          size={RAIL_ICON_SIZE}
-          filled={liked}
-          style={railIconStyle(liked)}
-          className={cn(
-            "relative z-10 transition-colors duration-200",
-            liked ? "text-[#FE2C55]" : "text-white",
-            bursting && !reducedMotion && "motion-safe:animate-heart-pop",
-          )}
+        <PdpIconSwap
+          active={liked}
+          activeIcon={
+            <PdpHeroLikeGlyph
+              filled
+              size={RAIL_ICON_SIZE}
+              className={cn(
+                "relative z-10 text-[#FE2C55]",
+                bursting && !reducedMotion && "motion-safe:animate-heart-pop",
+              )}
+            />
+          }
+          inactiveIcon={
+            <PdpHeroLikeGlyph
+              size={RAIL_ICON_SIZE}
+              className={cn(
+                "relative z-10",
+                lightChrome ? "text-white" : "text-neutral-900",
+              )}
+            />
+          }
         />
       </span>
-      <span className="font-extended text-[11px] leading-none tracking-[0.2px] text-white">
+      <span
+        className={cn(
+          "font-extended text-[11px] leading-none tracking-[0.2px]",
+          chromeTransitionClass,
+          lightChrome ? "text-white" : "text-neutral-900",
+        )}
+      >
         {label}
       </span>
     </button>
@@ -276,13 +305,18 @@ export function PdpHeroActionRail({
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
 }) {
-  const opacity = useHeroScrollOpacity();
-  const visible = isHeroOverlayVisible(opacity);
-  const { docked, frostOpacity } = useBottomBarDocked();
-  const { productId } = useActiveProduct();
-  const tabby = useOptionalTabbyVariant();
-  const tabbyExperiment = useTabbyFamilyCompareExperiment();
-  const showTabbyExperiment = productId === "tabby" && Boolean(tabby) && tabbyExperiment;
+  const { showHeroSocialRail } = getPdpVersionConfig(usePdpVersion());
+  const heroSurface = useHeroChromeSurface();
+  const lightChrome = heroUsesLightChrome(heroSurface);
+  const reducedMotion = useReducedMotion();
+  const chromeTransitionClass = reducedMotion
+    ? undefined
+    : HERO_CHROME_COLOR_TRANSITION_CLASS;
+  const scrimTransitionClass = reducedMotion
+    ? undefined
+    : HERO_SCRIM_TRANSITION_CLASS;
+  const { opacity } = useHeroUiChrome();
+  const visible = isHeroUiChromeVisible(opacity);
   const playHeroEnter = useHeroEnterOnce();
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -297,56 +331,105 @@ export function PdpHeroActionRail({
     });
   };
 
+  // v2 drops the social rail (like / reviews / save). The AR Try On glyph is not social
+  // and stays when offered, so only suppress the rail entirely when nothing remains.
+  if (!showHeroSocialRail && !onOpenArTryOn) {
+    return null;
+  }
+
   return (
     <>
     <div
       className={cn(
-        "absolute right-3 z-20 flex flex-col items-center gap-4",
-        RAIL_GLYPH_SHADOW,
+        "pdp-hero-ui-chrome absolute z-20 flex flex-col items-center gap-4",
+        lightChrome ? RAIL_GLYPH_LIGHT_SHADOW : RAIL_GLYPH_DARK_SHADOW,
+        chromeTransitionClass,
       )}
       style={{
-        bottom: heroActionRailOffset(showTabbyExperiment, docked),
-        opacity,
+        right: "calc(0.5rem + var(--hero-inset, 0px))",
+        bottom: heroActionRailOffset(),
         visibility: visible ? "visible" : "hidden",
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      {/* Soft contrast bed — guarantees the white glyphs read on any backdrop
-          (bright photos, light video frames) without flipping colors. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[118%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/22 blur-2xl"
-      />
-      <LikeRailAction
-        className={cn(playHeroEnter && "pdp-social-rail-item")}
-        label={PDP_LIKE_SUMMARY.label}
-        ariaLabel={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
-        liked={liked}
-        onToggle={() => setLiked((prev) => !prev)}
-      />
-      <RailAction
-        className={cn(playHeroEnter && "pdp-social-rail-item")}
-        icon="chat_bubble"
-        label={PDP_COMMENTS_SUMMARY.label}
-        ariaLabel={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
-        onClick={onOpenReviews}
-      />
-      <RailAction
-        className={cn(playHeroEnter && "pdp-social-rail-item")}
-        icon="bookmark"
-        label={PDP_SAVE_SUMMARY.label}
-        ariaLabel={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
-        filled={saved}
-        pressed={saved}
-        onClick={handleSave}
-      />
+      {showHeroSocialRail ? (
+        <>
+          {/* Soft contrast bed — guarantees the white glyphs read on any backdrop
+              (bright photos, light video frames) without flipping colors. */}
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[118%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/22 blur-2xl",
+              scrimTransitionClass,
+            )}
+            style={{ opacity: lightChrome ? 1 : 0 }}
+          />
+          <LikeRailAction
+            className={cn(playHeroEnter && "pdp-social-rail-item")}
+            label={PDP_LIKE_SUMMARY.label}
+            ariaLabel={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
+            liked={liked}
+            onToggle={() => setLiked((prev) => !prev)}
+            lightChrome={lightChrome}
+            chromeTransitionClass={chromeTransitionClass}
+          />
+          <RailAction
+            className={cn(playHeroEnter && "pdp-social-rail-item")}
+            icon={
+              <PdpHeroCommentGlyph
+                size={RAIL_ICON_SIZE}
+                className={lightChrome ? "text-white" : "text-neutral-900"}
+              />
+            }
+            label={PDP_COMMENTS_SUMMARY.label}
+            ariaLabel={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
+            onClick={onOpenReviews}
+            lightChrome={lightChrome}
+            chromeTransitionClass={chromeTransitionClass}
+          />
+          <RailAction
+            className={cn(playHeroEnter && "pdp-social-rail-item")}
+            icon={
+              <PdpIconSwap
+                active={saved}
+                activeIcon={
+                  <PdpHeroBookmarkGlyph
+                    saved
+                    size={RAIL_ICON_SIZE}
+                    className={lightChrome ? "text-white" : "text-neutral-900"}
+                  />
+                }
+                inactiveIcon={
+                  <PdpHeroBookmarkGlyph
+                    size={RAIL_ICON_SIZE}
+                    className={lightChrome ? "text-white" : "text-neutral-900"}
+                  />
+                }
+              />
+            }
+            label={PDP_SAVE_SUMMARY.label}
+            ariaLabel={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
+            pressed={saved}
+            onClick={handleSave}
+            lightChrome={lightChrome}
+            chromeTransitionClass={chromeTransitionClass}
+          />
+        </>
+      ) : null}
       {onOpenArTryOn ? (
         <RailAction
           className={cn("mt-4", playHeroEnter && "pdp-social-rail-item")}
-          icon="view_in_ar"
+          icon={
+            <PdpHeroArGlyph
+              size={RAIL_ICON_SIZE}
+              className={lightChrome ? "text-white" : "text-neutral-900"}
+            />
+          }
           label="Try On"
           ariaLabel="Try on with AI"
           onClick={onOpenArTryOn}
+          lightChrome={lightChrome}
+          chromeTransitionClass={chromeTransitionClass}
         />
       ) : null}
     </div>
@@ -367,6 +450,7 @@ function StaticActionRowTrack({
   onOpenReviews,
   onToggleSave,
   onOpenArTryOn,
+  showSocial,
 }: {
   liked: boolean;
   saved: boolean;
@@ -374,56 +458,70 @@ function StaticActionRowTrack({
   onOpenReviews?: () => void;
   onToggleSave: () => void;
   onOpenArTryOn?: () => void;
+  showSocial: boolean;
 }) {
   return (
     <div className="-mx-3 overflow-x-auto px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex w-max items-center gap-2">
-        <button
-          type="button"
-          aria-label={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
-          aria-pressed={liked}
-          onClick={onToggleLike}
-          className={STATIC_SOCIAL_PILL_CLASS}
-        >
-          <MaterialIcon
-            name="favorite"
-            size={STATIC_PILL_ICON_SIZE}
-            filled={liked}
-            className={cn(liked && "text-[#FE2C55]")}
-          />
-          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
-            {PDP_LIKE_SUMMARY.label}
-          </span>
-        </button>
+        {showSocial ? (
+          <>
+            <button
+              type="button"
+              aria-label={`Like, ${PDP_LIKE_SUMMARY.label} likes`}
+              aria-pressed={liked}
+              onClick={onToggleLike}
+              className={STATIC_SOCIAL_PILL_CLASS}
+            >
+              <PdpIconSwap
+                active={liked}
+                activeIcon={
+                  <PdpHeroLikeGlyph
+                    filled
+                    size={STATIC_PILL_ICON_SIZE}
+                    className="text-[#FE2C55]"
+                  />
+                }
+                inactiveIcon={
+                  <PdpHeroLikeGlyph size={STATIC_PILL_ICON_SIZE} />
+                }
+              />
+              <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+                {PDP_LIKE_SUMMARY.label}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          aria-label={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
-          onClick={onOpenReviews}
-          className={STATIC_SOCIAL_PILL_CLASS}
-        >
-          <MaterialIcon name="chat_bubble" size={STATIC_PILL_ICON_SIZE} />
-          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
-            {PDP_COMMENTS_SUMMARY.label}
-          </span>
-        </button>
+            <button
+              type="button"
+              aria-label={`Reviews, ${PDP_COMMENTS_SUMMARY.label} reviews`}
+              onClick={onOpenReviews}
+              className={STATIC_SOCIAL_PILL_CLASS}
+            >
+              <PdpHeroCommentGlyph size={STATIC_PILL_ICON_SIZE} />
+              <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+                {PDP_COMMENTS_SUMMARY.label}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          aria-label={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
-          aria-pressed={saved}
-          onClick={onToggleSave}
-          className={STATIC_SOCIAL_PILL_CLASS}
-        >
-          <MaterialIcon
-            name="bookmark"
-            size={STATIC_PILL_ICON_SIZE}
-            filled={saved}
-          />
-          <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
-            {PDP_SAVE_SUMMARY.label}
-          </span>
-        </button>
+            <button
+              type="button"
+              aria-label={`Save, ${PDP_SAVE_SUMMARY.label} saves`}
+              aria-pressed={saved}
+              onClick={onToggleSave}
+              className={STATIC_SOCIAL_PILL_CLASS}
+            >
+              <PdpIconSwap
+                active={saved}
+                activeIcon={
+                  <PdpHeroBookmarkGlyph saved size={STATIC_PILL_ICON_SIZE} />
+                }
+                inactiveIcon={<PdpHeroBookmarkGlyph size={STATIC_PILL_ICON_SIZE} />}
+              />
+              <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>
+                {PDP_SAVE_SUMMARY.label}
+              </span>
+            </button>
+          </>
+        ) : null}
 
         {onOpenArTryOn ? (
           <button
@@ -432,7 +530,7 @@ function StaticActionRowTrack({
             onClick={onOpenArTryOn}
             className={STATIC_SOCIAL_PILL_CLASS}
           >
-            <MaterialIcon name="view_in_ar" size={STATIC_PILL_ICON_SIZE} />
+            <PdpHeroArGlyph size={STATIC_PILL_ICON_SIZE} />
             <span className={STATIC_SOCIAL_PILL_LABEL_CLASS}>Try On</span>
           </button>
         ) : null}
@@ -449,6 +547,7 @@ export function PdpStaticActionRow({
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
 }) {
+  const { showHeroSocialRail } = getPdpVersionConfig(usePdpVersion());
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [saveToastOpen, setSaveToastOpen] = useState(false);
@@ -462,6 +561,11 @@ export function PdpStaticActionRow({
     });
   };
 
+  // v2 drops the social pills (like / reviews / save); only the AR Try On pill remains.
+  if (!showHeroSocialRail && !onOpenArTryOn) {
+    return null;
+  }
+
   return (
     <>
       <StaticActionRowTrack
@@ -471,6 +575,7 @@ export function PdpStaticActionRow({
         onOpenReviews={onOpenReviews}
         onToggleSave={handleSave}
         onOpenArTryOn={onOpenArTryOn}
+        showSocial={showHeroSocialRail}
       />
       <PdpToast
         message="Saved to your bookmarks"

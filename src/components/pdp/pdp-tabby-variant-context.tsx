@@ -40,7 +40,7 @@ import {
   type TabbyStyleId,
 } from "./pdp-tabby-variants";
 
-export type TabbySizeOptionAvailability = {
+type TabbySizeOptionAvailability = {
   option: ReturnType<typeof getTabbySizeOption>;
   available: boolean;
 };

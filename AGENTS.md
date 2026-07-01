@@ -4,6 +4,20 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Planning (Plan mode)
+
+In **Plan mode**, load `.cursor/rules/agent-planning.mdc` (or `@agent-planning`). Do scoped recon before presenting a plan; output execution-ready steps with verified paths. During Agent execution, follow the plan and discover further only when the plan defers it, an assumption breaks, or a check fails.
+
+## PDP versions (read before any PDP edit)
+
+The PDP ships two designs from one codebase: **v1** (frozen current design, `/v1` and legacy `/`) and **v2** (stakeholder pivot, `/v2`). Be version-aware before touching PDP code.
+
+- Full reference: `docs/pdp-versions.md`
+- v2 changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts` — never rewrite v1 defaults.
+- Never edit `pdp-data.ts`, `pdp-section-chapters.ts`, or `globals.css` for v2-only needs.
+- After v2 changes, confirm `/v1` is unchanged and run `pnpm check:versions`.
+- Cursor rule: `.cursor/rules/pdp-versions.mdc` (always on).
+
 ## Layout grid (always use)
 
 **Mobile `12/12/4`** · **Desktop `24/20/8`**
@@ -17,6 +31,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Use `PageShell`, `PageGrid`, `GridItem` from `@/components/grid/page-grid`. See `docs/design-system/grid.md`.
 
+## Hero chrome
+
+Tabby video hero land (inset shell, floating CTA): `docs/pdp-hero-chrome.md`.
+
 ## Typography
 
 All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/design-system/typography.md`.
@@ -24,3 +42,15 @@ All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/desi
 ## Icons
 
 All icons use **Google Material Symbols** via `MaterialIcon`. See `docs/design-system/icons.md`.
+
+## Animation & motion
+
+Any animation, transition, enter/exit, stagger, scroll fade, or micro-interaction work **must** implement and validate the **make-interfaces-feel-better** skill before handoff.
+
+- JS-orchestrated motion uses **GSAP**; see `docs/design-system/animations.md`
+- Full reference: `docs/design-system/animations.md`
+- Skill: `.agents/skills/make-interfaces-feel-better/SKILL.md` · Cursor: `.cursor/skills/make-interfaces-feel-better/SKILL.md`
+- Hero timing/reveal: `docs/pdp-hero-chrome.md`
+- Progressive blur: load `progressive-blur.mdc` when building fade-to-blur chrome
+
+Work is not complete until the skill Review Checklist passes and handoff includes Before | After tables for every applied principle.

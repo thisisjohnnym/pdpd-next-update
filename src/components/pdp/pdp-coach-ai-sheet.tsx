@@ -12,6 +12,8 @@ import {
   pdpBottomSheetGrabHandleClass,
   pdpBottomSheetHeaderClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetBodyClass,
+  pdpBottomSheetScrollRegionClass,
   pdpBottomSheetViewportFrameClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
@@ -56,7 +58,7 @@ const TYPING_DELAY_MS = 750;
 
 function UserBubble({ text }: { text: string }) {
   return (
-    <div className="flex justify-end">
+    <div className="pdp-msg-enter flex justify-end">
       <div
         className={cn(
           "max-w-[82%] rounded-[20px] rounded-br-md bg-black px-4 py-2.5 text-white",
@@ -72,7 +74,7 @@ function UserBubble({ text }: { text: string }) {
 
 function AiBubble({ answer }: { answer: ConciergeAnswer }) {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="pdp-msg-enter flex items-start gap-2.5">
       <div className="flex min-w-0 flex-col gap-3">
         <div>
           <p
@@ -129,7 +131,7 @@ function AiBubble({ answer }: { answer: ConciergeAnswer }) {
 
 function TypingBubble() {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="pdp-msg-enter flex items-start gap-2.5">
       <div className="flex items-center gap-1 py-2">
         {[0, 1, 2].map((dot) => (
           <span
@@ -367,7 +369,7 @@ export function PdpCoachAiSheet({ open, onClose, ask }: PdpCoachAiSheetProps) {
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-50 overscroll-none transition-opacity duration-300",
         open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
       aria-hidden={!open}
@@ -412,10 +414,11 @@ export function PdpCoachAiSheet({ open, onClose, ask }: PdpCoachAiSheetProps) {
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className={pdpBottomSheetBodyClass}>
             <div
               ref={scrollRef}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pt-2"
+              data-pdp-sheet-scroll
+              className={pdpBottomSheetScrollRegionClass("px-3 pt-2")}
             >
               {isEmpty ? (
                 <div className="flex flex-col gap-3 pb-3">

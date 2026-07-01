@@ -1,46 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import {
-  PDP_CHAPTERS,
-  pdpChapterAnchorId,
-  type PdpChapter,
-} from "./pdp-section-chapters";
-import { useScrollSnapshot } from "./use-coalesced-scroll";
+import { PdpJumpBarTitle } from "./pdp-jump-bar-title";
+import { PdpIconSwap } from "./pdp-icon-swap";
+import { pdpChapterAnchorId } from "./pdp-section-chapters";
+import { PDP_CHROME_HEADER_OFFSET, usePdpChromeMode } from "./use-pdp-chrome-mode";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { useMountTransition } from "./use-mount-transition";
+import { useRafLerp } from "./use-raf-lerp";
+import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
 import { pdpType, pdpPressableClass } from "./pdp-type";
-
-/** Approx header height (safe-area + nav row) — keeps the active probe + jump under the header */
-const HEADER_OFFSET = 72;
-
-type PresentChapter = PdpChapter & { top: number };
-
-function readPresentChapters(scrollY: number): PresentChapter[] {
-  if (typeof document === "undefined") {
-    return [];
-  }
-
-  return PDP_CHAPTERS.flatMap((chapter) => {
-    const el = document.getElementById(pdpChapterAnchorId(chapter.id));
-    if (!el) {
-      return [];
-    }
-    const top = el.getBoundingClientRect().top + scrollY;
-    return [{ ...chapter, top }];
-  }).sort((a, b) => a.top - b.top);
-}
 
 export function PdpSectionIndicator({
   suppressed = false,
 }: {
   suppressed?: boolean;
 }) {
-  const { scrollY, viewportHeight } = useScrollSnapshot();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,16 +30,43 @@ export function PdpSectionIndicator({
     setMounted(true);
   }, []);
 
-  // Derived during render from the live DOM — re-runs on every scroll snapshot,
-  // so no effect/setState loop is needed to track the active chapter.
-  const chapters = mounted ? readPresentChapters(scrollY) : [];
-  const probe = scrollY + HEADER_OFFSET + 8;
-  let activeIndex = 0;
-  chapters.forEach((chapter, index) => {
-    if (chapter.top <= probe) {
-      activeIndex = index;
-    }
+  const { sectionChapters } = getPdpVersionConfig(usePdpVersion());
+  const { chapters, activeIndex, active, jumpBarActive, sectionProgress } =
+    usePdpChromeMode(mounted, sectionChapters);
+  const menu = useMountTransition(menuOpen, 220);
+
+  // Show on scroll-down from "The Details" onward (mutually exclusive with the
+  // CTA). Keep it up while the jump menu is open so it doesn't vanish mid-tap.
+  const visible = (jumpBarActive || menuOpen) && !suppressed;
+
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [targetWidth, setTargetWidth] = useState<number | null>(null);
+  const labels = chapters.map((chapter) => chapter.label);
+  const activeLabel = active?.label ?? "";
+
+  const lerpedSectionProgress = useRafLerp(sectionProgress, { enabled: visible });
+  const smoothedWidth = useRafLerp(targetWidth ?? 0, {
+    enabled: targetWidth !== null && visible,
   });
+
+  useEffect(() => {
+    const node = measureRef.current;
+    if (!node) {
+      return;
+    }
+
+    const measure = () => {
+      setTargetWidth(node.offsetWidth);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeLabel, activeIndex, chapters.length]);
 
   const jumpTo = useCallback((id: string) => {
     const scrollToAnchor = (behavior: ScrollBehavior) => {
@@ -65,7 +74,8 @@ export function PdpSectionIndicator({
       if (!el) {
         return;
       }
-      const top = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - PDP_CHROME_HEADER_OFFSET;
       window.scrollTo({ top: Math.max(0, top), behavior });
     };
 
@@ -80,79 +90,95 @@ export function PdpSectionIndicator({
     return null;
   }
 
-  // Clean on land — reveal only after scrolling past the hero.
-  const pastHero = viewportHeight > 0 && scrollY > viewportHeight * 0.85;
-  const visible = pastHero && !suppressed && chapters.length > 0;
-
-  const scrollMax =
-    document.documentElement.scrollHeight - viewportHeight || 1;
-  const progress = Math.min(1, Math.max(0, scrollY / scrollMax));
-  const active = chapters[activeIndex];
-
   return createPortal(
     <>
       <div
         className={cn(
-          "fixed inset-x-0 z-[25] transition-[transform,opacity] duration-300 ease-out",
+          "pointer-events-none fixed inset-x-0 z-[41] transition-[transform,opacity] duration-300 ease-out",
           visible
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0",
+            : "translate-y-full opacity-0",
         )}
-        style={{ top: "calc(var(--pdp-safe-area-top) + 3.5rem)" }}
+        style={{
+          bottom: BOTTOM_CHROME_OFFSET,
+          paddingBottom: "0.625rem",
+          paddingLeft: "var(--hero-inset, 0px)",
+          paddingRight: "var(--hero-inset, 0px)",
+        }}
         aria-hidden={!visible}
       >
-        <PageGrid fullWidth>
-          <GridItem mobile={12} desktop={24}>
-            <div className="pdp-glass-light--cta flex flex-col gap-2 rounded-2xl px-3.5 py-2.5">
-              <div className="h-[3px] w-full overflow-hidden rounded-full bg-neutral-200/80">
-                <div
-                  className="h-full rounded-full bg-black transition-[width] duration-200 ease-out"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-baseline gap-2">
-                  <span className="font-extended truncate text-[13px] font-normal tracking-[0.2px] text-black">
-                    {active?.label}
-                  </span>
-                  <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
-                    {activeIndex + 1} of {chapters.length}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((open) => !open)}
-                  aria-expanded={menuOpen}
-                  aria-label="Jump to section"
-                  className={cn(
-                    "-my-2 flex min-h-10 shrink-0 items-center gap-1.5 py-2 text-neutral-600",
-                    pdpPressableClass,
-                  )}
-                >
-                  <span className={pdpType.label}>Jump to</span>
-                  <MaterialIcon
-                    name={menuOpen ? "close" : "menu"}
-                    size={18}
-                    className="text-neutral-700"
-                  />
-                </button>
-              </div>
-            </div>
-          </GridItem>
-        </PageGrid>
+        <div className="relative px-2 lg:px-5">
+          <div
+            ref={measureRef}
+            aria-hidden
+            className="pointer-events-none invisible absolute flex items-center gap-2.5 whitespace-nowrap py-2.5 pl-3.5 pr-3"
+          >
+            <MaterialIcon name="list" size={18} />
+            <span className="flex items-baseline gap-2">
+              <span className="font-extended text-[13px] font-normal tracking-[0.2px]">
+                {activeLabel}
+              </span>
+              <span className="shrink-0 tabular-nums text-[11px]">
+                {activeIndex + 1} / {chapters.length}
+              </span>
+            </span>
+            <MaterialIcon name="expand_less" size={18} />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label="Jump to section"
+            className={cn(
+              "pdp-glass-light--jump-bar pointer-events-auto relative overflow-hidden rounded-full py-2.5 pl-3.5 pr-3",
+              pdpPressableClass,
+            )}
+            style={{
+              width: targetWidth !== null ? Math.ceil(smoothedWidth) : undefined,
+            }}
+          >
+            <div
+              aria-hidden
+              className="absolute inset-y-0 left-0 z-0 rounded-full bg-neutral-900/10"
+              style={{ width: `${lerpedSectionProgress * 100}%` }}
+            />
+            <span className="relative z-10 flex items-center gap-2.5">
+              <MaterialIcon name="list" size={18} className="text-neutral-700" />
+              <span className="flex items-baseline gap-2">
+                <PdpJumpBarTitle labels={labels} activeIndex={activeIndex} />
+                <span className="shrink-0 text-neutral-400 tabular-nums text-[11px]">
+                  {activeIndex + 1} / {chapters.length}
+                </span>
+              </span>
+              <MaterialIcon
+                name="expand_less"
+                size={18}
+                className={cn(
+                  "text-neutral-600 transition-transform duration-300 ease-out",
+                  menuOpen && "rotate-180",
+                )}
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
-      {menuOpen ? (
+      {menu.mounted ? (
         <div className="fixed inset-0 z-[44]">
           <button
             type="button"
             aria-label="Close jump menu"
             onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 size-full bg-black/30"
+            className={cn(
+              "pdp-fade absolute inset-0 size-full bg-black/30",
+              menu.state === "open" ? "opacity-100" : "opacity-0",
+            )}
           />
           <div
-            className="absolute inset-x-0"
-            style={{ top: "calc(var(--pdp-safe-area-top) + 3.5rem)" }}
+            className="pdp-pop-up absolute inset-x-0"
+            data-state={menu.state}
+            style={{ bottom: BOTTOM_CHROME_OFFSET, paddingBottom: "0.625rem" }}
           >
             <PageGrid fullWidth>
               <GridItem mobile={12} desktop={24}>
@@ -188,27 +214,27 @@ export function PdpSectionIndicator({
                               pdpPressableClass,
                             )}
                           >
-                            <span
-                              aria-hidden
-                              className={cn(
-                                "flex size-5 shrink-0 items-center justify-center",
-                              )}
-                            >
-                              {index < activeIndex ? (
+                            <PdpIconSwap
+                              active={index < activeIndex}
+                              activeIcon={
                                 <MaterialIcon
                                   name="check"
                                   size={18}
                                   className="text-neutral-400"
                                 />
-                              ) : (
-                                <span
-                                  className={cn(
-                                    "size-2 rounded-full",
-                                    isActive ? "bg-black" : "bg-neutral-300",
-                                  )}
-                                />
-                              )}
-                            </span>
+                              }
+                              inactiveIcon={
+                                <span className="flex size-5 items-center justify-center">
+                                  <span
+                                    className={cn(
+                                      "size-2 rounded-full",
+                                      isActive ? "bg-black" : "bg-neutral-300",
+                                    )}
+                                  />
+                                </span>
+                              }
+                              className="flex size-5 shrink-0 items-center justify-center"
+                            />
                             <span className="flex min-w-0 flex-1 flex-col">
                               <span className="font-extended text-[15px] font-normal tracking-[0.2px] text-black">
                                 {chapter.label}

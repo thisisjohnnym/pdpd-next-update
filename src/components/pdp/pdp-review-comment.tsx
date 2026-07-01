@@ -13,6 +13,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { pdpCarouselImageClass } from "./pdp-carousel";
+import { PdpParallaxMedia, refreshPdpParallax } from "./pdp-parallax-media";
 import { PdpReviewLikeButton } from "./pdp-review-like-button";
 import { pdpPressableClass, pdpType } from "./pdp-type";
 import {
@@ -153,6 +154,8 @@ type PdpReviewFeedFilterBarProps = {
   value: PdpReviewFeedFilter;
   onChange: (filter: PdpReviewFeedFilter) => void;
   className?: string;
+  /** Hide the Comments tab (v2 removes comments from reviews) */
+  hideComments?: boolean;
 };
 
 /** Sheet-only filters — reviews, comments, questions, and photos */
@@ -160,7 +163,12 @@ export function PdpReviewFeedFilterBar({
   value,
   onChange,
   className,
+  hideComments = false,
 }: PdpReviewFeedFilterBarProps) {
+  const filters = hideComments
+    ? REVIEW_FEED_FILTERS.filter((filter) => filter.id !== "comments")
+    : REVIEW_FEED_FILTERS;
+
   return (
     <div
       className={cn("-mx-1 overflow-x-auto overscroll-x-contain", className)}
@@ -168,7 +176,7 @@ export function PdpReviewFeedFilterBar({
       aria-label="Filter reviews"
     >
       <div className="flex w-max min-w-full gap-2 px-1 pb-1">
-        {REVIEW_FEED_FILTERS.map((filter) => {
+        {filters.map((filter) => {
           const active = value === filter.id;
 
           return (
@@ -610,15 +618,16 @@ function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
         ) : null}
 
         {photo ? (
-          <div className="relative mt-3 aspect-[4/3] w-full max-w-[220px] overflow-hidden bg-neutral-100">
+          <PdpParallaxMedia className="relative mt-3 aspect-[4/3] w-full max-w-[220px] bg-neutral-100">
             <Image
               src={photo.src}
               alt={photo.alt}
               fill
               className={cn("object-cover object-center", pdpCarouselImageClass)}
               sizes="220px"
+              onLoadingComplete={refreshPdpParallax}
             />
-          </div>
+          </PdpParallaxMedia>
         ) : null}
       </div>
     </div>

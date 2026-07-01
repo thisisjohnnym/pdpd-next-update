@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { usePdpScrollLock } from "./use-pdp-scroll-lock";
+
 export type VisualViewportFrame = {
   top: number;
   left: number;
@@ -76,34 +78,5 @@ export function useVisualViewportFrame(active: boolean): VisualViewportFrame {
 
 /** Prevent background scroll while a modal/sheet is open — restores position on close */
 export function useBodyScrollLock(active: boolean) {
-  useEffect(() => {
-    if (!active || typeof document === "undefined") {
-      return;
-    }
-
-    const { body, documentElement: html } = document;
-    const scrollY = window.scrollY;
-    const previous = {
-      bodyPosition: body.style.position,
-      bodyTop: body.style.top,
-      bodyWidth: body.style.width,
-      bodyOverflow: body.style.overflow,
-      htmlOverflow: html.style.overflow,
-    };
-
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.width = "100%";
-    body.style.overflow = "hidden";
-    html.style.overflow = "hidden";
-
-    return () => {
-      body.style.position = previous.bodyPosition;
-      body.style.top = previous.bodyTop;
-      body.style.width = previous.bodyWidth;
-      body.style.overflow = previous.bodyOverflow;
-      html.style.overflow = previous.htmlOverflow;
-      window.scrollTo(0, scrollY);
-    };
-  }, [active]);
+  usePdpScrollLock(active);
 }

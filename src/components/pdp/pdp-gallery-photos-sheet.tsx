@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -13,10 +13,12 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { PDP_GALLERY_MORE_PHOTOS, type PdpGalleryPhoto } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpGalleryPhotosSheetProps = {
   photos?: PdpGalleryPhoto[];
@@ -31,33 +33,7 @@ export function PdpGalleryPhotosSheet({
   onClose,
 }: PdpGalleryPhotosSheetProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
+  const mounted = useOverlayDismiss(open, onClose);
 
   if (!mounted) {
     return null;
@@ -100,7 +76,12 @@ export function PdpGalleryPhotosSheet({
           </h2>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           <ul className="m-0 grid list-none grid-cols-2 gap-1.5 p-0">
             {photos.map((photo) => (
               <li key={photo.id} className="relative aspect-[4/5] overflow-hidden bg-neutral-100">

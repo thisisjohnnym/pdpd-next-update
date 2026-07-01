@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { usePdpScrollLock } from "./use-pdp-scroll-lock";
+
 /**
  * Shared chrome for PDP overlays (bottom sheets, menus): defers the first paint
  * until mounted so portals are SSR-safe, locks body scroll while open, and wires
@@ -14,13 +16,12 @@ export function useOverlayDismiss(open: boolean, onClose: () => void): boolean {
     setMounted(true);
   }, []);
 
+  usePdpScrollLock(open);
+
   useEffect(() => {
     if (!open) {
       return;
     }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -31,7 +32,6 @@ export function useOverlayDismiss(open: boolean, onClose: () => void): boolean {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose, open]);

@@ -17,6 +17,7 @@ import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import {
   pdpPressableIconClass,
   pdpVariantPillBaseClass,
@@ -147,28 +148,44 @@ function PdpColorDropup({
         className={cn(
           pillClass,
           "transition-[background-color,box-shadow] duration-300 ease-out",
+          !frost && "border border-neutral-200",
           stretch && "w-full max-w-none",
           elevated && FLOATING_PILL_SHADOW,
         )}
       >
         <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
-        <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
-          <span className="max-w-full truncate translate-y-px" title={coachColor.full}>
-            {coachColor.shade}
-          </span>
+        <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 leading-none">
           <span
             className={cn(
-              "truncate text-[10px] tracking-[0.2px]",
-              frost ? "text-white/55" : "text-neutral-500",
+              "truncate text-[11px] leading-none tracking-[0.2px]",
+              frost ? "text-white/55" : "text-neutral-400",
             )}
           >
             Color
           </span>
+          <span
+            className="max-w-full truncate text-[14px] leading-none"
+            title={coachColor.full}
+          >
+            {coachColor.shade}
+          </span>
         </span>
-        <MaterialIcon
-          name={open ? "expand_less" : "expand_more"}
-          size={18}
-          className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+        <PdpIconSwap
+          active={open}
+          activeIcon={
+            <MaterialIcon
+              name="expand_less"
+              size={18}
+              className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+            />
+          }
+          inactiveIcon={
+            <MaterialIcon
+              name="expand_more"
+              size={18}
+              className={cn("shrink-0", frost ? "text-white/70" : "text-neutral-600")}
+            />
+          }
         />
       </button>
     </div>
@@ -252,7 +269,7 @@ export function PdpColorSelector({
               disabled={!isSelectable}
               onClick={() => isSelectable && onSelect(color.id)}
               className={cn(
-                "relative shrink-0 overflow-hidden rounded-full bg-white transition-all",
+                "relative shrink-0 overflow-hidden rounded-full bg-white transition-[width,height,opacity,box-shadow] duration-200 ease-out",
                 isSelectable && pdpPressableIconClass,
                 !isSelectable && "cursor-not-allowed",
                 compact

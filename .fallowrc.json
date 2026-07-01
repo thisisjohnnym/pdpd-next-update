@@ -16,5 +16,8 @@
     //   "**/generated/**"     // OpenAPI, Protobuf codegen
     // ]
   },
+  "ignorePatterns": [
+    "scripts/**"
+  ],
   "rules": {}
 }

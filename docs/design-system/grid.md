@@ -25,8 +25,9 @@ import { PageGrid, GridItem, PageShell } from "@/components/grid/page-grid";
 </PageShell>
 ```
 
-- **Full-bleed** sections (e.g. hero imagery) sit outside `PageGrid`.
-- **In-grid** sections (header, product info, sticky CTA) use `PageGrid` + `GridItem`.
+- **Full-bleed** sections (e.g. hero imagery at `reveal = 0`) sit outside `PageGrid`.
+- **In-grid** sections (bottom modules, editorial blocks) use `PageGrid` + `GridItem`.
+- **Hero fixed chrome** (overlay header, floating CTA) is edge-to-edge per Paper `6AJ-0` (`--hero-inset` is `0`); uses `CTA_BAR_PADDING_PX` for the floating bar — see `docs/pdp-hero-chrome.md`.
 
 ## CSS tokens
 

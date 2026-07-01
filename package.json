@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check:versions": "node scripts/check-pdp-version-boundaries.mjs",
     "fallow": "fallow",
     "fallow:audit": "fallow audit",
     "fallow:health": "fallow health --score --hotspots",
@@ -15,6 +17,8 @@
     "prepare": "fallow hooks install --target git || true"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "gsap": "^3.15.0",
     "material-symbols": "^0.45.2",
     "next": "^16.2.9",
     "react": "^19.2.7",

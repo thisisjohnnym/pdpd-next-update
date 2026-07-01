@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 
 import { PDP_SIGNATURE_SOUNDS, type PdpSignatureSound } from "./pdp-data";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { PdpParallaxMedia, refreshPdpParallax } from "./pdp-parallax-media";
 import { useSignatureSound } from "./use-signature-sound";
 
 const SOUND_WAVE_HEIGHTS = [38, 68, 100, 58, 34];
@@ -70,24 +71,27 @@ const SignatureSoundHeroCard = memo(function SignatureSoundHeroCard({
       aria-label={active ? `Stop ${sound.label}` : sound.label}
       className="group relative block w-full overflow-hidden bg-black text-left [-webkit-tap-highlight-color:transparent]"
     >
-      <div className="relative aspect-[2/1] w-full">
-        <Image
-          src={sound.imageSrc}
-          alt={sound.imageAlt}
-          fill
-          priority={priority}
-          loading={priority ? undefined : "lazy"}
-          className="object-cover"
-          style={{ objectPosition: sound.objectPosition ?? "center center" }}
-          sizes="(max-width: 768px) 100vw, 640px"
-        />
+      <div className="relative aspect-[2/1] w-full overflow-hidden">
+        <PdpParallaxMedia className="absolute inset-0">
+          <Image
+            src={sound.imageSrc}
+            alt={sound.imageAlt}
+            fill
+            priority={priority}
+            loading={priority ? undefined : "lazy"}
+            className="object-cover"
+            style={{ objectPosition: sound.objectPosition ?? "center center" }}
+            sizes="(max-width: 768px) 100vw, 640px"
+            onLoadingComplete={refreshPdpParallax}
+          />
+        </PdpParallaxMedia>
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/5"
+          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/70 via-black/10 to-black/5"
         />
 
-        <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-3 px-4 py-3">
+        <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-3 px-4 py-3">
           <p className="font-extended min-w-0 flex-1 text-sm tracking-[0.2px] text-white">
             {sound.label}
           </p>

@@ -8,8 +8,11 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { PdpIconSwap } from "./pdp-icon-swap";
+import { pdpBottomSheetScrollRegionClass } from "./pdp-bottom-sheet";
 import { PDP_NAV, type PdpNavCategory, type PdpNavHighlight } from "./pdp-nav-data";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "./pdp-type";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpNavMenuProps = {
   open: boolean;
@@ -34,7 +37,7 @@ function NavHighlightCard({ highlight }: { highlight: PdpNavHighlight }) {
           src={highlight.imageSrc}
           alt={highlight.imageAlt}
           fill
-          className="object-cover object-center transition-transform duration-500 group-active:scale-[1.02]"
+          className="object-cover object-center transition-transform duration-500 group-active:scale-[0.96]"
           sizes={highlight.layout === "full" ? "100vw" : "50vw"}
         />
       </div>
@@ -71,10 +74,11 @@ function NavAccordionItem({
         <span className="font-extended text-sm tracking-[0.2px] text-black">
           {category.label}
         </span>
-        <MaterialIcon
-          name={open ? "remove" : "add"}
-          size={20}
+        <PdpIconSwap
           className="shrink-0 text-black"
+          active={open}
+          activeIcon={<MaterialIcon name="remove" size={20} />}
+          inactiveIcon={<MaterialIcon name="add" size={20} />}
         />
       </button>
       <div
@@ -112,38 +116,12 @@ function NavAccordionItem({
 /** Full-screen Coach navigation — FY26 tabbed menu with search, highlights, and accordions */
 export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useOverlayDismiss(open, onClose);
   const [brandTab, setBrandTab] = useState<NavBrandTab>("coach");
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
   const fullHighlights = PDP_NAV.highlights.filter((item) => item.layout === "full");
   const halfHighlights = PDP_NAV.highlights.filter((item) => item.layout === "half");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
 
   useEffect(() => {
     if (!open) {
@@ -159,7 +137,7 @@ export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-50 overscroll-none transition-opacity duration-300",
         open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
       aria-hidden={!open}
@@ -225,7 +203,10 @@ export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[var(--pdp-safe-area-bottom)]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass("pb-[var(--pdp-safe-area-bottom)]")}
+        >
           <PageGrid fullWidth className="py-4">
             <GridItem mobile={12} desktop={24}>
               <label className="relative mb-5 block">

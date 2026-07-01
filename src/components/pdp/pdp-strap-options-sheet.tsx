@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -15,10 +15,12 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpAddIconLabelClass, pdpType } from "./pdp-type";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
@@ -38,9 +40,15 @@ export function PdpStrapOptionsSheet({
 }: PdpStrapOptionsSheetProps) {
   const titleId = useId();
   const { isAdded, confirmAdd } = useTransientAddedSet();
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, 300);
+  const lastSetRef = useRef(set);
+  if (set) {
+    lastSetRef.current = set;
+  }
+  const displaySet = set ?? lastSetRef.current;
 
-  if (!set || !mounted) {
+  if (!overlayReady || !transition.mounted || !displaySet) {
     return null;
   }
 
@@ -80,16 +88,21 @@ export function PdpStrapOptionsSheet({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-1")}>
-            {set.title}
+            {displaySet.title}
           </h2>
           <p className={`mb-4 text-neutral-600 ${pdpType.caption}`}>
             Mix straps for shoulder, crossbody, or extended carry.
           </p>
 
           <ul className="flex flex-col gap-3">
-            {set.options.map((option) => {
+            {displaySet.options.map((option) => {
               const added = isAdded(option.id);
 
               return (
@@ -114,7 +127,7 @@ export function PdpStrapOptionsSheet({
                     <p className={`mt-0.5 text-neutral-600 ${pdpType.label}`}>
                       {option.subtitle}
                     </p>
-                    <p className={`mt-1 font-extended text-black ${pdpType.label}`}>
+                    <p className={`mt-1 font-extended text-black tabular-nums ${pdpType.label}`}>
                       {option.price}
                     </p>
                   </div>

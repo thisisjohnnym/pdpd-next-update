@@ -4,6 +4,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PdpExpandableText } from "./pdp-expandable-text";
+import { pdpPressableClass } from "./pdp-type";
 
 export type PdpAiInsightContentProps = {
   title?: string;
@@ -21,7 +22,7 @@ export type PdpAiInsightContentProps = {
 
 /** Shared icon + title + body row for AI insight callouts */
 // fallow-ignore-next-line complexity
-export function PdpAiInsightContent({
+function PdpAiInsightContent({
   title,
   body,
   eyebrow,
@@ -179,6 +180,7 @@ export function PdpAiInsightCard({
           aria-label={dismissLabel}
           className={cn(
             "absolute flex items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 active:bg-neutral-100",
+            pdpPressableClass,
             minimal
               ? contained
                 ? extraSmall

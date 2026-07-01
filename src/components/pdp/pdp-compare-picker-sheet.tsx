@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -15,10 +15,12 @@ import {
   pdpBottomSheetHeaderClass,
   pdpBottomSheetOverlayClass,
   pdpBottomSheetPanelClass,
+  pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpType } from "./pdp-type";
+import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpComparePickerSheetProps = {
   open: boolean;
@@ -37,33 +39,7 @@ export function PdpComparePickerSheet({
   onSelect,
 }: PdpComparePickerSheetProps) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, open]);
+  const mounted = useOverlayDismiss(open, onClose);
 
   const handleSelect = (index: number) => {
     onSelect(index);
@@ -105,7 +81,12 @@ export function PdpComparePickerSheet({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]">
+        <div
+          data-pdp-sheet-scroll
+          className={pdpBottomSheetScrollRegionClass(
+            "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))]",
+          )}
+        >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-4")}>
             Compare with
           </h2>
@@ -141,7 +122,7 @@ export function PdpComparePickerSheet({
                       <p className={`font-extended text-black ${pdpType.body}`}>
                         {item.name}
                       </p>
-                      <p className={`mt-0.5 font-extended text-black ${pdpType.label}`}>
+                      <p className={`mt-0.5 font-extended text-black tabular-nums ${pdpType.label}`}>
                         {item.price}
                       </p>
                     </div>

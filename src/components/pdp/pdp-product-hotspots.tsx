@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import { cn } from "@/lib/cn";
 
 import type { PdpProductHotspot } from "./pdp-data";
 import { pdpBodyRhythm } from "./pdp-type";
+import { useMountTransition } from "./use-mount-transition";
 
 type PdpProductHotspotsProps = {
   hotspots: PdpProductHotspot[];
@@ -35,9 +38,17 @@ function getCardTransform(y: number) {
 const HOTSPOT_RING_COLORS = ["#FE2C55", "#F4C542", "#5BC8F5"] as const;
 
 /** Tappable detail markers on product photography */
+// fallow-ignore-next-line complexity
 export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeHotspot = hotspots.find((hotspot) => hotspot.id === activeId);
+  const card = useMountTransition(Boolean(activeId), 220);
+  // Retain the last hotspot while the card animates out (activeId is null then).
+  const lastHotspotRef = useRef(activeHotspot);
+  if (activeHotspot) {
+    lastHotspotRef.current = activeHotspot;
+  }
+  const cardHotspot = activeHotspot ?? lastHotspotRef.current;
 
   const handleToggle = (id: string) => {
     setActiveId((current) => (current === id ? null : id));
@@ -45,11 +56,14 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
 
   return (
     <div className="absolute inset-0">
-      {activeId ? (
+      {card.mounted ? (
         <button
           type="button"
           aria-label="Close detail"
-          className="absolute inset-0 z-10"
+          className={cn(
+            "pdp-fade absolute inset-0 z-10",
+            card.state === "open" ? "opacity-100" : "opacity-0",
+          )}
           onClick={() => setActiveId(null)}
         />
       ) : null}
@@ -59,10 +73,6 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
         const staggerDelay = `${index * 0.45}s`;
         const ringColor = HOTSPOT_RING_COLORS[index % HOTSPOT_RING_COLORS.length];
 
-        if (isActive) {
-          return null;
-        }
-
         return (
           <div
             key={hotspot.id}
@@ -71,13 +81,16 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
           >
             <button
               type="button"
-              aria-expanded={false}
+              aria-expanded={isActive}
               aria-label={`${hotspot.title} — tap for details`}
               onClick={(event) => {
                 event.stopPropagation();
                 handleToggle(hotspot.id);
               }}
-              className="relative flex size-14 items-center justify-center"
+              className={cn(
+                "relative flex size-14 items-center justify-center transition-[opacity,scale] duration-200 ease-out",
+                isActive && "pointer-events-none scale-75 opacity-0",
+              )}
             >
               <span
                 aria-hidden
@@ -104,21 +117,26 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
         );
       })}
 
-      {activeHotspot ? (
+      {card.mounted && cardHotspot ? (
         <div
-          className="pointer-events-none absolute z-30 w-[min(13.5rem,calc(100%-1.5rem))] rounded-lg border border-white/50 bg-white/90 px-2.5 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+          className="pointer-events-none absolute z-30 w-[min(13.5rem,calc(100%-1.5rem))]"
           style={{
-            left: `${getCardLeftPercent(activeHotspot.x)}%`,
-            top: `${activeHotspot.y}%`,
-            transform: getCardTransform(activeHotspot.y),
+            left: `${getCardLeftPercent(cardHotspot.x)}%`,
+            top: `${cardHotspot.y}%`,
+            transform: getCardTransform(cardHotspot.y),
           }}
         >
-          <p className={`font-extended text-[13px] text-black ${pdpBodyRhythm}`}>
-            {activeHotspot.title}
-          </p>
-          <p className={`mt-0.5 font-extended text-[11px] text-neutral-600 ${pdpBodyRhythm}`}>
-            {activeHotspot.body}
-          </p>
+          <div
+            className="pdp-pop rounded-lg border border-white/50 bg-white/90 px-2.5 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+            data-state={card.state}
+          >
+            <p className={`font-extended text-[13px] text-black ${pdpBodyRhythm}`}>
+              {cardHotspot.title}
+            </p>
+            <p className={`mt-0.5 font-extended text-[11px] text-neutral-600 ${pdpBodyRhythm}`}>
+              {cardHotspot.body}
+            </p>
+          </div>
         </div>
       ) : null}
     </div>

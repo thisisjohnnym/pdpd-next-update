@@ -1,0 +1,50 @@
+---
+description: >-
+  Plan mode only — scoped recon before presenting a plan; concrete, execution-ready
+  steps with verified paths. Load when creating or revising an implementation plan
+  before Build. Not for Agent execution, Ask, or Debug unless @agent-planning is used.
+alwaysApply: false
+---
+
+# Planning (don’t plan blind)
+
+Use this rule **only when drafting or revising a plan** — not during normal Agent execution.
+
+Plans should be **execution-ready**: enough verified context that Build can follow the plan with minimal surprise. Aim for **sufficient confidence**, not full repo knowledge.
+
+## Before presenting the plan
+
+1. **Scope what you need** for this task (entry points, similar features, constraints, docs).
+2. **Inspect the codebase** — read, search, and trace callers before naming files, patterns, or steps you have not verified.
+3. **Load task-relevant docs and rules** (e.g. `docs/pdp-versions.md` for PDP work; grid, animation, or Paper docs when applicable).
+4. **Ask questions only when** the answer materially changes architecture, scope, cost, or irreversible choices. Otherwise propose a default and list it under Assumptions.
+5. **Do not over-explore.** Stop when the plan can name real paths and a clear verification path. Defer edge-case discovery to execution only when the plan flags it.
+
+## Required plan sections
+
+Non-trivial plans must include:
+
+- **Context checked** — files, docs, and searches already done
+- **Approach** — ordered steps mapped to verified paths/patterns
+- **Assumptions** — defaults taken without user confirmation
+- **Open questions** — blockers or high-impact decisions only (prefer ≤ 3)
+- **Verification** — checks after implementation (typecheck, lint, `pnpm check:versions` for PDP version work, browser/screenshot for visual work)
+
+## Recon depth by task size
+
+| Task | Minimum recon |
+|------|----------------|
+| Small fix (one area) | Target file + direct callers/usages |
+| Feature in known area | Similar implementation + config + relevant doc |
+| Cross-cutting / version-sensitive | Boundary docs + config adapter + boundary script |
+| Unclear or exploratory ask | Short spike or questions first, then a narrow plan |
+
+## During execution (after Build)
+
+Follow the plan. **Do not re-scout by default.** Discover further only when:
+
+- the plan explicitly defers verification,
+- implementation surfaces a fact that invalidates an assumption, or
+- a check fails and the fix path is unclear.
+
+When discovery is needed, state what changed and update the approach — do not silently drift from the plan.

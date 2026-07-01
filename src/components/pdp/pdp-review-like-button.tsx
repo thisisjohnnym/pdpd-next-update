@@ -5,7 +5,10 @@ import { useState } from "react";
 import { formatLikeCount } from "@/lib/format-like-count";
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { pdpType, pdpPressableClass } from "./pdp-type";
+import { PdpIconSwap } from "./pdp-icon-swap";
 import { cn } from "@/lib/cn";
+import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 type PdpReviewLikeButtonProps = {
   initialLikes: number;
@@ -14,14 +17,19 @@ type PdpReviewLikeButtonProps = {
   className?: string;
 };
 
-/** Toggle like on a customer review */
+/** Toggle like on a customer review — hidden when the version disables review likes */
 export function PdpReviewLikeButton({
   initialLikes,
   layout = "stacked",
   className,
 }: PdpReviewLikeButtonProps) {
+  const { showReviewLikes } = getPdpVersionConfig(usePdpVersion());
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialLikes);
+
+  if (!showReviewLikes) {
+    return null;
+  }
 
   const handleToggle = () => {
     setLiked((current) => {
@@ -47,15 +55,23 @@ export function PdpReviewLikeButton({
           className,
         )}
       >
-        <MaterialIcon
-          name="favorite"
-          size={18}
-          filled={liked}
-          className={cn(
-            "transition-colors duration-200",
-            liked ? "text-[#FE2C55]" : "text-neutral-400",
-            liked && "animate-heart-pop",
-          )}
+        <PdpIconSwap
+          active={liked}
+          activeIcon={
+            <MaterialIcon
+              name="favorite"
+              size={18}
+              filled
+              className="text-[#FE2C55] motion-safe:animate-heart-pop"
+            />
+          }
+          inactiveIcon={
+            <MaterialIcon
+              name="favorite"
+              size={18}
+              className="text-neutral-400"
+            />
+          }
         />
         <span className={`font-extended text-neutral-600 ${pdpType.micro}`}>
           {formatLikeCount(count)}
@@ -85,15 +101,23 @@ export function PdpReviewLikeButton({
           pdpPressableClass,
         )}
       >
-        <MaterialIcon
-          name="favorite"
-          size={18}
-          filled={liked}
-          className={cn(
-            "transition-colors duration-200",
-            liked ? "text-[#FE2C55]" : "text-neutral-800",
-            liked && "animate-heart-pop",
-          )}
+        <PdpIconSwap
+          active={liked}
+          activeIcon={
+            <MaterialIcon
+              name="favorite"
+              size={18}
+              filled
+              className="text-[#FE2C55] motion-safe:animate-heart-pop"
+            />
+          }
+          inactiveIcon={
+            <MaterialIcon
+              name="favorite"
+              size={18}
+              className="text-neutral-800"
+            />
+          }
         />
       </button>
       {count > 0 ? (
