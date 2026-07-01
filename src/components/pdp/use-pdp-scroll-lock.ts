@@ -35,7 +35,7 @@ function handleOverlayTouchMove(event: TouchEvent) {
 }
 
 /** Ref-counted — safe when multiple overlays stack (e.g. color + notify). */
-export function acquirePdpScrollLock() {
+function acquirePdpScrollLock() {
   if (typeof document === "undefined") {
     return;
   }
@@ -71,7 +71,7 @@ export function acquirePdpScrollLock() {
   });
 }
 
-export function releasePdpScrollLock() {
+function releasePdpScrollLock() {
   if (typeof document === "undefined") {
     return;
   }
