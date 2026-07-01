@@ -816,7 +816,7 @@ export const PDP_COACH_PREMIUM = {
   ] satisfies PdpCoachPremiumPerk[],
 } as const;
 
-export type PdpProductSpec = {
+export type PdpProductDetailSpec = {
   id: string;
   label: string;
   value: string;
@@ -835,7 +835,7 @@ export const PDP_PRODUCT_DETAILS = {
     { id: "dimensions", label: "Dimensions", value: '10" × 6"' },
     { id: "weight", label: "Weight", value: "0.9 lb" },
     { id: "drop", label: "Strap drop", value: '22"' },
-  ] satisfies PdpProductSpec[],
+  ] satisfies PdpProductDetailSpec[],
   payOverTime: {
     icon: "credit_card",
     amount: "4 interest-free payments of $118.75",

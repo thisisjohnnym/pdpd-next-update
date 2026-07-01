@@ -9,14 +9,14 @@ import { cn } from "@/lib/cn";
 import {
   PDP_PRODUCT_DETAILS,
   type PdpProductDetailRow,
-  type PdpProductSpec,
+  type PdpProductDetailSpec,
 } from "./pdp-data";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import { pdpType, pdpPressableClass } from "./pdp-type";
 
-function SpecTile({ spec }: { spec: PdpProductSpec }) {
+function SpecTile({ spec }: { spec: PdpProductDetailSpec }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl bg-neutral-100 px-4 py-3.5">
       <span className="font-extended text-lg font-normal leading-none tracking-[0.2px] text-black tabular-nums">
