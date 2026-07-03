@@ -11,6 +11,7 @@ import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
+  applyV4HeroGallery,
   type PdpHeroGallerySlide,
 } from "./pdp-hero-gallery-data";
 import {
@@ -107,19 +108,25 @@ export function PdpHeroGallery({
   fillFrame?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const loopedSlides = useMemo(() => loopCarouselItems(slides), [slides]);
-  const { useStableInfiniteCarousel, heroDockedBuyBar } = getPdpVersionConfig(
-    usePdpVersion(),
+  const { useStableInfiniteCarousel, heroDockedBuyBar, leadGalleryWithProductStill } =
+    getPdpVersionConfig(usePdpVersion());
+  const orderedSlides = useMemo(
+    () => (leadGalleryWithProductStill ? applyV4HeroGallery(slides) : slides),
+    [slides, leadGalleryWithProductStill],
+  );
+  const loopedSlides = useMemo(
+    () => loopCarouselItems(orderedSlides),
+    [orderedSlides],
   );
   const { activeIndex, activeLoopedIndex } = useInfiniteFullBleedCarousel(
     trackRef,
-    slides.length,
+    orderedSlides.length,
     { stableLoop: useStableInfiniteCarousel },
   );
   const setHeroChromeSurface = useSetHeroChromeSurface();
   const reducedMotion = useReducedMotion();
 
-  const surface = slides[activeIndex]?.headerSurface ?? "dark";
+  const surface = orderedSlides[activeIndex]?.headerSurface ?? "dark";
   const scrimVisible = surface === "dark";
   const scrimTransitionClass = reducedMotion ? undefined : HERO_SCRIM_TRANSITION_CLASS;
 
@@ -128,8 +135,8 @@ export function PdpHeroGallery({
   }, [setHeroChromeSurface, surface]);
 
   const galleryState = useMemo(
-    () => ({ activeIndex, count: slides.length, surface }),
-    [activeIndex, slides.length, surface],
+    () => ({ activeIndex, count: orderedSlides.length, surface }),
+    [activeIndex, orderedSlides.length, surface],
   );
 
   return (
@@ -153,7 +160,7 @@ export function PdpHeroGallery({
           )}
         >
           {loopedSlides.map((slide, index) => {
-            const logicalIndex = index % slides.length;
+            const logicalIndex = index % orderedSlides.length;
             return (
               <div
                 key={`${slide.kind}-${slide.src}-${index}`}

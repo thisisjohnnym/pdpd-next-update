@@ -16,6 +16,9 @@ import { getRecentlyViewedProductId } from "../pdp-products";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { pdpType, pdpPressableClass } from "../pdp-type";
 
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
+
 /**
  * v2-only recently viewed list (Paper BC6-0).
  *
@@ -24,6 +27,12 @@ import { pdpType, pdpPressableClass } from "../pdp-type";
  * Reuses PDP_RECENTLY_VIEWED + the same routing logic as the v1 carousel.
  */
 export function PdpV2RecentlyViewed() {
+  const {
+    squareProductCardCorners,
+    hideTextLinkArrows,
+    useV4ModuleSpacing,
+    leftAlignModuleHeadings,
+  } = getPdpVersionConfig(usePdpVersion());
   const router = useRouter();
   const { productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
@@ -45,11 +54,15 @@ export function PdpV2RecentlyViewed() {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 bg-white px-2 pb-2 pt-14"
+      className={cn(
+        "w-full shrink-0 bg-white pt-14",
+        useV4ModuleSpacing ? "px-4 pb-4" : "px-2 pb-2",
+      )}
     >
       <h2
         className={cn(
-          "font-extended m-0 mb-5 text-center font-normal tracking-tight text-black",
+          "font-extended m-0 mb-5 font-normal tracking-tight text-black",
+          leftAlignModuleHeadings ? "text-left" : "text-center",
           pdpType.headline,
         )}
       >
@@ -75,7 +88,12 @@ export function PdpV2RecentlyViewed() {
                   isLinked && pdpPressableClass,
                 )}
               >
-                <span className="relative h-[70px] w-[56px] shrink-0 overflow-hidden rounded-md bg-neutral-100">
+                <span
+                  className={cn(
+                    "relative h-[70px] w-[56px] shrink-0 overflow-hidden bg-neutral-100",
+                    squareProductCardCorners ? "rounded-none" : "rounded-md",
+                  )}
+                >
                   <Image
                     src={item.imageSrc}
                     alt={item.imageAlt}
@@ -114,22 +132,24 @@ export function PdpV2RecentlyViewed() {
                 <span className={cn("font-extended underline underline-offset-[3px]", pdpType.label)}>
                   View again
                 </span>
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                  style={{ flexShrink: 0 }}
-                >
-                  <path
-                    d="M5 12h14M13 6l6 6-6 6"
-                    fill="none"
-                    stroke="#171717"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {!hideTextLinkArrows ? (
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                    style={{ flexShrink: 0 }}
+                  >
+                    <path
+                      d="M5 12h14M13 6l6 6-6 6"
+                      fill="none"
+                      stroke="#171717"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : null}
               </button>
             </li>
           );

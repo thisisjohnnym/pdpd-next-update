@@ -4,6 +4,8 @@ import { cn } from "@/lib/cn";
 
 import { PdpHeroGalleryIndicator } from "../pdp-hero-gallery-indicator";
 import { isHeroUiChromeVisible, useHeroUiChrome } from "../use-hero-ui-chrome";
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
 import { PdpV3ArButton } from "./pdp-v3-ar-button";
 
 /**
@@ -21,16 +23,18 @@ export function PdpV3GalleryOverlay({
 }) {
   const { opacity } = useHeroUiChrome();
   const visible = isHeroUiChromeVisible(opacity);
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
 
   return (
     <div
       className={cn(
         "pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[38]",
-        "flex items-end justify-between px-2 pb-2 pt-10",
+        "flex items-end justify-between pt-10",
+        useV4ModuleSpacing ? "px-4 pb-4" : "px-2 pb-2",
       )}
       style={{ visibility: visible ? "visible" : "hidden" }}
     >
-      <div className="pointer-events-none pl-2">
+      <div className={cn("pointer-events-none", !useV4ModuleSpacing && "pl-2")}>
         <PdpHeroGalleryIndicator />
       </div>
       <PdpV3ArButton onOpenArTryOn={onOpenArTryOn} />

@@ -193,7 +193,7 @@ function PdpSocialViewInner() {
         bagCount={bagCount}
         menuOpen={navOpen}
         onOpenMenu={() => setNavOpen(true)}
-        hugBrandBar={showBrandBar}
+        hugBrandBar={showBrandBar && versionConfig.showBrandSwitcher}
       />
       {!isStripped && versionConfig.showSectionJumpBar ? (
         <PdpSectionIndicator suppressed={chromeSuppressed} />

@@ -139,7 +139,11 @@ export function PdpReviewsSheet({
           aria-modal="true"
           aria-labelledby={titleId}
           className={cn(
-            pdpBottomSheetPanelClass({ open, fitViewportFrame: true }),
+            pdpBottomSheetPanelClass({
+              open,
+              fitViewportFrame: true,
+              stableHeight: true,
+            }),
             "relative z-[1] min-h-0",
           )}
         >

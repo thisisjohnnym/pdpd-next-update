@@ -10,6 +10,9 @@ import {
 import { PdpStarRating } from "../pdp-review-comment";
 import { pdpPressableClass, pdpType } from "../pdp-type";
 
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
+
 /**
  * v2-only simplified reviews section (Paper AYJ-0 "v2 — Reviews (reviews only)").
  *
@@ -61,6 +64,8 @@ type PdpV2ReviewsProps = {
 };
 
 export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
+  const { leftAlignModuleHeadings, hideTextLinkArrows, useV4ModuleSpacing } =
+    getPdpVersionConfig(usePdpVersion());
   const { average, count } = PDP_REVIEWS_SUMMARY;
   const { body: aiBody } = PDP_REVIEWS_AI_SUMMARY;
 
@@ -70,10 +75,24 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 bg-white pb-10 pt-8"
+      className={cn(
+        "flex w-full shrink-0 flex-col items-center bg-white",
+        useV4ModuleSpacing ? "px-4 pb-[8px] pt-[56px]" : "px-3 pb-10 pt-8",
+      )}
     >
-      <div className="flex flex-col gap-6 px-3">
-        <div className="flex flex-col items-center gap-2">
+      <div
+        className={cn(
+          "flex w-full flex-col",
+          useV4ModuleSpacing ? "gap-4" : "gap-6",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-col",
+            useV4ModuleSpacing ? "gap-1" : "gap-2",
+            leftAlignModuleHeadings ? "items-start" : "items-center",
+          )}
+        >
           <h2
             className="font-extended m-0 text-xl font-normal tracking-tight text-black"
           >
@@ -87,7 +106,12 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
           </div>
         </div>
 
-        <div className="rounded-xl bg-[#F6F6F6] px-4 py-3.5">
+        <div
+          className={cn(
+            "flex flex-col rounded-xl bg-[#F6F6F6]",
+            useV4ModuleSpacing ? "gap-4 p-[14px]" : "px-4 py-3.5",
+          )}
+        >
           <p
             className={cn(
               "font-extended m-0 leading-snug text-neutral-600",
@@ -98,7 +122,8 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
           </p>
           <p
             className={cn(
-              "font-extended mt-2 m-0 text-neutral-600 opacity-[0.7]",
+              "font-extended m-0 text-neutral-600 opacity-[0.7]",
+              useV4ModuleSpacing ? "" : "mt-2",
               pdpType.micro,
             )}
           >
@@ -122,8 +147,14 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             className="pointer-events-none absolute inset-x-0 bottom-0 top-[185px] bg-gradient-to-t from-white to-transparent"
           />
         </div>
+      </div>
 
-        <div className="flex w-full flex-col items-center">
+      <div
+        className={cn(
+          "flex w-full flex-col items-center",
+          useV4ModuleSpacing ? "gap-6" : "pt-6",
+        )}
+      >
         {onReadAll ? (
           <button
             type="button"
@@ -142,7 +173,8 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             type="button"
             onClick={onWriteReview}
             className={cn(
-              "flex items-center justify-center gap-1 self-stretch pl-2 pt-[11px] text-neutral-900",
+              "flex items-center justify-center gap-1 self-stretch text-neutral-900",
+              useV4ModuleSpacing ? "" : "pl-2 pt-[11px]",
               pdpPressableClass,
             )}
           >
@@ -154,25 +186,26 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             >
               Write a review
             </span>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              aria-hidden
-              className="shrink-0"
-            >
-              <path
-                d="M5 12h14M13 6l6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            {!hideTextLinkArrows ? (
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                aria-hidden
+                className="shrink-0"
+              >
+                <path
+                  d="M5 12h14M13 6l6 6-6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : null}
           </button>
         ) : null}
-        </div>
       </div>
     </section>
   );

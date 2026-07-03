@@ -1,0 +1,58 @@
+---
+description: >-
+  Operating rules for Paper design workflows. Load whenever a task uses Paper,
+  the Paper MCP server, Paper design artifacts, or mentions Paper.
+alwaysApply: false
+---
+
+# Paper Global Rules
+
+Apply this rule whenever a task uses Paper, the Paper MCP server, or Paper design artifacts.
+
+## Core Output Default
+
+- Unless the user explicitly says otherwise, always produce three responsive breakpoints:
+  - Desktop
+  - Tablet
+  - Phone
+- Treat this as the default completion bar for Paper design output.
+
+## Non-Destructive Editing Policy
+
+- Never override, mutate, or repurpose an existing design frame/artboard as the primary output.
+- Always draw a fresh frame on the indicated page for new work.
+- If the user asks for revisions, create a fresh version frame rather than replacing the prior frame.
+
+## Paper MCP Preflight
+
+Before Paper tool calls:
+
+- Ensure Paper Desktop is open with a file active.
+- If MCP connection fails, instruct the user to open/reopen Paper Desktop and retry.
+- Read MCP tool schemas/descriptors before calling tools.
+- Confirm the target page and intended output location before creating frames.
+
+## Required Skills And Guidance
+
+For Paper workflows, load and follow:
+
+- `.cursor/skills/paper-mcp/SKILL.md` — shared preflight and tool conventions
+- `.cursor/skills/paper-code-to-design/SKILL.md` — code-to-design tasks
+- `.cursor/skills/paper-design-to-code/SKILL.md` — design-to-code tasks
+
+Use the Paper MCP servers configured in this environment and their current tool descriptors as the source of truth for valid operations and parameters.
+
+## Consistency And Handoff Quality
+
+- Maintain content parity across desktop/tablet/phone unless the user explicitly requests breakpoint-specific differences.
+- Name new frames predictably using surface + breakpoint + version, for example: `Hero_Desktop_v2`.
+- For each breakpoint, provide complete handoff-ready structure:
+  - Layout constraints and spacing behavior
+  - Typographic roles/styles
+  - Token-aligned color and style usage
+
+## Maintenance Note (Light Upkeep)
+
+- Recheck Paper skill file paths periodically (at least quarterly) and after plugin updates.
+- If Paper MCP tools or descriptors change, update the skills and this rule to match the current toolset.
+- Keep examples and naming conventions current with the active project workflow.

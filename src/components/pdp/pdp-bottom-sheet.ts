@@ -20,6 +20,12 @@ type PdpBottomSheetPanelOptions = PdpBottomSheetOpen & {
   maxHeight?: "85dvh" | "88dvh" | "92dvh";
   /** Cap to parent height — for sheets inside a visual-viewport frame (keyboard-safe) */
   fitViewportFrame?: boolean;
+  /**
+   * Reserve the full height instead of only capping it. Keeps the panel a stable
+   * size so swapping inner content (e.g. the reviews feed tabs) scrolls within a
+   * fixed panel rather than resizing it — no height jump between tabs.
+   */
+  stableHeight?: boolean;
 };
 
 const PDP_BOTTOM_SHEET_MAX_HEIGHT_CLASS = {
@@ -34,6 +40,18 @@ const PDP_BOTTOM_SHEET_VIEWPORT_FRAME_MAX_HEIGHT_CLASS = {
   "92dvh": "max-h-[min(92dvh,100%)]",
 } as const;
 
+const PDP_BOTTOM_SHEET_STABLE_HEIGHT_CLASS = {
+  "85dvh": "h-[85dvh]",
+  "88dvh": "h-[88dvh]",
+  "92dvh": "h-[92dvh]",
+} as const;
+
+const PDP_BOTTOM_SHEET_VIEWPORT_FRAME_STABLE_HEIGHT_CLASS = {
+  "85dvh": "h-[min(85dvh,100%)]",
+  "88dvh": "h-[min(88dvh,100%)]",
+  "92dvh": "h-[min(92dvh,100%)]",
+} as const;
+
 /** Soft upward lift — spread keeps the top edge from reading as a hairline stroke */
 const PDP_BOTTOM_SHEET_PANEL_SHADOW =
   "shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_-12px_28px_-4px_rgba(0,0,0,0.08)]";
@@ -43,13 +61,20 @@ export function pdpBottomSheetPanelClass({
   open,
   maxHeight = "85dvh",
   fitViewportFrame = false,
+  stableHeight = false,
 }: PdpBottomSheetPanelOptions) {
+  const heightClass = stableHeight
+    ? fitViewportFrame
+      ? PDP_BOTTOM_SHEET_VIEWPORT_FRAME_STABLE_HEIGHT_CLASS[maxHeight]
+      : PDP_BOTTOM_SHEET_STABLE_HEIGHT_CLASS[maxHeight]
+    : fitViewportFrame
+      ? PDP_BOTTOM_SHEET_VIEWPORT_FRAME_MAX_HEIGHT_CLASS[maxHeight]
+      : PDP_BOTTOM_SHEET_MAX_HEIGHT_CLASS[maxHeight];
+
   return cn(
     "font-extended relative flex min-h-0 w-full max-w-none flex-col overflow-hidden rounded-t-[20px] bg-white transition-transform duration-300 ease-out lg:mx-auto lg:max-w-[430px]",
     PDP_BOTTOM_SHEET_PANEL_SHADOW,
-    fitViewportFrame
-      ? PDP_BOTTOM_SHEET_VIEWPORT_FRAME_MAX_HEIGHT_CLASS[maxHeight]
-      : PDP_BOTTOM_SHEET_MAX_HEIGHT_CLASS[maxHeight],
+    heightClass,
     open ? "translate-y-0" : "translate-y-full",
   );
 }

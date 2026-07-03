@@ -50,6 +50,11 @@ export type PdpVersionConfig = {
    * Undefined in v1 (slot not rendered).
    */
   trenchPortraitSlide?: { src: string; alt: string; objectPosition?: string };
+  /**
+   * Render the trench portrait slide when `trenchPortraitSlide` is set. v4 (Paper
+   * r5) drops the slide, so it reads the object but gates on this flag.
+   */
+  showTrenchPortraitSlide: boolean;
   /** Default gallery slide list (non-Tabby fallback) */
   gallerySlides: PdpGallerySlideV2[];
   /** Wayfinding chapters for the jump bar */
@@ -106,6 +111,80 @@ export type PdpVersionConfig = {
    * floating buy bar instead, so v3 disables the jump bar entirely.
    */
   showSectionJumpBar: boolean;
+  /**
+   * Render the v4 five-up spec chips (Height / Width / Depth / Weight / Strap
+   * drop) in the Details module instead of the frozen three-up spec row (Paper
+   * r5 `LD6-0`). Reads `pdp-v4-specs.ts`, never mutates the frozen v1 specs.
+   */
+  useV4Specs: boolean;
+  /**
+   * Lead the Tabby hero gallery with the A0 product still instead of the
+   * lifestyle land video (Paper r5). v4 only — v1/v2/v3 keep the video first.
+   */
+  leadGalleryWithProductStill: boolean;
+  /**
+   * Pin demo stock states (Sold out + Notify me) onto distinct Popular Colors in
+   * the progressive color drawer so it always demos the sold-out affordance
+   * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
+   */
+  demoPopularColorStates: boolean;
+  /**
+   * Drop the color-derived glow/shadow on the Add to bag pill (Paper r5 feedback
+   * "remove the shadow on the ATB"). v4 only — v1/v2/v3 keep the glow that lifts
+   * the pill off the r4 hero scrim.
+   */
+  flattenBuyBarCta: boolean;
+  /**
+   * Left-align the Reviews, More like this, and Recently viewed section
+   * headings (Paper r5 `MAE-0` / `MD6-0` / `ME6-0`) instead of the centered
+   * v2/v3 layout. v4 only.
+   */
+  leftAlignModuleHeadings: boolean;
+  /**
+   * Square the product-card corners in More like this and Recently viewed
+   * (Paper r5 `MD6-0` "no rounded corners" / `ME6-0`). v4 only — v1/v2/v3 keep
+   * the rounded cards.
+   */
+  squareProductCardCorners: boolean;
+  /**
+   * Hide the trailing arrow icon on the "Write a review" and "View again" text
+   * links (Paper r5 `MAE-0` / `ME6-0` show plain underlined text). v4 only.
+   */
+  hideTextLinkArrows: boolean;
+  /**
+   * Use the larger r5 UGC section heading type (24px / 120% line-height /
+   * -0.02em tracking) instead of the v2/v3 20px heading (Paper r5 `L5X-0`
+   * "UGC after hero (updated type)"). v4 only.
+   */
+  useV4UgcHeadingType: boolean;
+  /**
+   * Apply the grouped r5 padding/spacing refresh across the shared modules —
+   * Reviews (`MAE-0`), More like this (`MD6-0`), Recently viewed (`ME6-0`),
+   * Details (`LD6-0`), Editorial carousel (`L2X-0`), Hero (`IMP-0`), and UGC
+   * (`L5X-0`). Grouped because they all flip together for v4 (precedent:
+   * `leftAlignModuleHeadings` spans two modules). v4 only — v1/v2/v3 keep the
+   * r3/r4 spacing. Exact per-module values live in the components.
+   */
+  useV4ModuleSpacing: boolean;
+  /**
+   * Show the Coach / Coach Outlet brand switcher strip above the video hero
+   * (`PdpBrandBarReveal`). v4 (Paper r5) hides it; v1/v2/v3 keep it. When false
+   * the overlay header also stops hugging the (absent) brand bar.
+   */
+  showBrandSwitcher: boolean;
+  /**
+   * Run the hero shrink/reveal choreography (intro peek + pull-to-reveal) that
+   * exposes the brand switcher. v4 hides the switcher, so the reveal has nothing
+   * to show — disable it and keep the hero full-bleed. v1/v2/v3 keep it.
+   */
+  enableHeroReveal: boolean;
+  /**
+   * Rebuild the leather-aging module to the r5 `JFT-0` / `LM2-0` structure:
+   * image on top (no warm header band above it), then a single warm `#EFEAE7`
+   * block holding a centered title, per-stage description, and the stage
+   * slider. v4 only — v1/v2/v3 keep the r3/r4 `AP5-0` layout.
+   */
+  useV4LeatherAgingLayout: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -121,6 +200,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showCompare: true,
   showLeatherCareUpsell: true,
   useSimplifiedReviews: false,
+  showTrenchPortraitSlide: false,
   gallerySlides: PDP_GALLERY_SLIDES,
   sectionChapters: PDP_CHAPTERS,
   detailsAfterSlideIndex: 1,
@@ -137,6 +217,18 @@ const V1_CONFIG: PdpVersionConfig = {
   floatingBuyBarWhenHeroHidden: false,
   useV3ColorSheet: false,
   showSectionJumpBar: true,
+  useV4Specs: false,
+  leadGalleryWithProductStill: false,
+  demoPopularColorStates: false,
+  flattenBuyBarCta: false,
+  leftAlignModuleHeadings: false,
+  squareProductCardCorners: false,
+  hideTextLinkArrows: false,
+  useV4UgcHeadingType: false,
+  showBrandSwitcher: true,
+  enableHeroReveal: true,
+  useV4ModuleSpacing: false,
+  useV4LeatherAgingLayout: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -159,6 +251,7 @@ const V2_CONFIG: PdpVersionConfig = {
     alt: "Model wearing Tabby Shoulder Bag 26 with a tan trench coat over the shoulder",
     objectPosition: "center top",
   },
+  showTrenchPortraitSlide: true,
   gallerySlides: PDP_GALLERY_SLIDES_V2,
   sectionChapters: PDP_CHAPTERS_V2,
   // The Details injects after slide[0] (ugc-community), before the studio product slide.
@@ -178,6 +271,18 @@ const V2_CONFIG: PdpVersionConfig = {
   floatingBuyBarWhenHeroHidden: false,
   useV3ColorSheet: false,
   showSectionJumpBar: true,
+  useV4Specs: false,
+  leadGalleryWithProductStill: false,
+  demoPopularColorStates: false,
+  flattenBuyBarCta: false,
+  leftAlignModuleHeadings: false,
+  squareProductCardCorners: false,
+  hideTextLinkArrows: false,
+  useV4UgcHeadingType: false,
+  showBrandSwitcher: true,
+  enableHeroReveal: true,
+  useV4ModuleSpacing: false,
+  useV4LeatherAgingLayout: false,
 };
 
 /**
@@ -196,10 +301,47 @@ const V3_CONFIG: PdpVersionConfig = {
   showSectionJumpBar: false,
 };
 
+/**
+ * v4 — Paper r5 pivot. Inherits the full v3 baseline (r4 hero/CTA scroll model,
+ * progressive color drawer) and layers the r5 refinements: no trench portrait
+ * slide, five-up Details specs, and the A0 product still leading the hero
+ * gallery. See docs/pdp-versions.md.
+ */
+const V4_CONFIG: PdpVersionConfig = {
+  ...V3_CONFIG,
+  // r5 drops the full-viewport trench portrait slide.
+  showTrenchPortraitSlide: false,
+  // r5 Details module: Height / Width / Depth / Weight / Strap drop.
+  useV4Specs: true,
+  // r5 hero gallery leads with the A0 product still.
+  leadGalleryWithProductStill: true,
+  // r5 color drawer demos the sold-out + Notify me affordance on Popular Colors.
+  demoPopularColorStates: true,
+  // r5 feedback: flatten the Add to bag pill (no color glow/shadow).
+  flattenBuyBarCta: true,
+  // r5 left-aligns the Reviews + More like this headings (Recently viewed stays centered).
+  leftAlignModuleHeadings: true,
+  // r5 squares the product-card corners in More like this + Recently viewed.
+  squareProductCardCorners: true,
+  // r5 drops the arrow icon on the "Write a review" / "View again" text links.
+  hideTextLinkArrows: true,
+  // r5 bumps the UGC section heading to the larger 24px type.
+  useV4UgcHeadingType: true,
+  // r5 grouped padding/spacing refresh across the shared modules.
+  useV4ModuleSpacing: true,
+  // r5 restructures the leather-aging module (image on top, single warm block).
+  useV4LeatherAgingLayout: true,
+  // r5 hides the Coach / Coach Outlet brand switcher above the hero.
+  showBrandSwitcher: false,
+  // No switcher to reveal — keep the hero full-bleed (no shrink/peek).
+  enableHeroReveal: false,
+};
+
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
   v3: V3_CONFIG,
+  v4: V4_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

@@ -10,6 +10,9 @@ import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
+
 type PdpV3HeroLayoutProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
@@ -41,6 +44,7 @@ export function PdpV3HeroLayout({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
 
@@ -52,7 +56,12 @@ export function PdpV3HeroLayout({
         fillFrame
       />
 
-      <footer className="flex shrink-0 flex-col gap-2 bg-white p-2">
+      <footer
+        className={cn(
+          "flex shrink-0 flex-col bg-white",
+          useV4ModuleSpacing ? "gap-4 px-4 pb-2 pt-4" : "gap-2 p-2",
+        )}
+      >
         <div className="flex items-start justify-between gap-4">
           <div className="font-extended flex min-w-0 flex-col text-neutral-900">
             <p className="min-w-0 truncate text-base leading-[115%] tracking-[0.4px]">
@@ -72,7 +81,7 @@ export function PdpV3HeroLayout({
           onColorSelect={onColorSelect}
           onAddToBag={onAddToBag}
           onColorSheetOpenChange={onColorSheetOpenChange}
-          className={cn("gap-1")}
+          className={cn(useV4ModuleSpacing ? "gap-2" : "gap-1")}
         />
       </footer>
 

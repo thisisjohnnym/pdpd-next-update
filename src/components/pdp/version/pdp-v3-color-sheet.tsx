@@ -34,6 +34,8 @@ import {
   getV3ColorSheetSections,
   type V3MaterialEntry,
 } from "./pdp-v3-color-sheet-sections";
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
 
 /** Progressive reveal — rows shown before the "see more" toggle. */
 const POPULAR_COLLAPSED = 3;
@@ -89,40 +91,60 @@ function ColorRow({
   availability,
   isSelected,
   onSelect,
+  onNotify,
 }: {
   swatch: string;
   name: string;
   availability: Parameters<typeof pdpColorAvailabilityLabel>[0];
   isSelected: boolean;
   onSelect: () => void;
+  /** When set, a sold-out color shows a Notify me affordance (v4 Paper r5). */
+  onNotify?: () => void;
 }) {
   const selectable = pdpColorIsSelectable(availability);
+  const showNotify = !selectable && availability === "notify" && Boolean(onNotify);
 
   return (
     <li role="presentation">
-      <button
-        type="button"
-        role="option"
-        aria-selected={isSelected}
-        aria-disabled={!selectable}
-        disabled={!selectable}
-        onClick={onSelect}
-        className={cn(
-          "flex w-full items-center gap-3 py-2.5 text-left transition-colors",
-          selectable ? pdpPressableClass : "opacity-60",
-        )}
-      >
-        <ColorSwatchCircle src={swatch} sizeClass="size-12" dimmed={!selectable} />
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className={cn("text-black", pdpType.label)}>{name}</span>
-          <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
-            {pdpColorAvailabilityLabel(availability)}
+      <div className="flex w-full items-center gap-3">
+        <button
+          type="button"
+          role="option"
+          aria-selected={isSelected}
+          aria-disabled={!selectable}
+          disabled={!selectable}
+          onClick={onSelect}
+          className={cn(
+            "flex min-w-0 flex-1 items-center gap-3 py-2.5 text-left transition-colors",
+            selectable ? pdpPressableClass : "opacity-60",
+          )}
+        >
+          <ColorSwatchCircle src={swatch} sizeClass="size-12" dimmed={!selectable} />
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className={cn("text-black", pdpType.label)}>{name}</span>
+            <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
+              {pdpColorAvailabilityLabel(availability)}
+            </span>
           </span>
-        </span>
-        {isSelected ? (
-          <MaterialIcon name="check" size={18} className="shrink-0 text-black" aria-hidden />
+          {isSelected ? (
+            <MaterialIcon name="check" size={18} className="shrink-0 text-black" aria-hidden />
+          ) : null}
+        </button>
+        {showNotify ? (
+          <button
+            type="button"
+            aria-label={`Notify me when ${name} is back in stock`}
+            onClick={onNotify}
+            className={cn(
+              "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
+              pdpStrokeCtaClass,
+            )}
+          >
+            <MaterialIcon name="mail" size={18} className="shrink-0" aria-hidden />
+            Notify me
+          </button>
         ) : null}
-      </button>
+      </div>
     </li>
   );
 }
@@ -219,6 +241,8 @@ export function PdpV3ColorSheet({
 }) {
   const titleId = useId();
   const tabby = useOptionalTabbyVariant();
+  const version = usePdpVersion();
+  const { demoPopularColorStates } = getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
   const [popularExpanded, setPopularExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
@@ -229,7 +253,9 @@ export function PdpV3ColorSheet({
     return null;
   }
 
-  const { popularColors, materials, sizes } = getV3ColorSheetSections(tabby);
+  const { popularColors, materials, sizes } = getV3ColorSheetSections(tabby, {
+    demoPopularColorStates,
+  });
 
   const visiblePopular = popularExpanded
     ? popularColors
@@ -335,6 +361,11 @@ export function PdpV3ColorSheet({
                         color.combinationAvailable
                       }
                       onSelect={() => handleColorSelect(color.id)}
+                      onNotify={
+                        demoPopularColorStates
+                          ? () => setNotifyLabel(color.name)
+                          : undefined
+                      }
                     />
                   ))}
                 </ul>

@@ -11,6 +11,9 @@ import {
 import { PDP_EDITORIAL_V2_CARDS } from "./pdp-data-v2";
 import { pdpType } from "../pdp-type";
 
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
+
 /**
  * v2-only editorial carousel (Paper AN3-0 / BV4-0).
  *
@@ -19,11 +22,17 @@ import { pdpType } from "../pdp-type";
  * Card content comes from PDP_EDITORIAL_V2_CARDS, independent of the gallery slides.
  */
 export function PdpV2EditorialCarousel() {
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+
   return (
     <section data-header-surface="light" className="w-full shrink-0 bg-white">
       <div className={pdpCarouselScrollWrapClass}>
         <div
-          className={cn(pdpCarouselScrollClass, "flex items-start gap-2 px-2 pt-14")}
+          className={cn(
+            pdpCarouselScrollClass,
+            "flex items-start",
+            useV4ModuleSpacing ? "gap-4 pl-4 pt-4" : "gap-2 px-2 pt-14",
+          )}
           aria-label="Tabby Shoulder Bag 26 editorial"
         >
           {PDP_EDITORIAL_V2_CARDS.map((card, index) => {

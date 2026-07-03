@@ -7,6 +7,9 @@ import { cn } from "@/lib/cn";
 import { PDP_UGC_VIDEO_CAROUSEL } from "../pdp-data";
 import { pdpType } from "../pdp-type";
 
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
+
 /**
  * v2-only — "Carried by the community" section (Paper AFC-0).
  *
@@ -25,14 +28,27 @@ type CardProps = {
   caption?: string;
   handle?: string;
   verified?: boolean;
+  /** v4 Paper r5 `L5X-0`: square corners + 125% caption/handle leading. */
+  useV4?: boolean;
 };
 
-function UgcCard({ src, alt, height, caption, handle, verified }: CardProps) {
+function UgcCard({
+  src,
+  alt,
+  height,
+  caption,
+  handle,
+  verified,
+  useV4 = false,
+}: CardProps) {
   const isFeatured = height === 430;
 
   return (
     <div
-      className="relative w-[280px] shrink-0 overflow-hidden rounded-lg"
+      className={cn(
+        "relative w-[280px] shrink-0 overflow-hidden",
+        useV4 ? "rounded-none" : "rounded-lg",
+      )}
       style={{ height }}
     >
       <Image
@@ -66,7 +82,8 @@ function UgcCard({ src, alt, height, caption, handle, verified }: CardProps) {
           {caption ? (
             <p
               className={cn(
-                "font-extended m-0 leading-snug text-white",
+                "font-extended m-0 text-white",
+                useV4 ? "text-balance leading-[1.25]" : "leading-snug",
                 pdpType.body,
               )}
             >
@@ -75,7 +92,13 @@ function UgcCard({ src, alt, height, caption, handle, verified }: CardProps) {
           ) : null}
           {handle ? (
             <div className="flex items-center gap-[5px]">
-              <span className={cn("font-extended text-white", pdpType.body)}>
+              <span
+                className={cn(
+                  "font-extended text-white",
+                  useV4 && "leading-[1.25]",
+                  pdpType.body,
+                )}
+              >
                 {handle}
               </span>
               {verified ? (
@@ -105,6 +128,9 @@ function UgcCard({ src, alt, height, caption, handle, verified }: CardProps) {
 }
 
 export function PdpV2UgcCommunity() {
+  const { useV4UgcHeadingType, useV4ModuleSpacing } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
   const { title, followCta, videos } = PDP_UGC_VIDEO_CAROUSEL;
 
   const left = videos[1]!;
@@ -116,8 +142,20 @@ export function PdpV2UgcCommunity() {
       data-header-surface="light"
       className="w-full shrink-0 bg-white pt-14 pb-0"
     >
-      <div className="mb-[14px] flex flex-col items-center gap-2 px-2">
-        <h2 className="font-extended m-0 text-center text-xl font-normal leading-snug tracking-tight text-balance text-black">
+      <div
+        className={cn(
+          "mb-[14px] flex flex-col items-center gap-2 px-2",
+          useV4ModuleSpacing && "pb-2",
+        )}
+      >
+        <h2
+          className={cn(
+            "font-extended m-0 text-center font-normal text-balance text-black",
+            useV4UgcHeadingType
+              ? "text-[24px] leading-[1.2] tracking-[-0.02em]"
+              : "text-xl leading-snug tracking-tight",
+          )}
+        >
           {title}
         </h2>
 
@@ -153,7 +191,12 @@ export function PdpV2UgcCommunity() {
 
       {/* 3-card peek: overflow-clip + justify-center matches Paper AFC-0 */}
       <div className="flex items-center justify-center gap-2 overflow-clip px-2">
-        <UgcCard src={left.poster} alt={left.alt} height={392} />
+        <UgcCard
+          src={left.poster}
+          alt={left.alt}
+          height={392}
+          useV4={useV4ModuleSpacing}
+        />
         <UgcCard
           src={center.poster}
           alt={center.alt}
@@ -161,8 +204,14 @@ export function PdpV2UgcCommunity() {
           caption={V2_FEATURED_CAPTION}
           handle={center.handle}
           verified={center.verified}
+          useV4={useV4ModuleSpacing}
         />
-        <UgcCard src={right.poster} alt={right.alt} height={392} />
+        <UgcCard
+          src={right.poster}
+          alt={right.alt}
+          height={392}
+          useV4={useV4ModuleSpacing}
+        />
       </div>
     </section>
   );

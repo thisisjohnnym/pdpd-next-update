@@ -1,3 +1,4 @@
+import type { PdpColorAvailability } from "../pdp-data";
 import {
   getAvailableSizesForStyle,
   isColorAvailableForStyleSize,
@@ -127,6 +128,38 @@ function buildMaterials(
   });
 }
 
+/**
+ * v4 demo (Paper r5 `J2K-0`). Mirrors `V3_DEMO_MATERIAL_STATUSES` for Popular
+ * Colors: the frozen catalog keeps popular colorways broadly in stock, so the
+ * drawer never surfaces the sold-out + Notify me affordance the feedback asked
+ * for. We pin the first two *non-selected, distinct* colors to "sold out"
+ * (frozen `notify`) so the collapsed list always demos it — never repeating one
+ * color across states. v4 only; v1/v2/v3 keep the raw catalog statuses.
+ */
+const V3_DEMO_POPULAR_STATUSES: PdpColorAvailability[] = ["notify", "notify"];
+
+function buildPopularColors(
+  tabby: TabbyVariantContextValue,
+  demoStates: boolean,
+): TabbyColorOption[] {
+  if (!demoStates) {
+    return tabby.colorOptions;
+  }
+
+  let demoIndex = 0;
+  return tabby.colorOptions.map((color) => {
+    if (color.id === tabby.selectedColorId) {
+      return color;
+    }
+    const demo = V3_DEMO_POPULAR_STATUSES[demoIndex];
+    if (!demo) {
+      return color;
+    }
+    demoIndex += 1;
+    return { ...color, availability: demo };
+  });
+}
+
 export type V3ColorSheetSections = {
   popularColors: TabbyColorOption[];
   materials: V3MaterialEntry[];
@@ -135,9 +168,13 @@ export type V3ColorSheetSections = {
 
 export function getV3ColorSheetSections(
   tabby: TabbyVariantContextValue,
+  options: { demoPopularColorStates?: boolean } = {},
 ): V3ColorSheetSections {
   return {
-    popularColors: tabby.colorOptions,
+    popularColors: buildPopularColors(
+      tabby,
+      options.demoPopularColorStates ?? false,
+    ),
     materials: buildMaterials(tabby.styleId, tabby.size, tabby.selectedColorId),
     sizes: tabby.sizeOptions,
   };
