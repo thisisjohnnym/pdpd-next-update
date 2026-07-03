@@ -11,6 +11,7 @@ import {
 } from "./pdp-data";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
+import { revealStaggerDelay } from "./use-pdp-element-reveal";
 import { PDP_V4_SPECS } from "./version/pdp-v4-specs";
 
 /** Paper AHD-0 — column-major tile order (leather/hardware | interior/patina) */
@@ -51,31 +52,34 @@ function MacroHero() {
   const { macro, eyebrow } = PDP_PRODUCT_DETAILS;
 
   return (
-    <div className="relative h-[340px] w-full shrink-0 overflow-hidden bg-neutral-200">
-      <Image
-        src={macro.src}
-        alt={macro.alt}
-        fill
-        priority
-        unoptimized
-        sizes="(min-width: 1024px) 1024px, 100vw"
-        className="object-cover object-center"
-        style={{
-          objectPosition: macro.objectPosition ?? "center",
-          transform: `scale(${macro.scale ?? 1})`,
-          transformOrigin: "center center",
-          filter: "brightness(40%)",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-x-5 bottom-[22px]">
-        <PdpTextReveal
-          as="h2"
-          className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-[-0.01em] text-balance text-white"
-        >
-          {eyebrow}
-        </PdpTextReveal>
+    <PdpRevealItem>
+      <div className="relative h-[340px] w-full shrink-0 overflow-hidden bg-neutral-200">
+        <Image
+          src={macro.src}
+          alt={macro.alt}
+          fill
+          priority
+          unoptimized
+          sizes="(min-width: 1024px) 1024px, 100vw"
+          className="object-cover object-center"
+          style={{
+            objectPosition: macro.objectPosition ?? "center",
+            transform: `scale(${macro.scale ?? 1})`,
+            transformOrigin: "center center",
+            filter: "brightness(40%)",
+          }}
+        />
+        <div className="pointer-events-none absolute inset-x-5 bottom-[22px]">
+          <PdpTextReveal
+            as="h2"
+            delay={revealStaggerDelay(1)}
+            className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-[-0.01em] text-balance text-white"
+          >
+            {eyebrow}
+          </PdpTextReveal>
+        </div>
       </div>
-    </div>
+    </PdpRevealItem>
   );
 }
 
@@ -101,11 +105,13 @@ function SpecCell({ spec, colClass }: { spec: PdpProductSpec; colClass?: string 
 /** Three-up spec row with hairline dividers — Paper AHD-0 */
 function SpecRow({ specs }: { specs: readonly PdpProductSpec[] }) {
   return (
-    <div className="flex">
-      {specs.map((spec, index) => (
-        <SpecCell key={spec.id} spec={spec} colClass={SPEC_COL_CLASS[index]} />
-      ))}
-    </div>
+    <PdpRevealItem className="px-2 py-6">
+      <div className="flex">
+        {specs.map((spec, index) => (
+          <SpecCell key={spec.id} spec={spec} colClass={SPEC_COL_CLASS[index]} />
+        ))}
+      </div>
+    </PdpRevealItem>
   );
 }
 
@@ -118,26 +124,30 @@ function SpecGridV4({ specs }: { specs: readonly PdpProductSpec[] }) {
   const secondaryRow = specs.slice(3, 5);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex">
-        {dimensionRow.map((spec, index) => (
-          <SpecCell
-            key={spec.id}
-            spec={spec}
-            colClass={SPEC_COL_CLASS_V4[index]}
-          />
-        ))}
-      </div>
-      {secondaryRow.length ? (
-        <div className="flex border-t border-neutral-200 pt-4">
-          {secondaryRow.map((spec, index) => (
+    <div className="flex flex-col gap-4 px-2 py-6">
+      <PdpRevealItem delay={revealStaggerDelay(0)}>
+        <div className="flex">
+          {dimensionRow.map((spec, index) => (
             <SpecCell
               key={spec.id}
               spec={spec}
-              colClass={SPEC_PAIR_COL_CLASS_V4[index]}
+              colClass={SPEC_COL_CLASS_V4[index]}
             />
           ))}
         </div>
+      </PdpRevealItem>
+      {secondaryRow.length ? (
+        <PdpRevealItem delay={revealStaggerDelay(1)}>
+          <div className="flex border-t border-neutral-200 pt-4">
+            {secondaryRow.map((spec, index) => (
+              <SpecCell
+                key={spec.id}
+                spec={spec}
+                colClass={SPEC_PAIR_COL_CLASS_V4[index]}
+              />
+            ))}
+          </div>
+        </PdpRevealItem>
       ) : null}
     </div>
   );
@@ -192,6 +202,8 @@ function DetailTileColumns({
   /** v4 Paper r5 `LDS-0` widens the inter-column gap to 16px. */
   columnGapClass?: string;
 }) {
+  let staggerIndex = 0;
+
   return (
     <div className={cn("flex", columnGapClass)}>
       {V2_TILE_COLUMNS.map((columnIndices, columnIndex) => (
@@ -201,12 +213,13 @@ function DetailTileColumns({
             if (!tile) {
               return null;
             }
+            const delay = revealStaggerDelay(staggerIndex);
+            staggerIndex += 1;
+
             return (
-              <DetailTile
-                key={tile.id}
-                tile={tile}
-                squareCorners={squareCorners}
-              />
+              <PdpRevealItem key={tile.id} delay={delay}>
+                <DetailTile tile={tile} squareCorners={squareCorners} />
+              </PdpRevealItem>
             );
           })}
         </div>
@@ -235,24 +248,20 @@ export function PdpProductDetailsModule({
       data-header-surface="light"
       className="relative w-full shrink-0 overflow-clip bg-white pt-14"
     >
-      <PdpRevealItem>
-        <MacroHero />
-      </PdpRevealItem>
+      <MacroHero />
 
-      <PdpRevealItem className="px-2 py-6">
-        {useV4Specs ? (
-          <SpecGridV4 specs={PDP_V4_SPECS} />
-        ) : (
-          <SpecRow specs={specs} />
-        )}
-      </PdpRevealItem>
+      {useV4Specs ? (
+        <SpecGridV4 specs={PDP_V4_SPECS} />
+      ) : (
+        <SpecRow specs={specs} />
+      )}
 
-      <PdpRevealItem
-        delay={80}
+      <div
         className={cn(
           "flex flex-col",
           useV4Spacing ? "px-4 pb-4" : "px-2 pb-6",
           showHeading && "gap-4 pt-[30px]",
+          !showHeading && "pt-[30px]",
         )}
       >
         {showHeading ? (
@@ -265,8 +274,10 @@ export function PdpProductDetailsModule({
         ) : null}
         {showHeading ? (
           <div className="grid grid-cols-2 gap-x-2 gap-y-7">
-            {closerLook.tiles.map((tile) => (
-              <DetailTile key={tile.id} tile={tile} />
+            {closerLook.tiles.map((tile, index) => (
+              <PdpRevealItem key={tile.id} delay={revealStaggerDelay(index)}>
+                <DetailTile tile={tile} />
+              </PdpRevealItem>
             ))}
           </div>
         ) : (
@@ -276,7 +287,7 @@ export function PdpProductDetailsModule({
             columnGapClass={useV4Spacing ? "gap-4" : "gap-2"}
           />
         )}
-      </PdpRevealItem>
+      </div>
     </section>
   );
 }

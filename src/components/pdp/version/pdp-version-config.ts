@@ -185,6 +185,12 @@ export type PdpVersionConfig = {
    * slider. v4 only — v1/v2/v3 keep the r3/r4 `AP5-0` layout.
    */
   useV4LeatherAgingLayout: boolean;
+  /**
+   * Per-element GSAP scroll-scrubbed reveals on headlines (opacity + blur) and
+   * content blocks (opacity + lift). v4 only — v1/v2/v3 keep pass-through
+   * wrappers and the ambient section-level fade.
+   */
+  useV4GranularScrollReveal: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -229,6 +235,7 @@ const V1_CONFIG: PdpVersionConfig = {
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
+  useV4GranularScrollReveal: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -283,6 +290,7 @@ const V2_CONFIG: PdpVersionConfig = {
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
+  useV4GranularScrollReveal: false,
 };
 
 /**
@@ -335,6 +343,8 @@ const V4_CONFIG: PdpVersionConfig = {
   showBrandSwitcher: false,
   // No switcher to reveal — keep the hero full-bleed (no shrink/peek).
   enableHeroReveal: false,
+  // r5 scroll-scrubbed per-element reveals (headlines blur, blocks lift).
+  useV4GranularScrollReveal: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

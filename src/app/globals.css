@@ -494,6 +494,19 @@ html.font-extended {
   pointer-events: none;
 }
 
+/* Rails wired to useDragToScroll — desktop mouse click-and-drag panning.
+   Grab affordance only appears where the drag hook is actually attached. */
+.pdp-carousel-draggable {
+  cursor: grab;
+}
+
+.pdp-carousel-draggable.pdp-carousel-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Build picker pills — overflow-x scroll clips vertically unless padded */
 .pdp-build-picker-scroll {
   overflow-x: auto;
@@ -527,16 +540,14 @@ html.font-extended {
   transform-style: preserve-3d;
   backface-visibility: hidden;
   will-change: transform, filter;
-  box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.55);
   /* transform tracks scroll per-frame for crisp depth; only soften the brightness shift */
-  transition: filter 140ms ease-out, box-shadow 140ms ease-out;
+  transition: filter 140ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pdp-ugc-coverflow [data-coverflow-layer] {
     transform: none !important;
     filter: none !important;
-    box-shadow: none;
     transition: none;
   }
 }

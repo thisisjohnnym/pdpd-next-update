@@ -10,6 +10,8 @@ import {
 } from "../pdp-carousel";
 import { PDP_EDITORIAL_V2_CARDS } from "./pdp-data-v2";
 import { pdpType } from "../pdp-type";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -39,8 +41,10 @@ export function PdpV2EditorialCarousel() {
             const isLast = index === PDP_EDITORIAL_V2_CARDS.length - 1;
 
             return (
-              <article
+              <PdpRevealItem
                 key={card.id}
+                as="article"
+                delay={revealStaggerDelay(index)}
                 className="flex w-[335px] shrink-0 snap-start snap-always flex-col gap-2 bg-white pb-6"
               >
                 <div
@@ -97,7 +101,7 @@ export function PdpV2EditorialCarousel() {
                     </svg>
                   </a>
                 ) : null}
-              </article>
+              </PdpRevealItem>
             );
           })}
         </div>

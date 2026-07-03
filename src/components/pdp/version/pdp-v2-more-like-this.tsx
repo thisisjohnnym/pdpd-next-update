@@ -5,7 +5,10 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpType } from "../pdp-type";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -37,7 +40,8 @@ export function PdpV2MoreLikeThis({
           leftAlignModuleHeadings ? "items-start" : "items-center",
         )}
       >
-        <h2
+        <PdpTextReveal
+          as="h2"
           className={cn(
             "font-extended m-0 font-normal tracking-tight text-black",
             leftAlignModuleHeadings ? "text-left" : "text-center",
@@ -45,7 +49,7 @@ export function PdpV2MoreLikeThis({
           )}
         >
           {eyebrow}
-        </h2>
+        </PdpTextReveal>
       </div>
 
       {/* Static 3-card clip — 3rd card peeks; not scrollable (Paper B6C-0) */}
@@ -56,8 +60,12 @@ export function PdpV2MoreLikeThis({
             useV4ModuleSpacing ? "gap-4 px-4" : "gap-2 px-2",
           )}
         >
-          {items.map((item) => (
-            <div key={item.id} className="flex w-[158px] shrink-0 flex-col gap-2">
+          {items.map((item, index) => (
+            <PdpRevealItem
+              key={item.id}
+              delay={revealStaggerDelay(index)}
+              className="flex w-[158px] shrink-0 flex-col gap-2"
+            >
               <div
                 className={cn(
                   "relative h-[198px] w-[158px] overflow-hidden",
@@ -116,7 +124,7 @@ export function PdpV2MoreLikeThis({
                 </svg>
                 Add to bag
               </button>
-            </div>
+            </PdpRevealItem>
           ))}
         </div>
       </div>

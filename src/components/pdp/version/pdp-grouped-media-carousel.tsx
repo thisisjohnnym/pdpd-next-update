@@ -10,6 +10,8 @@ import {
   pdpCarouselScrollWrapClass,
 } from "../pdp-carousel";
 import { PdpTextReveal } from "../pdp-text-reveal";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 /**
  * Near-full-width slot with a peek of the next frame.
@@ -49,9 +51,13 @@ export function PdpGroupedMediaCarousel({
       <div className={pdpCarouselScrollWrapClass}>
         <div className={cn(pdpCarouselScrollClass, "flex gap-2")} aria-label={title}>
           {items.map((node, index) => (
-            <div key={index} className={GROUPED_MEDIA_CARD_CLASS}>
+            <PdpRevealItem
+              key={index}
+              delay={revealStaggerDelay(index)}
+              className={GROUPED_MEDIA_CARD_CLASS}
+            >
               {node}
-            </div>
+            </PdpRevealItem>
           ))}
         </div>
       </div>

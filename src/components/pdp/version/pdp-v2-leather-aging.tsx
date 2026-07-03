@@ -13,7 +13,10 @@ import {
 import { cn } from "@/lib/cn";
 
 import { PDP_LEATHER_AGING } from "../pdp-data";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpType } from "../pdp-type";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 import { useRafLerp } from "../use-raf-lerp";
 import { useReducedMotion } from "../use-reduced-motion";
 
@@ -229,17 +232,21 @@ function PdpLeatherAgingV4() {
   return (
     <section data-header-surface="light" className="w-full shrink-0 bg-white px-4">
       <div className="overflow-hidden">
-        {/* image on top */}
+        <PdpRevealItem>
         <div className="relative h-[430px] w-full bg-neutral-200">
           <LeatherAgingStages stageIndex={stageIndex} />
         </div>
+        </PdpRevealItem>
 
-        {/* single warm block: title + per-stage description + slider */}
+        <PdpRevealItem delay={revealStaggerDelay(1)}>
         <div className="flex flex-col items-center gap-8 bg-[#EFEAE7] px-2 py-6">
           <div className="flex w-full flex-col items-center gap-2">
-            <h2 className="font-extended m-0 self-stretch text-center text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-balance text-black">
+            <PdpTextReveal
+              as="h2"
+              className="font-extended m-0 self-stretch text-center text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-balance text-black"
+            >
               {title}
-            </h2>
+            </PdpTextReveal>
             {/* Reserve height for the longest (2-years) caption so the card
                 never resizes as the stage changes. Reads the committed stage —
                 text + photo only change on release, not mid-drag. */}
@@ -349,6 +356,7 @@ function PdpLeatherAgingV4() {
             </div>
           </div>
         </div>
+        </PdpRevealItem>
       </div>
     </section>
   );

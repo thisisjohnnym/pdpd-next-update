@@ -15,6 +15,9 @@ import { productPath } from "../pdp-product-routes";
 import { getRecentlyViewedProductId } from "../pdp-products";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { pdpType, pdpPressableClass } from "../pdp-type";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -59,7 +62,8 @@ export function PdpV2RecentlyViewed() {
         useV4ModuleSpacing ? "px-4 pb-4" : "px-2 pb-2",
       )}
     >
-      <h2
+      <PdpTextReveal
+        as="h2"
         className={cn(
           "font-extended m-0 mb-5 font-normal tracking-tight text-black",
           leftAlignModuleHeadings ? "text-left" : "text-center",
@@ -67,17 +71,22 @@ export function PdpV2RecentlyViewed() {
         )}
       >
         {PDP_RECENTLY_VIEWED_SECTION.eyebrow}
-      </h2>
+      </PdpTextReveal>
 
       <ul
         className="m-0 flex list-none flex-col gap-[14px] p-0"
         aria-label="Recently viewed items"
       >
-        {PDP_RECENTLY_VIEWED.map((item) => {
+        {PDP_RECENTLY_VIEWED.map((item, index) => {
           const isLinked = getRecentlyViewedProductId(item.id) !== null;
 
           return (
-            <li key={item.id} className="flex items-center gap-2">
+            <PdpRevealItem
+              key={item.id}
+              as="li"
+              delay={revealStaggerDelay(index)}
+              className="flex items-center gap-2"
+            >
               <button
                 type="button"
                 onClick={isLinked ? () => handleViewAgain(item.id) : undefined}
@@ -151,7 +160,7 @@ export function PdpV2RecentlyViewed() {
                   </svg>
                 ) : null}
               </button>
-            </li>
+            </PdpRevealItem>
           );
         })}
       </ul>

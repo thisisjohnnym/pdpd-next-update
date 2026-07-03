@@ -8,7 +8,10 @@ import {
   PDP_REVIEWS_SUMMARY,
 } from "../pdp-data";
 import { PdpStarRating } from "../pdp-review-comment";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpPressableClass, pdpType } from "../pdp-type";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -93,19 +96,23 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             leftAlignModuleHeadings ? "items-start" : "items-center",
           )}
         >
-          <h2
+          <PdpTextReveal
+            as="h2"
             className="font-extended m-0 text-xl font-normal tracking-tight text-black"
           >
             Reviews
-          </h2>
-          <div className="flex items-center gap-2">
+          </PdpTextReveal>
+          <PdpRevealItem delay={revealStaggerDelay(1)}>
+            <div className="flex items-center gap-2">
             <PdpStarRating rating={average} size={18} />
             <span className={cn("font-extended text-black", pdpType.body)}>
               {average.toFixed(1)} ({count} reviews)
             </span>
           </div>
+          </PdpRevealItem>
         </div>
 
+        <PdpRevealItem delay={revealStaggerDelay(2)}>
         <div
           className={cn(
             "flex flex-col rounded-xl bg-[#F6F6F6]",
@@ -130,8 +137,9 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             AI-generated summary
           </p>
         </div>
+        </PdpRevealItem>
 
-        {/* Clip both review cards into a fixed window with a soft fade (Paper AYJ-0) */}
+        <PdpRevealItem delay={revealStaggerDelay(3)}>
         <div className="relative h-[213px] overflow-clip">
           <div className="flex flex-col">
             {firstReview ? <ReviewCard review={firstReview} /> : null}
@@ -147,8 +155,10 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
             className="pointer-events-none absolute inset-x-0 bottom-0 top-[185px] bg-gradient-to-t from-white to-transparent"
           />
         </div>
+        </PdpRevealItem>
       </div>
 
+      <PdpRevealItem delay={revealStaggerDelay(4)}>
       <div
         className={cn(
           "flex w-full flex-col items-center",
@@ -207,6 +217,7 @@ export function PdpV2Reviews({ onReadAll, onWriteReview }: PdpV2ReviewsProps) {
           </button>
         ) : null}
       </div>
+      </PdpRevealItem>
     </section>
   );
 }
