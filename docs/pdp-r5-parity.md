@@ -9,6 +9,8 @@ not by eye.
 This doc supersedes the r3 mapping in [pdp-v2-components.md](pdp-v2-components.md)
 for anything v4/r5.
 
+**Round changelog (stakeholder-facing):** [rounds/r5-v4.md](rounds/r5-v4.md)
+
 ---
 
 ## Rule 0 — Use the r5 nodes, do not re-derive them

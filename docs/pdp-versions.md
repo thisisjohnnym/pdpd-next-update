@@ -2,6 +2,8 @@
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
+**Also read:** [deploy-and-links.md](deploy-and-links.md) (URLs & ship) · [prototype-versions.md](prototype-versions.md) (playbook) · [rounds/](rounds/) (per-round changelogs)
+
 ## In short
 
 - **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round.
@@ -33,16 +35,20 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## 2. Brand-team links
 
-On the **`v2`** deploy both versions are reachable:
+**Production (share with stakeholders):** https://pdp-next-sigma.vercel.app
 
-- `https://{preview-host}/v1` → current design
-- `https://{preview-host}/v2` → pivot design
+| Route | URL | Round doc |
+|-------|-----|-----------|
+| v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
+| v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
+| v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
+| v4 (latest) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
 
-Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v2/products/tabby-shoulder-bag-26-black`.
+Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
 
-Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break. There is no redirect on `/` — the named routes are the canonical brand links.
+Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break.
 
-> Fill in the live preview host once the `v2` branch is deployed.
+**Deploy process:** [deploy-and-links.md](deploy-and-links.md) · **Playbook:** [prototype-versions.md](prototype-versions.md) · **Round index:** [rounds/README.md](rounds/README.md)
 
 ---
 
@@ -288,7 +294,7 @@ r5 was originally scoped from a verbal feedback checklist, which missed several 
 
 **Leather aging restructure (v4):** the r5 Leather aging artboards (`JFT-0` / `LM2-0` / …) restructure the module — image on top (no warm header band above it), then a single warm `#EFEAE7` block holding a centered title, per-stage description, and the stage slider. The block is **not** plain white (an earlier draft of this note wrongly said white). The shared `PdpV2LeatherAging` renders this v4 layout behind the `useV4LeatherAgingLayout` flag; v2/v3 keep the r3/r4 `AP5-0` layout (warm header band above the image, caption below the slider).
 
-For the full r5 (v4) module map, node-verify workflow, and Definition of Done, see [pdp-r5-parity.md](pdp-r5-parity.md).
+For the full r5 (v4) module map, node-verify workflow, and Definition of Done, see [pdp-r5-parity.md](pdp-r5-parity.md) and the round changelog [rounds/r5-v4.md](rounds/r5-v4.md).
 
 ---
 
