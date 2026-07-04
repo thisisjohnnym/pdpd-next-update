@@ -184,7 +184,7 @@ export function PdpNotifySheet({
           </form>
 
           <p className={cn(pdpType.micro, "mt-3 text-center text-neutral-400")}>
-            We'll only use your email for this restock alert.
+            We&apos;ll only use your email for this restock alert.
           </p>
         </div>
       </div>
