@@ -2,6 +2,8 @@
 
 Source of truth: [Paper — updates - r3, artboard `ADB-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/4-0/ADB-0)
 
+> **Superseded for v4/r5.** This page maps the **r3** design. For anything v4/r5 (the current pivot), use [pdp-r5-parity.md](pdp-r5-parity.md) as the source of truth — the r5 artboards restructure padding/spacing/type and the leather-aging module. Only rely on this page for v2/v3 baseline behavior.
+
 If code and Paper disagree, Paper wins. Every module listed here must be verified against its Paper node before being marked `match`.
 
 ---

@@ -9,6 +9,11 @@ import { cn } from "@/lib/cn";
 import { useHeaderContrast } from "./use-header-contrast";
 import { CoachWordmark } from "./pdp-brand-logos";
 import { PDP_BRAND_BAR_HEIGHT } from "./pdp-brand-bar";
+import {
+  HERO_NAV_ICON_HIT_V4_PX,
+  HERO_NAV_PADDING_INLINE_V4_PX,
+  HERO_NAV_PADDING_TOP_V4_PX,
+} from "./pdp-hero-tokens";
 import { pdpPressableIconClass } from "./pdp-type";
 import { useScrollNavVisibility } from "./use-scroll-nav-visibility";
 import { useHeroRevealApplier } from "./use-pdp-hero-reveal";
@@ -20,6 +25,8 @@ import {
 } from "./pdp-hero-chrome-surface";
 import { useScrollSnapshot } from "./use-coalesced-scroll";
 import { useReducedMotion } from "./use-reduced-motion";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 const HEADER_ICON_SIZE = 24;
 const HEADER_ROW_HEIGHT = 24;
@@ -53,6 +60,8 @@ export function PdpOverlayHeader({
   const chromeTransitionClass = reducedMotion
     ? undefined
     : HERO_CHROME_COLOR_TRANSITION_CLASS;
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+  const iconHit = useV4ModuleSpacing ? HERO_NAV_ICON_HIT_V4_PX : HEADER_ROW_HEIGHT;
 
   // Ride below the brand switcher while it is revealed, then sit at the top.
   useHeroRevealApplier((reveal) => {
@@ -64,6 +73,73 @@ export function PdpOverlayHeader({
       hugBrandBar ? reveal * PDP_BRAND_BAR_HEIGHT : 0
     }px)`;
   });
+
+  const headerRow = (
+    <div
+      className={cn(
+        "pdp-hero-header-enter grid grid-cols-[1fr_auto_1fr] items-center",
+        chromeTransitionClass,
+      )}
+      style={{ height: iconHit }}
+    >
+      <button
+        type="button"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+        onClick={onOpenMenu}
+        className={cn(
+          "flex items-center justify-center justify-self-start",
+          pdpPressableIconClass,
+          chromeTransitionClass,
+          isLight ? "text-white" : "text-neutral-900",
+        )}
+        style={{ width: iconHit, height: iconHit }}
+      >
+        <PdpIconSwap
+          active={menuOpen}
+          activeIcon={<PdpHeroMenuGlyph open size={HEADER_ICON_SIZE} />}
+          inactiveIcon={<PdpHeroMenuGlyph size={HEADER_ICON_SIZE} />}
+        />
+      </button>
+
+      <CoachWordmark
+        className={cn(
+          "h-2.5 w-auto",
+          chromeTransitionClass,
+          isLight ? "text-white" : "text-neutral-900",
+        )}
+      />
+
+      <button
+        type="button"
+        aria-label={
+          bagCount > 0
+            ? `Shopping bag, ${bagCount} item${bagCount === 1 ? "" : "s"}`
+            : "Shopping bag"
+        }
+        className={cn(
+          "relative flex items-center justify-center justify-self-end",
+          pdpPressableIconClass,
+          chromeTransitionClass,
+          isLight ? "text-white" : "text-neutral-900",
+        )}
+        style={{ width: iconHit, height: iconHit }}
+      >
+        <PdpIconSwap
+          active={bagCount > 0}
+          activeIcon={
+            <span
+              key={bagCount}
+              className="motion-safe:animate-bag-badge-pop inline-flex size-6 items-center justify-center"
+            >
+              <PdpHeroBagGlyph count={bagCount} size={HEADER_ICON_SIZE} />
+            </span>
+          }
+          inactiveIcon={<PdpHeroBagGlyph count={0} size={HEADER_ICON_SIZE} />}
+        />
+      </button>
+    </div>
+  );
 
   return (
     <header
@@ -82,76 +158,29 @@ export function PdpOverlayHeader({
           paddingRight: "var(--hero-inset, 0px)",
         }}
       >
-      <PageGrid fullWidth className="pointer-events-auto relative pb-2.5 pt-[calc(var(--pdp-safe-area-top)+0.75rem)]">
-        <GridItem mobile={12} desktop={24}>
+        {useV4ModuleSpacing ? (
+          // Hero chrome is edge-to-edge with bespoke padding (docs/design-system/grid.md),
+          // so v4 skips PageGrid and uses the Paper r5 `M15-0` inset directly.
           <div
-            className={cn(
-              "pdp-hero-header-enter grid grid-cols-[1fr_auto_1fr] items-center",
-              chromeTransitionClass,
-            )}
-            style={{ height: HEADER_ROW_HEIGHT }}
+            className="pointer-events-auto relative"
+            style={{
+              paddingLeft: HERO_NAV_PADDING_INLINE_V4_PX,
+              paddingRight: HERO_NAV_PADDING_INLINE_V4_PX,
+              paddingTop: `calc(var(--pdp-safe-area-top) + ${HERO_NAV_PADDING_TOP_V4_PX}px)`,
+            }}
           >
-            <button
-              type="button"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              onClick={onOpenMenu}
-              className={cn(
-                "flex items-center justify-self-start",
-                pdpPressableIconClass,
-                chromeTransitionClass,
-                isLight ? "text-white" : "text-neutral-900",
-              )}
-              style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
-            >
-              <PdpIconSwap
-                active={menuOpen}
-                activeIcon={<PdpHeroMenuGlyph open size={HEADER_ICON_SIZE} />}
-                inactiveIcon={<PdpHeroMenuGlyph size={HEADER_ICON_SIZE} />}
-              />
-            </button>
-
-            <CoachWordmark
-              className={cn(
-                "h-2.5 w-auto",
-                chromeTransitionClass,
-                isLight ? "text-white" : "text-neutral-900",
-              )}
-            />
-
-            <button
-              type="button"
-              aria-label={
-                bagCount > 0
-                  ? `Shopping bag, ${bagCount} item${bagCount === 1 ? "" : "s"}`
-                  : "Shopping bag"
-              }
-              className={cn(
-                "relative flex items-center justify-center justify-self-end",
-                pdpPressableIconClass,
-                chromeTransitionClass,
-                isLight ? "text-white" : "text-neutral-900",
-              )}
-              style={{ width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }}
-            >
-              <PdpIconSwap
-                active={bagCount > 0}
-                activeIcon={
-                  <span
-                    key={bagCount}
-                    className="motion-safe:animate-bag-badge-pop inline-flex size-6 items-center justify-center"
-                  >
-                    <PdpHeroBagGlyph count={bagCount} size={HEADER_ICON_SIZE} />
-                  </span>
-                }
-                inactiveIcon={
-                  <PdpHeroBagGlyph count={0} size={HEADER_ICON_SIZE} />
-                }
-              />
-            </button>
+            {headerRow}
           </div>
-        </GridItem>
-      </PageGrid>
+        ) : (
+          <PageGrid
+            fullWidth
+            className="pointer-events-auto relative pb-2.5 pt-[calc(var(--pdp-safe-area-top)+0.75rem)]"
+          >
+            <GridItem mobile={12} desktop={24}>
+              {headerRow}
+            </GridItem>
+          </PageGrid>
+        )}
       </div>
     </header>
   );

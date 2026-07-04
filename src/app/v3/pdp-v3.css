@@ -1,0 +1,27 @@
+/*
+ * v3-only styles — Paper r4 pivot.
+ *
+ * RULES (enforced by scripts/check-pdp-version-boundaries.mjs):
+ * - Every selector here MUST be scoped under [data-pdp-version="v3"].
+ * - Never edit shared .pdp-* rules in globals.css for v3-only needs.
+ * - Shared design system (grid, typography, icons, motion tokens) stays shared.
+ *
+ * This file is imported only by src/app/v3/layout.tsx, so it never affects /v1 or /v2.
+ */
+
+[data-pdp-version="v3"] {
+  /* v3 design tokens land here as the pivot evolves. */
+}
+
+/* Match the v2 calm land — suppress hero-land enter animations. */
+[data-pdp-version="v3"] .pdp-hero-header-enter,
+[data-pdp-version="v3"] .pdp-hero-hud-enter,
+[data-pdp-version="v3"] .pdp-hero-bottom-enter {
+  animation: none;
+}
+
+/* .pdp-social-rail-item has a static opacity:0 rule — reset alongside animation */
+[data-pdp-version="v3"] .pdp-social-rail-item {
+  opacity: 1;
+  animation: none;
+}

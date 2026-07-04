@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { ScrollRevealSectionContext } from "./scroll-reveal-section-context";
 import { useLazyNearView } from "./use-lazy-near-view";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -25,13 +27,19 @@ type PdpScrollRevealProps = {
  * per-element staggers) is what calms the "lots happening at once" feeling on a
  * media-dense scroll.
  */
-function RevealContent({ children }: { children: React.ReactNode }) {
+function RevealContent({
+  children,
+  granular,
+}: {
+  children: React.ReactNode;
+  granular: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const [revealed, setRevealed] = useState(reducedMotion);
+  const [revealed, setRevealed] = useState(reducedMotion || granular);
 
   useEffect(() => {
-    if (reducedMotion) {
+    if (granular || reducedMotion) {
       setRevealed(true);
       return;
     }
@@ -54,10 +62,41 @@ function RevealContent({ children }: { children: React.ReactNode }) {
 
     observer.observe(node);
 
+    // IntersectionObserver only calls back when the ratio crosses a
+    // threshold. An instant/jump scroll (End key, anchor links,
+    // viewport-resize scroll snaps) can skip a section clean over its
+    // trigger zone in a single frame, so the ratio stays at 0 the whole
+    // time and the observer never fires again — the section is stranded
+    // at opacity-0 forever. Catch that directly: if it's already fully
+    // above the viewport, reveal it now.
+    let rafId = 0;
+    const checkSkippedPast = () => {
+      rafId = 0;
+      if (node.getBoundingClientRect().bottom <= 0) {
+        setRevealed(true);
+      }
+    };
+    const onScrollOrResize = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(checkSkippedPast);
+      }
+    };
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
     };
-  }, [reducedMotion]);
+  }, [granular, reducedMotion]);
+
+  if (granular) {
+    return <div>{children}</div>;
+  }
 
   return (
     <div
@@ -84,6 +123,8 @@ export function PdpScrollReveal({
   lazyMount = false,
   reserveMinHeight = "70dvh",
 }: PdpScrollRevealProps) {
+  const version = usePdpVersion();
+  const { useV4GranularScrollReveal } = getPdpVersionConfig(version);
   const triggerRef = useRef<HTMLDivElement>(null);
   const nearView = useLazyNearView(triggerRef, lazyMount);
   const shouldMount = !lazyMount || nearView;
@@ -103,7 +144,9 @@ export function PdpScrollReveal({
     >
       {shouldMount ? (
         <ScrollRevealSectionContext.Provider value={{ sectionVisible: true }}>
-          <RevealContent>{children}</RevealContent>
+          <RevealContent granular={useV4GranularScrollReveal}>
+            {children}
+          </RevealContent>
         </ScrollRevealSectionContext.Provider>
       ) : null}
     </div>

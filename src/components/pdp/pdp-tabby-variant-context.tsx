@@ -45,7 +45,7 @@ export type TabbySizeOptionAvailability = {
   available: boolean;
 };
 
-type TabbyVariantContextValue = {
+export type TabbyVariantContextValue = {
   slug: string;
   sku: TabbySku;
   style: TabbyStyle;

@@ -10,6 +10,8 @@ import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { pdpPressableSolidClass } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 type PdpBuyBarRowProps = {
   selectedColorId: string;
@@ -32,6 +34,7 @@ export function PdpBuyBarRow({
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
+  const { flattenBuyBarCta } = getPdpVersionConfig(usePdpVersion());
 
   const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
   const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
@@ -96,7 +99,7 @@ export function PdpBuyBarRow({
           style={{
             backgroundColor: atbChrome.background,
             color: atbChrome.foreground,
-            boxShadow: atbChrome.glow,
+            boxShadow: flattenBuyBarCta ? "none" : atbChrome.glow,
           }}
         >
           <span className="relative z-[1] flex min-w-0 items-center justify-center gap-2">

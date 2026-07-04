@@ -5,7 +5,13 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
+import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpType } from "../pdp-type";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
+
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
 
 /**
  * v2-only simplified "More like this" module (Paper B6C-0).
@@ -18,6 +24,8 @@ export function PdpV2MoreLikeThis({
 }: {
   onAddToBag?: (id: string) => void;
 }) {
+  const { leftAlignModuleHeadings, squareProductCardCorners, useV4ModuleSpacing } =
+    getPdpVersionConfig(usePdpVersion());
   const { eyebrow, items } = PDP_MORE_LIKE_THIS;
 
   return (
@@ -25,23 +33,45 @@ export function PdpV2MoreLikeThis({
       data-header-surface="light"
       className="w-full shrink-0 bg-white pt-[56px]"
     >
-      <div className="mb-5 flex flex-col items-center gap-1 px-3">
-        <h2
+      <div
+        className={cn(
+          "mb-5 flex flex-col gap-1",
+          useV4ModuleSpacing ? "px-4" : "px-3",
+          leftAlignModuleHeadings ? "items-start" : "items-center",
+        )}
+      >
+        <PdpTextReveal
+          as="h2"
           className={cn(
-            "font-extended m-0 text-center font-normal tracking-tight text-black",
+            "font-extended m-0 font-normal tracking-tight text-black",
+            leftAlignModuleHeadings ? "text-left" : "text-center",
             pdpType.headline,
           )}
         >
           {eyebrow}
-        </h2>
+        </PdpTextReveal>
       </div>
 
       {/* Static 3-card clip — 3rd card peeks; not scrollable (Paper B6C-0) */}
       <div className="overflow-clip">
-        <div className="flex gap-2 px-2 pb-1">
-          {items.map((item) => (
-            <div key={item.id} className="flex w-[158px] shrink-0 flex-col gap-2">
-              <div className="relative h-[198px] w-[158px] overflow-hidden rounded-xl">
+        <div
+          className={cn(
+            "flex pb-1",
+            useV4ModuleSpacing ? "gap-4 px-4" : "gap-2 px-2",
+          )}
+        >
+          {items.map((item, index) => (
+            <PdpRevealItem
+              key={item.id}
+              delay={revealStaggerDelay(index)}
+              className="flex w-[158px] shrink-0 flex-col gap-2"
+            >
+              <div
+                className={cn(
+                  "relative h-[198px] w-[158px] overflow-hidden",
+                  squareProductCardCorners ? "rounded-none" : "rounded-xl",
+                )}
+              >
                 <Image
                   src={item.imageSrc}
                   alt={item.imageAlt}
@@ -94,7 +124,7 @@ export function PdpV2MoreLikeThis({
                 </svg>
                 Add to bag
               </button>
-            </div>
+            </PdpRevealItem>
           ))}
         </div>
       </div>

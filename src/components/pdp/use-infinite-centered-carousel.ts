@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 
 import { useReducedMotion } from "./use-reduced-motion";
 
@@ -154,9 +154,11 @@ export function useInfiniteCenteredCarousel(
     measure();
     el.addEventListener("scroll", scheduleIdleCheck, { passive: true });
     el.addEventListener("scrollend", recenterIfAtEdge);
-    el.addEventListener("touchstart", onPointerDown, { passive: true });
-    el.addEventListener("touchend", onPointerUp, { passive: true });
-    el.addEventListener("touchcancel", onPointerUp, { passive: true });
+    // Pointer events cover touch AND mouse (click-and-drag via useDragToScroll)
+    // so the edge-teleport recenter never fires mid-drag for either input.
+    el.addEventListener("pointerdown", onPointerDown, { passive: true });
+    el.addEventListener("pointerup", onPointerUp, { passive: true });
+    el.addEventListener("pointercancel", onPointerUp, { passive: true });
 
     return () => {
       if (idleTimer) {
@@ -164,12 +166,165 @@ export function useInfiniteCenteredCarousel(
       }
       el.removeEventListener("scroll", scheduleIdleCheck);
       el.removeEventListener("scrollend", recenterIfAtEdge);
-      el.removeEventListener("touchstart", onPointerDown);
-      el.removeEventListener("touchend", onPointerUp);
-      el.removeEventListener("touchcancel", onPointerUp);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("pointercancel", onPointerUp);
       ro.disconnect();
     };
   }, [scrollRef, itemCount, initialIndex]);
+}
+
+const DRAG_CLICK_SUPPRESS_THRESHOLD_PX = 6;
+
+/** Longest a smooth settle should ever take — fallback for browsers without `scrollend`. */
+const DRAG_SETTLE_FALLBACK_MS = 500;
+
+/** Nearest child's centered scrollLeft to whatever position the rail is currently at. */
+function nearestChildScrollLeft(el: HTMLElement): number {
+  const viewportCenter = el.scrollLeft + el.clientWidth / 2;
+  let target = el.scrollLeft;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const child of Array.from(el.children) as HTMLElement[]) {
+    const childCenter = child.offsetLeft + child.offsetWidth / 2;
+    const distance = Math.abs(childCenter - viewportCenter);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      target = getCenteredScrollLeft(el, child);
+    }
+  }
+
+  return target;
+}
+
+/**
+ * Click-and-drag horizontal scrolling for mouse pointers. Touch and pen
+ * already scroll the rail natively (`overflow-x-auto` + `touch-action`), so
+ * this only intercepts mouse input — a plain desktop mouse has no built-in
+ * way to pan a horizontal rail, which otherwise makes carousels unusable
+ * when demoing off a laptop trackpad-free mouse.
+ *
+ * Sets `scrollLeft` directly during the drag (CSS `scroll-snap-type` is
+ * suspended via `.pdp-carousel-dragging` so it can't fight the live drag),
+ * then on release animates to the nearest card with `scrollTo({ behavior:
+ * "smooth" })` — an explicit tween rather than trusting the browser's own
+ * (instant, `scroll-behavior: auto`) snap correction — before handing scroll
+ * snap back for touch/keyboard/resize. Skips the tween under reduced motion.
+ */
+export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
+  const reducedMotion = useReducedMotion();
+  const reducedMotionRef = useRef(reducedMotion);
+
+  useEffect(() => {
+    reducedMotionRef.current = reducedMotion;
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    let dragging = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let moved = 0;
+    let settleTimer = 0;
+
+    const clearSettleTimer = () => {
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+        settleTimer = 0;
+      }
+      el.removeEventListener("scrollend", finishSettle);
+    };
+
+    const finishSettle = () => {
+      clearSettleTimer();
+      el.classList.remove("pdp-carousel-dragging");
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse" || event.button !== 0) {
+        return;
+      }
+
+      clearSettleTimer();
+      dragging = true;
+      moved = 0;
+      startX = event.clientX;
+      startScrollLeft = el.scrollLeft;
+      el.classList.add("pdp-carousel-dragging");
+
+      try {
+        el.setPointerCapture(event.pointerId);
+      } catch {
+        /* capture unsupported — drag still works via document-level fallback */
+      }
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!dragging) {
+        return;
+      }
+
+      const dx = event.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      el.scrollLeft = startScrollLeft - dx;
+    };
+
+    const endDrag = (event: PointerEvent) => {
+      if (!dragging) {
+        return;
+      }
+
+      dragging = false;
+
+      // scroll-snap-type is still "none" here (see .pdp-carousel-dragging in
+      // globals.css) — animate to the target ourselves first, then hand snap
+      // back. Restoring snap before the tween finishes lets the browser's own
+      // (instant) correction preempt it, which is exactly the jump this fixes.
+      el.scrollTo({
+        left: nearestChildScrollLeft(el),
+        behavior: reducedMotionRef.current ? "auto" : "smooth",
+      });
+
+      if (supportsScrollEndEvent()) {
+        el.addEventListener("scrollend", finishSettle, { once: true });
+      } else {
+        settleTimer = window.setTimeout(finishSettle, DRAG_SETTLE_FALLBACK_MS);
+      }
+
+      if (el.hasPointerCapture(event.pointerId)) {
+        el.releasePointerCapture(event.pointerId);
+      }
+    };
+
+    // A drag ending under the pointer would otherwise fire a click on
+    // whatever it lands on — swallow it once the pointer has moved enough
+    // to count as a drag rather than a tap.
+    const onClickCapture = (event: MouseEvent) => {
+      if (moved > DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", endDrag);
+    el.addEventListener("pointercancel", endDrag);
+    el.addEventListener("click", onClickCapture, { capture: true });
+
+    return () => {
+      clearSettleTimer();
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", endDrag);
+      el.removeEventListener("pointercancel", endDrag);
+      el.removeEventListener("click", onClickCapture, { capture: true });
+    };
+  }, [scrollRef]);
 }
 
 /** Coverflow depth tuning — how far the side clips rotate, recede, and dim */

@@ -1,13 +1,16 @@
-# PDP Versions (v1 / v2)
+# PDP Versions (v1 / v2 / v3 / v4)
 
-Single source of truth for the two PDP designs that ship from this codebase. Read this before any PDP edit.
+Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
+
+**Also read:** [deploy-and-links.md](deploy-and-links.md) (URLs & ship) · [prototype-versions.md](prototype-versions.md) (playbook) · [rounds/](rounds/) (per-round changelogs)
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the stakeholder pivot.
-- Brand team compares them at **`/v1`** and **`/v2`** on the same deploy.
-- `main` is untouched. Pivot work lives on the **`v2`** git branch.
-- v2 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1.
+- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round.
+- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, and **`/v4`** on the same deploy.
+- v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
+- v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
+- v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
 
 ---
 
@@ -32,16 +35,20 @@ Single source of truth for the two PDP designs that ship from this codebase. Rea
 
 ## 2. Brand-team links
 
-On the **`v2`** deploy both versions are reachable:
+**Production (share with stakeholders):** https://pdp-next-sigma.vercel.app
 
-- `https://{preview-host}/v1` → current design
-- `https://{preview-host}/v2` → pivot design
+| Route | URL | Round doc |
+|-------|-----|-----------|
+| v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
+| v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
+| v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
+| v4 (latest) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
 
-Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v2/products/tabby-shoulder-bag-26-black`.
+Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
 
-Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break. There is no redirect on `/` — the named routes are the canonical brand links.
+Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break.
 
-> Fill in the live preview host once the `v2` branch is deployed.
+**Deploy process:** [deploy-and-links.md](deploy-and-links.md) · **Playbook:** [prototype-versions.md](prototype-versions.md) · **Round index:** [rounds/README.md](rounds/README.md)
 
 ---
 
@@ -128,6 +135,8 @@ Bundle and Compare are not in the v2 Paper design — they are hidden via `showB
 |---|---|---|
 | `updates - r2` (page `3-0`) | v1 frozen baseline — parity target for `/v1` | `/v1` |
 | `updates - r3` (page `4-0`) | v2 pivot baseline — visual tweak surface | `/v2` |
+| `updates - r4` (page `5-0`) | v3 pivot baseline — r4 hero/CTA/color drawer | `/v3` |
+| `updates - r5` (page `6-0`) | v4 pivot baseline — r5 feedback refinements | `/v4` |
 
 **R3 export rules**
 
@@ -183,11 +192,117 @@ Then in Safari (via the `user-safari` MCP): screenshot `/v1` and `/v2` for the T
 
 ---
 
-## 7. Sunset plan
+## 8. v3 — Paper r4 pivot
+
+v3 is the stakeholder pivot from Paper page `updates - r4` (`5-0`). It **inherits the v2 module order** below the hero (it spreads `V2_CONFIG`) and adds three r4 UX changes. Nothing in v1 or v2 changes.
+
+### What v3 changes
+
+1. **Restructured hero** (`F39-0` / `CPE-0`) — the gallery sits in the scroll document with a white footer carrying the product name/price and a **docked** Color + Add to bag row (`FGQ-0`). The slide indicator and AR button move into the gallery overlay (`F3D-0`); the right-edge social rail is gone.
+2. **CTA scroll model** (`F9R-0` / `F5Z-0`) — the docked buy bar scrolls away with the hero. A sentinel at the bottom of the hero block drives a floating buy bar (`PdpBottomActions`) that returns once the hero passes the viewport top. The chapter jump bar is disabled in v3 so it never replaces the floating CTA.
+3. **Progressive color drawer** (`EU5-0` / `EIE-0`) — a full-height in-context sheet with **Popular colors** (3 shown, expands to all), **Explore materials** (4 shown, expands), and a horizontal **Bag size** row. Replaces the flat `PdpColorSheet` for Tabby.
+
+### v3-only files
+
+| File | Role |
+|------|------|
+| `src/app/v3/` | Route folder — `layout.tsx` sets `data-pdp-version="v3"` and imports `pdp-v3.css`; pages pass `version="v3"` |
+| `src/app/v3/pdp-v3.css` | v3-scoped CSS (animation suppressions inherited from v2 calm land) |
+| `src/app/v3/pdp-v3-root-marker.tsx` | Marks `<html>` so portaled chrome (floating CTA) gets v3 CSS |
+| `src/components/pdp/version/pdp-v3-hero-layout.tsx` | r4 hero: gallery + white footer (name/price + docked `PdpBuyBarRow`) + scroll sentinel |
+| `src/components/pdp/version/pdp-v3-gallery-overlay.tsx` | Gallery-overlay slide indicator + AR button (replaces HUD + rail) |
+| `src/components/pdp/version/pdp-v3-ar-button.tsx` | r4 AR "Try On" button in the gallery overlay |
+| `src/components/pdp/version/use-hero-buy-bar-visibility.ts` | `IntersectionObserver` sentinel → floating bar handoff |
+| `src/components/pdp/version/pdp-v3-color-sheet.tsx` | Progressive color drawer |
+| `src/components/pdp/version/pdp-v3-color-sheet-sections.ts` | Maps the frozen Tabby catalog into Popular / Materials / Sizes |
+
+### v3 feature flags (`pdp-version-config.ts`)
+
+`V3_CONFIG` spreads `V2_CONFIG` then sets:
+
+| Flag | v1 | v2 | v3 | Purpose |
+|------|----|----|----|---------|
+| `galleryUsesV2Slides` | false | true | true | Use the v2 reshaped gallery slide list (replaces the old `version === "v2"` check in `pdp-tabby-color-media.ts`) |
+| `heroScrollsWithPage` | false | false | true | Hero land is in the scroll document, not a fixed 100svh island |
+| `heroDockedBuyBar` | false | false | true | Color + Add to bag dock in the hero footer; gallery uses the v3 overlay |
+| `floatingBuyBarWhenHeroHidden` | false | false | true | Floating bar mounts only after the hero scrolls past |
+| `useV3ColorSheet` | false | false | true | Render the progressive drawer instead of `PdpColorSheet` |
+| `showSectionJumpBar` | true | true | **false** | r4 keeps the floating buy bar instead of the chapter jump bar |
+
+Shared components read these flags; v1/v2 paths are untouched. The flags only take effect on the Tabby video hero land (`showBrandBar && hero.kind === "video"`). On a stripped PDP (e.g. Kira) `/v3` falls back to the same stripped behavior as v1/v2.
+
+### v3 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1/v2 routes must not import any `*-v3` module, and `pdp-v3.css` selectors must be scoped under `[data-pdp-version="v3"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v3"`. Add a flag to `PdpVersionConfig`.
+- Detailed specs: hero/CTA in `docs/pdp-hero-chrome.md` (v3 appendix); color drawer in `docs/pdp-v3-color-sheet.md`.
+
+---
+
+## 8.5. v4 — Paper r5 pivot
+
+v4 is the stakeholder feedback round from Paper page `updates - r5` (`6-0`). It **inherits the full v3 baseline** (it spreads `V3_CONFIG`) — the r4 hero/CTA scroll model and progressive color drawer carry over unchanged — and layers the r5 feedback refinements. Nothing in v1, v2, or v3 changes.
+
+### What v4 changes
+
+1. **No trench portrait slide** — the full-viewport trench portrait between reviews and More like this (Paper `B39-0`, present in v2/v3) is dropped. Gated by `showTrenchPortraitSlide: false`; the shared gallery reads the flag before rendering `trenchPortraitSlide`.
+2. **Five-up Details specs** (Paper r5 `LD6-0`) — the Details module renders **Height / Width / Depth / Weight / Strap drop** (3-up row + 2-up row) instead of the frozen three-up spec row. Values live in a new v4-only `pdp-v4-specs.ts`; the frozen `PDP_PRODUCT_DETAILS.specs` in `pdp-data.ts` is never touched.
+3. **A0 product still leads the hero gallery** — the Tabby hero gallery leads with `ccx04_b4bk_a0.webp` (the A0 product still) instead of the lifestyle land video. v4-only reorder; the frozen `PDP_HERO_GALLERY_SLIDES` array is not mutated.
+4. **r5 style parity** — brings the shared v2 modules in line with the r5 artboards: **left-aligned Reviews and More like this headings** (Paper `MAE-0` / `MD6-0`); **square product-card corners** in More like this and Recently viewed (Paper `MD6-0` "no rounded corners" / `ME6-0`); **arrow-free text links** on "Write a review" and "View again" (Paper `MAE-0` / `ME6-0`); and the **larger 24px UGC heading type** (Paper `L5X-0` "updated type"). The Recently viewed heading stays centered by design (Paper `ME6-0`).
+
+### v4-only files
+
+| File | Role |
+|------|------|
+| `src/app/v4/` | Route folder — `layout.tsx` sets `data-pdp-version="v4"` and imports `pdp-v4.css`; pages pass `version="v4"` |
+| `src/app/v4/pdp-v4.css` | v4-scoped CSS (animation suppressions inherited from v2/v3 calm land) |
+| `src/app/v4/pdp-v4-root-marker.tsx` | Marks `<html>` so portaled chrome (floating CTA) gets v4 CSS |
+| `src/components/pdp/version/pdp-v4-specs.ts` | v4 five-up Details spec list (Height/Width/Depth/Weight/Strap drop) |
+
+### v4 feature flags (`pdp-version-config.ts`)
+
+`V4_CONFIG` spreads `V3_CONFIG` then sets:
+
+| Flag | v3 | v4 | Purpose |
+|------|----|----|---------|
+| `showTrenchPortraitSlide` | true | **false** | Drop the full-viewport trench portrait slide |
+| `useV4Specs` | false | **true** | Render the five-up Details spec chips |
+| `leadGalleryWithProductStill` | false | **true** | Lead the Tabby hero gallery with the A0 product still |
+| `demoPopularColorStates` | false | **true** | Pin demo Sold out / Notify me states onto distinct Popular Colors |
+| `flattenBuyBarCta` | false | **true** | Drop the color glow/shadow on the Add to bag pill |
+| `leftAlignModuleHeadings` | false | **true** | Left-align the Reviews + More like this headings (Recently viewed stays centered) |
+| `squareProductCardCorners` | false | **true** | Square the More like this cards + Recently viewed thumbnails |
+| `hideTextLinkArrows` | false | **true** | Hide the arrow on "Write a review" / "View again" links |
+| `useV4UgcHeadingType` | false | **true** | Use the larger 24px UGC section heading |
+| `useV4ModuleSpacing` | false | **true** | r5 padding/spacing refresh across Reviews, More like this, Recently viewed, Details, Editorial, Hero, UGC |
+| `useV4LeatherAgingLayout` | false | **true** | Rebuild leather aging (image on top, single warm block) |
+| `showBrandSwitcher` | true | **false** | Hide the Coach / Coach Outlet brand switcher above the hero |
+| `enableHeroReveal` | true | **false** | Disable the hero shrink/peek choreography (nothing to reveal without the switcher) |
+
+Shared components read these flags; v1/v2/v3 paths are untouched.
+
+### v4 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1/v2/v3 routes must not import any `*-v4` module, and `pdp-v4.css` selectors must be scoped under `[data-pdp-version="v4"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v4"`. Add a flag to `PdpVersionConfig`.
+
+Some r5 feedback items are cross-version bug fixes (reviews-tray height stability, leather-aging interaction) that are fixed in the shared components rather than gated to v4 — they improve every version.
+
+### r5 parity process note
+
+r5 was originally scoped from a verbal feedback checklist, which missed several detail-level refinements that only the renamed artboards captured ("no rounded corners", "updated type", "updated cta and alignment"). The style-parity flags above closed that gap by node-verifying each updated r5 artboard directly through the Paper MCP (`get_node_info` / `get_jsx` / `get_computed_styles`) rather than eyeballing screenshots. Future version rounds should do the same before signing off "no gap found."
+
+**Leather aging restructure (v4):** the r5 Leather aging artboards (`JFT-0` / `LM2-0` / …) restructure the module — image on top (no warm header band above it), then a single warm `#EFEAE7` block holding a centered title, per-stage description, and the stage slider. The block is **not** plain white (an earlier draft of this note wrongly said white). The shared `PdpV2LeatherAging` renders this v4 layout behind the `useV4LeatherAgingLayout` flag; v2/v3 keep the r3/r4 `AP5-0` layout (warm header band above the image, caption below the slider).
+
+For the full r5 (v4) module map, node-verify workflow, and Definition of Done, see [pdp-r5-parity.md](pdp-r5-parity.md) and the round changelog [rounds/r5-v4.md](rounds/r5-v4.md).
+
+---
+
+## 9. Sunset plan
 
 When stakeholders pick a winner:
 
-- **v1 wins** — delete `src/components/pdp/version/`, the `/v2` route, `pdp-v2.css`, and the version props/flags; restore plain component calls.
-- **v2 wins** — promote v2 to default: fold the v2 flags into the shared components as the new baseline, then remove the `/v1` route and the adapter layer.
+- **v1 wins** — delete `src/components/pdp/version/`, the `/v2`, `/v3`, and `/v4` routes, `pdp-v2.css` / `pdp-v3.css` / `pdp-v4.css`, and the version props/flags; restore plain component calls.
+- **a pivot wins** — promote it to default: fold its flags into the shared components as the new baseline, then remove the other routes and the adapter layer.
 
 Either way, remove the boundary script and Cursor rule once a single version remains.
