@@ -54,11 +54,13 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-1. Cut **`v1`** from `main` — frozen baseline, no pivot edits.
-2. Branch **`v2`** from `v1` — all pivot work happens here.
-3. Leave **`main`** as-is until stakeholders pick a winner.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v4`) from one codebase.
 
-`v1` is frozen: never commit to it after it is cut. When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
+1. All prototype work lands on **`main`**.
+2. Route versions (`/v1`–`/v4`) are frozen comparison URLs — not separate git branches.
+3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
+
+When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
 
 ---
 

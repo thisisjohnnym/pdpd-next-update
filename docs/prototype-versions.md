@@ -23,7 +23,7 @@ This doc is the **process** layer. PDP-specific architecture and flags live in [
 | **Route versions** (`/v1`…`/v4` on one deploy) | One link host; easy A/B for stakeholders; shared components | Needs discipline (flags, boundary checks) |
 | **Git branch per round** | Clean history per round | Hard to compare live; many preview URLs |
 
-This repo uses **route versions on one production deploy**. Git branch `v2` is the active development line; `/v1`–`/v4` are comparison URLs.
+This repo uses **route versions on one production deploy**. Git branch **`main`** holds all comparison routes (`/v1`–`/v4`); active prototype work lands there.
 
 ---
 

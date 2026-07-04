@@ -29,18 +29,18 @@ Update the **Last prod deploy** row in [rounds/README.md](rounds/README.md) afte
 
 | | Preview | Production |
 |---|---------|------------|
-| **When it updates** | Every `git push` to `origin/v2` | When you run `vercel --prod` |
-| **Typical URL** | `https://pdp-next-git-v2-thisisjohnnym-9611s-projects.vercel.app` | `https://pdp-next-sigma.vercel.app` |
+| **When it updates** | Every `git push` to `origin/main` | When you run `vercel --prod` (or push `main` — Vercel production branch) |
+| **Typical URL** | `https://pdp-next-git-main-thisisjohnnym-9611s-projects.vercel.app` | `https://pdp-next-sigma.vercel.app` |
 | **Use for** | Your own QA before promoting | Stakeholder links, brand-team review |
 | **SSO** | May require Vercel team login | Public (200 on `/v4`) |
 
-Pushing the `v2` branch does **not** update `pdp-next-sigma.vercel.app` until you promote to production.
+Pushing **`main`** updates `pdp-next-sigma.vercel.app` when Vercel’s production branch is set to `main`. Use `vercel --prod` for a manual promote from your machine.
 
 ---
 
 ## Deploy commands
 
-From repo root, on branch `v2`:
+From repo root, on branch `main`:
 
 ```bash
 # 1. Verify (same as CI)
@@ -48,10 +48,10 @@ pnpm typecheck
 pnpm check:versions
 pnpm build
 
-# 2. Commit and push (creates Preview deploy)
-git push origin v2
+# 2. Commit and push (updates production when Vercel tracks main)
+git push origin main
 
-# 3. Promote to production (updates sigma URL)
+# 3. Optional: manual production promote from local
 vercel --prod --yes
 ```
 
@@ -63,9 +63,9 @@ vercel --prod --yes
 
 | Name | Meaning |
 |------|---------|
-| Git branch `v2` | Long-lived development branch — all prototype work lands here |
+| Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v4`) and active prototype work |
 | Routes `/v1`–`/v4` | Frozen comparison URLs on one deploy — not separate git branches |
-| `main` / `v1` git branches | Historical baselines; active shipping uses `v2` + route versions |
+| Git branch `v2` | Legacy development line (merged into `main`); keep in sync or retire |
 
 When someone says “deploy v4,” they mean **ship code to production so `/v4` shows the latest round** — not a separate `v4` git branch.
 
@@ -97,7 +97,7 @@ Use before every production deploy:
 - [ ] `/v4` matches the round doc + Paper artboard (if design-led)
 - [ ] `pnpm check:versions` passes
 - [ ] `pnpm build` passes
-- [ ] `git push origin v2` then `vercel --prod --yes`
+- [ ] `git push origin main` (and `vercel --prod --yes` if promoting manually)
 - [ ] [rounds/README.md](rounds/README.md) deploy date updated
 - [ ] Round changelog updated in `docs/rounds/rN-vN.md`
 
@@ -110,4 +110,4 @@ Use before every production deploy:
 | Project | `pdp-next` |
 | Team | `thisisjohnnym-9611s-projects` |
 | Production alias | `pdp-next-sigma.vercel.app` |
-| Linked git branch (preview) | `v2` |
+| Linked git branch (production) | `main` |

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # PDP Versions (v1 frozen … v4 active)
 
-The PDP ships four comparison routes on one deploy:
+The PDP ships four comparison routes on one deploy from **`main`**:
 
 - **v1** (`/v1`, legacy `/`) — frozen brand baseline
 - **v2** (`/v2`) — first stakeholder pivot (frozen)

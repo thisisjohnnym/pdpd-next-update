@@ -27,7 +27,7 @@ Before sharing `/v4` (or any round) with stakeholders:
 
 1. `pnpm check:versions` and `pnpm build` pass
 2. Spot-check `/v1`–`/v3` unchanged; `/v4` matches round doc
-3. `git push origin v2` then `vercel --prod --yes` (push alone only updates Preview)
+3. `git push origin main` (production updates when Vercel tracks `main`; use `vercel --prod --yes` to promote manually)
 4. Update `docs/rounds/README.md` deploy date and `docs/rounds/rN-vN.md` deploy log
 
 Full checklist: `docs/deploy-and-links.md`
