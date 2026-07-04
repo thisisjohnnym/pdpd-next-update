@@ -20,7 +20,7 @@ type PdpTextRevealProps<T extends ElementType> = {
   delay?: number;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "className">;
 
-/** Copy block — scroll-scrubbed opacity + blur reveal on v4 */
+/** Copy block — scroll-triggered opacity + blur reveal on v4 */
 export function PdpTextReveal<T extends ElementType = "div">({
   as,
   children,

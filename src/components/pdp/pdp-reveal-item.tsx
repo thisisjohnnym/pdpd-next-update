@@ -20,7 +20,7 @@ type PdpRevealItemProps<T extends ElementType> = {
   delay?: number;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "className">;
 
-/** Layout block — scroll-scrubbed opacity + lift reveal on v4 */
+/** Layout block — scroll-triggered opacity + lift reveal on v4 */
 export function PdpRevealItem<T extends ElementType = "div">({
   as,
   children,
