@@ -16,7 +16,7 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | Field | Value |
 |-------|-------|
 | Date | Jul 3, 2026 |
-| Commit | `54fb435` — docs: prototype-first workflow for multi-version shipping |
+| Commit | `c5f6236` — fix(v4): play-once scroll reveals instead of scrub freeze |
 | URL | https://pdp-next-sigma.vercel.app/v4 |
 
 Update this section after every `vercel --prod`.
