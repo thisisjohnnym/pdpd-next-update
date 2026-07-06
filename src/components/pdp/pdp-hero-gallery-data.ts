@@ -38,6 +38,43 @@ export type PdpHeroGallerySlide =
 
 const HERO_STILL_BASE = "/images/hero/tabby26";
 
+/** The A0 product still promoted to slide 0 in v4 (Paper r5). */
+const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
+
+/** The broken/too-small feature-callout still and its r5 replacement (Paper r5). */
+const HERO_FEATURE_CALLOUT_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`;
+const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101-r5.png`;
+
+/**
+ * v4 (Paper r5) hero gallery treatment. Returns a new array (never mutates the
+ * frozen source) so v1/v2/v3 are unaffected:
+ *   - Lead with the A0 product still instead of the lifestyle land video.
+ *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
+ */
+export function applyV4HeroGallery(
+  slides: PdpHeroGallerySlide[],
+): PdpHeroGallerySlide[] {
+  const swapped = slides.map((slide) =>
+    slide.src === HERO_FEATURE_CALLOUT_SRC
+      ? { ...slide, src: HERO_FEATURE_CALLOUT_R5_SRC }
+      : slide,
+  );
+
+  const leadIndex = swapped.findIndex(
+    (slide) => slide.src === HERO_LEAD_PRODUCT_STILL_SRC,
+  );
+
+  if (leadIndex <= 0) {
+    return swapped;
+  }
+
+  return [
+    swapped[leadIndex]!,
+    ...swapped.slice(0, leadIndex),
+    ...swapped.slice(leadIndex + 1),
+  ];
+}
+
 /**
  * Side-scrolling hero gallery for Tabby Shoulder Bag 26.
  *

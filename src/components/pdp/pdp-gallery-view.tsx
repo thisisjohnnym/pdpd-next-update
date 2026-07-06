@@ -670,7 +670,11 @@ export function PdpGalleryView({
                     className={ECOMM_MODULE_CLASS}
                     surface="light"
                   >
-                    <PdpProductDetailsModule showHeading={versionConfig.showDetailsHeading} />
+                    <PdpProductDetailsModule
+                      showHeading={versionConfig.showDetailsHeading}
+                      useV4Specs={versionConfig.useV4Specs}
+                      useV4Spacing={versionConfig.useV4ModuleSpacing}
+                    />
                   </PdpScrollReveal>,
                 ]
               : [];
@@ -930,8 +934,8 @@ export function PdpGalleryView({
           />
         </PdpScrollReveal>
       ) : null}
-      {/* v2 trench portrait slide — full-viewport image between reviews and More like this (Paper B39-0) */}
-      {versionConfig.trenchPortraitSlide ? (
+      {/* v2 trench portrait slide — full-viewport image between reviews and More like this (Paper B39-0). Dropped in v4 (Paper r5). */}
+      {versionConfig.showTrenchPortraitSlide && versionConfig.trenchPortraitSlide ? (
         <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="dark" lazyMount>
           <PdpV2FullSlide
             src={versionConfig.trenchPortraitSlide.src}

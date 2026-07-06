@@ -6,12 +6,19 @@ import { cn } from "@/lib/cn";
 
 import { usePdpHeroGallery } from "./pdp-hero-gallery-context";
 import { useReducedMotion } from "./use-reduced-motion";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 /** Paper `6JV-0` — 2px tall ticks, 4px gap; active tick elongates into a bar */
 const TICK_HEIGHT_PX = 2;
 const TICK_DOT_PX = 2;
 const TICK_ACTIVE_PX = 16;
 const TICK_GAP_PX = 4;
+
+/** v4 (Paper r5 `LZ0-0`) — taller 3px ticks, 4px dot, 24px active bar */
+const TICK_HEIGHT_V4_PX = 3;
+const TICK_DOT_V4_PX = 4;
+const TICK_ACTIVE_V4_PX = 24;
 
 /** Cap the visible window — the rail scrolls so the active tick stays in view */
 const MAX_VISIBLE = 8;
@@ -33,11 +40,15 @@ export function PdpHeroGalleryIndicator() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = useReducedMotion();
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+
+  // v4 (Paper r5) shows every slide tick uncapped; only the legacy window scrolls.
+  const capped = !useV4ModuleSpacing && count > MAX_VISIBLE;
 
   useEffect(() => {
     const viewport = viewportRef.current;
     const active = activeRef.current;
-    if (!viewport || !active || count <= MAX_VISIBLE) {
+    if (!viewport || !active || !capped) {
       return;
     }
 
@@ -50,14 +61,16 @@ export function PdpHeroGalleryIndicator() {
     } else if (left < viewport.scrollLeft) {
       viewport.scrollTo({ left, behavior });
     }
-  }, [activeIndex, count, reducedMotion]);
+  }, [activeIndex, capped, reducedMotion]);
 
   if (count <= 1) {
     return null;
   }
 
   const isDark = surface === "dark";
-  const capped = count > MAX_VISIBLE;
+  const tickHeight = useV4ModuleSpacing ? TICK_HEIGHT_V4_PX : TICK_HEIGHT_PX;
+  const tickDot = useV4ModuleSpacing ? TICK_DOT_V4_PX : TICK_DOT_PX;
+  const tickActive = useV4ModuleSpacing ? TICK_ACTIVE_V4_PX : TICK_ACTIVE_PX;
 
   return (
     <div
@@ -65,7 +78,7 @@ export function PdpHeroGalleryIndicator() {
       aria-hidden
       className="pointer-events-none flex overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       style={{
-        height: TICK_HEIGHT_PX,
+        height: tickHeight,
         columnGap: TICK_GAP_PX,
         width: capped ? CAPPED_WIDTH_PX : undefined,
         maxWidth: "100%",
@@ -89,8 +102,8 @@ export function PdpHeroGalleryIndicator() {
                   : "bg-neutral-900/30",
             )}
             style={{
-              height: TICK_HEIGHT_PX,
-              width: active ? TICK_ACTIVE_PX : TICK_DOT_PX,
+              height: tickHeight,
+              width: active ? tickActive : tickDot,
             }}
           />
         );

@@ -10,13 +10,27 @@ In **Plan mode**, load `.cursor/rules/agent-planning.mdc` (or `@agent-planning`)
 
 ## PDP versions (read before any PDP edit)
 
-The PDP ships two designs from one codebase: **v1** (frozen current design, `/v1` and legacy `/`) and **v2** (stakeholder pivot, `/v2`). Be version-aware before touching PDP code.
+The PDP ships **four comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, and **v4** (latest round). Be version-aware before touching PDP code.
 
-- Full reference: `docs/pdp-versions.md`
-- v2 changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts` — never rewrite v1 defaults.
-- Never edit `pdp-data.ts`, `pdp-section-chapters.ts`, or `globals.css` for v2-only needs.
-- After v2 changes, confirm `/v1` is unchanged and run `pnpm check:versions`.
+- Architecture & flags: `docs/pdp-versions.md`
+- Deploy & stakeholder links: `docs/deploy-and-links.md`
+- Prototype playbook: `docs/prototype-versions.md`
+- Per-round changelogs: `docs/rounds/`
+- v2+ changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts` — never rewrite v1 defaults.
+- Never edit `pdp-data.ts`, `pdp-section-chapters.ts`, or `globals.css` for version-only needs (prefer `pdp-vN.css`).
+- After changes, confirm older routes unchanged and run `pnpm check:versions`.
 - Cursor rule: `.cursor/rules/pdp-versions.mdc` (always on).
+
+### Pre-ship checklist
+
+Before sharing `/v4` (or any round) with stakeholders:
+
+1. `pnpm check:versions` and `pnpm build` pass
+2. Spot-check `/v1`–`/v3` unchanged; `/v4` matches round doc
+3. `git push origin main` (production updates when Vercel tracks `main`; use `vercel --prod --yes` to promote manually)
+4. Update `docs/rounds/README.md` deploy date and `docs/rounds/rN-vN.md` deploy log
+
+Full checklist: `docs/deploy-and-links.md`
 
 ## Layout grid (always use)
 

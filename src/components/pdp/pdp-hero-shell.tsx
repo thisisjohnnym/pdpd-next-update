@@ -11,6 +11,8 @@ import {
   lerpHeroReveal,
 } from "./pdp-hero-tokens";
 import { useHeroRevealApplier } from "./use-pdp-hero-reveal";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 function applyHeroShellLayout(
   reveal: number,
@@ -55,6 +57,7 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
   const phoneRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
+  const { showBrandSwitcher } = getPdpVersionConfig(usePdpVersion());
 
   useEffect(
     () => () => {
@@ -75,7 +78,7 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
       ref={phoneRef}
       className="relative flex min-h-[var(--pdp-immersive-height,100svh)] flex-1 flex-col overflow-clip bg-white"
     >
-      <PdpBrandBarReveal />
+      {showBrandSwitcher ? <PdpBrandBarReveal /> : null}
       <div ref={heroRef} className="flex min-h-0 flex-1 flex-col">
         <div ref={mediaFrameRef} className="relative flex min-h-0 flex-1 flex-col">
           {children}

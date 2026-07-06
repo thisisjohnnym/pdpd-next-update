@@ -36,8 +36,35 @@ export function useLazyNearView(
 
     observer.observe(node);
 
+    // IntersectionObserver only calls back when the ratio crosses a
+    // threshold. An instant/jump scroll (End key, anchor links,
+    // viewport-resize scroll snaps) can skip a section clean over its
+    // trigger zone in a single frame, so the ratio stays at 0 the whole
+    // time and the observer never fires again — the section is stranded
+    // as an empty placeholder forever. Catch that directly: if it's
+    // already fully above the viewport, mount it now.
+    let rafId = 0;
+    const checkSkippedPast = () => {
+      rafId = 0;
+      if (node.getBoundingClientRect().bottom <= 0) {
+        setNearView(true);
+      }
+    };
+    const onScrollOrResize = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(checkSkippedPast);
+      }
+    };
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
     };
   }, [enabled, nearView, ref]);
 

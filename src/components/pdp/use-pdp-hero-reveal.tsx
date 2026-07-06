@@ -260,9 +260,8 @@ export function PdpHeroRevealProvider({
   children: ReactNode;
 }) {
   const reducedMotion = useReducedMotion();
-  const { heroRevealDeferToHorizontalGallery } = getPdpVersionConfig(
-    usePdpVersion(),
-  );
+  const { heroRevealDeferToHorizontalGallery, enableHeroReveal } =
+    getPdpVersionConfig(usePdpVersion());
   const [controller] = useState(() => new HeroRevealController());
 
   useEffect(() => {
@@ -278,6 +277,16 @@ export function PdpHeroRevealProvider({
     const unsub = controller.subscribe((reveal) => {
       document.documentElement.style.setProperty("--hero-reveal", `${reveal}`);
     });
+
+    // No brand switcher to reveal — pin the hero full-bleed, skip the intro peek.
+    if (!enableHeroReveal) {
+      controller.allowIntroCollapse();
+      controller.setDirect(0, "hero-reveal-disabled");
+      controller.finishIntro();
+      return () => {
+        unsub();
+      };
+    }
 
     let cancelled = false;
     let collapseTimer = 0;
@@ -311,11 +320,11 @@ export function PdpHeroRevealProvider({
       window.clearTimeout(collapseTimer);
       unsub();
     };
-  }, [controller]);
+  }, [controller, enableHeroReveal]);
 
   // Pull-to-reveal: intentional overscroll at top only — scroll-back rests full bleed.
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || !enableHeroReveal) {
       return;
     }
 
@@ -563,7 +572,7 @@ export function PdpHeroRevealProvider({
       window.clearTimeout(scrollEndTimer);
       controller.cancelAutohide();
     };
-  }, [controller, heroRevealDeferToHorizontalGallery]);
+  }, [controller, heroRevealDeferToHorizontalGallery, enableHeroReveal]);
 
   return (
     <HeroRevealContext.Provider value={controller}>

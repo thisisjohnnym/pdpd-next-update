@@ -5,6 +5,7 @@ import {
   type PdpGallerySlide,
 } from "./pdp-data";
 import { buildV2Slides, type PdpGallerySlideV2 } from "./version/pdp-data-v2";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpVersion } from "./version/pdp-version-context";
 
 const TABBY_SILVER_SOFT_PURPLE_ID = "silver-soft-purple";
@@ -80,7 +81,7 @@ function swapPurpleMorePhotos(photos: PdpGalleryPhoto[]): PdpGalleryPhoto[] {
 
 /**
  * Gallery scroll — swap on-model frames when a colorway has dedicated lifestyle assets.
- * Version-aware: v2 reshapes the swapped list (UGC after hero, grouped craft carousel, removals).
+ * Version-aware: v2/v3 reshape the swapped list (UGC after hero, grouped craft carousel, removals).
  */
 export function getTabbyGallerySlidesForColor(
   colorId: string,
@@ -90,7 +91,9 @@ export function getTabbyGallerySlidesForColor(
     ? swapPurpleModelSlides(PDP_GALLERY_SLIDES)
     : PDP_GALLERY_SLIDES;
 
-  return version === "v2" ? buildV2Slides(v1Slides) : v1Slides;
+  return getPdpVersionConfig(version).galleryUsesV2Slides
+    ? buildV2Slides(v1Slides)
+    : v1Slides;
 }
 
 /** View more photos sheet — keep extended gallery in sync with color selection */

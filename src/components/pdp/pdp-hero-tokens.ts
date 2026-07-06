@@ -33,6 +33,21 @@ export const CTA_BAR_PADDING_PX = 8;
 /** Product HUD row padding from media frame bottom — Paper `6CU-0` / `670-0` paddingBottom */
 export const HERO_FRAME_BOTTOM_PAD_PX = 8;
 
+/** v4 (Paper r5 `IMP-0` / `J86-0`) nav Header side padding */
+export const HERO_NAV_PADDING_INLINE_V4_PX = 16;
+
+/** v4 nav Header top padding — Paper r5 `M15-0` paddingTop */
+export const HERO_NAV_PADDING_TOP_V4_PX = 18;
+
+/** v4 nav icon hit frame — Paper r5 bag button `M1F-0` 28×28 */
+export const HERO_NAV_ICON_HIT_V4_PX = 28;
+
+/** v4 gallery overlay row side padding — Paper r5 `LYZ-0` paddingInline */
+export const HERO_GALLERY_OVERLAY_PADDING_INLINE_V4_PX = 16;
+
+/** v4 gallery overlay row bottom padding — Paper r5 `LYZ-0` paddingBottom */
+export const HERO_GALLERY_OVERLAY_PADDING_BOTTOM_V4_PX = 16;
+
 /** Hero UI stays fully visible until this fraction of viewport scrolled */
 export const HERO_UI_FADE_START_VIEWPORT = 0.8;
 
