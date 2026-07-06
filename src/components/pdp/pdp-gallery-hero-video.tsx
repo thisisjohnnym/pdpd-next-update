@@ -39,6 +39,45 @@ const CONTROL_BUTTON_CLASS =
 
 const TAP_MOVE_THRESHOLD_PX = 12;
 
+/** Match poster / skeleton framing to the video element's object-fit classes. */
+function resolveMediaFraming(className?: string, style?: CSSProperties) {
+  const objectFit = className?.includes("object-contain")
+    ? "contain"
+    : "cover";
+  const objectPosition =
+    typeof style?.objectPosition === "string" ? style.objectPosition : "center";
+  const fitClass =
+    objectFit === "contain" ? "object-contain" : "object-cover";
+
+  return { objectFit, objectPosition, fitClass };
+}
+
+function PosterFrame({
+  poster,
+  fitClass,
+  objectPosition,
+  visible,
+}: {
+  poster: string;
+  fitClass: string;
+  objectPosition: string;
+  visible: boolean;
+}) {
+  return (
+    <img
+      src={poster}
+      alt=""
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute inset-0 z-[1] size-full object-center transition-opacity duration-500",
+        fitClass,
+        visible ? "opacity-100" : "opacity-0",
+      )}
+      style={{ objectPosition }}
+    />
+  );
+}
+
 export function PdpGalleryHeroVideo({
   className,
   style,
@@ -84,6 +123,8 @@ export function PdpGalleryHeroVideo({
   });
 
   const videoSources = resolveVideoSources(src);
+  const { fitClass: posterFitClass, objectPosition: posterObjectPosition } =
+    resolveMediaFraming(className, style);
 
   const useTapCaptureLayer = tapToTogglePlayback;
   const videoIgnoresPointer = passThroughTouch || useTapCaptureLayer;
@@ -178,22 +219,23 @@ export function PdpGalleryHeroVideo({
       <div
         aria-hidden
         className={cn(
-          "relative size-full",
+          "relative size-full overflow-hidden",
           !poster && !priorityAutoplay && "motion-safe:animate-pulse",
-          skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900",
+          !poster &&
+            (skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900"),
           className,
         )}
-        style={{
-          ...style,
-          ...(poster
-            ? {
-                backgroundImage: `url(${poster})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : undefined),
-        }}
-      />
+        style={style}
+      >
+        {poster ? (
+          <PosterFrame
+            poster={poster}
+            fitClass={posterFitClass}
+            objectPosition={posterObjectPosition}
+            visible
+          />
+        ) : null}
+      </div>
     );
   }
 
@@ -206,13 +248,11 @@ export function PdpGalleryHeroVideo({
       )}
     >
       {poster ? (
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 z-[1] bg-cover bg-center transition-opacity duration-500",
-            videoFrameVisible ? "opacity-0" : "opacity-100",
-          )}
-          style={{ backgroundImage: `url(${poster})` }}
+        <PosterFrame
+          poster={poster}
+          fitClass={posterFitClass}
+          objectPosition={posterObjectPosition}
+          visible={!videoFrameVisible}
         />
       ) : null}
 
