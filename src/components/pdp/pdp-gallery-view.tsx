@@ -710,11 +710,22 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: craft (Feel → Up close) → Details → Out in the wild → Aging.
+          // v5: Feel → Out in the wild → Details → Up close → Aging.
           // v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
               ? [
+                  ...(versionConfig.useV4CompactUgcStrip
+                    ? [
+                        <PdpScrollReveal
+                          key={`ugc-wild-strip-${index}`}
+                          className={ECOMM_MODULE_CLASS}
+                          surface="light"
+                        >
+                          <PdpV2UgcCommunity />
+                        </PdpScrollReveal>,
+                      ]
+                    : []),
                   <ChapterAnchor
                     key={`anchor-the-details-${index}`}
                     id="the-details"
@@ -737,17 +748,6 @@ export function PdpGalleryView({
                       }
                     />
                   </PdpScrollReveal>,
-                  ...(versionConfig.useV4CompactUgcStrip
-                    ? [
-                        <PdpScrollReveal
-                          key={`ugc-wild-strip-${index}`}
-                          className={ECOMM_MODULE_CLASS}
-                          surface="light"
-                        >
-                          <PdpV2UgcCommunity />
-                        </PdpScrollReveal>,
-                      ]
-                    : []),
                 ]
               : [];
 

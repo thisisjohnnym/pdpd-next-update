@@ -480,7 +480,7 @@ function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
   );
 }
 
-/** v4 — compact portrait strip after The Details ("Out in the wild"). */
+/** v4 — compact portrait strip before The Details ("Out in the wild"). */
 function UgcCompactWildStrip() {
   const { videos } = PDP_UGC_VIDEO_CAROUSEL;
   const { headline, socialHandle, previewCount } = PDP_UGC_COMMUNITY_COMPACT_SECTION;
@@ -521,7 +521,7 @@ function UgcCompactWildStrip() {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 overflow-x-clip pt-8 pb-8"
+      className="w-full shrink-0 overflow-x-clip pt-8 pb-6"
     >
       <div className="mb-4 flex flex-col gap-3 px-4">
         <div className="flex items-baseline justify-between gap-3">

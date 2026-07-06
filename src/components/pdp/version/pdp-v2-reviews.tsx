@@ -104,7 +104,7 @@ function V4ReviewSummary({
   leftAlignModuleHeadings: boolean;
 }) {
   const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
-  const { headline, reviewHighlights, featuredQuote } = PDP_V4_REVIEWS_SUMMARY;
+  const { headline, reviewHighlights } = PDP_V4_REVIEWS_SUMMARY;
   const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
@@ -185,33 +185,9 @@ function V4ReviewSummary({
           </div>
         </PdpRevealItem>
 
-        {/* Representative quote — light supporting read */}
-        <PdpRevealItem delay={revealStaggerDelay(4)} className="w-full">
-          <figure
-            className={cn(
-              "m-0",
-              !leftAlignModuleHeadings && "mx-auto max-w-[20rem]",
-            )}
-          >
-            <blockquote
-              className={cn(
-                "m-0 text-pretty text-neutral-600",
-                useConsistentModuleHeadings
-                  ? pdpType.caption
-                  : "font-extended text-[13px] leading-[1.4] tracking-[0.2px]",
-              )}
-            >
-              &ldquo;{featuredQuote.body}&rdquo;
-            </blockquote>
-            <figcaption className="font-sans mt-1.5 text-[11px] leading-[14px] text-neutral-400">
-              — {featuredQuote.author}
-              {featuredQuote.verified ? ", verified buyer" : ""}
-            </figcaption>
-          </figure>
-        </PdpRevealItem>
       </div>
 
-      <PdpRevealItem delay={revealStaggerDelay(5)}>
+      <PdpRevealItem delay={revealStaggerDelay(4)}>
         <div
           className={cn(
             "flex w-full flex-col pt-5",

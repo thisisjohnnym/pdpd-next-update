@@ -72,7 +72,7 @@ export function PdpV4Craftsmanship() {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 overflow-x-clip bg-white pt-14 pb-6"
+      className="w-full shrink-0 overflow-x-clip bg-white pt-6 pb-8"
     >
       <div
         className={cn(

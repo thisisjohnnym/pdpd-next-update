@@ -6,7 +6,6 @@ import type { KeyboardEvent } from "react";
 import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_DRAG_ZOOM_HINT } from "./pdp-data";
-import { PdpHoldChip } from "./pdp-hold-chip";
 import { PANEL_MEDIA_COVER_CLASS } from "./pdp-viewport-chrome";
 import { useDragZoomLens } from "./use-drag-zoom-lens";
 
@@ -23,7 +22,7 @@ type PdpGalleryDragZoomImageProps = {
   scale?: string;
   fitContain?: boolean;
   panel?: boolean;
-  /** Center the hold chip on hero gallery drag-zoom (v4); bottom elsewhere. */
+  /** Center the hold trigger on hero gallery drag-zoom (v4); bottom elsewhere. */
   overlayAware?: boolean;
   /** With hero carousel — allow horizontal swipes on the image (default vertical only). */
   allowHorizontalPan?: boolean;
@@ -48,9 +47,7 @@ export function PdpGalleryDragZoomImage({
     containerRef,
     lensPosition,
     containerSize,
-    isPending,
     isZooming,
-    holdDurationMs,
     pointerType,
     triggerHandlers,
   } = useDragZoomLens();
@@ -106,37 +103,28 @@ export function PdpGalleryDragZoomImage({
       />
 
       {/*
-        The hold gesture lives on this dedicated control, NOT the image — so the
-        photo stays freely scrollable and resting a thumb on it never arms zoom.
-        Kept mounted (only faded) while zooming so the captured pointer survives.
+        Hold gesture lives on this dedicated control, NOT the image — so the photo
+        stays freely scrollable. Kept mounted (only faded) while zooming so the
+        captured pointer survives.
       */}
       <div
         className={cn(
-          "pointer-events-none absolute z-[12] flex justify-center px-4 transition-opacity duration-200",
+          "pointer-events-none absolute z-[12] flex justify-center px-4",
           overlayAware
             ? "inset-0 z-[42] items-center"
             : "inset-x-0 bottom-0 pb-4 pt-10",
           isZooming ? "opacity-0" : "opacity-100",
         )}
       >
-        <PdpHoldChip
-          as="div"
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label={PDP_GALLERY_DRAG_ZOOM_HINT}
           {...triggerHandlers}
-          tone="light"
-          size="compact"
-          icon="pan_tool"
-          label={isPending ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
-          active={isPending}
-          durationMs={holdDurationMs}
-          pressed={isPending}
           className={cn(
-            "pdp-drag-zoom-control pointer-events-auto cursor-pointer",
+            "pdp-drag-zoom-control pointer-events-auto min-h-9 min-w-[10.5rem] cursor-pointer rounded-full border-0 bg-transparent p-0 opacity-0",
             allowHorizontalPan ? "pdp-drag-zoom-control--carousel-pan" : "touch-none",
           )}
-          onKeyDown={(event: KeyboardEvent) => {
+          onKeyDown={(event: KeyboardEvent<HTMLButtonElement>) => {
             if (event.key === " " || event.key === "Enter") {
               event.preventDefault();
             }

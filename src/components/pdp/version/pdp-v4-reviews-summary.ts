@@ -7,9 +7,4 @@ export const PDP_V4_REVIEWS_SUMMARY = {
     "Fits everyday essentials",
     "True to photos",
   ],
-  featuredQuote: {
-    body: "Weekend trip tested. Crossbody all day, zero issues.",
-    author: "Jules T.",
-    verified: true,
-  },
 } as const;

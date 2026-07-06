@@ -248,7 +248,7 @@ function PdpLeatherAgingV4({
     <p
       className={cn(
         pdpModuleIntroClass(leatherAgingHeaderAboveImage ? "left" : "center"),
-        "min-h-[52px]",
+        !leatherAgingHeaderAboveImage && "min-h-[52px]",
       )}
     >
       {`${stage.timeline} — ${stage.summary}`}
@@ -256,7 +256,7 @@ function PdpLeatherAgingV4({
   );
 
   const stageSlider = (
-    <div className="flex w-[294px] flex-col gap-[18px] select-none">
+    <div className="mx-auto flex w-full max-w-[calc(100%-3rem)] flex-col gap-[18px] select-none">
       {/* dot track — press and drag the salmon thumb between stages */}
       <div
         role="slider"
@@ -368,7 +368,7 @@ function PdpLeatherAgingV4({
         className="w-full shrink-0 bg-white px-4 pt-14 pb-6"
       >
         <PdpRevealItem>
-          <div className="mb-5 flex flex-col items-start gap-2">
+          <div className="mb-3 flex flex-col items-start gap-2">
             <PdpModuleHeading spacing="none" className="text-left">
               {title}
             </PdpModuleHeading>
@@ -383,14 +383,14 @@ function PdpLeatherAgingV4({
         </PdpRevealItem>
 
         <PdpRevealItem delay={revealStaggerDelay(2)}>
-          <div className="flex w-full flex-col items-center gap-8 pt-6">
+          <div className="flex w-full flex-col items-stretch gap-4 pt-6">
             {stageSlider}
             {showCareUpsell ? (
               <PdpLeatherAgingCareUpsell
                 stageIndex={stageIndex}
                 isDragging={isDragging}
                 onQuickAdd={onQuickAdd}
-                className="w-[294px]"
+                className="mt-0 w-[294px]"
               />
             ) : null}
           </div>
@@ -423,16 +423,18 @@ function PdpLeatherAgingV4({
             {stageCaption}
           </div>
 
-          {stageSlider}
+          <div className="flex w-full flex-col items-center gap-4">
+            {stageSlider}
 
-          {showCareUpsell ? (
-            <PdpLeatherAgingCareUpsell
-              stageIndex={stageIndex}
-              isDragging={isDragging}
-              onQuickAdd={onQuickAdd}
-              className="w-[294px]"
-            />
-          ) : null}
+            {showCareUpsell ? (
+              <PdpLeatherAgingCareUpsell
+                stageIndex={stageIndex}
+                isDragging={isDragging}
+                onQuickAdd={onQuickAdd}
+                className="mt-0 w-[294px]"
+              />
+            ) : null}
+          </div>
         </div>
         </PdpRevealItem>
       </div>

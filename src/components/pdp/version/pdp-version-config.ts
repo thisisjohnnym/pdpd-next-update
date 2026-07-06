@@ -218,7 +218,7 @@ export type PdpVersionConfig = {
    */
   useV4CraftsmanshipLayout: boolean;
   /**
-   * Compact UGC strip after The Details — "Out in the wild" header row,
+   * Compact UGC strip before The Details — "Out in the wild" header row,
    * small rounded portrait tiles, and a +N more card. v4 only; removes the
    * standalone `ugc-community` gallery slide.
    */
@@ -467,8 +467,8 @@ const V4_CONFIG: PdpVersionConfig = {
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Feel the leather → Up close → Details → Out in the wild → Aging.
-  detailsAfterSlideIndex: 2,
+  // v5 story: Feel the leather → Out in the wild → Details → Up close → Aging.
+  detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideBuyBarAtbIcon: true,
   hideColorSheetSizePrice: true,

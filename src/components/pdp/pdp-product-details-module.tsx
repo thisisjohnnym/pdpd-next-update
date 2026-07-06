@@ -336,7 +336,12 @@ export function PdpProductDetailsModule({
       )}
     >
       {useV4Specs ? (
-        <div className="px-4 pb-10 pt-4">
+        <div
+          className={cn(
+            "px-4",
+            !showCloserLook && useV4Spacing ? "pt-6 pb-6" : "pt-4 pb-10",
+          )}
+        >
           <div
             className={cn(
               "mb-5 flex flex-col gap-2",
