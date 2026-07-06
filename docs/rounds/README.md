@@ -17,7 +17,7 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | Field | Value |
 |-------|-------|
 | Date | Jul 6, 2026 |
-| Commit | _(pending ship)_ |
+| Commit | `d854f34` — feat(v5): Tabby family explorer and buy box merchandising |
 | URL | https://pdp-next-sigma.vercel.app/v5 |
 
 Update this section after every `vercel --prod`.
