@@ -153,6 +153,11 @@ export type PdpVersionConfig = {
    */
   hideColorSheetSizePrice: boolean;
   /**
+   * Flat color drawer — one list under "Choose color" for the current bag only
+   * (no Popular Colors / Explore Materials sections, no bag size rail). v5 only.
+   */
+  flatColorSheet: boolean;
+  /**
    * Left-align the Reviews, More like this, and Recently viewed section
    * headings (Paper r5 `MAE-0` / `MD6-0` / `ME6-0`) instead of the centered
    * v2/v3 layout. v4 only.
@@ -266,6 +271,7 @@ const V1_CONFIG: PdpVersionConfig = {
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
   hideColorSheetSizePrice: false,
+  flatColorSheet: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -328,6 +334,7 @@ const V2_CONFIG: PdpVersionConfig = {
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
   hideColorSheetSizePrice: false,
+  flatColorSheet: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -414,6 +421,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CraftsmanshipLayout: true,
   useV4CompactUgcStrip: true,
   showLeatherCareUpsell: true,
+  flatColorSheet: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

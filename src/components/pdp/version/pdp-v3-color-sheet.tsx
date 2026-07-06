@@ -246,7 +246,7 @@ export function PdpV3ColorSheet({
   const titleId = useId();
   const tabby = useOptionalTabbyVariant();
   const version = usePdpVersion();
-  const { demoPopularColorStates, hideColorSheetSizePrice } =
+  const { demoPopularColorStates, hideColorSheetSizePrice, flatColorSheet } =
     getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
   const [popularExpanded, setPopularExpanded] = useState(false);
@@ -360,6 +360,33 @@ export function PdpV3ColorSheet({
                 ) : null}
               </div>
 
+              {flatColorSheet ? (
+                <ul
+                  role="listbox"
+                  aria-label="Colors"
+                  className="m-0 flex list-none flex-col border-t border-neutral-100 pt-2"
+                >
+                  {popularColors.map((color) => (
+                    <ColorRow
+                      key={color.id}
+                      fill={color.chromeSample}
+                      name={color.name}
+                      availability={color.availability}
+                      isSelected={
+                        color.id === tabby.selectedColorId &&
+                        color.combinationAvailable
+                      }
+                      onSelect={() => handleColorSelect(color.id)}
+                      onNotify={
+                        color.availability === "notify"
+                          ? () => setNotifyLabel(color.name)
+                          : undefined
+                      }
+                    />
+                  ))}
+                </ul>
+              ) : (
+                <>
               <section aria-label="Popular colors" className="border-t border-neutral-100 pt-4">
                 <p className={cn("mb-1", SECTION_LABEL_CLASS)}>Popular Colors</p>
                 <ul role="listbox" aria-label="Popular colors" className="m-0 flex list-none flex-col">
@@ -462,6 +489,8 @@ export function PdpV3ColorSheet({
                   })}
                 </ul>
               </section>
+                </>
+              )}
             </div>
 
             <div className="shrink-0 pb-[max(16px,var(--pdp-safe-area-bottom))]" />
