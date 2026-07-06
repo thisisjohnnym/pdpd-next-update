@@ -25,7 +25,7 @@ import { usePdpVersion } from "./pdp-version-context";
 /**
  * v2-only recently viewed list (Paper BC6-0).
  *
- * White-background vertical list (no grid wrapper): centered heading, 56×70 rounded
+ * White-background vertical list (no grid wrapper): centered heading, portrait
  * thumbnails, and an underlined "View again" text link with an arrow on each row.
  * Reuses PDP_RECENTLY_VIEWED + the same routing logic as the v1 carousel.
  */
@@ -85,7 +85,7 @@ export function PdpV2RecentlyViewed() {
               key={item.id}
               as="li"
               delay={revealStaggerDelay(index)}
-              className="flex items-center gap-2"
+              className={cn("flex items-center", useV4ModuleSpacing ? "gap-3" : "gap-2")}
             >
               <button
                 type="button"
@@ -93,13 +93,15 @@ export function PdpV2RecentlyViewed() {
                 aria-label={`View again: ${item.name}, viewed ${item.viewedLabel}`}
                 disabled={!isLinked}
                 className={cn(
-                  "flex min-w-0 grow items-center gap-2 text-left",
+                  "flex min-w-0 grow items-center text-left",
+                  useV4ModuleSpacing ? "gap-3" : "gap-2",
                   isLinked && pdpPressableClass,
                 )}
               >
                 <span
                   className={cn(
-                    "relative h-[70px] w-[56px] shrink-0 overflow-hidden bg-neutral-100",
+                    "relative shrink-0 overflow-hidden bg-neutral-100",
+                    useV4ModuleSpacing ? "h-[100px] w-[80px]" : "h-[70px] w-[56px]",
                     squareProductCardCorners ? "rounded-none" : "rounded-md",
                   )}
                 >
@@ -108,7 +110,7 @@ export function PdpV2RecentlyViewed() {
                     alt={item.imageAlt}
                     fill
                     className="object-cover object-center"
-                    sizes="56px"
+                    sizes={useV4ModuleSpacing ? "80px" : "56px"}
                   />
                 </span>
                 <span className="flex min-w-0 grow flex-col gap-2">

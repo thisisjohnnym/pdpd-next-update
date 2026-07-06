@@ -35,6 +35,7 @@ export type V3MaterialEntry = {
   styleId: TabbyStyleId;
   label: string;
   swatch?: string;
+  chromeSample?: string;
   status: V3MaterialStatus;
 };
 
@@ -50,11 +51,11 @@ const V3_MATERIAL_ORDER: TabbyStyleId[] = [
   "chain",
 ];
 
-function representativeSwatch(
+function representativeColor(
   styleId: TabbyStyleId,
   size: TabbySize,
   selectedColorId: string,
-): string | undefined {
+): TabbyColorOption | undefined {
   const offeredAtSize = getAvailableSizesForStyle(styleId).includes(size);
   const repSize = offeredAtSize ? size : getAvailableSizesForStyle(styleId)[0];
   if (repSize === undefined) {
@@ -62,9 +63,15 @@ function representativeSwatch(
   }
 
   const options = getTabbyColorOptionsForStyleSize(styleId, repSize);
-  const match =
-    options.find((option) => option.id === selectedColorId) ?? options[0];
-  return match?.swatch;
+  return options.find((option) => option.id === selectedColorId) ?? options[0];
+}
+
+function representativeSwatch(
+  styleId: TabbyStyleId,
+  size: TabbySize,
+  selectedColorId: string,
+): string | undefined {
+  return representativeColor(styleId, size, selectedColorId)?.swatch;
 }
 
 function materialStatus(
@@ -123,6 +130,8 @@ function buildMaterials(
       styleId,
       label: getTabbyStyle(styleId).materialLabel,
       swatch: representativeSwatch(styleId, size, selectedColorId),
+      chromeSample: representativeColor(styleId, size, selectedColorId)
+        ?.chromeSample,
       status,
     };
   });
@@ -132,11 +141,12 @@ function buildMaterials(
  * v4 demo (Paper r5 `J2K-0`). Mirrors `V3_DEMO_MATERIAL_STATUSES` for Popular
  * Colors: the frozen catalog keeps popular colorways broadly in stock, so the
  * drawer never surfaces the sold-out + Notify me affordance the feedback asked
- * for. We pin the first two *non-selected, distinct* colors to "sold out"
- * (frozen `notify`) so the collapsed list always demos it — never repeating one
- * color across states. v4 only; v1/v2/v3 keep the raw catalog statuses.
+ * for. We pin the first *non-selected* color to "sold out" (frozen `notify`) so
+ * the collapsed list demos the affordance once — never repeating one color across
+ * states, and never stacking on top of catalog notify rows. v4 only; v1/v2/v3 keep
+ * the raw catalog statuses.
  */
-const V3_DEMO_POPULAR_STATUSES: PdpColorAvailability[] = ["notify", "notify"];
+const V3_DEMO_POPULAR_STATUSES: PdpColorAvailability[] = ["notify"];
 
 function buildPopularColors(
   tabby: TabbyVariantContextValue,
@@ -153,6 +163,9 @@ function buildPopularColors(
     }
     const demo = V3_DEMO_POPULAR_STATUSES[demoIndex];
     if (!demo) {
+      if (color.availability === "notify") {
+        return { ...color, availability: "in_stock" };
+      }
       return color;
     }
     demoIndex += 1;

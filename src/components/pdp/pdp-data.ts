@@ -838,7 +838,7 @@ export type PdpProductDetailTile = {
 };
 
 export const PDP_PRODUCT_DETAILS = {
-  eyebrow: "The details",
+  eyebrow: "The Details",
   /** Full-bleed macro at the top of the module — "The details" overlay */
   macro: {
     src: "/images/gallery/tabby-detail-quilt.png",
@@ -1220,6 +1220,9 @@ export type PdpGalleryImmersiveSlide = {
   panelContain?: boolean;
   /** Drag-to-zoom lens overlay — studio product shots */
   dragZoom?: boolean;
+  /** Optional copy above the frame — studio product / drag-zoom slides (v4) */
+  headline?: string;
+  subtext?: string;
   /** Header icon contrast when this frame is active */
   headerSurface?: "light" | "dark";
   hotspots?: PdpProductHotspot[];
@@ -3397,9 +3400,14 @@ export const PDP_COMMENTS_SUMMARY = {
 } as const;
 
 export const PDP_REVIEWS_AI_SUMMARY = {
-  headline: "What our customers think",
+  headline: "What to know",
   body: "Many note that Tabby Shoulder Bag 26 is a refined, well-crafted bag that strikes an appealing balance between structure and style. The full-grain pebbled leather and signature C clasp stand out as premium touches.",
   attribution: "Buyer highlights, summarized by AI",
+  highlights: [
+    "Structured shape that still wears casually",
+    "Full-grain pebbled leather with a weighty C clasp",
+    "Strap adjusts easily for crossbody or shoulder carry",
+  ],
 } as const;
 
 const PDP_REVIEWS_RATING_BREAKDOWN = [

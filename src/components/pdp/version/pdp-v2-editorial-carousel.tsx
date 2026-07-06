@@ -8,9 +8,10 @@ import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
 } from "../pdp-carousel";
-import { PDP_EDITORIAL_V2_CARDS } from "./pdp-data-v2";
+import { PDP_EDITORIAL_V2_CARDS, PDP_EDITORIAL_V2_SECTION } from "./pdp-data-v2";
 import { pdpType } from "../pdp-type";
 import { PdpRevealItem } from "../pdp-reveal-item";
+import { PdpTextReveal } from "../pdp-text-reveal";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
@@ -24,16 +25,53 @@ import { usePdpVersion } from "./pdp-version-context";
  * Card content comes from PDP_EDITORIAL_V2_CARDS, independent of the gallery slides.
  */
 export function PdpV2EditorialCarousel() {
-  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+  const { useV4ModuleSpacing, leftAlignModuleHeadings } =
+    getPdpVersionConfig(usePdpVersion());
+  const { headline, subtext } = PDP_EDITORIAL_V2_SECTION;
 
   return (
-    <section data-header-surface="light" className="w-full shrink-0 bg-white">
+    <section
+      data-header-surface="light"
+      className={cn("w-full shrink-0 bg-white", useV4ModuleSpacing && "pt-[56px]")}
+    >
+      {useV4ModuleSpacing ? (
+        <div
+          className={cn(
+            "mb-5 flex flex-col gap-1.5",
+            useV4ModuleSpacing ? "px-4" : "px-3",
+            leftAlignModuleHeadings ? "items-start" : "items-center",
+          )}
+        >
+          <PdpTextReveal
+            as="h2"
+            className={cn(
+              "font-extended m-0 font-normal tracking-tight text-black",
+              leftAlignModuleHeadings ? "text-left" : "text-center",
+              pdpType.headline,
+            )}
+          >
+            {headline}
+          </PdpTextReveal>
+          <PdpTextReveal
+            as="p"
+            delay={100}
+            className={cn(
+              pdpType.caption,
+              "m-0 text-neutral-600",
+              leftAlignModuleHeadings ? "text-left" : "text-center",
+            )}
+          >
+            {subtext}
+          </PdpTextReveal>
+        </div>
+      ) : null}
+
       <div className={pdpCarouselScrollWrapClass}>
         <div
           className={cn(
             pdpCarouselScrollClass,
             "flex items-start",
-            useV4ModuleSpacing ? "gap-4 pl-4 pt-4" : "gap-2 px-2 pt-14",
+            useV4ModuleSpacing ? "gap-4 pl-4 pt-0" : "gap-2 px-2 pt-14",
           )}
           aria-label="Tabby Shoulder Bag 26 editorial"
         >
@@ -45,7 +83,10 @@ export function PdpV2EditorialCarousel() {
                 key={card.id}
                 as="article"
                 delay={revealStaggerDelay(index)}
-                className="flex w-[335px] shrink-0 snap-start snap-always flex-col gap-2 bg-white pb-6"
+                className={cn(
+                  "flex w-[335px] shrink-0 snap-start snap-always flex-col bg-white pb-6",
+                  useV4ModuleSpacing ? "gap-2.5" : "gap-2",
+                )}
               >
                 <div
                   className={cn(
@@ -62,10 +103,13 @@ export function PdpV2EditorialCarousel() {
                   />
                 </div>
 
-                <div className="px-1">
+                <div className={cn(useV4ModuleSpacing ? "px-0" : "px-1")}>
                   <p
                     className={cn(
-                      "font-extended m-0 text-pretty text-[16px] leading-[110%] text-black",
+                      "m-0 text-pretty",
+                      useV4ModuleSpacing
+                        ? cn(pdpType.caption, "text-neutral-600")
+                        : "font-extended text-[16px] leading-[110%] text-black",
                     )}
                   >
                     {card.caption}

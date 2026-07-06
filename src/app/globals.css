@@ -560,6 +560,11 @@ html.font-extended {
   user-select: none;
 }
 
+/* Hero carousel drag-zoom — image area must allow horizontal paging */
+.pdp-material-explore--carousel-pan {
+  touch-action: pan-x pan-y;
+}
+
 .pdp-material-explore.touch-none {
   touch-action: none;
 }
@@ -588,6 +593,11 @@ html.pdp-overlay-scroll-lock {
   -webkit-user-select: none;
   touch-action: none;
   user-select: none;
+}
+
+/* Hero carousel — chip still handles hold, but horizontal swipes page the gallery */
+.pdp-drag-zoom-control--carousel-pan {
+  touch-action: pan-x pan-y;
 }
 
 @keyframes pdp-material-lens-pulse {

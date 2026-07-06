@@ -214,8 +214,9 @@ export function useDragZoomLens() {
 
   /**
    * Attach these to the dedicated zoom trigger control — NOT the image. The hold
-   * begins on the trigger and the pointer is captured immediately, so the
-   * subsequent drag continues across the photo even though it left the trigger.
+   * begins on the trigger; pointer capture is deferred until the hold timer
+   * completes so horizontal carousel swipes that start on the chip still page.
+   * Once zoom engages, capture keeps the drag reporting across the photo.
    */
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>) => {
@@ -232,14 +233,6 @@ export function useDragZoomLens() {
       clearHoldTimer();
 
       const target = event.currentTarget;
-
-      // Capture on the trigger now so the drag keeps reporting once the finger
-      // moves off the control and onto the image.
-      try {
-        target.setPointerCapture(event.pointerId);
-      } catch {
-        /* capture unsupported — handlers still work without it */
-      }
 
       captureTargetRef.current = target;
       pointerIdRef.current = event.pointerId;
@@ -262,6 +255,13 @@ export function useDragZoomLens() {
       holdTimerRef.current = setTimeout(() => {
         holdTimerRef.current = null;
         if (phaseRef.current === "pending") {
+          // Capture only once the hold lands — horizontal carousel swipes that
+          // start on the chip never grab the pointer, so paging still works.
+          try {
+            target.setPointerCapture(event.pointerId);
+          } catch {
+            /* capture unsupported — handlers still work without it */
+          }
           activateZoom(type);
         }
       }, HOLD_TO_ZOOM_MS);

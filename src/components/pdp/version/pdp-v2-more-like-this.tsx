@@ -83,7 +83,8 @@ export function PdpV2MoreLikeThis({
 
               <p
                 className={cn(
-                  "font-extended m-0 text-center leading-snug text-black",
+                  "font-extended m-0 leading-snug text-black",
+                  leftAlignModuleHeadings ? "text-left" : "text-center",
                   pdpType.body,
                 )}
               >
@@ -91,7 +92,8 @@ export function PdpV2MoreLikeThis({
               </p>
               <p
                 className={cn(
-                  "font-extended -mt-1 m-0 text-center text-neutral-500",
+                  "font-extended -mt-1 m-0 text-neutral-500",
+                  leftAlignModuleHeadings ? "text-left" : "text-center",
                   pdpType.label,
                 )}
               >

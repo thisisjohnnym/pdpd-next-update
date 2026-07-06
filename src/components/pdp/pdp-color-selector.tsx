@@ -57,6 +57,8 @@ type PdpColorSelectorProps = {
   squared?: boolean;
   /** Lift the inline pill with the floating buy-bar shadow (scrolled state) */
   elevated?: boolean;
+  /** Hide the grey "Color" caption — show swatch + shade name + chevron only */
+  hideLabel?: boolean;
 };
 
 /** Floating buy-bar elevation — matches the AR button drop shadow */
@@ -72,6 +74,7 @@ function PdpColorDropup({
   heightClass,
   squared = false,
   elevated = false,
+  hideLabel = false,
 }: Pick<
   PdpColorSelectorProps,
   | "colors"
@@ -83,6 +86,7 @@ function PdpColorDropup({
   | "heightClass"
   | "squared"
   | "elevated"
+  | "hideLabel"
 >) {
   const [open, setOpen] = useState(false);
   const { productId } = useActiveProduct();
@@ -162,16 +166,26 @@ function PdpColorDropup({
           elevated && FLOATING_PILL_SHADOW,
         )}
       >
-        <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
-        <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 leading-none">
-          <span
-            className={cn(
-              "truncate text-[11px] leading-none tracking-[0.2px]",
-              frost ? "text-white/55" : "text-neutral-400",
-            )}
-          >
-            Color
-          </span>
+        <ColorSwatchCircle
+          fill={selected.chromeSample ?? "#d4d4d4"}
+          sizeClass="size-7"
+        />
+        <span
+          className={cn(
+            "flex min-w-0 flex-1 leading-none",
+            hideLabel ? "items-center" : "flex-col items-start gap-0.5",
+          )}
+        >
+          {!hideLabel ? (
+            <span
+              className={cn(
+                "truncate text-[11px] leading-none tracking-[0.2px]",
+                frost ? "text-white/55" : "text-neutral-400",
+              )}
+            >
+              Color
+            </span>
+          ) : null}
           <span
             className="max-w-full truncate text-[14px] leading-none"
             title={coachColor.full}
@@ -214,6 +228,7 @@ export function PdpColorSelector({
   heightClass,
   squared = false,
   elevated = false,
+  hideLabel = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
@@ -230,6 +245,7 @@ export function PdpColorSelector({
         heightClass={heightClass}
         squared={squared}
         elevated={elevated}
+        hideLabel={hideLabel}
       />
     );
   }

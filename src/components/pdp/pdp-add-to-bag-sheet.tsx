@@ -137,9 +137,11 @@ function BagBundleSummary({
 function BagProductCard({
   selectedColor,
   product,
+  embedded = false,
 }: {
   selectedColor: PdpColor;
   product: PdpProductConfig;
+  embedded?: boolean;
 }) {
   const imageSrc =
     product.hero.kind === "image"
@@ -149,7 +151,12 @@ function BagProductCard({
     product.hero.kind === "image" ? product.hero.alt : PDP_PRODUCT.imageAlt;
 
   return (
-    <div className="flex overflow-hidden rounded-lg bg-[#f2f2f2]">
+    <div
+      className={cn(
+        "flex overflow-hidden",
+        embedded ? "bg-transparent" : "rounded-lg bg-[#f2f2f2]",
+      )}
+    >
       <div className="relative w-[7.25rem] shrink-0 self-stretch min-h-[6.75rem]">
         <Image
           src={imageSrc}
@@ -362,14 +369,15 @@ export function PdpAddToBagSheet({
               savings={savings}
             />
           ) : (
-            <BagProductCard selectedColor={selectedColor} product={product} />
-          )}
-
-          {!isBundle ? (
-            <div className="pb-4">
-              <PdpPayOverTimeCard />
+            <div className="mb-4 overflow-hidden rounded-2xl bg-neutral-100">
+              <BagProductCard
+                selectedColor={selectedColor}
+                product={product}
+                embedded
+              />
+              <PdpPayOverTimeCard embedded />
             </div>
-          ) : null}
+          )}
 
           <div className="flex gap-2 py-4">
             <button

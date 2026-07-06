@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties } from "react";
+import { type CSSProperties, type PointerEvent, useRef } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -37,6 +37,8 @@ type PdpGalleryHeroVideoProps = {
 const CONTROL_BUTTON_CLASS =
   "flex size-8 items-center justify-center text-white transition-opacity active:opacity-75";
 
+const TAP_MOVE_THRESHOLD_PX = 12;
+
 export function PdpGalleryHeroVideo({
   className,
   style,
@@ -66,6 +68,7 @@ export function PdpGalleryHeroVideo({
     showBlurReveal,
     heroBlackout,
     showFrozenPlayOverlay,
+    showTapPausedOverlay,
     effectivePreload,
     playbackHint,
     togglePlayback,
@@ -82,10 +85,57 @@ export function PdpGalleryHeroVideo({
 
   const videoSources = resolveVideoSources(src);
 
-  const canTapVideo = !passThroughTouch && (tapToTogglePlayback || showControls);
+  const useTapCaptureLayer = tapToTogglePlayback;
+  const videoIgnoresPointer = passThroughTouch || useTapCaptureLayer;
+  const canTapVideo =
+    !videoIgnoresPointer && (tapToTogglePlayback || showControls);
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
-  const playbackOverlayIcon = playbackHint ?? (showFrozenPlayOverlay ? "play" : null);
+  const playbackOverlayIcon =
+    playbackHint ??
+    (showFrozenPlayOverlay || showTapPausedOverlay ? "play" : null);
+  const overlayInteractive = showFrozenPlayOverlay || showTapPausedOverlay;
+
+  const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const tapMovedRef = useRef(false);
+
+  const resetTapCapture = () => {
+    tapStartRef.current = null;
+    tapMovedRef.current = false;
+  };
+
+  const handleTapCapturePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    tapStartRef.current = { x: event.clientX, y: event.clientY };
+    tapMovedRef.current = false;
+  };
+
+  const handleTapCapturePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const start = tapStartRef.current;
+    if (!start) {
+      return;
+    }
+
+    const dx = Math.abs(event.clientX - start.x);
+    const dy = Math.abs(event.clientY - start.y);
+    if (dx > TAP_MOVE_THRESHOLD_PX || dy > TAP_MOVE_THRESHOLD_PX) {
+      tapMovedRef.current = true;
+    }
+  };
+
+  const handleTapCapturePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = tapStartRef.current;
+    resetTapCapture();
+
+    if (!start || tapMovedRef.current) {
+      return;
+    }
+
+    const dx = Math.abs(event.clientX - start.x);
+    const dy = Math.abs(event.clientY - start.y);
+    if (dx <= TAP_MOVE_THRESHOLD_PX && dy <= TAP_MOVE_THRESHOLD_PX) {
+      togglePlayback();
+    }
+  };
 
   const videoClassName = cn(
     className,
@@ -99,8 +149,8 @@ export function PdpGalleryHeroVideo({
           priorityAutoplay || isReady ? "opacity-100" : "opacity-0",
         ),
     canTapVideo && "cursor-pointer",
-    passThroughTouch && "pointer-events-none",
-    allowHorizontalPan && !passThroughTouch && "[touch-action:pan-x_pan-y]",
+    videoIgnoresPointer && "pointer-events-none",
+    allowHorizontalPan && !canTapVideo && "[touch-action:pan-x_pan-y]",
   );
 
   const videoElement = (
@@ -193,22 +243,32 @@ export function PdpGalleryHeroVideo({
         videoElement
       )}
 
+      {useTapCaptureLayer ? (
+        <div
+          className="absolute inset-0 z-[2] [touch-action:pan-x_pan-y]"
+          onPointerDown={handleTapCapturePointerDown}
+          onPointerMove={handleTapCapturePointerMove}
+          onPointerUp={handleTapCapturePointerUp}
+          onPointerCancel={resetTapCapture}
+        />
+      ) : null}
+
       {playbackOverlayIcon ? (
         <div
           className={cn(
             "absolute inset-0 z-[3] flex items-center justify-center",
-            showFrozenPlayOverlay && "pointer-events-auto",
+            overlayInteractive && "pointer-events-auto",
             playbackHint && "pointer-events-none",
           )}
         >
           <button
             type="button"
             aria-label={playbackOverlayIcon === "play" ? "Play video" : "Pause video"}
-            onClick={showFrozenPlayOverlay ? togglePlayback : undefined}
+            onClick={overlayInteractive ? togglePlayback : undefined}
             className={cn(
               "flex size-[4.25rem] items-center justify-center rounded-full bg-black/55 pdp-backdrop-blur-degrade",
               playbackHint && "motion-safe:animate-[pdp-playback-hint_650ms_ease-out_both]",
-              showFrozenPlayOverlay && "transition-transform active:scale-[0.96]",
+              overlayInteractive && "transition-transform active:scale-[0.96]",
             )}
           >
             <MaterialIcon
@@ -221,7 +281,7 @@ export function PdpGalleryHeroVideo({
       ) : null}
 
       {showControlChrome ? (
-        <div className="pointer-events-auto absolute bottom-3 right-3 z-[2] flex items-center gap-1.5">
+        <div className="pointer-events-auto absolute bottom-3 right-3 z-[4] flex items-center gap-1.5">
           {showMuteControl ? (
             <button
               type="button"

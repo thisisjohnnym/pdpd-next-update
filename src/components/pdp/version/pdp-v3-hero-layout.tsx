@@ -44,7 +44,7 @@ export function PdpV3HeroLayout({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+  const { useV4ModuleSpacing, hideBuyBarColorLabel } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
 
@@ -59,7 +59,7 @@ export function PdpV3HeroLayout({
       <footer
         className={cn(
           "flex shrink-0 flex-col bg-white",
-          useV4ModuleSpacing ? "gap-4 px-4 pb-2 pt-4" : "gap-2 p-2",
+          useV4ModuleSpacing ? "gap-4 px-4 pb-4 pt-4" : "gap-2 p-2",
         )}
       >
         <div className="flex items-start justify-between gap-4">
@@ -81,6 +81,7 @@ export function PdpV3HeroLayout({
           onColorSelect={onColorSelect}
           onAddToBag={onAddToBag}
           onColorSheetOpenChange={onColorSheetOpenChange}
+          hideColorLabel={hideBuyBarColorLabel}
           className={cn(useV4ModuleSpacing ? "gap-2" : "gap-1")}
         />
       </footer>

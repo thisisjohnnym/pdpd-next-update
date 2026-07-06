@@ -23,7 +23,7 @@ import {
   type PdpReviewReply,
 } from "./pdp-data";
 
-type StarSize = 18 | 20;
+type StarSize = 16 | 18 | 20;
 
 export function PdpStarRating({
   rating,
@@ -527,7 +527,7 @@ type FormalReviewCardProps = {
   variant: "compact" | "full";
 };
 
-/** Structured buyer review — title, description, stars, and recommend tags */
+/** Structured buyer review — title, description, and stars */
 function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
   const [expanded, setExpanded] = useState(false);
   const description = comment.body ?? comment.quote;
@@ -600,22 +600,6 @@ function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
             </>
           ) : null}
         </p>
-
-        {comment.recommendTags?.length ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {comment.recommendTags.map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-neutral-700",
-                  pdpType.micro,
-                )}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
 
         {photo ? (
           <PdpParallaxMedia className="relative mt-3 aspect-[4/3] w-full max-w-[220px] bg-neutral-100">

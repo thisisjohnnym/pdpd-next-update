@@ -41,6 +41,7 @@ type HeroVideoPlayback = {
   showFrozenPlayOverlay: boolean;
   effectivePreload: "auto" | "metadata" | "none";
   playbackHint: "play" | "pause" | null;
+  showTapPausedOverlay: boolean;
   togglePlayback: () => void;
   toggleMute: () => void;
 };
@@ -587,6 +588,13 @@ export function useHeroVideoPlayback({
         !canAutoplayPriorityHero
       : manualPlaybackRequired && (isReady || Boolean(poster) || firstFrameTimedOut));
 
+  const showTapPausedOverlay =
+    tapToTogglePlayback &&
+    isActive &&
+    userPaused &&
+    !isPlaying &&
+    !showFrozenPlayOverlay;
+
   const effectivePreload: "auto" | "metadata" | "none" = (() => {
     if (priorityAutoplay && isActive) {
       return "auto";
@@ -632,6 +640,7 @@ export function useHeroVideoPlayback({
     showBlurReveal,
     heroBlackout,
     showFrozenPlayOverlay,
+    showTapPausedOverlay,
     effectivePreload,
     playbackHint,
     togglePlayback,

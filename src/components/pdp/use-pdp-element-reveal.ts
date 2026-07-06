@@ -17,7 +17,7 @@ const REVEAL_BLUR_PX = 8;
 const REVEAL_LIFT_PX = 12;
 const REVEAL_DURATION = 0.7;
 /** Scroll-runway offset between staggered siblings (px). */
-export const REVEAL_STAGGER_PX = 64;
+const REVEAL_STAGGER_PX = 64;
 
 export function revealStaggerDelay(index: number): number {
   return index * REVEAL_STAGGER_PX;

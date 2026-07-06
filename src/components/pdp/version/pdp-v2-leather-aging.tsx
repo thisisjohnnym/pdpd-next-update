@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/cn";
 
 import { PDP_LEATHER_AGING } from "../pdp-data";
+import { PdpLeatherAgingCareUpsell } from "../pdp-leather-aging-care-upsell";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpType } from "../pdp-type";
@@ -88,7 +89,13 @@ function LeatherAgingStages({ stageIndex }: { stageIndex: number }) {
  * slider (dot track + labels). Square corners. Same tap interaction and frozen
  * `PDP_LEATHER_AGING` data as the v2 layout.
  */
-function PdpLeatherAgingV4() {
+function PdpLeatherAgingV4({
+  showCareUpsell = false,
+  onQuickAdd,
+}: {
+  showCareUpsell?: boolean;
+  onQuickAdd?: () => void;
+}) {
   const { stages, title } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
   const reducedMotion = useReducedMotion();
@@ -355,6 +362,15 @@ function PdpLeatherAgingV4() {
               </div>
             </div>
           </div>
+
+          {showCareUpsell ? (
+            <PdpLeatherAgingCareUpsell
+              stageIndex={stageIndex}
+              isDragging={isDragging}
+              onQuickAdd={onQuickAdd}
+              className="w-[294px]"
+            />
+          ) : null}
         </div>
         </PdpRevealItem>
       </div>
@@ -375,7 +391,13 @@ function PdpLeatherAgingV4() {
  *
  * v4 (Paper r5 `JFT-0`) restructures this — see `PdpLeatherAgingV4`.
  */
-export function PdpV2LeatherAging() {
+export function PdpV2LeatherAging({
+  showCareUpsell = false,
+  onQuickAdd,
+}: {
+  showCareUpsell?: boolean;
+  onQuickAdd?: () => void;
+} = {}) {
   const { useV4LeatherAgingLayout } = getPdpVersionConfig(usePdpVersion());
   const { stages, title, image } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
@@ -384,7 +406,12 @@ export function PdpV2LeatherAging() {
   const stage = stages[stageIndex]!;
 
   if (useV4LeatherAgingLayout) {
-    return <PdpLeatherAgingV4 />;
+    return (
+      <PdpLeatherAgingV4
+        showCareUpsell={showCareUpsell}
+        onQuickAdd={onQuickAdd}
+      />
+    );
   }
 
   return (

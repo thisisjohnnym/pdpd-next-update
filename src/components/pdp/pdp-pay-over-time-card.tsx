@@ -7,7 +7,7 @@ import { PDP_PAY_OVER_TIME } from "./pdp-data";
 import { pdpPressableClass } from "./pdp-type";
 
 /** Afterpay row — add-to-bag confirmation tray */
-export function PdpPayOverTimeCard() {
+export function PdpPayOverTimeCard({ embedded = false }: { embedded?: boolean }) {
   const { icon, amount, body } = PDP_PAY_OVER_TIME;
 
   return (
@@ -15,7 +15,10 @@ export function PdpPayOverTimeCard() {
       type="button"
       aria-label={`${amount}. ${body}`}
       className={cn(
-        "flex w-full items-center gap-3.5 rounded-2xl bg-neutral-100 px-[18px] py-4 text-left",
+        "flex w-full items-center gap-3.5 px-[18px] py-4 text-left",
+        embedded
+          ? "border-t border-neutral-200/80 bg-transparent"
+          : "rounded-2xl bg-neutral-100",
         pdpPressableClass,
       )}
     >

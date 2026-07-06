@@ -519,6 +519,52 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
   }, [scrollRef, reducedMotion]);
 }
 
+/** Maps snap-start scroll position to the active item index (finite rails) */
+export function useCarouselSnapStartActiveIndex(
+  scrollRef: RefObject<HTMLDivElement | null>,
+) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    const updateActiveIndex = () => {
+      const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+      const anchor = el.scrollLeft + paddingLeft;
+      let closestIndex = 0;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (let index = 0; index < el.children.length; index += 1) {
+        const child = el.children[index] as HTMLElement;
+        const distance = Math.abs(child.offsetLeft - anchor);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      }
+
+      setActiveIndex(closestIndex);
+    };
+
+    updateActiveIndex();
+    el.addEventListener("scroll", updateActiveIndex, { passive: true });
+
+    const ro = new ResizeObserver(updateActiveIndex);
+    ro.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", updateActiveIndex);
+      ro.disconnect();
+    };
+  }, [scrollRef]);
+
+  return activeIndex;
+}
+
 /** Maps center-snapped scroll position to the active source item index */
 function useCarouselActiveIndex(
   scrollRef: RefObject<HTMLDivElement | null>,

@@ -86,14 +86,14 @@ function SectionToggle({
 }
 
 function ColorRow({
-  swatch,
+  fill,
   name,
   availability,
   isSelected,
   onSelect,
   onNotify,
 }: {
-  swatch: string;
+  fill: string;
   name: string;
   availability: Parameters<typeof pdpColorAvailabilityLabel>[0];
   isSelected: boolean;
@@ -119,7 +119,7 @@ function ColorRow({
             selectable ? pdpPressableClass : "opacity-60",
           )}
         >
-          <ColorSwatchCircle src={swatch} sizeClass="size-12" dimmed={!selectable} />
+          <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn("text-black", pdpType.label)}>{name}</span>
             <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
@@ -165,7 +165,7 @@ function MaterialRow({
   onSelect: () => void;
   onNotify: () => void;
 }) {
-  const { status, label, swatch } = material;
+  const { status, label, chromeSample } = material;
   const selectable = status === "current" || status === "in-stock";
   const dimmed = status === "out-of-stock" || status === "unavailable-in-color";
 
@@ -188,7 +188,11 @@ function MaterialRow({
             selectable ? pdpPressableClass : "cursor-default",
           )}
         >
-          <ColorSwatchCircle src={swatch ?? ""} sizeClass="size-12" dimmed={dimmed} />
+          <ColorSwatchCircle
+            fill={chromeSample ?? "#d4d4d4"}
+            sizeClass="size-12"
+            dimmed={dimmed}
+          />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn(dimmed ? "text-neutral-400" : "text-black", pdpType.label)}>
               {label}
@@ -242,7 +246,8 @@ export function PdpV3ColorSheet({
   const titleId = useId();
   const tabby = useOptionalTabbyVariant();
   const version = usePdpVersion();
-  const { demoPopularColorStates } = getPdpVersionConfig(version);
+  const { demoPopularColorStates, hideColorSheetSizePrice } =
+    getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
   const [popularExpanded, setPopularExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
@@ -338,13 +343,21 @@ export function PdpV3ColorSheet({
 
           <div className={pdpBottomSheetBodyClass}>
             <div data-pdp-sheet-scroll className={pdpBottomSheetScrollRegionClass("px-3 pt-0.5")}>
-              <div className="mb-4 flex items-baseline justify-between gap-3">
+              <div
+                className={cn(
+                  "mb-4",
+                  !hideColorSheetSizePrice &&
+                    "flex items-baseline justify-between gap-3",
+                )}
+              >
                 <h2 id={titleId} className={cn("m-0", pdpType.headline)}>
                   Choose color
                 </h2>
-                <span className={cn("shrink-0 text-neutral-500", pdpType.label)}>
-                  Size {tabby.size} · {tabby.summary.price}
-                </span>
+                {!hideColorSheetSizePrice ? (
+                  <span className={cn("shrink-0 text-neutral-500", pdpType.label)}>
+                    Size {tabby.size} · {tabby.summary.price}
+                  </span>
+                ) : null}
               </div>
 
               <section aria-label="Popular colors" className="border-t border-neutral-100 pt-4">
@@ -353,7 +366,7 @@ export function PdpV3ColorSheet({
                   {visiblePopular.map((color) => (
                     <ColorRow
                       key={color.id}
-                      swatch={color.swatch}
+                      fill={color.chromeSample}
                       name={color.name}
                       availability={color.availability}
                       isSelected={

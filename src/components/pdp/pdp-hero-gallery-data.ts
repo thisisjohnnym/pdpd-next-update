@@ -30,6 +30,8 @@ export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
 export type PdpHeroGalleryImageSlide = PdpHeroGalleryBaseSlide & {
   kind: "image";
   src: string;
+  /** Press-and-hold magnifier lens — studio product front (916) */
+  dragZoom?: boolean;
 };
 
 export type PdpHeroGallerySlide =
@@ -41,6 +43,19 @@ const HERO_STILL_BASE = "/images/hero/tabby26";
 /** The A0 product still promoted to slide 0 in v4 (Paper r5). */
 const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
 
+/** Native 9:16 studio product — drag-zoom lead in v4 hero gallery. */
+const HERO_STUDIO_DRAG_ZOOM_SRC =
+  "/images/gallery/tabby-product-front-916.jpg";
+
+const HERO_STUDIO_DRAG_ZOOM_SLIDE: PdpHeroGalleryImageSlide = {
+  kind: "image",
+  src: HERO_STUDIO_DRAG_ZOOM_SRC,
+  alt: "Tabby Shoulder Bag 26 in black full-grain leather, front view with gold C turnlock clasp and detachable straps",
+  shotType: "product",
+  headerSurface: "light",
+  dragZoom: true,
+};
+
 /** The broken/too-small feature-callout still and its r5 replacement (Paper r5). */
 const HERO_FEATURE_CALLOUT_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`;
 const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101-r5.png`;
@@ -48,17 +63,38 @@ const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk
 /**
  * v4 (Paper r5) hero gallery treatment. Returns a new array (never mutates the
  * frozen source) so v1/v2/v3 are unaffected:
- *   - Lead with the A0 product still instead of the lifestyle land video.
+ *   - Optionally lead with the studio drag-zoom product still (916) instead of
+ *     the lifestyle land video — `heroGalleryStudioDragZoom`.
+ *   - Otherwise lead with the A0 product still — `leadGalleryWithProductStill`.
  *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
  */
 export function applyV4HeroGallery(
   slides: PdpHeroGallerySlide[],
+  options: {
+    leadGalleryWithProductStill?: boolean;
+    heroGalleryStudioDragZoom?: boolean;
+  } = {},
 ): PdpHeroGallerySlide[] {
-  const swapped = slides.map((slide) =>
-    slide.src === HERO_FEATURE_CALLOUT_SRC
-      ? { ...slide, src: HERO_FEATURE_CALLOUT_R5_SRC }
-      : slide,
-  );
+  const swapped = slides
+    .map((slide) =>
+      slide.src === HERO_FEATURE_CALLOUT_SRC
+        ? { ...slide, src: HERO_FEATURE_CALLOUT_R5_SRC }
+        : slide,
+    )
+    .filter(
+      (slide) =>
+        options.heroGalleryStudioDragZoom ||
+        options.leadGalleryWithProductStill ||
+        slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
+    );
+
+  if (options.heroGalleryStudioDragZoom) {
+    return [HERO_STUDIO_DRAG_ZOOM_SLIDE, ...swapped];
+  }
+
+  if (!options.leadGalleryWithProductStill) {
+    return swapped;
+  }
 
   const leadIndex = swapped.findIndex(
     (slide) => slide.src === HERO_LEAD_PRODUCT_STILL_SRC,

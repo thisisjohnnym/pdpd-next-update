@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
 import { cn } from "@/lib/cn";
 
 import { usePdpHeroGallery } from "./pdp-hero-gallery-context";
@@ -20,67 +18,93 @@ const TICK_HEIGHT_V4_PX = 3;
 const TICK_DOT_V4_PX = 4;
 const TICK_ACTIVE_V4_PX = 24;
 
-/** Cap the visible window — the rail scrolls so the active tick stays in view */
-const MAX_VISIBLE = 8;
+/** Switch to the compact rail once the per-tick row would feel too wide */
+const MAX_TICKS = 8;
+const COMPACT_TRACK_WIDTH_PX = 56;
+const COMPACT_TRACK_WIDTH_V4_PX = 64;
+const COMPACT_PILL_WIDTH_PX = 14;
+const COMPACT_PILL_WIDTH_V4_PX = 20;
 
-const CAPPED_WIDTH_PX =
-  MAX_VISIBLE * TICK_DOT_PX +
-  (MAX_VISIBLE - 1) * TICK_GAP_PX +
-  (TICK_ACTIVE_PX - TICK_DOT_PX);
+type IndicatorTone = {
+  isDark: boolean;
+  reducedMotion: boolean;
+  tickHeight: number;
+  tickDot: number;
+  tickActive: number;
+};
 
 /**
- * Hero gallery slide indicator (docs/pdp-hero-chrome.md).
- *
- * Shows at most {@link MAX_VISIBLE} ticks inside a clipped viewport; the inner
- * rail holds every slide and scrolls so the active tick is always visible — it
- * starts moving before the active tick would reach the last visible slot.
+ * Compact progress rail — one fixed-width track with a sliding active pill.
+ * Used when the gallery has more slides than we want to render as individual ticks.
  */
-export function PdpHeroGalleryIndicator() {
-  const { activeIndex, count, surface } = usePdpHeroGallery();
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const activeRef = useRef<HTMLSpanElement>(null);
-  const reducedMotion = useReducedMotion();
-  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
-
-  // v4 (Paper r5) shows every slide tick uncapped; only the legacy window scrolls.
-  const capped = !useV4ModuleSpacing && count > MAX_VISIBLE;
-
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    const active = activeRef.current;
-    if (!viewport || !active || !capped) {
-      return;
-    }
-
-    const behavior: ScrollBehavior = reducedMotion ? "auto" : "smooth";
-    const left = active.offsetLeft;
-    const right = left + active.offsetWidth;
-
-    if (right > viewport.scrollLeft + viewport.clientWidth) {
-      viewport.scrollTo({ left: right - viewport.clientWidth, behavior });
-    } else if (left < viewport.scrollLeft) {
-      viewport.scrollTo({ left, behavior });
-    }
-  }, [activeIndex, capped, reducedMotion]);
-
-  if (count <= 1) {
-    return null;
-  }
-
-  const isDark = surface === "dark";
-  const tickHeight = useV4ModuleSpacing ? TICK_HEIGHT_V4_PX : TICK_HEIGHT_PX;
-  const tickDot = useV4ModuleSpacing ? TICK_DOT_V4_PX : TICK_DOT_PX;
-  const tickActive = useV4ModuleSpacing ? TICK_ACTIVE_V4_PX : TICK_ACTIVE_PX;
+function CompactGalleryRail({
+  activeIndex,
+  count,
+  tone,
+  useV4ModuleSpacing,
+}: {
+  activeIndex: number;
+  count: number;
+  tone: IndicatorTone;
+  useV4ModuleSpacing: boolean;
+}) {
+  const trackWidth = useV4ModuleSpacing
+    ? COMPACT_TRACK_WIDTH_V4_PX
+    : COMPACT_TRACK_WIDTH_PX;
+  const pillWidth = useV4ModuleSpacing
+    ? COMPACT_PILL_WIDTH_V4_PX
+    : COMPACT_PILL_WIDTH_PX;
+  const maxOffset = trackWidth - pillWidth;
+  const offset =
+    count <= 1 ? 0 : (activeIndex / (count - 1)) * maxOffset;
 
   return (
     <div
-      ref={viewportRef}
       aria-hidden
-      className="pointer-events-none flex overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="pointer-events-none relative shrink-0"
+      style={{ width: trackWidth, height: tone.tickHeight }}
+    >
+      <div
+        className={cn(
+          "absolute inset-0 rounded-full",
+          tone.isDark ? "bg-white/30" : "bg-neutral-900/20",
+        )}
+      />
+      <span
+        className={cn(
+          "absolute top-0 rounded-full",
+          !tone.reducedMotion && "transition-[left,background-color] duration-300 ease-out",
+          tone.isDark ? "bg-white" : "bg-neutral-900",
+        )}
+        style={{
+          left: offset,
+          width: pillWidth,
+          height: tone.tickHeight,
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Per-tick row (Paper `6JV-0`) — used for shorter galleries where every tick fits.
+ */
+function TickGalleryRail({
+  activeIndex,
+  count,
+  tone,
+}: {
+  activeIndex: number;
+  count: number;
+  tone: IndicatorTone;
+}) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none flex"
       style={{
-        height: tickHeight,
+        height: tone.tickHeight,
         columnGap: TICK_GAP_PX,
-        width: capped ? CAPPED_WIDTH_PX : undefined,
         maxWidth: "100%",
       }}
     >
@@ -89,11 +113,11 @@ export function PdpHeroGalleryIndicator() {
         return (
           <span
             key={index}
-            ref={active ? activeRef : undefined}
             className={cn(
               "shrink-0 rounded-full",
-              !reducedMotion && "transition-[width,background-color] duration-300 ease-out",
-              isDark
+              !tone.reducedMotion &&
+                "transition-[width,background-color] duration-300 ease-out",
+              tone.isDark
                 ? active
                   ? "bg-white"
                   : "bg-white/40"
@@ -102,12 +126,55 @@ export function PdpHeroGalleryIndicator() {
                   : "bg-neutral-900/30",
             )}
             style={{
-              height: tickHeight,
-              width: active ? tickActive : tickDot,
+              height: tone.tickHeight,
+              width: active ? tone.tickActive : tone.tickDot,
             }}
           />
         );
       })}
     </div>
+  );
+}
+
+/**
+ * Hero gallery slide indicator (docs/pdp-hero-chrome.md).
+ *
+ * Short galleries render Paper `6JV-0` ticks. Long galleries switch to a fixed-
+ * width progress rail so 15+ slides do not sprawl across the hero chrome.
+ */
+export function PdpHeroGalleryIndicator() {
+  const { activeIndex, count, surface } = usePdpHeroGallery();
+  const reducedMotion = useReducedMotion();
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+
+  if (count <= 1) {
+    return null;
+  }
+
+  const tone: IndicatorTone = {
+    isDark: surface === "dark",
+    reducedMotion,
+    tickHeight: useV4ModuleSpacing ? TICK_HEIGHT_V4_PX : TICK_HEIGHT_PX,
+    tickDot: useV4ModuleSpacing ? TICK_DOT_V4_PX : TICK_DOT_PX,
+    tickActive: useV4ModuleSpacing ? TICK_ACTIVE_V4_PX : TICK_ACTIVE_PX,
+  };
+
+  if (count > MAX_TICKS && useV4ModuleSpacing) {
+    return (
+      <CompactGalleryRail
+        activeIndex={activeIndex}
+        count={count}
+        tone={tone}
+        useV4ModuleSpacing={useV4ModuleSpacing}
+      />
+    );
+  }
+
+  return (
+    <TickGalleryRail
+      activeIndex={activeIndex}
+      count={count}
+      tone={tone}
+    />
   );
 }

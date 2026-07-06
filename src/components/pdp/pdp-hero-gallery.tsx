@@ -19,11 +19,7 @@ import {
   resolveHeroFraming,
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
-import {
-  HERO_SCRIM_TRANSITION_CLASS,
-  useSetHeroChromeSurface,
-} from "./pdp-hero-chrome-surface";
-import { useReducedMotion } from "./use-reduced-motion";
+import { useSetHeroChromeSurface } from "./pdp-hero-chrome-surface";
 import {
   HERO_FILTER_GRADIENT,
   HERO_MIDDLE_GRADIENT,
@@ -65,6 +61,7 @@ function HeroSlideMedia({
         showMuteControl={false}
         passThroughTouch
         allowHorizontalPan
+        tapToTogglePlayback
         className={cn("size-full object-center", fitClass)}
         style={{ objectPosition }}
       />
@@ -108,11 +105,21 @@ export function PdpHeroGallery({
   fillFrame?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const { useStableInfiniteCarousel, heroDockedBuyBar, leadGalleryWithProductStill } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    useStableInfiniteCarousel,
+    heroDockedBuyBar,
+    leadGalleryWithProductStill,
+    heroGalleryStudioDragZoom,
+  } = getPdpVersionConfig(usePdpVersion());
   const orderedSlides = useMemo(
-    () => (leadGalleryWithProductStill ? applyV4HeroGallery(slides) : slides),
-    [slides, leadGalleryWithProductStill],
+    () =>
+      leadGalleryWithProductStill || heroGalleryStudioDragZoom
+        ? applyV4HeroGallery(slides, {
+            leadGalleryWithProductStill,
+            heroGalleryStudioDragZoom,
+          })
+        : slides,
+    [slides, leadGalleryWithProductStill, heroGalleryStudioDragZoom],
   );
   const loopedSlides = useMemo(
     () => loopCarouselItems(orderedSlides),
@@ -124,11 +131,8 @@ export function PdpHeroGallery({
     { stableLoop: useStableInfiniteCarousel },
   );
   const setHeroChromeSurface = useSetHeroChromeSurface();
-  const reducedMotion = useReducedMotion();
 
   const surface = orderedSlides[activeIndex]?.headerSurface ?? "dark";
-  const scrimVisible = surface === "dark";
-  const scrimTransitionClass = reducedMotion ? undefined : HERO_SCRIM_TRANSITION_CLASS;
 
   useLayoutEffect(() => {
     setHeroChromeSurface(surface);
@@ -161,6 +165,7 @@ export function PdpHeroGallery({
         >
           {loopedSlides.map((slide, index) => {
             const logicalIndex = index % orderedSlides.length;
+            const slideScrimVisible = slide.headerSurface === "dark";
             return (
               <div
                 key={`${slide.kind}-${slide.src}-${index}`}
@@ -172,38 +177,31 @@ export function PdpHeroGallery({
                   isActive={index === activeLoopedIndex}
                   eager={logicalIndex <= 1}
                 />
+                {slideScrimVisible ? (
+                  <>
+                    <div
+                      aria-hidden
+                      className="pdp-hero-ui-chrome pointer-events-none absolute inset-0 z-[1]"
+                      style={{ backgroundImage: HERO_FILTER_GRADIENT }}
+                    />
+                    <div
+                      aria-hidden
+                      className="pdp-hero-ui-chrome pdp-hero-immersive__top-scrim"
+                    />
+                    <div
+                      aria-hidden
+                      className="pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[1]"
+                      style={{
+                        height: `${HERO_MIDDLE_HEIGHT_FRACTION * 100}%`,
+                        backgroundImage: HERO_MIDDLE_GRADIENT,
+                      }}
+                    />
+                  </>
+                ) : null}
               </div>
             );
           })}
         </div>
-
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 z-[10]",
-            scrimTransitionClass,
-          )}
-          style={{ opacity: scrimVisible ? 1 : 0 }}
-        >
-          <div
-            className="pdp-hero-ui-chrome absolute inset-0"
-            style={{ backgroundImage: HERO_FILTER_GRADIENT }}
-          />
-          <div className="pdp-hero-ui-chrome pdp-hero-immersive__top-scrim" />
-        </div>
-
-        <div
-          aria-hidden
-          className={cn(
-            "pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[8]",
-            scrimTransitionClass,
-          )}
-          style={{
-            height: `${HERO_MIDDLE_HEIGHT_FRACTION * 100}%`,
-            backgroundImage: HERO_MIDDLE_GRADIENT,
-            opacity: scrimVisible ? 1 : 0,
-          }}
-        />
 
         {heroDockedBuyBar ? (
           <PdpV3GalleryOverlay onOpenArTryOn={onOpenArTryOn} />

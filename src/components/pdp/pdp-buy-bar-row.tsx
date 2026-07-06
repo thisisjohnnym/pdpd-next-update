@@ -19,6 +19,8 @@ type PdpBuyBarRowProps = {
   onAddToBag: () => void;
   onColorSheetOpenChange?: (open: boolean) => void;
   hideColor?: boolean;
+  /** Hide the grey "Color" caption in the inline pill (docked hero buy bar). */
+  hideColorLabel?: boolean;
   className?: string;
 };
 
@@ -29,6 +31,7 @@ export function PdpBuyBarRow({
   onAddToBag,
   onColorSheetOpenChange,
   hideColor = false,
+  hideColorLabel = false,
   className,
 }: PdpBuyBarRowProps) {
   const tabby = useOptionalTabbyVariant();
@@ -83,6 +86,7 @@ export function PdpBuyBarRow({
             stretch={isTabbyProduct}
             onOpenChange={handleColorSheetOpenChange}
             heightClass="h-[50px]"
+            hideLabel={hideColorLabel}
           />
         </div>
       ) : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { KeyboardEvent } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -22,6 +23,10 @@ type PdpGalleryDragZoomImageProps = {
   scale?: string;
   fitContain?: boolean;
   panel?: boolean;
+  /** Center the hold chip on hero gallery drag-zoom (v4); bottom elsewhere. */
+  overlayAware?: boolean;
+  /** With hero carousel — allow horizontal swipes on the image (default vertical only). */
+  allowHorizontalPan?: boolean;
   className?: string;
 };
 
@@ -35,6 +40,8 @@ export function PdpGalleryDragZoomImage({
   scale = "scale-100",
   fitContain = false,
   panel = false,
+  overlayAware = false,
+  allowHorizontalPan = false,
   className,
 }: PdpGalleryDragZoomImageProps) {
   const {
@@ -70,7 +77,11 @@ export function PdpGalleryDragZoomImage({
       className={cn(
         "pdp-material-explore relative size-full select-none",
         touchLocked && "z-[41]",
-        touchLocked ? "touch-none" : "touch-pan-y",
+        touchLocked
+          ? "touch-none"
+          : allowHorizontalPan
+            ? "pdp-material-explore--carousel-pan"
+            : "touch-pan-y",
         className,
       )}
       role="img"
@@ -101,23 +112,34 @@ export function PdpGalleryDragZoomImage({
       */}
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 z-[3] flex justify-center px-4 pb-4 pt-10",
-          "bg-gradient-to-t from-black/55 via-black/20 to-transparent transition-opacity duration-200",
+          "pointer-events-none absolute z-[12] flex justify-center px-4 transition-opacity duration-200",
+          overlayAware
+            ? "inset-0 z-[42] items-center"
+            : "inset-x-0 bottom-0 pb-4 pt-10",
           isZooming ? "opacity-0" : "opacity-100",
         )}
       >
         <PdpHoldChip
-          as="button"
-          type="button"
+          as="div"
+          role="button"
+          tabIndex={0}
           aria-label={PDP_GALLERY_DRAG_ZOOM_HINT}
           {...triggerHandlers}
-          tone="dark"
+          tone="light"
           icon="pan_tool"
           label={isPending ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
           active={isPending}
           durationMs={holdDurationMs}
           pressed={isPending}
-          className="pdp-drag-zoom-control pointer-events-auto touch-none"
+          className={cn(
+            "pdp-drag-zoom-control pointer-events-auto cursor-pointer",
+            allowHorizontalPan ? "pdp-drag-zoom-control--carousel-pan" : "touch-none",
+          )}
+          onKeyDown={(event: KeyboardEvent) => {
+            if (event.key === " " || event.key === "Enter") {
+              event.preventDefault();
+            }
+          }}
         />
       </div>
 

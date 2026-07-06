@@ -3,6 +3,7 @@ import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
 
 import {
   PDP_GALLERY_SLIDES_V2,
+  PDP_GALLERY_SLIDES_V4,
   type PdpGallerySlideV2,
 } from "./pdp-data-v2";
 import { PDP_CHAPTERS_V2 } from "./pdp-section-chapters-v2";
@@ -120,8 +121,14 @@ export type PdpVersionConfig = {
   /**
    * Lead the Tabby hero gallery with the A0 product still instead of the
    * lifestyle land video (Paper r5). v4 only — v1/v2/v3 keep the video first.
+   * Superseded when `heroGalleryStudioDragZoom` is true.
    */
   leadGalleryWithProductStill: boolean;
+  /**
+   * Lead the Tabby hero gallery with the studio drag-zoom product still (916)
+   * and drop the duplicate from the vertical scroll gallery. v4 only.
+   */
+  heroGalleryStudioDragZoom: boolean;
   /**
    * Pin demo stock states (Sold out + Notify me) onto distinct Popular Colors in
    * the progressive color drawer so it always demos the sold-out affordance
@@ -134,6 +141,17 @@ export type PdpVersionConfig = {
    * the pill off the r4 hero scrim.
    */
   flattenBuyBarCta: boolean;
+  /**
+   * Hide the grey "Color" caption above the shade name in the docked hero buy-bar
+   * pill — keep swatch + shade + chevron only (Paper r5). v4 only — v3 keeps the
+   * two-line pill.
+   */
+  hideBuyBarColorLabel: boolean;
+  /**
+   * Hide the grey "Size {n} · {price}" caption in the progressive color
+   * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
+   */
+  hideColorSheetSizePrice: boolean;
   /**
    * Left-align the Reviews, More like this, and Recently viewed section
    * headings (Paper r5 `MAE-0` / `MD6-0` / `ME6-0`) instead of the centered
@@ -157,6 +175,24 @@ export type PdpVersionConfig = {
    * "UGC after hero (updated type)"). v4 only.
    */
   useV4UgcHeadingType: boolean;
+  /**
+   * Details closer-look tiles — horizontal snap-start peek rail with dot
+   * pagination instead of the 2×2 column grid. v4 only (Paper r5 `LDS-0`).
+   */
+  useV4DetailsTileCarousel: boolean;
+  /** Show the closer-look image tile gallery beneath the Details specs. */
+  showDetailsCloserLook: boolean;
+  /**
+   * Replace the horizontal editorial carousel with a craftsmanship carousel
+   * editorial stack (Paper r5). v4 only.
+   */
+  useV4CraftsmanshipLayout: boolean;
+  /**
+   * Compact UGC strip tucked under The Details — "Out in the wild" header row,
+   * small rounded portrait tiles, and a +N more card. v4 only; removes the
+   * standalone `ugc-community` gallery slide.
+   */
+  useV4CompactUgcStrip: boolean;
   /**
    * Apply the grouped r5 padding/spacing refresh across the shared modules —
    * Reviews (`MAE-0`), More like this (`MD6-0`), Recently viewed (`ME6-0`),
@@ -225,17 +261,24 @@ const V1_CONFIG: PdpVersionConfig = {
   showSectionJumpBar: true,
   useV4Specs: false,
   leadGalleryWithProductStill: false,
+  heroGalleryStudioDragZoom: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
+  hideBuyBarColorLabel: false,
+  hideColorSheetSizePrice: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
+  useV4DetailsTileCarousel: false,
+  showDetailsCloserLook: true,
+  useV4CraftsmanshipLayout: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
   useV4GranularScrollReveal: false,
+  useV4CompactUgcStrip: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -261,7 +304,7 @@ const V2_CONFIG: PdpVersionConfig = {
   showTrenchPortraitSlide: true,
   gallerySlides: PDP_GALLERY_SLIDES_V2,
   sectionChapters: PDP_CHAPTERS_V2,
-  // The Details injects after slide[0] (ugc-community), before the studio product slide.
+  // The Details injects before slide[0] (studio product); ugc-community follows.
   detailsAfterSlideIndex: 0,
   // v2 Paper AHD-0: no "A closer look" sub-heading — tiles flow directly from spec row.
   showDetailsHeading: false,
@@ -280,17 +323,24 @@ const V2_CONFIG: PdpVersionConfig = {
   showSectionJumpBar: true,
   useV4Specs: false,
   leadGalleryWithProductStill: false,
+  heroGalleryStudioDragZoom: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
+  hideBuyBarColorLabel: false,
+  hideColorSheetSizePrice: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
+  useV4DetailsTileCarousel: false,
+  showDetailsCloserLook: true,
+  useV4CraftsmanshipLayout: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
   useV4GranularScrollReveal: false,
+  useV4CompactUgcStrip: false,
 };
 
 /**
@@ -319,14 +369,20 @@ const V4_CONFIG: PdpVersionConfig = {
   ...V3_CONFIG,
   // r5 drops the full-viewport trench portrait slide.
   showTrenchPortraitSlide: false,
-  // r5 Details module: Height / Width / Depth / Weight / Strap drop.
+  // r5 Details module: Dimensions / Weight / Carry / Capacity.
   useV4Specs: true,
-  // r5 hero gallery leads with the A0 product still.
+  // r5 hero gallery: product still first (A0 bag on studio ground).
   leadGalleryWithProductStill: true,
+  heroGalleryStudioDragZoom: false,
+  gallerySlides: PDP_GALLERY_SLIDES_V4,
   // r5 color drawer demos the sold-out + Notify me affordance on Popular Colors.
   demoPopularColorStates: true,
   // r5 feedback: flatten the Add to bag pill (no color glow/shadow).
   flattenBuyBarCta: true,
+  // r5 docked buy bar: swatch + shade + chevron only (no grey "Color" caption).
+  hideBuyBarColorLabel: true,
+  // r5 color drawer: drop the grey "Size {n} · {price}" header meta.
+  hideColorSheetSizePrice: true,
   // r5 left-aligns the Reviews + More like this headings (Recently viewed stays centered).
   leftAlignModuleHeadings: true,
   // r5 squares the product-card corners in More like this + Recently viewed.
@@ -335,8 +391,15 @@ const V4_CONFIG: PdpVersionConfig = {
   hideTextLinkArrows: true,
   // r5 bumps the UGC section heading to the larger 24px type.
   useV4UgcHeadingType: true,
+  // r5 Details closer-look — horizontal peek rail with dot pagination.
+  useV4DetailsTileCarousel: true,
+  // r5 drops the closer-look tile gallery — specs only for now.
+  showDetailsCloserLook: false,
+  // r5 replaces the editorial carousel with a craftsmanship carousel module.
+  useV4CraftsmanshipLayout: true,
   // r5 grouped padding/spacing refresh across the shared modules.
   useV4ModuleSpacing: true,
+  useV4CompactUgcStrip: true,
   // r5 restructures the leather-aging module (image on top, single warm block).
   useV4LeatherAgingLayout: true,
   // r5 hides the Coach / Coach Outlet brand switcher above the hero.
@@ -345,6 +408,8 @@ const V4_CONFIG: PdpVersionConfig = {
   enableHeroReveal: false,
   // r5 scroll-triggered per-element reveals (headlines blur, blocks lift).
   useV4GranularScrollReveal: true,
+  // v1 care upsell returns on the r5 leather-aging layout (hidden at "New").
+  showLeatherCareUpsell: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

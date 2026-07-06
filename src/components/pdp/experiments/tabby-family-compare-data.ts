@@ -15,7 +15,7 @@ import {
 } from "../pdp-tabby-variants";
 
 /** Core Tabby silhouettes surfaced in the family compare picker */
-const TABBY_COMPARE_STYLE_IDS: TabbyStyleId[] = [
+export const TABBY_COMPARE_STYLE_IDS: TabbyStyleId[] = [
   "classic",
   "soft",
   "quilted",
@@ -24,7 +24,7 @@ const TABBY_COMPARE_STYLE_IDS: TabbyStyleId[] = [
   "chain",
 ];
 
-type TabbyCompareProduct = {
+export type TabbyCompareProduct = {
   styleId: TabbyStyleId;
   size: TabbySize;
   slug: string;
