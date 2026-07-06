@@ -158,6 +158,11 @@ export type PdpVersionConfig = {
    */
   flatColorSheet: boolean;
   /**
+   * Keep the side-scrolling hero gallery when the shopper picks another colorway
+   * — do not swap to a color-specific static hero image. v5 only.
+   */
+  lockHeroGalleryTemplate: boolean;
+  /**
    * Left-align the Reviews, More like this, and Recently viewed section
    * headings (Paper r5 `MAE-0` / `MD6-0` / `ME6-0`) instead of the centered
    * v2/v3 layout. v4 only.
@@ -272,6 +277,7 @@ const V1_CONFIG: PdpVersionConfig = {
   hideBuyBarColorLabel: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  lockHeroGalleryTemplate: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -335,6 +341,7 @@ const V2_CONFIG: PdpVersionConfig = {
   hideBuyBarColorLabel: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  lockHeroGalleryTemplate: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -422,6 +429,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
+  lockHeroGalleryTemplate: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

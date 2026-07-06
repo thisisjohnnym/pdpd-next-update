@@ -102,10 +102,6 @@ function PdpSocialViewInner() {
     productId === "tabby" && tabby
       ? tabby.colors.find((entry) => entry.id === activeColorId)
       : null;
-  const tabbyColorHero =
-    selectedTabbyColor && hasTabbyColorHeroOverride(selectedTabbyColor)
-      ? selectedTabbyColor
-      : null;
 
   useKiraColorFromSearchParam(productId, selectedColorId, setSelectedColorId);
 
@@ -133,6 +129,13 @@ function PdpSocialViewInner() {
   const versionConfig = getPdpVersionConfig(usePdpVersion());
   const { showReviewComments, heroScrollsWithPage, floatingBuyBarWhenHeroHidden } =
     versionConfig;
+
+  const tabbyColorHero =
+    !versionConfig.lockHeroGalleryTemplate &&
+    selectedTabbyColor &&
+    hasTabbyColorHeroOverride(selectedTabbyColor)
+      ? selectedTabbyColor
+      : null;
 
   const heroSentinelRef = useRef<HTMLDivElement>(null);
 
