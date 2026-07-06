@@ -2275,7 +2275,7 @@ export const PDP_LEATHER_AGING = {
       label: "New",
       timeline: "Day one",
       summary:
-        "Crisp grain, structured shape and factory-fresh. No special care needed yet.",
+        "Crisp grain, structured shape. No special care needed yet.",
       image: PDP_LEATHER_AGING_NEW_IMAGE,
       traits: [
         {

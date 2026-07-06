@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRef } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -10,13 +11,19 @@ import {
   PDP_REVIEWS_AI_SUMMARY,
   PDP_REVIEWS_SUMMARY,
 } from "../pdp-data";
-import { pdpCarouselImageClass } from "../pdp-carousel";
+import {
+  pdpCarouselImageClass,
+  pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
+  pdpUgcStoryCardCompactClass,
+} from "../pdp-carousel";
 import { PdpStarRating } from "../pdp-review-comment";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpModuleHeadlineDisplayClass } from "../pdp-module-section";
 import { pdpPressableClass, pdpType } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
+import { useDragToScroll } from "../use-infinite-centered-carousel";
 
 import { PDP_UGC_COMMUNITY_PHOTOS, type PdpUgcCommunityPhoto } from "./pdp-data-v2";
 import { PDP_V4_REVIEWS_SUMMARY } from "./pdp-v4-reviews-summary";
@@ -66,16 +73,22 @@ function V4SectionLabel({ children }: { children: string }) {
   );
 }
 
-function ReviewUgcMomentCard({ photo }: { photo: PdpUgcCommunityPhoto }) {
+function ReviewUgcMomentCard({
+  photo,
+  className,
+}: {
+  photo: PdpUgcCommunityPhoto;
+  className?: string;
+}) {
   return (
-    <figure className="m-0 flex min-w-0 flex-col gap-2">
+    <figure className={cn("m-0 flex min-w-0 flex-col gap-2", className)}>
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-none bg-neutral-100">
         <Image
           src={photo.src}
           alt={photo.alt}
           fill
           className={cn("object-cover object-center", pdpCarouselImageClass)}
-          sizes="50vw"
+          sizes="45vw"
         />
       </div>
       {(photo.caption || photo.quote || photo.handle) ? (
@@ -94,6 +107,32 @@ function ReviewUgcMomentCard({ photo }: { photo: PdpUgcCommunityPhoto }) {
         </figcaption>
       ) : null}
     </figure>
+  );
+}
+
+function ReviewUgcMomentsRail() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useDragToScroll(scrollRef);
+
+  return (
+    <div className={pdpCarouselScrollWrapClass}>
+      <div
+        ref={scrollRef}
+        className={cn(
+          pdpCarouselScrollClass,
+          "pdp-carousel-draggable flex items-start gap-3 pb-1",
+        )}
+        aria-label="Real customer moments"
+      >
+        {PDP_UGC_COMMUNITY_PHOTOS.slice(0, 4).map((photo) => (
+          <ReviewUgcMomentCard
+            key={photo.id}
+            photo={photo}
+            className={pdpUgcStoryCardCompactClass}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -177,11 +216,7 @@ function V4ReviewSummary({
         <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
           <div className="flex flex-col gap-2.5">
             <V4SectionLabel>Real customer moments</V4SectionLabel>
-            <div className="grid w-full grid-cols-2 gap-x-3 gap-y-4">
-              {PDP_UGC_COMMUNITY_PHOTOS.slice(0, 4).map((photo) => (
-                <ReviewUgcMomentCard key={photo.id} photo={photo} />
-              ))}
-            </div>
+            <ReviewUgcMomentsRail />
           </div>
         </PdpRevealItem>
 

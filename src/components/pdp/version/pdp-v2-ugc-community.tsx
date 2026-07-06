@@ -555,7 +555,7 @@ function UgcCompactWildStrip() {
           ref={scrollRef}
           className={cn(
             pdpCarouselScrollClass,
-            "pdp-carousel-draggable flex items-stretch gap-2 pb-1",
+            "pdp-carousel-draggable flex items-stretch gap-3 pb-1",
           )}
           aria-label="Community photos and videos"
         >

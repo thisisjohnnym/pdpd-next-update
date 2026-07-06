@@ -131,9 +131,12 @@ function SpecRow({ specs }: { specs: readonly PdpProductDetailSpec[] }) {
 function SpecListV4({
   specs,
   leftAlign = true,
+  itemGapClass = "gap-1",
 }: {
   specs: readonly PdpProductDetailSpecV4[];
   leftAlign?: boolean;
+  /** v5 bumps label/value/hint rhythm to 12px (`gap-3`). */
+  itemGapClass?: string;
 }) {
   const alignClass = leftAlign ? "items-start text-left" : "items-center text-center";
 
@@ -152,7 +155,8 @@ function SpecListV4({
             key={spec.id}
             delay={delay}
             className={cn(
-              "flex min-w-0 flex-col gap-1 py-5",
+              "flex min-w-0 flex-col py-5",
+              itemGapClass,
               alignClass,
               isNotFirstRow && "border-t border-neutral-200",
               isRightColumn ? "border-l border-neutral-200 pl-5" : "pr-5",
@@ -326,6 +330,7 @@ export function PdpProductDetailsModule({
   leftAlignModuleHeadings?: boolean;
 }) {
   const { specs, closerLook, eyebrow } = PDP_PRODUCT_DETAILS;
+  const v5DetailsLayout = !showCloserLook && useV4Spacing;
 
   return (
     <section
@@ -344,7 +349,8 @@ export function PdpProductDetailsModule({
         >
           <div
             className={cn(
-              "mb-5 flex flex-col gap-2",
+              "mb-5 flex flex-col",
+              v5DetailsLayout ? "gap-3" : "gap-2",
               leftAlignModuleHeadings ? "items-start" : "items-center text-center",
             )}
           >
@@ -364,7 +370,11 @@ export function PdpProductDetailsModule({
               {PDP_V4_DETAILS_SECTION.intro}
             </PdpTextReveal>
           </div>
-          <SpecListV4 specs={PDP_V4_SPECS} leftAlign={leftAlignModuleHeadings} />
+          <SpecListV4
+            specs={PDP_V4_SPECS}
+            leftAlign={leftAlignModuleHeadings}
+            itemGapClass={v5DetailsLayout ? "gap-3" : "gap-1"}
+          />
         </div>
       ) : (
         <MacroHero />

@@ -365,7 +365,7 @@ function PdpLeatherAgingV4({
     return (
       <section
         data-header-surface="light"
-        className="w-full shrink-0 bg-white px-4 pt-14 pb-6"
+        className="w-full shrink-0 bg-white px-4 pt-6 pb-6"
       >
         <PdpRevealItem>
           <div className="mb-3 flex flex-col items-start gap-2">

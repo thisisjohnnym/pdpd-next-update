@@ -72,11 +72,11 @@ export function PdpV4Craftsmanship() {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 overflow-x-clip bg-white pt-6 pb-8"
+      className="w-full shrink-0 overflow-x-clip bg-white pt-6 pb-6"
     >
       <div
         className={cn(
-          "mb-5 flex flex-col gap-2 px-4",
+          "mb-5 flex flex-col gap-3 px-4",
           leftAlignModuleHeadings ? "items-start" : "items-center text-center",
         )}
       >

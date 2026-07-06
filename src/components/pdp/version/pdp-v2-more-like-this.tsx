@@ -71,8 +71,7 @@ export function PdpV2MoreLikeThis({
           className={cn(
             "flex pb-1",
             useV4ModuleSpacing ? "px-4" : "gap-2 px-2",
-            useV4ModuleSpacing &&
-              (moreLikeThisLargeCards ? "gap-1" : "gap-4"),
+            useV4ModuleSpacing && "gap-3",
           )}
         >
           {items.map((item, index) => (
@@ -121,27 +120,11 @@ export function PdpV2MoreLikeThis({
                 type="button"
                 onClick={() => onAddToBag?.(item.id)}
                 className={cn(
-                  "font-extended inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[#D4D4D4] text-black transition-colors active:bg-neutral-50",
+                  "font-extended inline-flex w-full items-center justify-center rounded-full border border-[#D4D4D4] text-black transition-colors active:bg-neutral-50",
                   moreLikeThisLargeCards ? "text-xs" : pdpType.micro,
                 )}
                 style={{ height: card.buttonHeight }}
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                  style={{ flexShrink: 0 }}
-                >
-                  <path
-                    d="M6 8h12l-1 12H7L6 8Zm3 0V6a3 3 0 0 1 6 0v2"
-                    fill="none"
-                    stroke="#171717"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
                 Add to bag
               </button>
             </PdpRevealItem>
