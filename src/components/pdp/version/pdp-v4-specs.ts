@@ -8,6 +8,12 @@ export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
   hint?: string;
 };
 
+/** v4/v5 Details module — intro beneath "The Details" heading. */
+export const PDP_V4_DETAILS_SECTION = {
+  intro:
+    "Full-grain leather, measured dimensions, and shoulder-or-crossbody carry — the essentials at a glance.",
+} as const;
+
 /**
  * v4-only Details facts (Paper r5 `LD6-0`).
  *

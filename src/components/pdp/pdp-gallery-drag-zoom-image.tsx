@@ -126,6 +126,7 @@ export function PdpGalleryDragZoomImage({
           aria-label={PDP_GALLERY_DRAG_ZOOM_HINT}
           {...triggerHandlers}
           tone="light"
+          size="compact"
           icon="pan_tool"
           label={isPending ? "Keep holding…" : PDP_GALLERY_DRAG_ZOOM_HINT}
           active={isPending}

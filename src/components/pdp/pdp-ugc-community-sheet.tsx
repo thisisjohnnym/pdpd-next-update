@@ -49,32 +49,30 @@ type PdpUgcCommunitySheetProps = {
 
 function UgcSheetPhotoGrid({ photos }: { photos: readonly PdpUgcCommunityPhoto[] }) {
   return (
-    <ul className="m-0 grid list-none grid-cols-2 gap-1.5 p-0">
+    <ul className="m-0 grid list-none grid-cols-2 gap-x-2 gap-y-4 p-0">
       {photos.map((photo) => (
-        <li key={photo.id} className="relative aspect-[9/16] overflow-hidden rounded-none bg-neutral-100">
-          <Image
-            src={photo.src}
-            alt={photo.alt}
-            fill
-            className="rounded-none object-cover object-center"
-            sizes="50vw"
-          />
+        <li key={photo.id} className="flex min-w-0 flex-col gap-2">
+          <div className="relative aspect-[9/16] overflow-hidden rounded-none bg-neutral-100">
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              className="rounded-none object-cover object-center"
+              sizes="50vw"
+            />
+          </div>
           {photo.quote || photo.caption || photo.handle ? (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <div className="flex flex-col gap-1">
               {photo.caption ? (
-                <p className={cn("font-extended m-0 text-white/80", pdpType.label)}>
-                  {photo.caption}
-                </p>
+                <p className={cn(pdpType.label, "m-0 text-neutral-500")}>{photo.caption}</p>
               ) : null}
               {photo.quote ? (
-                <p className={cn("font-extended m-0 text-balance text-white", pdpType.body)}>
+                <p className={cn(pdpType.caption, "m-0 text-pretty text-neutral-600")}>
                   &ldquo;{photo.quote}&rdquo;
                 </p>
               ) : null}
               {photo.handle ? (
-                <p className={cn("font-extended m-0 text-white/90", pdpType.label)}>
-                  {photo.handle}
-                </p>
+                <p className={cn(pdpType.micro, "m-0 text-neutral-400")}>{photo.handle}</p>
               ) : null}
             </div>
           ) : null}
@@ -176,7 +174,7 @@ export function PdpUgcCommunitySheet({
         </div>
 
         <div className={pdpBottomSheetBodyClass}>
-          <div className="shrink-0 border-b border-neutral-200 px-3 pb-4">
+          <div className="shrink-0 px-3 pb-4">
             <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-3")}>
               {headline}
             </h2>

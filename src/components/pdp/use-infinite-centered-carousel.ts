@@ -220,10 +220,15 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
   }, [reducedMotion]);
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) {
-      return;
-    }
+    let cleanup: (() => void) | undefined;
+    let retryRafId = 0;
+
+    const attach = () => {
+      const el = scrollRef.current;
+      if (!el) {
+        retryRafId = requestAnimationFrame(attach);
+        return;
+      }
 
     let dragging = false;
     let startX = 0;
@@ -316,13 +321,23 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
     el.addEventListener("pointercancel", endDrag);
     el.addEventListener("click", onClickCapture, { capture: true });
 
-    return () => {
+      cleanup = () => {
       clearSettleTimer();
       el.removeEventListener("pointerdown", onPointerDown);
       el.removeEventListener("pointermove", onPointerMove);
       el.removeEventListener("pointerup", endDrag);
       el.removeEventListener("pointercancel", endDrag);
       el.removeEventListener("click", onClickCapture, { capture: true });
+      };
+    };
+
+    attach();
+
+    return () => {
+      if (retryRafId) {
+        cancelAnimationFrame(retryRafId);
+      }
+      cleanup?.();
     };
   }, [scrollRef]);
 }
@@ -664,9 +679,15 @@ export function useInfiniteFullBleedCarousel(
       setActiveLoopedIndex(target);
     };
 
-    requestAnimationFrame(() => {
+    const scrollToStart = () => {
       scrollToChild(startIndex);
       setActiveLoopedIndex(startIndex);
+    };
+
+    requestAnimationFrame(() => {
+      scrollToStart();
+      // First rAF can run before slide widths exist — retry once layout settles.
+      requestAnimationFrame(scrollToStart);
     });
 
     if (itemCount < 2) {

@@ -15,6 +15,7 @@ import {
   pdpUgcVideoInfiniteScrollClass,
   pdpUgcVideoInfiniteScrollV4Class,
 } from "../pdp-carousel";
+import { pdpModuleHeadlineDisplayClass, pdpModuleIntroClass } from "../pdp-module-section";
 import { pdpType } from "../pdp-type";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
@@ -35,6 +36,7 @@ import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 import { PdpUgcCommunitySheet } from "../pdp-ugc-community-sheet";
 import { PdpUgcMediaToggle, type UgcMediaMode } from "../pdp-ugc-media-toggle";
+import { useReducedMotion } from "../use-reduced-motion";
 
 /**
  * v2-only — "Carried by the community" section (Paper AFC-0, r5 `L5X-0`).
@@ -72,6 +74,7 @@ function UgcSectionHeader({
   onMediaModeChange,
 }: UgcSectionHeaderProps) {
   const { subtext } = PDP_UGC_COMMUNITY_SECTION;
+  const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings
     ? "items-start text-left"
     : "items-center text-center";
@@ -87,11 +90,12 @@ function UgcSectionHeader({
       <PdpTextReveal
         as="h2"
         className={cn(
-          "font-extended m-0 font-normal text-balance text-black",
+          useConsistentModuleHeadings
+            ? pdpModuleHeadlineDisplayClass(true)
+            : useV4UgcHeadingType
+              ? pdpModuleHeadlineDisplayClass(false)
+              : cn(pdpType.headline, "m-0 text-black leading-snug tracking-tight"),
           leftAlignModuleHeadings ? "text-left" : "text-center",
-          useV4UgcHeadingType
-            ? "text-[24px] leading-[1.2] tracking-[-0.02em]"
-            : "text-xl leading-snug tracking-tight",
         )}
       >
         {title}
@@ -102,9 +106,7 @@ function UgcSectionHeader({
           as="p"
           delay={100}
           className={cn(
-            pdpType.caption,
-            "m-0 max-w-[28rem] text-balance text-neutral-600",
-            leftAlignModuleHeadings ? "text-left" : "text-center",
+            pdpModuleIntroClass(leftAlignModuleHeadings ? "left" : "center"),
           )}
         >
           {subtext}
@@ -291,50 +293,12 @@ function UgcCard({ video, scrollRoot, useV4 = false, className }: UgcCardProps) 
 
 type UgcPhotoCardProps = {
   photo: PdpUgcCommunityPhoto;
-  scrollRoot: HTMLElement | null;
   className?: string;
 };
 
-function UgcPhotoCard({ photo, scrollRoot, className }: UgcPhotoCardProps) {
-  const cardRef = useRef<HTMLElement>(null);
-  const [isActive, setIsActive] = useState(false);
-  const activeRef = useRef(false);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card || !scrollRoot) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const ratio = entry.intersectionRatio;
-
-        if (!activeRef.current && ratio >= 0.6) {
-          activeRef.current = true;
-          setIsActive(true);
-        } else if (activeRef.current && ratio < 0.45) {
-          activeRef.current = false;
-          setIsActive(false);
-        }
-      },
-      { root: scrollRoot, threshold: [0, 0.45, 0.6] },
-    );
-
-    observer.observe(card);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [scrollRoot]);
-
-  const showOverlay = isActive && (photo.quote || photo.caption || photo.handle);
-
+function UgcPhotoCard({ photo, className }: UgcPhotoCardProps) {
   return (
-    <article
-      ref={cardRef}
-      className={cn("relative flex shrink-0 flex-col", className)}
-    >
+    <article className={cn("flex shrink-0 flex-col gap-2", className)}>
       <div className="relative aspect-[9/16] w-full overflow-hidden rounded-none bg-neutral-200">
         <Image
           src={photo.src}
@@ -343,68 +307,42 @@ function UgcPhotoCard({ photo, scrollRoot, className }: UgcPhotoCardProps) {
           className="object-cover object-center"
           sizes="(min-width: 1024px) 45vw, 83vw"
         />
-
-        {showOverlay ? (
-          <>
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0"
-              style={{
-                height: "55%",
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)",
-              }}
-            />
-            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-[14px]">
-              {photo.caption ? (
-                <p
-                  className={cn(
-                    "font-extended m-0 text-white/80",
-                    pdpType.label,
-                  )}
+      </div>
+      {photo.quote || photo.caption || photo.handle ? (
+        <div className="flex flex-col gap-1 px-0.5">
+          {photo.caption ? (
+            <p className={cn(pdpType.label, "m-0 text-neutral-500")}>{photo.caption}</p>
+          ) : null}
+          {photo.quote ? (
+            <p className={cn(pdpType.caption, "m-0 text-pretty text-neutral-600")}>
+              &ldquo;{photo.quote}&rdquo;
+            </p>
+          ) : null}
+          {photo.handle ? (
+            <div className="flex items-center gap-1">
+              <span className={cn(pdpType.micro, "text-neutral-400")}>{photo.handle}</span>
+              {photo.verified ? (
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  aria-label="Verified customer"
                 >
-                  {photo.caption}
-                </p>
-              ) : null}
-              {photo.quote ? (
-                <p
-                  className={cn(
-                    "font-extended m-0 text-balance leading-[1.25] text-white",
-                    pdpType.body,
-                  )}
-                >
-                  &ldquo;{photo.quote}&rdquo;
-                </p>
-              ) : null}
-              {photo.handle ? (
-                <div className="flex items-center gap-[5px]">
-                  <span className={cn("font-extended leading-[1.25] text-white", pdpType.body)}>
-                    {photo.handle}
-                  </span>
-                  {photo.verified ? (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      aria-label="Verified customer"
-                    >
-                      <circle cx="12" cy="12" r="10" fill="#1D9BF0" />
-                      <path
-                        d="M8 12.5l2.5 2.5 5-5.5"
-                        fill="none"
-                        stroke="#FFFFFF"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  ) : null}
-                </div>
+                  <circle cx="12" cy="12" r="10" fill="#1D9BF0" />
+                  <path
+                    d="M8 12.5l2.5 2.5 5-5.5"
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               ) : null}
             </div>
-          </>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -472,7 +410,6 @@ function UgcCommunityRail({
               >
                 <UgcPhotoCard
                   photo={photo}
-                  scrollRoot={scrollRoot}
                   className={cardClass}
                 />
               </PdpRevealItem>
@@ -482,36 +419,102 @@ function UgcCommunityRail({
   );
 }
 
+type UgcCompactPreviewItem =
+  | { kind: "video"; id: string; video: PdpUgcVideo }
+  | { kind: "photo"; id: string; src: string; alt: string };
+
+/** Inline muted loop clip for the compact wild strip — poster-only when reduced motion. */
+function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
+  const reducedMotion = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || reducedMotion) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      },
+      { threshold: 0.2 },
+    );
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [reducedMotion]);
+
+  if (reducedMotion) {
+    return (
+      <Image
+        src={video.poster}
+        alt={video.alt}
+        fill
+        className="rounded-none object-cover object-center"
+        sizes="22vw"
+      />
+    );
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      src={video.src}
+      poster={video.poster}
+      muted
+      autoPlay
+      loop
+      playsInline
+      preload="metadata"
+      aria-label={video.alt}
+      className="absolute inset-0 size-full rounded-none object-cover object-center"
+    />
+  );
+}
+
 /** v4 — compact portrait strip after The Details ("Out in the wild"). */
 function UgcCompactWildStrip() {
   const { videos } = PDP_UGC_VIDEO_CAROUSEL;
   const { headline, socialHandle, previewCount } = PDP_UGC_COMMUNITY_COMPACT_SECTION;
+  const { compactUgcMoreCountOverride, useConsistentModuleHeadings } =
+    getPdpVersionConfig(usePdpVersion());
   const scrollRef = useRef<HTMLDivElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mediaMode, setMediaMode] = useState<UgcMediaMode>("videos");
 
-  const previewItems = useMemo(() => {
+  const previewItems = useMemo((): UgcCompactPreviewItem[] => {
     if (mediaMode === "videos") {
       return videos.slice(0, previewCount).map((video) => ({
-        kind: "video" as const,
+        kind: "video",
         id: video.id,
-        src: video.poster,
-        alt: video.alt,
+        video,
       }));
     }
 
     return PDP_UGC_COMMUNITY_PHOTOS.slice(0, previewCount).map((photo) => ({
-      kind: "photo" as const,
+      kind: "photo",
       id: photo.id,
       src: photo.src,
       alt: photo.alt,
     }));
   }, [videos, previewCount, mediaMode]);
 
-  const moreCount =
+  const calculatedMoreCount =
     mediaMode === "videos"
       ? Math.max(0, videos.length - previewItems.length)
       : Math.max(0, PDP_UGC_COMMUNITY_PHOTOS.length - previewItems.length);
+  const moreCount =
+    compactUgcMoreCountOverride > 0
+      ? compactUgcMoreCountOverride
+      : calculatedMoreCount;
 
   useDragToScroll(scrollRef);
 
@@ -522,7 +525,10 @@ function UgcCompactWildStrip() {
     >
       <div className="mb-4 flex flex-col gap-3 px-4">
         <div className="flex items-baseline justify-between gap-3">
-          <PdpTextReveal as="h2" className={cn(pdpType.headline, "m-0 text-black")}>
+          <PdpTextReveal
+            as="h2"
+            className={pdpModuleHeadlineDisplayClass(useConsistentModuleHeadings)}
+          >
             {headline}
           </PdpTextReveal>
           <PdpTextReveal as="div" delay={80}>
@@ -559,13 +565,17 @@ function UgcCompactWildStrip() {
               delay={revealStaggerDelay(index)}
               className={pdpUgcCompactCardClass}
             >
-              <Image
-                src={item.src}
-                alt={item.alt}
-                fill
-                className="rounded-none object-cover object-center"
-                sizes="22vw"
-              />
+              {item.kind === "video" ? (
+                <UgcCompactVideoTile video={item.video} />
+              ) : (
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  className="rounded-none object-cover object-center"
+                  sizes="22vw"
+                />
+              )}
             </PdpRevealItem>
           ))}
           {moreCount > 0 ? (

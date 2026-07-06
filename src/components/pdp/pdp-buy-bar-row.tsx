@@ -37,7 +37,9 @@ export function PdpBuyBarRow({
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
-  const { flattenBuyBarCta } = getPdpVersionConfig(usePdpVersion());
+  const { flattenBuyBarCta, hideBuyBarColorLabel, hideBuyBarAtbIcon } =
+    getPdpVersionConfig(usePdpVersion());
+  const hideLabel = hideColorLabel || hideBuyBarColorLabel;
 
   const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
   const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
@@ -86,7 +88,7 @@ export function PdpBuyBarRow({
             stretch={isTabbyProduct}
             onOpenChange={handleColorSheetOpenChange}
             heightClass="h-[50px]"
-            hideLabel={hideColorLabel}
+            hideLabel={hideLabel}
           />
         </div>
       ) : null}
@@ -106,14 +108,21 @@ export function PdpBuyBarRow({
             boxShadow: flattenBuyBarCta ? "none" : atbChrome.glow,
           }}
         >
-          <span className="relative z-[1] flex min-w-0 items-center justify-center gap-2">
-            <MaterialIcon
-              name="shopping_bag"
-              size={18}
-              className="shrink-0 -translate-y-px"
-              style={{ color: atbChrome.foreground }}
-              aria-hidden
-            />
+          <span
+            className={cn(
+              "relative z-[1] flex min-w-0 items-center justify-center",
+              !hideBuyBarAtbIcon && "gap-2",
+            )}
+          >
+            {!hideBuyBarAtbIcon ? (
+              <MaterialIcon
+                name="shopping_bag"
+                size={18}
+                className="shrink-0 -translate-y-px"
+                style={{ color: atbChrome.foreground }}
+                aria-hidden
+              />
+            ) : null}
             <span className="translate-y-px text-[14px]">Add to bag</span>
           </span>
         </button>

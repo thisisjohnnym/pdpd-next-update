@@ -198,8 +198,8 @@ export function TabbyVariantProvider({
 
   const setSelectedColorId = useCallback(
     (colorId: string) => {
-      const color = colors.find((entry) => entry.id === colorId);
-      if (!color || !pdpColorIsSelectable(color.availability)) {
+      const option = colorOptions.find((entry) => entry.id === colorId);
+      if (!option?.combinationAvailable) {
         return;
       }
 
@@ -208,7 +208,7 @@ export function TabbyVariantProvider({
         replaceTabbyBrowserUrl(slug, colorId);
       }
     },
-    [activeProductId, colors, slug],
+    [activeProductId, colorOptions, slug],
   );
 
   const selectColorAtSize = useCallback(

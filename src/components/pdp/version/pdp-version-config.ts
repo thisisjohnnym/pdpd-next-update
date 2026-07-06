@@ -66,6 +66,11 @@ export type PdpVersionConfig = {
   showDetailsHeading: boolean;
   /** Use the v2 More like this layout (158px fixed-width cards) */
   useSimplifiedMoreLikeThis: boolean;
+  /**
+   * Bump More like this product cards ~10% (174×218px vs 158×198px) and tighten
+   * the rail gap so the 3rd card still peeks. v5 only — v4 keeps Paper B6C-0.
+   */
+  moreLikeThisLargeCards: boolean;
   /** Use the v2 leather aging card layout (warm header/image/controls — Paper AP5-0) */
   useSimplifiedLeatherAging: boolean;
   /** Use the v2 recently viewed vertical list (white bg — Paper BC6-0) */
@@ -148,6 +153,11 @@ export type PdpVersionConfig = {
    */
   hideBuyBarColorLabel: boolean;
   /**
+   * Drop the shopping_bag icon on the docked + floating buy-bar Add to bag pill.
+   * v5 only — v1/v2/v3/v4 keep the icon beside the label.
+   */
+  hideBuyBarAtbIcon: boolean;
+  /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
    */
@@ -158,10 +168,20 @@ export type PdpVersionConfig = {
    */
   flatColorSheet: boolean;
   /**
+   * Hide the "In stock" subtitle on color rows — only show callouts for low
+   * stock or sold out. v5 only.
+   */
+  hideInStockColorLabel: boolean;
+  /**
    * Keep the side-scrolling hero gallery when the shopper picks another colorway
    * — do not swap to a color-specific static hero image. v5 only.
    */
   lockHeroGalleryTemplate: boolean;
+  /**
+   * Hero footer material line — show "Quilted Leather" on its own gray line
+   * instead of "in Quilted Leather". v5 only.
+   */
+  heroMaterialSubtitleLine: boolean;
   /**
    * Left-align the Reviews, More like this, and Recently viewed section
    * headings (Paper r5 `MAE-0` / `MD6-0` / `ME6-0`) instead of the centered
@@ -204,6 +224,11 @@ export type PdpVersionConfig = {
    */
   useV4CompactUgcStrip: boolean;
   /**
+   * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
+   * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
+   */
+  compactUgcMoreCountOverride: number;
+  /**
    * Apply the grouped r5 padding/spacing refresh across the shared modules —
    * Reviews (`MAE-0`), More like this (`MD6-0`), Recently viewed (`ME6-0`),
    * Details (`LD6-0`), Editorial carousel (`L2X-0`), Hero (`IMP-0`), and UGC
@@ -232,6 +257,16 @@ export type PdpVersionConfig = {
    */
   useV4LeatherAgingLayout: boolean;
   /**
+   * Leather aging — left-aligned title + caption above the image on white
+   * (no warm `#EFEAE7` block). Matches Up close / Reviews header pattern. v5 only.
+   */
+  leatherAgingHeaderAboveImage: boolean;
+  /**
+   * Unify module H1s to `pdpType.headline` (20px) — matches The Details and
+   * Out in the wild instead of the legacy 24px r5 override. v5 only.
+   */
+  useConsistentModuleHeadings: boolean;
+  /**
    * Per-element GSAP scroll-triggered reveals on headlines (opacity + blur) and
    * content blocks (opacity + lift). v4 only — v1/v2/v3 keep pass-through
    * wrappers and the ambient section-level fade.
@@ -258,6 +293,7 @@ const V1_CONFIG: PdpVersionConfig = {
   detailsAfterSlideIndex: 1,
   showDetailsHeading: true,
   useSimplifiedMoreLikeThis: false,
+  moreLikeThisLargeCards: false,
   useSimplifiedLeatherAging: false,
   useSimplifiedRecentlyViewed: false,
   fixedHeaderSurface: "auto",
@@ -275,9 +311,12 @@ const V1_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideBuyBarAtbIcon: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  hideInStockColorLabel: false,
   lockHeroGalleryTemplate: false,
+  heroMaterialSubtitleLine: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -289,8 +328,11 @@ const V1_CONFIG: PdpVersionConfig = {
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
+  leatherAgingHeaderAboveImage: false,
+  useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
+  compactUgcMoreCountOverride: 0,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -339,9 +381,12 @@ const V2_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideBuyBarAtbIcon: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  hideInStockColorLabel: false,
   lockHeroGalleryTemplate: false,
+  heroMaterialSubtitleLine: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
   hideTextLinkArrows: false,
@@ -353,8 +398,11 @@ const V2_CONFIG: PdpVersionConfig = {
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   useV4LeatherAgingLayout: false,
+  leatherAgingHeaderAboveImage: false,
+  useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
+  compactUgcMoreCountOverride: 0,
 };
 
 /**
@@ -422,6 +470,7 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 story: Feel the leather → Up close → Details → Out in the wild → Aging.
   detailsAfterSlideIndex: 2,
   hideBuyBarColorLabel: true,
+  hideBuyBarAtbIcon: true,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   showDetailsCloserLook: false,
@@ -429,7 +478,13 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
+  hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
+  heroMaterialSubtitleLine: true,
+  leatherAgingHeaderAboveImage: true,
+  compactUgcMoreCountOverride: 6,
+  useConsistentModuleHeadings: true,
+  moreLikeThisLargeCards: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

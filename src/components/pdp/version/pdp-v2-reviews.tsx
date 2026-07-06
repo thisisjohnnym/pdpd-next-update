@@ -14,13 +14,12 @@ import { pdpCarouselImageClass } from "../pdp-carousel";
 import { PdpStarRating } from "../pdp-review-comment";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
+import { pdpModuleHeadlineDisplayClass } from "../pdp-module-section";
 import { pdpPressableClass, pdpType } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
-import {
-  PDP_V4_REVIEWS_SUMMARY,
-  PDP_V4_REVIEW_UGC_MOMENTS,
-} from "./pdp-v4-reviews-summary";
+import { PDP_UGC_COMMUNITY_PHOTOS, type PdpUgcCommunityPhoto } from "./pdp-data-v2";
+import { PDP_V4_REVIEWS_SUMMARY } from "./pdp-v4-reviews-summary";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
@@ -67,6 +66,37 @@ function V4SectionLabel({ children }: { children: string }) {
   );
 }
 
+function ReviewUgcMomentCard({ photo }: { photo: PdpUgcCommunityPhoto }) {
+  return (
+    <figure className="m-0 flex min-w-0 flex-col gap-2">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-none bg-neutral-100">
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          fill
+          className={cn("object-cover object-center", pdpCarouselImageClass)}
+          sizes="50vw"
+        />
+      </div>
+      {(photo.caption || photo.quote || photo.handle) ? (
+        <figcaption className="flex flex-col gap-1">
+          {photo.caption ? (
+            <p className={cn(pdpType.label, "m-0 text-neutral-500")}>{photo.caption}</p>
+          ) : null}
+          {photo.quote ? (
+            <p className={cn(pdpType.caption, "m-0 text-pretty text-neutral-600")}>
+              &ldquo;{photo.quote}&rdquo;
+            </p>
+          ) : null}
+          {photo.handle ? (
+            <p className={cn(pdpType.micro, "m-0 text-neutral-400")}>{photo.handle}</p>
+          ) : null}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
+
 function V4ReviewSummary({
   onReadAll,
   leftAlignModuleHeadings,
@@ -75,6 +105,7 @@ function V4ReviewSummary({
 }) {
   const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
   const { headline, reviewHighlights, featuredQuote } = PDP_V4_REVIEWS_SUMMARY;
+  const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
   return (
@@ -88,7 +119,7 @@ function V4ReviewSummary({
           <PdpTextReveal
             as="h2"
             className={cn(
-              "font-extended m-0 text-[24px] leading-[1.2] font-normal tracking-[-0.02em] text-black",
+              pdpModuleHeadlineDisplayClass(useConsistentModuleHeadings),
               leftAlignModuleHeadings ? "text-left" : "text-center",
             )}
           >
@@ -127,7 +158,13 @@ function V4ReviewSummary({
                     className="shrink-0 text-neutral-400"
                     aria-hidden
                   />
-                  <span className="font-extended text-[13px] leading-[1.35] tracking-[0.2px] text-neutral-800">
+                  <span
+                    className={cn(
+                      useConsistentModuleHeadings
+                        ? cn(pdpType.body, "text-neutral-800")
+                        : "font-extended text-[13px] leading-[1.35] tracking-[0.2px] text-neutral-800",
+                    )}
+                  >
                     {item}
                   </span>
                 </li>
@@ -140,22 +177,9 @@ function V4ReviewSummary({
         <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
           <div className="flex flex-col gap-2.5">
             <V4SectionLabel>Real customer moments</V4SectionLabel>
-            <div className="grid w-full grid-cols-3 gap-2">
-              {PDP_V4_REVIEW_UGC_MOMENTS.map((moment) => (
-                <figure key={moment.id} className="m-0 flex min-w-0 flex-col gap-1">
-                  <div className="relative aspect-square w-full overflow-hidden rounded-none bg-neutral-100">
-                    <Image
-                      src={moment.src}
-                      alt={moment.alt}
-                      fill
-                      className={cn("object-cover object-center", pdpCarouselImageClass)}
-                      sizes="30vw"
-                    />
-                  </div>
-                  <figcaption className="font-sans text-[10px] leading-[1.3] tracking-[0.02em] text-balance text-neutral-400">
-                    {moment.context}
-                  </figcaption>
-                </figure>
+            <div className="grid w-full grid-cols-2 gap-x-3 gap-y-4">
+              {PDP_UGC_COMMUNITY_PHOTOS.slice(0, 4).map((photo) => (
+                <ReviewUgcMomentCard key={photo.id} photo={photo} />
               ))}
             </div>
           </div>
@@ -169,7 +193,14 @@ function V4ReviewSummary({
               !leftAlignModuleHeadings && "mx-auto max-w-[20rem]",
             )}
           >
-            <blockquote className="font-extended m-0 text-[13px] leading-[1.4] tracking-[0.2px] text-pretty text-neutral-600">
+            <blockquote
+              className={cn(
+                "m-0 text-pretty text-neutral-600",
+                useConsistentModuleHeadings
+                  ? pdpType.caption
+                  : "font-extended text-[13px] leading-[1.4] tracking-[0.2px]",
+              )}
+            >
               &ldquo;{featuredQuote.body}&rdquo;
             </blockquote>
             <figcaption className="font-sans mt-1.5 text-[11px] leading-[14px] text-neutral-400">

@@ -9,6 +9,7 @@ import { PdpBuyBarRow } from "../pdp-buy-bar-row";
 import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
+import { pdpType } from "../pdp-type";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -44,7 +45,8 @@ export function PdpV3HeroLayout({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing, hideBuyBarColorLabel } = getPdpVersionConfig(usePdpVersion());
+  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine } =
+    getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
 
@@ -67,8 +69,15 @@ export function PdpV3HeroLayout({
             <p className="min-w-0 truncate text-base leading-[115%] tracking-[0.4px]">
               {summary.name}
             </p>
-            <p className="min-w-0 truncate text-xs leading-[115%] tracking-[0.4px] text-neutral-900">
-              in {summary.subtitle}
+            <p
+              className={cn(
+                "min-w-0 truncate leading-[115%] tracking-[0.4px]",
+                heroMaterialSubtitleLine
+                  ? cn(pdpType.label, "mt-1 text-neutral-500")
+                  : "text-xs text-neutral-900",
+              )}
+            >
+              {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
             </p>
           </div>
           <p className="font-extended shrink-0 text-base leading-none tabular-nums text-neutral-900">

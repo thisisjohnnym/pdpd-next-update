@@ -10,6 +10,7 @@ import {
   pdpCarouselScrollWrapClass,
 } from "../pdp-carousel";
 import { PdpModuleHeading } from "../pdp-module-heading";
+import { pdpModuleIntroClass } from "../pdp-module-section";
 import { pdpType } from "../pdp-type";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
@@ -81,10 +82,7 @@ export function PdpV4Craftsmanship() {
       >
         <PdpModuleHeading
           spacing="none"
-          className={cn(
-            leftAlignModuleHeadings ? "text-left" : "text-center",
-            "text-[24px] leading-[1.2] tracking-[-0.02em]",
-          )}
+          className={leftAlignModuleHeadings ? "text-left" : "text-center"}
         >
           {headline}
         </PdpModuleHeading>
@@ -92,9 +90,7 @@ export function PdpV4Craftsmanship() {
           as="p"
           delay={100}
           className={cn(
-            pdpType.caption,
-            "m-0 max-w-[28rem] text-balance text-neutral-600",
-            leftAlignModuleHeadings ? "text-left" : "text-center",
+            pdpModuleIntroClass(leftAlignModuleHeadings ? "left" : "center"),
           )}
         >
           {intro}

@@ -6,8 +6,8 @@ import { cn } from "@/lib/cn";
 import {
   heroUsesLightChrome,
   HERO_CHROME_COLOR_TRANSITION_CLASS,
-  useHeroChromeSurface,
 } from "../pdp-hero-chrome-surface";
+import { usePdpHeroGallery } from "../pdp-hero-gallery-context";
 import { pdpPressableIconClass } from "../pdp-type";
 import { useReducedMotion } from "../use-reduced-motion";
 
@@ -25,8 +25,8 @@ const AR_ICON_SIZE = 24;
  * active slide like the legacy rail.
  */
 export function PdpV3ArButton({ onOpenArTryOn }: { onOpenArTryOn?: () => void }) {
-  const heroSurface = useHeroChromeSurface();
-  const lightChrome = heroUsesLightChrome(heroSurface);
+  const { surface } = usePdpHeroGallery();
+  const lightChrome = heroUsesLightChrome(surface);
   const reducedMotion = useReducedMotion();
   const chromeTransitionClass = reducedMotion
     ? undefined

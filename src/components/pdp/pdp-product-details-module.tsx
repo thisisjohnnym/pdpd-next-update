@@ -17,6 +17,7 @@ import {
 } from "./pdp-carousel";
 import { PdpCarouselDotIndicator } from "./pdp-carousel-dot-indicator";
 import { PdpModuleHeading } from "./pdp-module-heading";
+import { pdpModuleIntroClass } from "./pdp-module-section";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import { revealStaggerDelay } from "./use-pdp-element-reveal";
@@ -25,6 +26,7 @@ import {
   useDragToScroll,
 } from "./use-infinite-centered-carousel";
 import {
+  PDP_V4_DETAILS_SECTION,
   PDP_V4_SPECS,
   type PdpProductDetailSpecV4,
 } from "./version/pdp-v4-specs";
@@ -138,7 +140,7 @@ function SpecListV4({
   let staggerIndex = 0;
 
   return (
-    <div className="mt-5 grid grid-cols-2 border-y border-neutral-200">
+    <div className="grid grid-cols-2 border-y border-neutral-200">
       {specs.map((spec, index) => {
         const delay = revealStaggerDelay(staggerIndex);
         staggerIndex += 1;
@@ -335,12 +337,28 @@ export function PdpProductDetailsModule({
     >
       {useV4Specs ? (
         <div className="px-4 pb-10 pt-4">
-          <PdpModuleHeading
-            spacing="none"
-            className={leftAlignModuleHeadings ? "text-left" : "text-center"}
+          <div
+            className={cn(
+              "mb-5 flex flex-col gap-2",
+              leftAlignModuleHeadings ? "items-start" : "items-center text-center",
+            )}
           >
-            {eyebrow}
-          </PdpModuleHeading>
+            <PdpModuleHeading
+              spacing="none"
+              className={leftAlignModuleHeadings ? "text-left" : "text-center"}
+            >
+              {eyebrow}
+            </PdpModuleHeading>
+            <PdpTextReveal
+              as="p"
+              delay={100}
+              className={pdpModuleIntroClass(
+                leftAlignModuleHeadings ? "left" : "center",
+              )}
+            >
+              {PDP_V4_DETAILS_SECTION.intro}
+            </PdpTextReveal>
+          </div>
           <SpecListV4 specs={PDP_V4_SPECS} leftAlign={leftAlignModuleHeadings} />
         </div>
       ) : (

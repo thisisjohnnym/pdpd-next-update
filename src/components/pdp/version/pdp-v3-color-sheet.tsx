@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -28,6 +28,7 @@ import { ColorSwatchCircle } from "../pdp-color-swatch";
 import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
+import type { TabbyColorOption } from "../pdp-tabby-colors";
 import { pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
 import {
@@ -92,6 +93,8 @@ function ColorRow({
   isSelected,
   onSelect,
   onNotify,
+  combinationAvailable = true,
+  hideInStockLabel = false,
 }: {
   fill: string;
   name: string;
@@ -100,9 +103,16 @@ function ColorRow({
   onSelect: () => void;
   /** When set, a sold-out color shows a Notify me affordance (v4 Paper r5). */
   onNotify?: () => void;
+  /** Offered for the current style + size — rows without it stay visible but disabled. */
+  combinationAvailable?: boolean;
+  /** When true, omit the "In stock" subtitle — show low stock / sold out only. */
+  hideInStockLabel?: boolean;
 }) {
-  const selectable = pdpColorIsSelectable(availability);
+  const selectable =
+    combinationAvailable && pdpColorIsSelectable(availability);
   const showNotify = !selectable && availability === "notify" && Boolean(onNotify);
+  const showAvailabilityLabel =
+    !hideInStockLabel || availability !== "in_stock";
 
   return (
     <li role="presentation">
@@ -122,9 +132,11 @@ function ColorRow({
           <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn("text-black", pdpType.label)}>{name}</span>
-            <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
-              {pdpColorAvailabilityLabel(availability)}
-            </span>
+            {showAvailabilityLabel ? (
+              <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
+                {pdpColorAvailabilityLabel(availability)}
+              </span>
+            ) : null}
           </span>
           {isSelected ? (
             <MaterialIcon name="check" size={18} className="shrink-0 text-black" aria-hidden />
@@ -246,13 +258,33 @@ export function PdpV3ColorSheet({
   const titleId = useId();
   const tabby = useOptionalTabbyVariant();
   const version = usePdpVersion();
-  const { demoPopularColorStates, hideColorSheetSizePrice, flatColorSheet } =
-    getPdpVersionConfig(version);
+  const {
+    demoPopularColorStates,
+    hideColorSheetSizePrice,
+    flatColorSheet,
+    hideInStockColorLabel,
+  } = getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
+  const ignoreBackdropCloseRef = useRef(false);
   const [popularExpanded, setPopularExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
   const [notifyLabel, setNotifyLabel] = useState<string | null>(null);
   const [notifyToastOpen, setNotifyToastOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    ignoreBackdropCloseRef.current = true;
+    const frame = requestAnimationFrame(() => {
+      ignoreBackdropCloseRef.current = false;
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [open]);
 
   if (!mounted || !tabby || typeof document === "undefined" || !document.body) {
     return null;
@@ -272,8 +304,12 @@ export function PdpV3ColorSheet({
     : materials.slice(0, MATERIALS_COLLAPSED);
   const hiddenMaterials = materials.length - MATERIALS_COLLAPSED;
 
-  const handleColorSelect = (id: string) => {
-    tabby.setSelectedColorId(id);
+  const handleColorSelect = (color: TabbyColorOption) => {
+    if (!color.combinationAvailable || !pdpColorIsSelectable(color.availability)) {
+      return;
+    }
+
+    tabby.setSelectedColorId(color.id);
     onClose();
   };
 
@@ -319,7 +355,12 @@ export function PdpV3ColorSheet({
           type="button"
           aria-label="Close color picker"
           className={pdpBottomSheetBackdropClass()}
-          onClick={onClose}
+          onClick={() => {
+            if (ignoreBackdropCloseRef.current) {
+              return;
+            }
+            onClose();
+          }}
           tabIndex={open ? 0 : -1}
         />
 
@@ -376,7 +417,9 @@ export function PdpV3ColorSheet({
                         color.id === tabby.selectedColorId &&
                         color.combinationAvailable
                       }
-                      onSelect={() => handleColorSelect(color.id)}
+                      combinationAvailable={color.combinationAvailable}
+                      hideInStockLabel={hideInStockColorLabel}
+                      onSelect={() => handleColorSelect(color)}
                       onNotify={
                         color.availability === "notify"
                           ? () => setNotifyLabel(color.name)
@@ -400,7 +443,9 @@ export function PdpV3ColorSheet({
                         color.id === tabby.selectedColorId &&
                         color.combinationAvailable
                       }
-                      onSelect={() => handleColorSelect(color.id)}
+                      combinationAvailable={color.combinationAvailable}
+                      hideInStockLabel={hideInStockColorLabel}
+                      onSelect={() => handleColorSelect(color)}
                       onNotify={
                         demoPopularColorStates
                           ? () => setNotifyLabel(color.name)

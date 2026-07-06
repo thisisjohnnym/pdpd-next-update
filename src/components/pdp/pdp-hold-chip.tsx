@@ -12,11 +12,32 @@ import { cn } from "@/lib/cn";
 
 /** Shared "press & hold to X" affordance — one pill, two surfaces (dark photo / light studio). */
 type PdpHoldTone = "dark" | "light";
+type PdpHoldChipSize = "default" | "compact";
 
-const RING_SIZE = 34;
-const RING_STROKE = 2.5;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const RING_SIZE_BY_CHIP = {
+  default: 34,
+  compact: 28,
+} as const;
+
+const RING_STROKE_BY_CHIP = {
+  default: 2.5,
+  compact: 2,
+} as const;
+
+const ICON_SIZE_BY_CHIP = {
+  default: 18,
+  compact: 15,
+} as const;
+
+const LABEL_CLASS_BY_CHIP = {
+  default: "text-[11px]",
+  compact: "text-[10px]",
+} as const;
+
+const PILL_CLASS_BY_CHIP = {
+  default: "gap-2 py-1.5 pl-1.5 pr-3.5",
+  compact: "gap-1.5 py-1 pl-1 pr-2.5",
+} as const;
 
 const RING_TONE = {
   dark: { track: "rgba(255,255,255,0.3)", arc: "#ffffff", icon: "text-white" },
@@ -31,6 +52,7 @@ const CHIP_TONE = {
 type HoldRingProps = {
   icon: string;
   tone: PdpHoldTone;
+  size: PdpHoldChipSize;
   /** Continuous fill 0..1 (e.g. weight lift). Takes precedence over `active`. */
   progress?: number;
   /** Time-based fill while held (e.g. zoom hold timer). Used when `progress` is undefined. */
@@ -40,8 +62,12 @@ type HoldRingProps = {
 
 /** Circular progress ring with the gesture icon centered inside. */
 // fallow-ignore-next-line complexity
-function HoldRing({ icon, tone, progress, active, durationMs }: HoldRingProps) {
+function HoldRing({ icon, tone, size, progress, active, durationMs }: HoldRingProps) {
   const colors = RING_TONE[tone];
+  const ringSize = RING_SIZE_BY_CHIP[size];
+  const ringStroke = RING_STROKE_BY_CHIP[size];
+  const ringRadius = (ringSize - ringStroke) / 2;
+  const ringCircumference = 2 * Math.PI * ringRadius;
   const timed = progress === undefined;
   const [filled, setFilled] = useState(false);
 
@@ -61,38 +87,38 @@ function HoldRing({ icon, tone, progress, active, durationMs }: HoldRingProps) {
   const offset = timed
     ? filled
       ? 0
-      : RING_CIRCUMFERENCE
-    : RING_CIRCUMFERENCE * (1 - clamped);
+      : ringCircumference
+    : ringCircumference * (1 - clamped);
   const engaged = timed ? active : clamped > 0;
 
   return (
     <span
       className="relative flex shrink-0 items-center justify-center"
-      style={{ width: RING_SIZE, height: RING_SIZE }}
+      style={{ width: ringSize, height: ringSize }}
     >
       <svg
-        width={RING_SIZE}
-        height={RING_SIZE}
-        viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+        width={ringSize}
+        height={ringSize}
+        viewBox={`0 0 ${ringSize} ${ringSize}`}
         className="absolute inset-0 -rotate-90"
       >
         <circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
+          cx={ringSize / 2}
+          cy={ringSize / 2}
+          r={ringRadius}
           fill="none"
           stroke={colors.track}
-          strokeWidth={RING_STROKE}
+          strokeWidth={ringStroke}
         />
         <circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
+          cx={ringSize / 2}
+          cy={ringSize / 2}
+          r={ringRadius}
           fill="none"
           stroke={colors.arc}
-          strokeWidth={RING_STROKE}
+          strokeWidth={ringStroke}
           strokeLinecap="round"
-          strokeDasharray={RING_CIRCUMFERENCE}
+          strokeDasharray={ringCircumference}
           strokeDashoffset={offset}
           style={{
             transition: timed
@@ -105,7 +131,7 @@ function HoldRing({ icon, tone, progress, active, durationMs }: HoldRingProps) {
       </svg>
       <MaterialIcon
         name={icon}
-        size={18}
+        size={ICON_SIZE_BY_CHIP[size]}
         filled={engaged}
         className={cn(colors.icon, "transition-transform duration-150")}
         style={{ transform: engaged ? "scale(0.96)" : "scale(1)" }}
@@ -118,6 +144,7 @@ type PdpHoldChipOwnProps = {
   icon: string;
   label: string;
   tone?: PdpHoldTone;
+  size?: PdpHoldChipSize;
   /** Continuous fill 0..1 — pass for progress-driven holds. */
   progress?: number;
   /** Time-based fill while held — pass with `durationMs` when there's no continuous progress. */
@@ -142,6 +169,7 @@ export function PdpHoldChip<T extends ElementType = "button">({
   icon,
   label,
   tone = "dark",
+  size = "default",
   progress,
   active = false,
   durationMs = 0,
@@ -154,7 +182,8 @@ export function PdpHoldChip<T extends ElementType = "button">({
   return (
     <Tag
       className={cn(
-        "inline-flex select-none items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5",
+        "inline-flex select-none items-center rounded-full",
+        PILL_CLASS_BY_CHIP[size],
         "transition-transform duration-150 active:scale-[0.96]",
         CHIP_TONE[tone],
         pressed && "scale-[1.04]",
@@ -165,11 +194,14 @@ export function PdpHoldChip<T extends ElementType = "button">({
       <HoldRing
         icon={icon}
         tone={tone}
+        size={size}
         progress={progress}
         active={active}
         durationMs={durationMs}
       />
-      <span className="font-extended text-[11px] tracking-[0.2px]">{label}</span>
+      <span className={cn("font-extended tracking-[0.2px]", LABEL_CLASS_BY_CHIP[size])}>
+        {label}
+      </span>
     </Tag>
   );
 }

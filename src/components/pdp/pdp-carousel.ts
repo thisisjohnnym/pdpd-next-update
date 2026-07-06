@@ -77,7 +77,7 @@ export const pdpUgcVideoCardInfiniteV4Class =
 
 /** v4 compact wild strip — ~4 portrait tiles across, square corners (Paper r5). */
 export const pdpUgcCompactCardClass =
-  "pdp-ugc-compact-card relative aspect-[9/16] w-[calc((100vw-2rem-1.5rem)/4)] shrink-0 snap-start snap-always overflow-hidden rounded-none bg-neutral-200 [&_img]:rounded-none";
+  "pdp-ugc-compact-card relative aspect-[9/16] w-[calc((100vw-2rem-1.5rem)/4)] shrink-0 snap-start snap-always overflow-hidden rounded-none bg-neutral-200 [&_img]:rounded-none [&_video]:rounded-none";
 
 /** UGC video infinite rail — active tile centered with side peek */
 export const pdpUgcVideoInfiniteScrollClass = cn(

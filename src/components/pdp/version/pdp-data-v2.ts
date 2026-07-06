@@ -63,8 +63,8 @@ export const PDP_CRAFTSMANSHIP_V4_CARDS = [
     id: "hardware",
     title: "Signature hardware",
     body: "The iconic C clasp brings Coach heritage into focus.",
-    src: "/images/gallery/tabby-leather-detail-hardware.png",
-    alt: "Close-up of the brushed gold C turn-lock clasp on Tabby Shoulder Bag 26",
+    src: "/images/gallery/tabby-c-clasp-closeup.png",
+    alt: "Close-up of the polished gold C turn-lock clasp with COACH engraving on black glovetanned leather",
   },
   {
     id: "interior",

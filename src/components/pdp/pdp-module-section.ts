@@ -43,6 +43,27 @@ export function pdpModuleSectionClass({
 export function pdpModuleHeadingLeadClass() {
   return "mb-4";
 }
+
+/** Legacy r5 24px module title — v4 UGC/Reviews; v5 uses `pdpModuleHeadlineDisplayClass`. */
+const pdpModuleHeadlineR5Class =
+  "font-extended m-0 text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-balance text-black";
+
+/** Module H1 — `consistent` true → `pdpType.headline` (Details / Out in the wild scale). */
+export function pdpModuleHeadlineDisplayClass(consistent: boolean) {
+  return consistent
+    ? cn(pdpType.headline, "m-0 text-black")
+    : pdpModuleHeadlineR5Class;
+}
+
+/** Intro line beneath module H1s (Up close, leather aging stage copy, etc.). */
+export function pdpModuleIntroClass(align: "left" | "center" = "left") {
+  return cn(
+    pdpType.caption,
+    "m-0 max-w-[28rem] text-balance text-neutral-600",
+    align === "left" ? "text-left" : "text-center",
+  );
+}
+
 /** Primary H1 — modules, sheets, drawers */
 function pdpPageHeadingClass({ lead = true }: { lead?: boolean } = {}) {
   return cn(pdpType.headline, "m-0 text-balance", lead && "mb-4");

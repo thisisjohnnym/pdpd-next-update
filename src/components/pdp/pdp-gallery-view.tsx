@@ -106,11 +106,7 @@ function gallerySection(
   } = {},
 ) {
   return (
-    <PdpScrollReveal
-      key={key}
-      surface={options.surface ?? "transparent"}
-      lazyMount
-    >
+    <PdpScrollReveal key={key} surface={options.surface ?? "transparent"}>
       {child}
     </PdpScrollReveal>
   );

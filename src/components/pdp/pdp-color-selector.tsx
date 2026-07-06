@@ -105,6 +105,10 @@ function PdpColorDropup({
     onOpenChange?.(next);
   };
 
+  const toggleSheet = () => {
+    setSheetOpen(!open);
+  };
+
   const handleSelect = (id: string) => {
     const color = colors.find((entry) => entry.id === id);
     if (
@@ -157,7 +161,10 @@ function PdpColorDropup({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Color: ${coachColor.full}, ${pdpColorAvailabilityLabel(selected.availability)}. Choose another color.`}
-        onClick={() => setSheetOpen(!open)}
+        onClick={(event) => {
+          event.stopPropagation();
+          toggleSheet();
+        }}
         className={cn(
           pillClass,
           "transition-[background-color,box-shadow] duration-300 ease-out",
