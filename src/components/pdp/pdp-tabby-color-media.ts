@@ -82,7 +82,8 @@ function swapPurpleMorePhotos(photos: PdpGalleryPhoto[]): PdpGalleryPhoto[] {
 /**
  * Gallery scroll — swap on-model frames when a colorway has dedicated lifestyle assets.
  * Version-aware: v2/v3 reshape the swapped list (UGC after hero, grouped craft carousel, removals).
- * v4 additionally reframes the studio drag-zoom immersive (4:5 + in-image copy).
+ * v4 additionally reframes the studio drag-zoom immersive (4:5 + copy above).
+ * v5 inherits the same gallery patches when the compact UGC strip is active.
  */
 export function getTabbyGallerySlidesForColor(
   colorId: string,
@@ -102,9 +103,12 @@ export function getTabbyGallerySlidesForColor(
     omitStudioProduct: config.heroGalleryStudioDragZoom,
   });
 
-  return version === "v4"
-    ? applyV4GallerySlidePatches(v2Slides)
-    : v2Slides;
+  // v5 (and v4) drop the standalone ugc-community slide when the compact strip
+  // is injected beside The Details, and patch the studio drag-zoom frame copy.
+  const applyV4Patches =
+    version === "v4" || version === "v5" || config.useV4CompactUgcStrip;
+
+  return applyV4Patches ? applyV4GallerySlidePatches(v2Slides) : v2Slides;
 }
 
 /** View more photos sheet — keep extended gallery in sync with color selection */

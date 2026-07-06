@@ -482,7 +482,7 @@ function UgcCommunityRail({
   );
 }
 
-/** v4 — compact portrait strip under The Details ("Out in the wild"). */
+/** v4 — compact portrait strip after The Details ("Out in the wild"). */
 function UgcCompactWildStrip() {
   const { videos } = PDP_UGC_VIDEO_CAROUSEL;
   const { headline, socialHandle, previewCount } = PDP_UGC_COMMUNITY_COMPACT_SECTION;

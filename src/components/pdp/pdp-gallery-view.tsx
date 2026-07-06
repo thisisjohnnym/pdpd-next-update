@@ -714,21 +714,11 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v4: "Out in the wild" strip, then The Details. v2/v3: Details only.
+          // v5: craft (Feel → Up close) → Details → Out in the wild → Aging.
+          // v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
               ? [
-                  ...(versionConfig.useV4CompactUgcStrip
-                    ? [
-                        <PdpScrollReveal
-                          key={`ugc-wild-strip-${index}`}
-                          className={ECOMM_MODULE_CLASS}
-                          surface="light"
-                        >
-                          <PdpV2UgcCommunity />
-                        </PdpScrollReveal>,
-                      ]
-                    : []),
                   <ChapterAnchor
                     key={`anchor-the-details-${index}`}
                     id="the-details"
@@ -751,6 +741,17 @@ export function PdpGalleryView({
                       }
                     />
                   </PdpScrollReveal>,
+                  ...(versionConfig.useV4CompactUgcStrip
+                    ? [
+                        <PdpScrollReveal
+                          key={`ugc-wild-strip-${index}`}
+                          className={ECOMM_MODULE_CLASS}
+                          surface="light"
+                        >
+                          <PdpV2UgcCommunity />
+                        </PdpScrollReveal>,
+                      ]
+                    : []),
                 ]
               : [];
 
@@ -793,7 +794,14 @@ export function PdpGalleryView({
 
           if (slide.type === "leather-aging") {
             return [
-              <ChapterAnchor key={`anchor-the-feel-${index}`} id="the-feel" />,
+              ...(versionConfig.useV4CompactUgcStrip
+                ? []
+                : [
+                    <ChapterAnchor
+                      key={`anchor-the-feel-${index}`}
+                      id="the-feel"
+                    />,
+                  ]),
               gallerySection(
                 `leather-aging-${index}`,
                 versionConfig.useSimplifiedLeatherAging ? (
@@ -898,6 +906,10 @@ export function PdpGalleryView({
           }
 
           if (slide.type === "ugc-community") {
+            if (versionConfig.useV4CompactUgcStrip) {
+              return [];
+            }
+
             return [
               gallerySection(
                 `ugc-community-${index}`,
@@ -935,7 +947,20 @@ export function PdpGalleryView({
             return [];
           }
 
+          const isV5FeelLead =
+            versionConfig.useV4CompactUgcStrip &&
+            slide.dragZoom &&
+            slide.src.includes("tabby-product-front-916");
+
           return [
+            ...(isV5FeelLead
+              ? [
+                  <ChapterAnchor
+                    key={`anchor-the-feel-${index}`}
+                    id="the-feel"
+                  />,
+                ]
+              : []),
             gallerySection(
               `immersive-${index}-${slide.src}`,
               <PdpGalleryPortraitSlide

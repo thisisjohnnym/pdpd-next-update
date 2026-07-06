@@ -120,7 +120,7 @@ export const PDP_EDITORIAL_V2_SECTION = {
     "On model, in the studio, and packed for the day — full-grain leather from every angle.",
 } as const;
 
-/** v4 compact UGC strip — sits under The Details (Paper r5). */
+/** v4 compact UGC strip — follows The Details (Paper r5). */
 export const PDP_UGC_COMMUNITY_COMPACT_SECTION = {
   headline: "Out in the wild",
   socialHandle: {
