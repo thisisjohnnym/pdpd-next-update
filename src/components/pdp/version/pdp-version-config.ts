@@ -360,29 +360,22 @@ const V3_CONFIG: PdpVersionConfig = {
 };
 
 /**
- * v4 — Paper r5 pivot. Inherits the full v3 baseline (r4 hero/CTA scroll model,
- * progressive color drawer) and layers the r5 refinements: no trench portrait
- * slide, five-up Details specs, and the A0 product still leading the hero
- * gallery. See docs/pdp-versions.md.
+ * v4 — Paper r5 pivot (frozen at Johnny's Jul 2026 production baseline).
+ * Inherits the full v3 baseline and layers the first r5 refinements shipped
+ * to pdp-next-sigma.vercel.app/v4. See docs/pdp-versions.md.
  */
 const V4_CONFIG: PdpVersionConfig = {
   ...V3_CONFIG,
   // r5 drops the full-viewport trench portrait slide.
   showTrenchPortraitSlide: false,
-  // r5 Details module: Dimensions / Weight / Carry / Capacity.
+  // r5 Details module: Height / Width / Depth / Weight / Strap drop.
   useV4Specs: true,
-  // r5 hero gallery: product still first (A0 bag on studio ground).
+  // r5 hero gallery leads with the A0 product still.
   leadGalleryWithProductStill: true,
-  heroGalleryStudioDragZoom: false,
-  gallerySlides: PDP_GALLERY_SLIDES_V4,
   // r5 color drawer demos the sold-out + Notify me affordance on Popular Colors.
   demoPopularColorStates: true,
   // r5 feedback: flatten the Add to bag pill (no color glow/shadow).
   flattenBuyBarCta: true,
-  // r5 docked buy bar: swatch + shade + chevron only (no grey "Color" caption).
-  hideBuyBarColorLabel: true,
-  // r5 color drawer: drop the grey "Size {n} · {price}" header meta.
-  hideColorSheetSizePrice: true,
   // r5 left-aligns the Reviews + More like this headings (Recently viewed stays centered).
   leftAlignModuleHeadings: true,
   // r5 squares the product-card corners in More like this + Recently viewed.
@@ -391,15 +384,8 @@ const V4_CONFIG: PdpVersionConfig = {
   hideTextLinkArrows: true,
   // r5 bumps the UGC section heading to the larger 24px type.
   useV4UgcHeadingType: true,
-  // r5 Details closer-look — horizontal peek rail with dot pagination.
-  useV4DetailsTileCarousel: true,
-  // r5 drops the closer-look tile gallery — specs only for now.
-  showDetailsCloserLook: false,
-  // r5 replaces the editorial carousel with a craftsmanship carousel module.
-  useV4CraftsmanshipLayout: true,
   // r5 grouped padding/spacing refresh across the shared modules.
   useV4ModuleSpacing: true,
-  useV4CompactUgcStrip: true,
   // r5 restructures the leather-aging module (image on top, single warm block).
   useV4LeatherAgingLayout: true,
   // r5 hides the Coach / Coach Outlet brand switcher above the hero.
@@ -408,7 +394,23 @@ const V4_CONFIG: PdpVersionConfig = {
   enableHeroReveal: false,
   // r5 scroll-triggered per-element reveals (headlines blur, blocks lift).
   useV4GranularScrollReveal: true,
-  // v1 care upsell returns on the r5 leather-aging layout (hidden at "New").
+};
+
+/**
+ * v5 — Sean r5 polish round (Jul 2026). Inherits the frozen v4 baseline and
+ * layers compact UGC, craftsmanship carousel, reviews preview, details rail,
+ * buy-bar/color-sheet tweaks, and gallery slide reshuffle. Share as
+ * `/v5` while `/v4` stays comparable to Johnny's last prod deploy.
+ */
+const V5_CONFIG: PdpVersionConfig = {
+  ...V4_CONFIG,
+  gallerySlides: PDP_GALLERY_SLIDES_V4,
+  hideBuyBarColorLabel: true,
+  hideColorSheetSizePrice: true,
+  useV4DetailsTileCarousel: true,
+  showDetailsCloserLook: false,
+  useV4CraftsmanshipLayout: true,
+  useV4CompactUgcStrip: true,
   showLeatherCareUpsell: true,
 };
 
@@ -417,6 +419,7 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v2: V2_CONFIG,
   v3: V3_CONFIG,
   v4: V4_CONFIG,
+  v5: V5_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

@@ -25,9 +25,3 @@
   opacity: 1;
   animation: none;
 }
-
-/* Out in the wild compact strip — square portrait tiles (Paper r5). */
-[data-pdp-version="v4"] .pdp-ugc-compact-card,
-[data-pdp-version="v4"] .pdp-ugc-compact-card img {
-  border-radius: 0;
-}

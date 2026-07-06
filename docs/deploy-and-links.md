@@ -16,8 +16,8 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 | Purpose | URL |
 |---------|-----|
-| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` |
-| Latest feedback round only | https://pdp-next-sigma.vercel.app/v4 |
+| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` · `/v5` |
+| Latest feedback round only | https://pdp-next-sigma.vercel.app/v5 |
 | Legacy baseline (same as v1) | https://pdp-next-sigma.vercel.app/ |
 | Stripped PDP (Kira) on latest round | https://pdp-next-sigma.vercel.app/v4/products/kira-crossbody-bag-18 |
 
@@ -81,7 +81,8 @@ PDP prototype — compare versions (same product, same deploy):
 v1 (frozen baseline):  https://pdp-next-sigma.vercel.app/v1
 v2 (first pivot):      https://pdp-next-sigma.vercel.app/v2
 v3 (r4 hero/CTA):      https://pdp-next-sigma.vercel.app/v3
-v4 (latest — r5):      https://pdp-next-sigma.vercel.app/v4
+v4 (Johnny r5 baseline): https://pdp-next-sigma.vercel.app/v4
+v5 (latest — Sean polish): https://pdp-next-sigma.vercel.app/v5
 ```
 
 For “what changed in the latest round,” point reviewers to [rounds/r5-v4.md](rounds/r5-v4.md).

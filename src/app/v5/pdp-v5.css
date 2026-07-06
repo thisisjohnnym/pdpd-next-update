@@ -1,0 +1,29 @@
+/*
+ * v5-only styles — Sean r5 polish round.
+ *
+ * RULES (enforced by scripts/check-pdp-version-boundaries.mjs):
+ * - Every selector here MUST be scoped under [data-pdp-version="v5"].
+ * - Never edit shared .pdp-* rules in globals.css for v5-only needs.
+ */
+
+[data-pdp-version="v5"] {
+  /* v5 design tokens land here as the round evolves. */
+}
+
+/* Match the v2/v3/v4 calm land — suppress hero-land enter animations. */
+[data-pdp-version="v5"] .pdp-hero-header-enter,
+[data-pdp-version="v5"] .pdp-hero-hud-enter,
+[data-pdp-version="v5"] .pdp-hero-bottom-enter {
+  animation: none;
+}
+
+[data-pdp-version="v5"] .pdp-social-rail-item {
+  opacity: 1;
+  animation: none;
+}
+
+/* Out in the wild compact strip — square portrait tiles (v5). */
+[data-pdp-version="v5"] .pdp-ugc-compact-card,
+[data-pdp-version="v5"] .pdp-ugc-compact-card img {
+  border-radius: 0;
+}
