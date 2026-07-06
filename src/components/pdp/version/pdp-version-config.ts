@@ -403,6 +403,7 @@ const V2_CONFIG: PdpVersionConfig = {
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
   compactUgcMoreCountOverride: 0,
+  moreLikeThisLargeCards: false,
 };
 
 /**
