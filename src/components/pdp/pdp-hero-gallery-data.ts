@@ -13,10 +13,15 @@ import type { PdpHeroShotType } from "./pdp-hero-framing";
  */
 export type PdpHeroSurface = "dark" | "light";
 
+/** Contextual CTA pinned to the hero gallery overlay on specific slides */
+export type PdpHeroOverlayCta = "fits-inside";
+
 type PdpHeroGalleryBaseSlide = {
   alt: string;
   shotType: PdpHeroShotType;
   headerSurface: PdpHeroSurface;
+  /** When set, the gallery overlay shows a CTA while this slide is active */
+  overlayCta?: PdpHeroOverlayCta;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -111,6 +116,29 @@ export function applyV4HeroGallery(
   ];
 }
 
+/** v5 hero land — 360° product spin. */
+export const HERO_GALLERY_V5_LEAD_SRC = "/videos/tabby26-spin.mp4";
+
+/** Move a slide to index 0 without mutating the frozen source array. */
+export function promoteHeroGallerySlideToLead(
+  slides: PdpHeroGallerySlide[],
+  leadSrc: string,
+): PdpHeroGallerySlide[] {
+  const leadIndex = slides.findIndex((slide) => slide.src === leadSrc);
+
+  if (leadIndex <= 0) {
+    return slides;
+  }
+
+  const leadSlide = slides[leadIndex]!;
+
+  return [
+    leadSlide,
+    ...slides.slice(0, leadIndex),
+    ...slides.slice(leadIndex + 1),
+  ];
+}
+
 /**
  * Side-scrolling hero gallery for Tabby Shoulder Bag 26.
  *
@@ -170,6 +198,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 open from above showing the empty leather-lined interior",
     shotType: "detail",
     headerSurface: "light",
+    overlayCta: "fits-inside",
   },
   {
     kind: "image",

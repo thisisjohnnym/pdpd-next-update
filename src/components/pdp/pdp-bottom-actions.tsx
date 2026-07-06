@@ -34,7 +34,8 @@ export function PdpBottomActions({
   const barRef = useRef<HTMLDivElement>(null);
   const playHeroEnter = useHeroEnterOnce();
 
-  const { showSectionJumpBar } = getPdpVersionConfig(usePdpVersion());
+  const { showSectionJumpBar, inlineBuyBarColorSwatches } =
+    getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
 
   useCtaBarHeight(barRef, mounted);
@@ -56,7 +57,7 @@ export function PdpBottomActions({
       ref={barRef}
       data-floating-cta-bar
       className={cn(
-        "pointer-events-none fixed inset-x-0 z-40 transition-transform duration-300 ease-out",
+        "pointer-events-none fixed inset-x-0 z-40 bg-white transition-transform duration-300 ease-out",
         chromeHidden ? "translate-y-full" : "translate-y-0",
       )}
       style={{
@@ -78,6 +79,8 @@ export function PdpBottomActions({
           onColorSelect={onColorSelect}
           onAddToBag={onAddToBag}
           onColorSheetOpenChange={setColorSheetOpen}
+          hideColor={inlineBuyBarColorSwatches}
+          inlineColorSwatches={false}
           className="gap-2.5"
         />
       </div>

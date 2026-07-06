@@ -9,6 +9,7 @@ import {
   pdpCarouselScrollWrapClass,
 } from "../pdp-carousel";
 import { PDP_EDITORIAL_V2_CARDS, PDP_EDITORIAL_V2_SECTION } from "./pdp-data-v2";
+import { PDP_HERO_FITS_INSIDE_TARGET_ID } from "./pdp-hero-fits-inside-button";
 import { pdpType } from "../pdp-type";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
@@ -82,6 +83,7 @@ export function PdpV2EditorialCarousel() {
               <PdpRevealItem
                 key={card.id}
                 as="article"
+                id={card.id === "capacity" ? PDP_HERO_FITS_INSIDE_TARGET_ID : undefined}
                 delay={revealStaggerDelay(index)}
                 className={cn(
                   "flex w-[335px] shrink-0 snap-start snap-always flex-col bg-white pb-6",

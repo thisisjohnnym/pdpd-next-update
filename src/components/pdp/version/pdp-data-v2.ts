@@ -1,4 +1,4 @@
-import { PDP_GALLERY_SLIDES, type PdpGallerySlide } from "../pdp-data";
+import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -17,11 +17,17 @@ export type PdpGalleryUgcCommunitySlide = {
   type: "ugc-community";
 };
 
+/** v5-only styling carousel — shoulder, crossbody, and on-model looks */
+export type PdpGalleryWaysToWearSlide = {
+  type: "ways-to-wear";
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
   | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
-  | PdpGalleryUgcCommunitySlide;
+  | PdpGalleryUgcCommunitySlide
+  | PdpGalleryWaysToWearSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
 export type PdpEditorialV2Card = {
@@ -131,6 +137,29 @@ export const PDP_UGC_COMMUNITY_COMPACT_SECTION = {
   previewCount: 3,
 } as const;
 
+/** Lifestyle themes for the v5 Out in the wild strip — replaces Videos / Photos. */
+export type PdpUgcWildTopicId = "weekend" | "commute" | "going-out" | "style";
+
+type PdpUgcWildTopic = {
+  id: PdpUgcWildTopicId;
+  label: string;
+};
+
+export const PDP_UGC_WILD_TOPICS = [
+  { id: "weekend", label: "Weekend" },
+  { id: "commute", label: "Commute" },
+  { id: "going-out", label: "Going out" },
+  { id: "style", label: "Style" },
+] satisfies PdpUgcWildTopic[];
+
+/** TikTok clip → theme (ids from `PDP_UGC_VIDEO_CAROUSEL`). */
+const PDP_UGC_WILD_VIDEO_TOPICS: Record<string, PdpUgcWildTopicId> = {
+  "ugc-rachblaire": "weekend",
+  "ugc-katiemcev0y": "commute",
+  "ugc-itsnani333": "going-out",
+  "ugc-lolalilylang": "style",
+};
+
 /** v4 section intro — subtext between headline and TikTok CTA (Paper L5X-0). */
 export const PDP_UGC_COMMUNITY_SECTION = {
   subtext: "Real people, real context — not random snaps.",
@@ -146,6 +175,8 @@ export type PdpUgcCommunityPhoto = {
   /** Short pull quote from the customer */
   quote?: string;
   verified?: boolean;
+  /** v5 Out in the wild topic grouping */
+  topicId: PdpUgcWildTopicId;
 };
 
 /** v4 UGC community photo rail — contextual customer stills (not studio product shots). */
@@ -158,6 +189,7 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
     caption: "Saturday coffee run",
     quote: "My go-to for slow weekend mornings.",
     verified: true,
+    topicId: "weekend",
   },
   {
     id: "city-commute",
@@ -167,6 +199,7 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
     caption: "City commute",
     quote: "Reads polished without feeling precious.",
     verified: true,
+    topicId: "commute",
   },
   {
     id: "mirror-selfie",
@@ -176,6 +209,7 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
     caption: "Getting ready",
     quote: "Higher on the hip — exactly where I want it for going out.",
     verified: true,
+    topicId: "going-out",
   },
   {
     id: "outfit-flat",
@@ -184,8 +218,40 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
     handle: "Sam K.",
     caption: "OOTD flat lay",
     quote: "Anchors the whole look without trying too hard.",
+    topicId: "style",
   },
 ] satisfies PdpUgcCommunityPhoto[];
+
+export type PdpUgcWildPreviewItem =
+  | { kind: "video"; id: string; video: PdpUgcVideo }
+  | { kind: "photo"; id: string; photo: PdpUgcCommunityPhoto };
+
+/** Photos + videos for one lifestyle topic — alternates clip then still. */
+export function listUgcWildItemsForTopic(
+  topicId: PdpUgcWildTopicId,
+  videos: readonly PdpUgcVideo[],
+): PdpUgcWildPreviewItem[] {
+  const photos = PDP_UGC_COMMUNITY_PHOTOS.filter((photo) => photo.topicId === topicId);
+  const topicVideos = videos.filter(
+    (video) => PDP_UGC_WILD_VIDEO_TOPICS[video.id] === topicId,
+  );
+  const items: PdpUgcWildPreviewItem[] = [];
+  const max = Math.max(photos.length, topicVideos.length);
+
+  for (let index = 0; index < max; index += 1) {
+    const video = topicVideos[index];
+    const photo = photos[index];
+
+    if (video) {
+      items.push({ kind: "video", id: video.id, video });
+    }
+    if (photo) {
+      items.push({ kind: "photo", id: photo.id, photo });
+    }
+  }
+
+  return items;
+}
 
 /**
  * Slide types dropped from the v2 page flow (kept in v1).
@@ -295,7 +361,7 @@ export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALL
 const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
   headline: "Feel the leather",
   subtext:
-    "Crafted to be seen—and examined. Press and hold to explore the leather grain, signature hardware, and the details that make every Tabby unique.",
+    "Crafted to be seen—and examined. Hold to explore the leather grain, signature hardware, and the details that make every Tabby unique.",
   aspect: "4/5" as const,
   objectPosition: "center 62%",
 } as const;
@@ -330,3 +396,51 @@ export function applyV4GallerySlidePatches(
 export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePatches(
   buildV2Slides(PDP_GALLERY_SLIDES),
 );
+
+export const PDP_WAYS_TO_WEAR_SECTION = {
+  headline: "Ways to wear",
+  body:
+    "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
+} as const;
+
+export type PdpWaysToWearStyle = {
+  id: string;
+  label: string;
+  caption: string;
+  src: string;
+  alt: string;
+};
+
+/** Shoulder and crossbody carry — large editorial stills for v5 */
+export const PDP_WAYS_TO_WEAR_STYLES = [
+  {
+    id: "shoulder",
+    label: "Shoulder carry",
+    caption: "Relaxed, elevated styling for everyday wear.",
+    src: "/images/gallery/tabby-leather-on-model-tee.png",
+    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a Coach tee and suede skirt",
+  },
+  {
+    id: "crossbody",
+    label: "Crossbody",
+    caption: "Hands-free comfort for commuting, travel, and everyday movement.",
+    src: "/images/gallery/tabby-on-model-trench.jpg",
+    alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
+  },
+] satisfies PdpWaysToWearStyle[];
+
+/** Insert the v5 Ways to wear module immediately after Up close / editorial carousel. */
+export function applyV5GallerySlidePatches(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  const result: PdpGallerySlideV2[] = [];
+
+  for (const slide of slides) {
+    result.push(slide);
+    if (slide.type === "editorial-carousel-v2") {
+      result.push({ type: "ways-to-wear" });
+    }
+  }
+
+  return result;
+}

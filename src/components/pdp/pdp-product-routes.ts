@@ -1,4 +1,5 @@
 import type { PdpProductId } from "./pdp-products";
+import type { PdpVersion } from "./version/pdp-version-context";
 import {
   DEFAULT_TABBY_SLUG,
   parseTabbySlug,
@@ -39,6 +40,21 @@ export function productPath(
   }
 
   return tabbyProductPath(options.tabbySlug ?? DEFAULT_TABBY_SLUG, options.colorId);
+}
+
+/** Keep the active PDP version when linking to another product slug. */
+export function versionedProductPath(
+  version: PdpVersion,
+  productId: PdpProductId,
+  options: { tabbySlug?: string; colorId?: string } = {},
+): string {
+  const path = productPath(productId, options);
+
+  if (version === "v1") {
+    return path;
+  }
+
+  return `/${version}${path}`;
 }
 
 /** In-place URL update — color/style changes within the active product */

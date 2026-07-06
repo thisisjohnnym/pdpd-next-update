@@ -22,8 +22,55 @@
   animation: none;
 }
 
-/* Out in the wild compact strip — square portrait tiles (v5). */
+/* Gallery → docked buy bar — no hairline between studio ground and white tray. */
+[data-pdp-version="v5"] .pdp-hero-immersive--fill-frame {
+  background-color: #f0f0f0;
+  margin-bottom: -1px;
+}
+
+[data-pdp-version="v5"] .pdp-hero-docked-footer {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v5"] .pdp-hero-docked-footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  pointer-events: none;
+}
+
+/* Below-fold color rail — no section dividers between ATB, tabs, and swatches. */
+[data-pdp-version="v5"] .pdp-hero-below-fold-colors,
+[data-pdp-version="v5"] [aria-label="Color and size"],
+[data-pdp-version="v5"] [aria-label="All colors"] {
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v5"] .pdp-hero-below-fold-colors [role="tablist"],
+[data-pdp-version="v5"] .pdp-hero-below-fold-colors [role="listbox"],
+[data-pdp-version="v5"] [aria-label="Color and size"] [role="tablist"],
+[data-pdp-version="v5"] [aria-label="Color and size"] [role="listbox"],
+[data-pdp-version="v5"] [aria-label="All colors"] [role="tablist"],
+[data-pdp-version="v5"] [aria-label="All colors"] [role="listbox"] {
+  border: 0;
+  box-shadow: none;
+}
+
 [data-pdp-version="v5"] .pdp-ugc-compact-card,
 [data-pdp-version="v5"] .pdp-ugc-compact-card img {
   border-radius: 0;
+}
+
+/* Explore the Tabby family — editorial product navigation below color + ATB. */
+[data-pdp-version="v5"] .pdp-tabby-family-explorer {
+  border: 0;
+  box-shadow: none;
 }

@@ -37,7 +37,9 @@ export function PdpV3GalleryOverlay({
       <div className={cn("pointer-events-none", !useV4ModuleSpacing && "pl-2")}>
         <PdpHeroGalleryIndicator />
       </div>
-      <PdpV3ArButton onOpenArTryOn={onOpenArTryOn} />
+      <div className="pointer-events-none flex shrink-0 flex-col items-center">
+        <PdpV3ArButton onOpenArTryOn={onOpenArTryOn} />
+      </div>
     </div>
   );
 }

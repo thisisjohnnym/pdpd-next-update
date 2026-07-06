@@ -969,9 +969,20 @@ html.pdp-panel-scroll {
 
 /* Inside PdpHeroShell — match inset media frame, not raw viewport */
 .pdp-hero-immersive--fill-frame {
-  flex: 1 1 auto;
+  flex: 1 1 0%;
   min-height: 0;
+  max-height: 100%;
   height: auto;
+  overflow: hidden;
+}
+
+/* Docked buy bar — gallery yields space; footer keeps full intrinsic height */
+.pdp-hero-media-frame--docked {
+  grid-template-rows: minmax(0, 1fr) auto auto;
+}
+
+.pdp-hero-media-frame--docked > .pdp-hero-docked-footer {
+  min-height: max-content;
 }
 
 .pdp-edge-to-edge__media,

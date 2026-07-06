@@ -15,13 +15,14 @@ import {
   pdpCarouselImageClass,
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
-  pdpUgcStoryCardCompactClass,
+  pdpReviewUgcMomentCardClass,
 } from "../pdp-carousel";
+import { PdpAiInsightCard } from "../pdp-ai-insight-card";
 import { PdpStarRating } from "../pdp-review-comment";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpModuleHeadlineDisplayClass } from "../pdp-module-section";
-import { pdpPressableClass, pdpType } from "../pdp-type";
+import { pdpPillRadiusClass, pdpPressableClass, pdpType } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 import { useDragToScroll } from "../use-infinite-centered-carousel";
 
@@ -67,7 +68,7 @@ type PdpV2ReviewsProps = {
 
 function V4SectionLabel({ children }: { children: string }) {
   return (
-    <p className="font-sans m-0 text-[11px] leading-[14px] tracking-[0.06em] text-neutral-400 uppercase">
+    <p className="font-sans m-0 text-[11px] leading-[14px] tracking-[0.06em] text-neutral-600 uppercase">
       {children}
     </p>
   );
@@ -81,23 +82,23 @@ function ReviewUgcMomentCard({
   className?: string;
 }) {
   return (
-    <figure className={cn("m-0 flex min-w-0 flex-col gap-2", className)}>
+    <figure className={cn("m-0 flex min-w-0 flex-col gap-1.5", className)}>
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-none bg-neutral-100">
         <Image
           src={photo.src}
           alt={photo.alt}
           fill
           className={cn("object-cover object-center", pdpCarouselImageClass)}
-          sizes="45vw"
+          sizes="32vw"
         />
       </div>
       {(photo.caption || photo.quote || photo.handle) ? (
-        <figcaption className="flex flex-col gap-1">
+        <figcaption className="flex flex-col gap-0.5">
           {photo.caption ? (
-            <p className={cn(pdpType.label, "m-0 text-neutral-500")}>{photo.caption}</p>
+            <p className={cn(pdpType.micro, "m-0 text-neutral-500")}>{photo.caption}</p>
           ) : null}
           {photo.quote ? (
-            <p className={cn(pdpType.caption, "m-0 text-pretty text-neutral-600")}>
+            <p className={cn(pdpType.label, "m-0 text-pretty text-neutral-600")}>
               &ldquo;{photo.quote}&rdquo;
             </p>
           ) : null}
@@ -128,7 +129,7 @@ function ReviewUgcMomentsRail() {
           <ReviewUgcMomentCard
             key={photo.id}
             photo={photo}
-            className={pdpUgcStoryCardCompactClass}
+            className={pdpReviewUgcMomentCardClass}
           />
         ))}
       </div>
@@ -144,7 +145,9 @@ function V4ReviewSummary({
 }) {
   const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
   const { headline, reviewHighlights } = PDP_V4_REVIEWS_SUMMARY;
-  const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
+  const { body: aiBody, attribution: aiAttribution } = PDP_REVIEWS_AI_SUMMARY;
+  const { useConsistentModuleHeadings, squareButtonCorners } =
+    getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
   return (
@@ -184,8 +187,26 @@ function V4ReviewSummary({
           </PdpRevealItem>
         </div>
 
-        {/* Review highlights */}
+        {/* AI review summary — flat grey tray (matches reviews sheet) */}
         <PdpRevealItem delay={revealStaggerDelay(2)} className="w-full">
+          <PdpAiInsightCard
+            variant="minimal"
+            size="xs"
+            contained
+            containedSurface="flat"
+            showIcon={false}
+            clampBodyLines={2}
+            moreLabel="See more"
+            lessLabel="See less"
+            body={aiBody}
+            eyebrow={aiAttribution}
+            eyebrowPosition="below"
+            className="w-full"
+          />
+        </PdpRevealItem>
+
+        {/* Review highlights */}
+        <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
           <div className="flex flex-col gap-2">
             <V4SectionLabel>Review highlights</V4SectionLabel>
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
@@ -212,17 +233,14 @@ function V4ReviewSummary({
           </div>
         </PdpRevealItem>
 
-        {/* Real customer moments */}
-        <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
-          <div className="flex flex-col gap-2.5">
-            <V4SectionLabel>Real customer moments</V4SectionLabel>
-            <ReviewUgcMomentsRail />
-          </div>
+        {/* Customer photo rail — no section label */}
+        <PdpRevealItem delay={revealStaggerDelay(4)} className="w-full">
+          <ReviewUgcMomentsRail />
         </PdpRevealItem>
 
       </div>
 
-      <PdpRevealItem delay={revealStaggerDelay(4)}>
+      <PdpRevealItem delay={revealStaggerDelay(5)}>
         <div
           className={cn(
             "flex w-full flex-col pt-5",
@@ -234,11 +252,18 @@ function V4ReviewSummary({
               type="button"
               onClick={onReadAll}
               className={cn(
-                "font-extended h-[48px] w-full rounded-full border border-[#D4D4D4] px-[24px] text-center text-black transition-colors active:bg-neutral-100",
-                pdpType.label,
+                "font-extended flex h-[48px] w-full items-center justify-center px-6 text-center transition-colors",
+                pdpPillRadiusClass(squareButtonCorners),
+                pdpPressableClass,
+                useConsistentModuleHeadings
+                  ? "border border-neutral-200 bg-white text-black active:bg-neutral-50"
+                  : "border border-[#D4D4D4] text-black active:bg-neutral-100",
+                useConsistentModuleHeadings ? pdpType.body : pdpType.label,
               )}
             >
-              Read all reviews
+              {useConsistentModuleHeadings
+                ? `View all ${count} reviews`
+                : "Read all reviews"}
             </button>
           ) : null}
         </div>

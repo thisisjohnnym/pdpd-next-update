@@ -1,22 +1,28 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
+import {
+  pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
+} from "../pdp-carousel";
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
-import { pdpType } from "../pdp-type";
+import { pdpPillRadiusClass, pdpType } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
+import { useDragToScroll } from "../use-infinite-centered-carousel";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
-/** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` bumps ~10%. */
+/** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` bumps image; ATB stays compact. */
 const MORE_LIKE_THIS_CARD = {
   default: { width: 158, imageHeight: 198, buttonHeight: 38 },
-  large: { width: 174, imageHeight: 218, buttonHeight: 40 },
+  large: { width: 174, imageHeight: 218, buttonHeight: 32 },
 } as const;
 
 /**
@@ -35,11 +41,15 @@ export function PdpV2MoreLikeThis({
     squareProductCardCorners,
     useV4ModuleSpacing,
     moreLikeThisLargeCards,
+    squareButtonCorners,
   } = getPdpVersionConfig(usePdpVersion());
   const card = moreLikeThisLargeCards
     ? MORE_LIKE_THIS_CARD.large
     : MORE_LIKE_THIS_CARD.default;
   const { eyebrow, items } = PDP_MORE_LIKE_THIS;
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useDragToScroll(scrollRef);
 
   return (
     <section
@@ -65,20 +75,21 @@ export function PdpV2MoreLikeThis({
         </PdpTextReveal>
       </div>
 
-      {/* Static 3-card clip — 3rd card peeks; not scrollable (Paper B6C-0) */}
-      <div className="overflow-clip">
+      <div className={pdpCarouselScrollWrapClass}>
         <div
+          ref={scrollRef}
           className={cn(
-            "flex pb-1",
-            useV4ModuleSpacing ? "px-4" : "gap-2 px-2",
-            useV4ModuleSpacing && "gap-3",
+            pdpCarouselScrollClass,
+            "pdp-carousel-draggable flex items-start pb-1",
+            useV4ModuleSpacing ? "gap-3 pr-4" : "gap-2 pr-2",
           )}
+          aria-label="More like this products"
         >
           {items.map((item, index) => (
             <PdpRevealItem
               key={item.id}
               delay={revealStaggerDelay(index)}
-              className="flex shrink-0 flex-col gap-2"
+              className="flex shrink-0 snap-start snap-always flex-col gap-2"
               style={{ width: card.width }}
             >
               <div
@@ -120,12 +131,13 @@ export function PdpV2MoreLikeThis({
                 type="button"
                 onClick={() => onAddToBag?.(item.id)}
                 className={cn(
-                  "font-extended inline-flex w-full items-center justify-center rounded-full border border-[#D4D4D4] text-black transition-colors active:bg-neutral-50",
-                  moreLikeThisLargeCards ? "text-xs" : pdpType.micro,
+                  "font-extended inline-flex w-full items-center justify-center border border-[#D4D4D4] px-2 text-black transition-colors active:bg-neutral-50",
+                  pdpPillRadiusClass(squareButtonCorners),
+                  pdpType.micro,
                 )}
                 style={{ height: card.buttonHeight }}
               >
-                Add to bag
+                <span className="translate-y-0.5">Add to bag</span>
               </button>
             </PdpRevealItem>
           ))}

@@ -9,15 +9,16 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | r2 | `/v1` (+ legacy `/`) | [updates r2 `3-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/3-0) | Frozen brand baseline | Frozen | — (baseline) |
 | r3 | `/v2` | [updates r3 `4-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/4-0) | First stakeholder pivot (shorter page, UGC up) | Frozen | [r3-v2.md](r3-v2.md) |
 | r4 | `/v3` | [updates r4 `5-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/5-0) | Hero scrolls with page, docked CTA, color drawer | Frozen | [r4-v3.md](r4-v3.md) |
-| r5 | `/v4` | [updates r5 `6-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/6-0) | r5 feedback refinements | **Active** | [r5-v4.md](r5-v4.md) |
+| r5 | `/v4` | [updates r5 `6-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/6-0) | r5 feedback refinements | Frozen | [r5-v4.md](r5-v4.md) |
+| r6 | `/v5` | Sean r5 polish | Buy box merchandising, Tabby family nav, module polish | **Active** | — |
 
 ## Last production deploy
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 3, 2026 |
-| Commit | `c5f6236` — fix(v4): play-once scroll reveals instead of scrub freeze |
-| URL | https://pdp-next-sigma.vercel.app/v4 |
+| Date | Jul 6, 2026 |
+| Commit | _(pending ship)_ |
+| URL | https://pdp-next-sigma.vercel.app/v5 |
 
 Update this section after every `vercel --prod`.
 
@@ -27,7 +28,8 @@ Update this section after every `vercel --prod`.
 v1  https://pdp-next-sigma.vercel.app/v1
 v2  https://pdp-next-sigma.vercel.app/v2
 v3  https://pdp-next-sigma.vercel.app/v3
-v4  https://pdp-next-sigma.vercel.app/v4   ← latest
+v4  https://pdp-next-sigma.vercel.app/v4
+v5  https://pdp-next-sigma.vercel.app/v5   ← latest
 ```
 
 Deploy process: [deploy-and-links.md](../deploy-and-links.md) · Playbook: [prototype-versions.md](../prototype-versions.md)

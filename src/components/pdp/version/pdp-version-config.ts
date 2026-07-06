@@ -1,4 +1,5 @@
 import { PDP_GALLERY_SLIDES } from "../pdp-data";
+import { HERO_GALLERY_V5_LEAD_SRC } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
 
 import {
@@ -135,6 +136,11 @@ export type PdpVersionConfig = {
    */
   heroGalleryStudioDragZoom: boolean;
   /**
+   * Promote a specific hero still to slide 0 after the v4 reorder (v5 back-view
+   * land). Empty string = disabled. v5 only.
+   */
+  heroGalleryLeadSlideSrc: string;
+  /**
    * Pin demo stock states (Sold out + Notify me) onto distinct Popular Colors in
    * the progressive color drawer so it always demos the sold-out affordance
    * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
@@ -157,6 +163,17 @@ export type PdpVersionConfig = {
    * v5 only — v1/v2/v3/v4 keep the icon beside the label.
    */
   hideBuyBarAtbIcon: boolean;
+  /**
+   * Hide the color pill on the docked hero footer — land shows Add to bag only.
+   * Hide the color dropdown pill on docked hero land — inline swatch carousel still
+   * shows when inlineBuyBarColorSwatches is on. v5 only.
+   */
+  hideDockedBuyBarColor: boolean;
+  /**
+   * Show all color swatches inline below the hero shell (below the fold).
+   * Docked hero + floating sticky bar show Add to bag only. v5 only.
+   */
+  inlineBuyBarColorSwatches: boolean;
   /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
@@ -195,6 +212,10 @@ export type PdpVersionConfig = {
    */
   squareProductCardCorners: boolean;
   /**
+   * Square pill CTAs — Add to bag, color selector, reviews, sheets. v5 only.
+   */
+  squareButtonCorners: boolean;
+  /**
    * Hide the trailing arrow icon on the "Write a review" and "View again" text
    * links (Paper r5 `MAE-0` / `ME6-0` show plain underlined text). v4 only.
    */
@@ -223,6 +244,11 @@ export type PdpVersionConfig = {
    * standalone `ugc-community` gallery slide.
    */
   useV4CompactUgcStrip: boolean;
+  /**
+   * Group Out in the wild by lifestyle topic (Weekend / Commute / …) instead of
+   * Videos / Photos. v5 compact strip + sheet only.
+   */
+  useUgcTopicThemes: boolean;
   /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
@@ -258,7 +284,8 @@ export type PdpVersionConfig = {
   useV4LeatherAgingLayout: boolean;
   /**
    * Leather aging — left-aligned title + caption above the image on white
-   * (no warm `#EFEAE7` block). Matches Up close / Reviews header pattern. v5 only.
+   * Leather aging — title + evergreen intro above the image; slider below with
+   * no per-stage caption (no warm `#EFEAE7` block). v5 only.
    */
   leatherAgingHeaderAboveImage: boolean;
   /**
@@ -272,6 +299,20 @@ export type PdpVersionConfig = {
    * wrappers and the ambient section-level fade.
    */
   useV4GranularScrollReveal: boolean;
+  /**
+   * Horizontal "Ways to wear it" styling module after Up close. v5 only.
+   */
+  showWaysToWearModule: boolean;
+  /**
+   * Pad below-fold hero color rows with visual-only swatch placeholders for
+   * sparse size tabs. v5 prototype only.
+   */
+  demoHeroColorSwatchRow: boolean;
+  /**
+   * Hide Tabby size cards in the buy-box selector and show editorial
+   * "Explore the Tabby family" product navigation below color. v5 only.
+   */
+  showTabbyAlsoAvailableAs: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -308,10 +349,13 @@ const V1_CONFIG: PdpVersionConfig = {
   useV4Specs: false,
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
+  heroGalleryLeadSlideSrc: "",
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
   hideBuyBarAtbIcon: false,
+  hideDockedBuyBarColor: false,
+  inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -319,6 +363,7 @@ const V1_CONFIG: PdpVersionConfig = {
   heroMaterialSubtitleLine: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
+  squareButtonCorners: false,
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
   useV4DetailsTileCarousel: false,
@@ -332,7 +377,11 @@ const V1_CONFIG: PdpVersionConfig = {
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
+  useUgcTopicThemes: false,
   compactUgcMoreCountOverride: 0,
+  showWaysToWearModule: false,
+  demoHeroColorSwatchRow: false,
+  showTabbyAlsoAvailableAs: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -378,10 +427,13 @@ const V2_CONFIG: PdpVersionConfig = {
   useV4Specs: false,
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
+  heroGalleryLeadSlideSrc: "",
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
   hideBuyBarAtbIcon: false,
+  hideDockedBuyBarColor: false,
+  inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -389,6 +441,7 @@ const V2_CONFIG: PdpVersionConfig = {
   heroMaterialSubtitleLine: false,
   leftAlignModuleHeadings: false,
   squareProductCardCorners: false,
+  squareButtonCorners: false,
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
   useV4DetailsTileCarousel: false,
@@ -402,8 +455,12 @@ const V2_CONFIG: PdpVersionConfig = {
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
+  useUgcTopicThemes: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
+  showWaysToWearModule: false,
+  demoHeroColorSwatchRow: false,
+  showTabbyAlsoAvailableAs: false,
 };
 
 /**
@@ -472,20 +529,28 @@ const V5_CONFIG: PdpVersionConfig = {
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideBuyBarAtbIcon: true,
+  hideDockedBuyBarColor: true,
+  inlineBuyBarColorSwatches: true,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   showDetailsCloserLook: false,
   useV4CraftsmanshipLayout: true,
   useV4CompactUgcStrip: true,
+  useUgcTopicThemes: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
+  heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
   heroMaterialSubtitleLine: true,
   leatherAgingHeaderAboveImage: true,
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,
+  squareButtonCorners: true,
+  showWaysToWearModule: true,
+  demoHeroColorSwatchRow: true,
+  showTabbyAlsoAvailableAs: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

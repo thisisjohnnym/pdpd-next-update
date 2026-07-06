@@ -9,11 +9,14 @@ import { cn } from "@/lib/cn";
 import { PDP_LEATHER_AGING, PDP_LEATHER_CLEANER } from "./pdp-data";
 import {
   pdpAddIconLabelClass,
+  pdpPillRadiusClass,
   pdpPressableClass,
   pdpStrokeCtaClass,
   pdpStrokeCtaMutedClass,
   pdpType,
 } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { useMountTransition } from "./use-mount-transition";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
@@ -25,10 +28,12 @@ function AgingCareUpsellRow({
   product,
   added,
   onQuickAdd,
+  squareButtonCorners,
 }: {
   product: (typeof PDP_LEATHER_CLEANER.products)[number];
   added: boolean;
   onQuickAdd: () => void;
+  squareButtonCorners: boolean;
 }) {
   return (
     <div className="flex items-center gap-3 py-2.5">
@@ -57,6 +62,7 @@ function AgingCareUpsellRow({
         className={cn(
           "font-extended inline-flex shrink-0 items-center justify-center gap-0.5 px-2.5 py-1.5 text-[11px] leading-none tracking-[0.2px] transition-colors",
           added ? pdpStrokeCtaMutedClass : pdpStrokeCtaClass,
+          pdpPillRadiusClass(squareButtonCorners),
         )}
       >
         <span className={pdpAddIconLabelClass}>{added ? "Added" : "Add"}</span>
@@ -151,6 +157,7 @@ export function PdpLeatherAgingCareUpsell({
   className?: string;
 }) {
   const { careNudge } = PDP_LEATHER_AGING;
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const { isAdded: isCareAdded, confirmAdd: confirmCareAdd } =
     useTransientAddedSet();
 
@@ -191,6 +198,7 @@ export function PdpLeatherAgingCareUpsell({
               key={product.id}
               product={product}
               added={isCareAdded(product.id)}
+              squareButtonCorners={squareButtonCorners}
               onQuickAdd={() => {
                 onQuickAdd?.();
                 confirmCareAdd(product.id);

@@ -12,6 +12,7 @@ import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
   applyV4HeroGallery,
+  promoteHeroGallerySlideToLead,
   type PdpHeroGallerySlide,
 } from "./pdp-hero-gallery-data";
 import {
@@ -110,17 +111,28 @@ export function PdpHeroGallery({
     heroDockedBuyBar,
     leadGalleryWithProductStill,
     heroGalleryStudioDragZoom,
+    heroGalleryLeadSlideSrc,
   } = getPdpVersionConfig(usePdpVersion());
-  const orderedSlides = useMemo(
-    () =>
+  const orderedSlides = useMemo(() => {
+    let result =
       leadGalleryWithProductStill || heroGalleryStudioDragZoom
         ? applyV4HeroGallery(slides, {
             leadGalleryWithProductStill,
             heroGalleryStudioDragZoom,
           })
-        : slides,
-    [slides, leadGalleryWithProductStill, heroGalleryStudioDragZoom],
-  );
+        : slides;
+
+    if (heroGalleryLeadSlideSrc) {
+      result = promoteHeroGallerySlideToLead(result, heroGalleryLeadSlideSrc);
+    }
+
+    return result;
+  }, [
+    slides,
+    leadGalleryWithProductStill,
+    heroGalleryStudioDragZoom,
+    heroGalleryLeadSlideSrc,
+  ]);
   const loopedSlides = useMemo(
     () => loopCarouselItems(orderedSlides),
     [orderedSlides],
@@ -139,8 +151,13 @@ export function PdpHeroGallery({
   }, [setHeroChromeSurface, surface]);
 
   const galleryState = useMemo(
-    () => ({ activeIndex, count: orderedSlides.length, surface }),
-    [activeIndex, orderedSlides.length, surface],
+    () => ({
+      activeIndex,
+      count: orderedSlides.length,
+      surface,
+      overlayCta: orderedSlides[activeIndex]?.overlayCta,
+    }),
+    [activeIndex, orderedSlides, surface],
   );
 
   return (
@@ -150,8 +167,9 @@ export function PdpHeroGallery({
         data-header-surface={surface}
         className={cn(
           HERO_IMMERSIVE_CLASS,
-          fillFrame && "pdp-hero-immersive--fill-frame flex-1",
-          "shrink-0",
+          fillFrame
+            ? "pdp-hero-immersive--fill-frame min-h-0 flex-1"
+            : "shrink-0",
           galleryPanelClassName(isLastPanel),
         )}
       >

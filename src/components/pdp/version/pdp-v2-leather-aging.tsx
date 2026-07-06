@@ -100,7 +100,7 @@ function PdpLeatherAgingV4({
 }) {
   const { leatherAgingHeaderAboveImage, useConsistentModuleHeadings } =
     getPdpVersionConfig(usePdpVersion());
-  const { stages, title } = PDP_LEATHER_AGING;
+  const { stages, title, intro } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
   const reducedMotion = useReducedMotion();
 
@@ -244,11 +244,15 @@ function PdpLeatherAgingV4({
     ? "bg-white"
     : "bg-[#EEE9E7]";
 
-  const stageCaption = (
+  const stageCaption = leatherAgingHeaderAboveImage ? (
+    <p className={cn(pdpModuleIntroClass("left"), "m-0 text-pretty leading-snug")}>
+      {intro}
+    </p>
+  ) : (
     <p
       className={cn(
-        pdpModuleIntroClass(leatherAgingHeaderAboveImage ? "left" : "center"),
-        !leatherAgingHeaderAboveImage && "min-h-[52px]",
+        pdpModuleIntroClass("center"),
+        "min-h-[52px]",
       )}
     >
       {`${stage.timeline} — ${stage.summary}`}
@@ -256,7 +260,14 @@ function PdpLeatherAgingV4({
   );
 
   const stageSlider = (
-    <div className="mx-auto flex w-full max-w-[calc(100%-3rem)] flex-col gap-[18px] select-none">
+    <div
+      className={cn(
+        "flex w-full flex-col gap-[18px] select-none",
+        leatherAgingHeaderAboveImage
+          ? "mx-auto w-full max-w-[300px]"
+          : "mx-auto max-w-[calc(100%-3rem)]",
+      )}
+    >
       {/* dot track — press and drag the salmon thumb between stages */}
       <div
         role="slider"
@@ -368,7 +379,7 @@ function PdpLeatherAgingV4({
         className="w-full shrink-0 bg-white px-4 pt-6 pb-6"
       >
         <PdpRevealItem>
-          <div className="mb-3 flex flex-col items-start gap-2">
+          <div className="mb-3 flex flex-col gap-2">
             <PdpModuleHeading spacing="none" className="text-left">
               {title}
             </PdpModuleHeading>
@@ -383,7 +394,7 @@ function PdpLeatherAgingV4({
         </PdpRevealItem>
 
         <PdpRevealItem delay={revealStaggerDelay(2)}>
-          <div className="flex w-full flex-col items-stretch gap-4 pt-6">
+          <div className="flex w-full flex-col items-stretch gap-4 border-t border-neutral-200 pt-5">
             {stageSlider}
             {showCareUpsell ? (
               <PdpLeatherAgingCareUpsell

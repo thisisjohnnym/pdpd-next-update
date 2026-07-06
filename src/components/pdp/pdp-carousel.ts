@@ -42,6 +42,16 @@ const pdpUgcStoryCardClass =
 export const pdpUgcStoryCardCompactClass =
   "w-[calc((100vw-1.25rem)/1.8)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
 
+/** Real customer moments — smaller portrait cards (~2.75 across with peek). */
+export const pdpReviewUgcMomentCardClass =
+  "w-[calc((100vw-1.25rem)/2.75)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/4.5)]";
+
+/** v5 Out in the wild + Real customer moments — matches reviews highlight card width. */
+export const pdpUgcWildMomentCardClass = cn(
+  pdpUgcStoryCardCompactClass,
+  "relative aspect-[4/5] overflow-hidden rounded-none bg-neutral-200 [&_img]:rounded-none [&_video]:rounded-none",
+);
+
 /** UGC video tiles (9:16) — ~1.1 across with next clip peek, gap-2 */
 const pdpUgcVideoCardClass =
   "w-[calc((100vw-1.25rem)/1.1)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/2.2)]";
@@ -75,9 +85,6 @@ export const pdpUgcVideoCardInfiniteClass =
 export const pdpUgcVideoCardInfiniteV4Class =
   "w-[calc((100vw-1.25rem)/1.35)] shrink-0 snap-center snap-always lg:w-[calc((100vw-2.25rem)/2.45)]";
 
-/** v4 compact wild strip — ~4 portrait tiles across, square corners (Paper r5). */
-export const pdpUgcCompactCardClass =
-  "pdp-ugc-compact-card relative aspect-[9/16] w-[calc((100vw-2rem-1.5rem)/4)] shrink-0 snap-start snap-always overflow-hidden rounded-none bg-neutral-200 [&_img]:rounded-none [&_video]:rounded-none";
 
 /** UGC video infinite rail — active tile centered with side peek */
 export const pdpUgcVideoInfiniteScrollClass = cn(

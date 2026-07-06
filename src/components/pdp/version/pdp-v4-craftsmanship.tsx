@@ -22,6 +22,7 @@ import {
   PDP_CRAFTSMANSHIP_V4_SECTION,
   type PdpCraftsmanshipV4Card,
 } from "./pdp-data-v2";
+import { PDP_HERO_FITS_INSIDE_TARGET_ID } from "./pdp-hero-fits-inside-button";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
@@ -30,14 +31,17 @@ function CraftsmanshipCard({
   card,
   index,
   className,
+  anchorId,
 }: {
   card: PdpCraftsmanshipV4Card;
   index: number;
   className?: string;
+  anchorId?: string;
 }) {
   return (
     <PdpRevealItem
       as="article"
+      id={anchorId}
       delay={revealStaggerDelay(index)}
       className={cn(
         "flex w-[335px] shrink-0 snap-start snap-always flex-col gap-3",
@@ -107,7 +111,14 @@ export function PdpV4Craftsmanship() {
           aria-label="Up close material highlights"
         >
           {PDP_CRAFTSMANSHIP_V4_CARDS.map((card, index) => (
-            <CraftsmanshipCard key={card.id} card={card} index={index} />
+            <CraftsmanshipCard
+              key={card.id}
+              card={card}
+              index={index}
+              anchorId={
+                card.id === "interior" ? PDP_HERO_FITS_INSIDE_TARGET_ID : undefined
+              }
+            />
           ))}
         </div>
       </div>

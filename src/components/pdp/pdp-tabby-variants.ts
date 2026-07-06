@@ -231,6 +231,21 @@ export function getTabbyProductTitle(
   return `Tabby Shoulder Bag ${size}`;
 }
 
+/** Editorial family-nav label — "Soft Tabby", "Pillow Tabby", … */
+export function getTabbyFamilyNavLabel(styleId: TabbyStyleId): string {
+  const style = getTabbyStyle(styleId);
+
+  if (styleId === "pillow-quilted") {
+    return "Pillow Tabby";
+  }
+
+  if (styleId === "classic") {
+    return "Classic Tabby";
+  }
+
+  return `${style.label} Tabby`;
+}
+
 export function tabbyProductPath(slug: string, colorId?: string): string {
   const base = `/products/${slug}`;
   return colorId ? `${base}?color=${encodeURIComponent(colorId)}` : base;

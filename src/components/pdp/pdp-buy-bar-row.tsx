@@ -9,7 +9,7 @@ import { PdpColorSelector } from "./pdp-color-selector";
 import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
-import { pdpPressableSolidClass } from "./pdp-type";
+import { pdpPillRadiusClass, pdpPressableSolidClass } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 
@@ -21,6 +21,12 @@ type PdpBuyBarRowProps = {
   hideColor?: boolean;
   /** Hide the grey "Color" caption in the inline pill (docked hero buy bar). */
   hideColorLabel?: boolean;
+  /** Stack color below ATB on docked hero land only (floating bar stays inline). */
+  stackColorBelow?: boolean;
+  /** Extend inline swatch carousel to hero footer edges */
+  swatchCarouselBleed?: boolean;
+  /** When false, color pill opens the sheet tray (sticky buy bar). Defaults to version config. */
+  inlineColorSwatches?: boolean;
   className?: string;
 };
 
@@ -32,13 +38,17 @@ export function PdpBuyBarRow({
   onColorSheetOpenChange,
   hideColor = false,
   hideColorLabel = false,
+  stackColorBelow = false,
+  swatchCarouselBleed = false,
+  inlineColorSwatches,
   className,
 }: PdpBuyBarRowProps) {
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
-  const { flattenBuyBarCta, hideBuyBarColorLabel, hideBuyBarAtbIcon } =
+  const { flattenBuyBarCta, hideBuyBarColorLabel, hideBuyBarAtbIcon, squareButtonCorners, inlineBuyBarColorSwatches } =
     getPdpVersionConfig(usePdpVersion());
+  const showInlineSwatches = inlineColorSwatches ?? inlineBuyBarColorSwatches;
   const hideLabel = hideColorLabel || hideBuyBarColorLabel;
 
   const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
@@ -76,57 +86,97 @@ export function PdpBuyBarRow({
     onColorSelect(id);
   };
 
-  return (
-    <div className={cn("flex w-full items-stretch gap-2.5", className)}>
-      {!hideColor ? (
-        <div className={cn("flex items-center", isTabbyProduct ? "min-w-0 flex-1" : "shrink-0")}>
-          <PdpColorSelector
-            colors={colors}
-            selectedId={activeColorId}
-            onSelect={handleColorSelect}
-            inline
-            stretch={isTabbyProduct}
-            onOpenChange={handleColorSheetOpenChange}
-            heightClass="h-[50px]"
-            hideLabel={hideLabel}
+  const atbButton = (
+    <button
+      type="button"
+      onClick={onAddToBag}
+      className={cn(
+        "font-extended relative isolate flex h-[50px] min-w-0 w-full items-center justify-center gap-2 overflow-hidden px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
+        pdpPillRadiusClass(squareButtonCorners),
+        pdpPressableSolidClass,
+        "active:brightness-90",
+      )}
+      style={{
+        backgroundColor: atbChrome.background,
+        color: atbChrome.foreground,
+        boxShadow: flattenBuyBarCta ? "none" : atbChrome.glow,
+      }}
+    >
+      <span
+        className={cn(
+          "relative z-[1] flex min-w-0 items-center justify-center",
+          !hideBuyBarAtbIcon && "gap-2",
+        )}
+      >
+        {!hideBuyBarAtbIcon ? (
+          <MaterialIcon
+            name="shopping_bag"
+            size={18}
+            className="shrink-0 -translate-y-px"
+            style={{ color: atbChrome.foreground }}
+            aria-hidden
           />
-        </div>
-      ) : null}
+        ) : null}
+        <span className="translate-y-px text-[14px]">Add to bag</span>
+      </span>
+    </button>
+  );
 
-      <div className={hideColor ? "min-w-0 w-full flex-1" : "min-w-0 flex-1"}>
-        <button
-          type="button"
-          onClick={onAddToBag}
-          className={cn(
-            "font-extended relative isolate flex h-[50px] min-w-0 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
-            pdpPressableSolidClass,
-            "active:brightness-90",
-          )}
-          style={{
-            backgroundColor: atbChrome.background,
-            color: atbChrome.foreground,
-            boxShadow: flattenBuyBarCta ? "none" : atbChrome.glow,
-          }}
-        >
-          <span
-            className={cn(
-              "relative z-[1] flex min-w-0 items-center justify-center",
-              !hideBuyBarAtbIcon && "gap-2",
-            )}
-          >
-            {!hideBuyBarAtbIcon ? (
-              <MaterialIcon
-                name="shopping_bag"
-                size={18}
-                className="shrink-0 -translate-y-px"
-                style={{ color: atbChrome.foreground }}
-                aria-hidden
-              />
-            ) : null}
-            <span className="translate-y-px text-[14px]">Add to bag</span>
-          </span>
-        </button>
-      </div>
+  const colorSelector = !hideColor ? (
+    <div
+      className={cn(
+        "flex items-center",
+        inlineBuyBarColorSwatches && swatchCarouselBleed && "-mx-4 px-4",
+        showInlineSwatches
+          ? "w-full"
+          : stackColorBelow
+            ? "w-full"
+            : isTabbyProduct
+              ? "min-w-0 flex-1"
+              : "shrink-0",
+      )}
+    >
+      <PdpColorSelector
+        colors={colors}
+        selectedId={activeColorId}
+        onSelect={handleColorSelect}
+        inline
+        exposeAllSwatches={showInlineSwatches}
+        stretch={isTabbyProduct || stackColorBelow || showInlineSwatches}
+        onOpenChange={handleColorSheetOpenChange}
+        heightClass={stackColorBelow ? "h-[44px]" : "h-[50px]"}
+        hideLabel={hideLabel}
+        squared={squareButtonCorners}
+      />
+    </div>
+  ) : null;
+
+  const stackColor =
+    stackColorBelow || showInlineSwatches;
+
+  return (
+    <div
+      className={cn(
+        "flex w-full",
+        stackColor
+          ? "flex-col items-stretch gap-2"
+          : "items-stretch gap-2.5",
+        className,
+      )}
+    >
+      {stackColor ? (
+        <>
+          <div className="min-w-0 w-full">{atbButton}</div>
+          {colorSelector}
+        </>
+      ) : (
+        <>
+          {colorSelector}
+          <div className={hideColor ? "min-w-0 w-full flex-1" : "min-w-0 flex-1"}>
+            {atbButton}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -9,11 +9,11 @@ import { PDP_UGC_VIDEO_CAROUSEL, type PdpUgcVideo } from "../pdp-data";
 import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
-  pdpUgcCompactCardClass,
   pdpUgcVideoCardInfiniteClass,
   pdpUgcVideoCardInfiniteV4Class,
   pdpUgcVideoInfiniteScrollClass,
   pdpUgcVideoInfiniteScrollV4Class,
+  pdpUgcWildMomentCardClass,
 } from "../pdp-carousel";
 import { pdpModuleHeadlineDisplayClass, pdpModuleIntroClass } from "../pdp-module-section";
 import { pdpType } from "../pdp-type";
@@ -30,12 +30,16 @@ import {
   PDP_UGC_COMMUNITY_COMPACT_SECTION,
   PDP_UGC_COMMUNITY_PHOTOS,
   PDP_UGC_COMMUNITY_SECTION,
+  listUgcWildItemsForTopic,
   type PdpUgcCommunityPhoto,
+  type PdpUgcWildPreviewItem,
+  type PdpUgcWildTopicId,
 } from "./pdp-data-v2";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 import { PdpUgcCommunitySheet } from "../pdp-ugc-community-sheet";
 import { PdpUgcMediaToggle, type UgcMediaMode } from "../pdp-ugc-media-toggle";
+import { PdpUgcTopicToggle } from "../pdp-ugc-topic-toggle";
 import { useReducedMotion } from "../use-reduced-motion";
 
 /**
@@ -423,6 +427,29 @@ type UgcCompactPreviewItem =
   | { kind: "video"; id: string; video: PdpUgcVideo }
   | { kind: "photo"; id: string; src: string; alt: string };
 
+function UgcCompactPreviewTile({
+  item,
+}: {
+  item: UgcCompactPreviewItem | PdpUgcWildPreviewItem;
+}) {
+  if (item.kind === "video") {
+    return <UgcCompactVideoTile video={item.video} />;
+  }
+
+  const src = "photo" in item ? item.photo.src : item.src;
+  const alt = "photo" in item ? item.photo.alt : item.alt;
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      className="rounded-none object-cover object-center"
+      sizes="45vw"
+    />
+  );
+}
+
 /** Inline muted loop clip for the compact wild strip — poster-only when reduced motion. */
 function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
   const reducedMotion = useReducedMotion();
@@ -484,13 +511,23 @@ function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
 function UgcCompactWildStrip() {
   const { videos } = PDP_UGC_VIDEO_CAROUSEL;
   const { headline, socialHandle, previewCount } = PDP_UGC_COMMUNITY_COMPACT_SECTION;
-  const { compactUgcMoreCountOverride, useConsistentModuleHeadings } =
+  const { compactUgcMoreCountOverride, useConsistentModuleHeadings, useUgcTopicThemes } =
     getPdpVersionConfig(usePdpVersion());
   const scrollRef = useRef<HTMLDivElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mediaMode, setMediaMode] = useState<UgcMediaMode>("videos");
+  const [activeTopic, setActiveTopic] = useState<PdpUgcWildTopicId>("weekend");
 
-  const previewItems = useMemo((): UgcCompactPreviewItem[] => {
+  const topicItems = useMemo(
+    () => listUgcWildItemsForTopic(activeTopic, videos),
+    [activeTopic, videos],
+  );
+
+  const previewItems = useMemo((): (UgcCompactPreviewItem | PdpUgcWildPreviewItem)[] => {
+    if (useUgcTopicThemes) {
+      return topicItems.slice(0, previewCount);
+    }
+
     if (mediaMode === "videos") {
       return videos.slice(0, previewCount).map((video) => ({
         kind: "video",
@@ -505,10 +542,11 @@ function UgcCompactWildStrip() {
       src: photo.src,
       alt: photo.alt,
     }));
-  }, [videos, previewCount, mediaMode]);
+  }, [useUgcTopicThemes, topicItems, previewCount, mediaMode, videos]);
 
-  const calculatedMoreCount =
-    mediaMode === "videos"
+  const calculatedMoreCount = useUgcTopicThemes
+    ? Math.max(0, topicItems.length - previewItems.length)
+    : mediaMode === "videos"
       ? Math.max(0, videos.length - previewItems.length)
       : Math.max(0, PDP_UGC_COMMUNITY_PHOTOS.length - previewItems.length);
   const moreCount =
@@ -546,7 +584,11 @@ function UgcCompactWildStrip() {
           </PdpTextReveal>
         </div>
         <PdpTextReveal as="div" delay={120}>
-          <PdpUgcMediaToggle value={mediaMode} onChange={setMediaMode} />
+          {useUgcTopicThemes ? (
+            <PdpUgcTopicToggle value={activeTopic} onChange={setActiveTopic} />
+          ) : (
+            <PdpUgcMediaToggle value={mediaMode} onChange={setMediaMode} />
+          )}
         </PdpTextReveal>
       </div>
 
@@ -563,19 +605,9 @@ function UgcCompactWildStrip() {
             <PdpRevealItem
               key={item.id}
               delay={revealStaggerDelay(index)}
-              className={pdpUgcCompactCardClass}
+              className={pdpUgcWildMomentCardClass}
             >
-              {item.kind === "video" ? (
-                <UgcCompactVideoTile video={item.video} />
-              ) : (
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  className="rounded-none object-cover object-center"
-                  sizes="22vw"
-                />
-              )}
+              <UgcCompactPreviewTile item={item} />
             </PdpRevealItem>
           ))}
           {moreCount > 0 ? (
@@ -586,7 +618,7 @@ function UgcCompactWildStrip() {
               onClick={() => setSheetOpen(true)}
               aria-label={`View ${moreCount} more community posts`}
               className={cn(
-                pdpUgcCompactCardClass,
+                pdpUgcWildMomentCardClass,
                 "flex cursor-pointer items-center justify-center border-0 bg-neutral-800 p-0",
               )}
             >
@@ -602,6 +634,8 @@ function UgcCompactWildStrip() {
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         initialMediaMode={mediaMode}
+        initialTopic={activeTopic}
+        organizeByTopic={useUgcTopicThemes}
       />
     </section>
   );

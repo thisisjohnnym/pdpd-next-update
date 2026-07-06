@@ -28,7 +28,9 @@ import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
-import { pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
+import { pdpPillRadiusClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
@@ -154,7 +156,7 @@ function BagProductCard({
     <div
       className={cn(
         "flex overflow-hidden",
-        embedded ? "bg-transparent" : "rounded-lg bg-[#f2f2f2]",
+        embedded ? "bg-transparent" : "rounded-lg bg-neutral-50",
       )}
     >
       <div className="relative w-[7.25rem] shrink-0 self-stretch min-h-[6.75rem]">
@@ -189,6 +191,8 @@ function BagUpsellAddButton({
   added: boolean;
   onAdd: () => void;
 }) {
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+
   return (
     <button
       type="button"
@@ -197,6 +201,7 @@ function BagUpsellAddButton({
       className={cn(
         "font-extended inline-flex shrink-0 items-center justify-center gap-1 px-3.5 py-2 text-xs tracking-[0.2px] transition-colors",
         added ? pdpStrokeCtaMutedClass : pdpStrokeCtaClass,
+        pdpPillRadiusClass(squareButtonCorners),
       )}
     >
       <span className={pdpAddIconLabelClass}>
@@ -294,6 +299,7 @@ export function PdpAddToBagSheet({
     useTransientAddedSet();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
   const mounted = useOverlayDismiss(open, onClose);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
 
   const colors = getPdpColors(productId);
   const upsells = getPdpBagUpsells(productId);
@@ -369,14 +375,23 @@ export function PdpAddToBagSheet({
               savings={savings}
             />
           ) : (
-            <div className="mb-4 overflow-hidden rounded-2xl bg-neutral-100">
-              <BagProductCard
-                selectedColor={selectedColor}
-                product={product}
-                embedded
-              />
-              <PdpPayOverTimeCard embedded />
-            </div>
+            <>
+              <div
+                className={cn(
+                  "mb-3 overflow-hidden bg-neutral-50",
+                  squareButtonCorners ? "rounded-none" : "rounded-2xl",
+                )}
+              >
+                <BagProductCard
+                  selectedColor={selectedColor}
+                  product={product}
+                  embedded
+                />
+              </div>
+              <div className="mb-4 px-1">
+                <PdpPayOverTimeCard embedded />
+              </div>
+            </>
           )}
 
           <div className="flex gap-2 py-4">
@@ -386,13 +401,17 @@ export function PdpAddToBagSheet({
               className={cn(
                 "font-extended flex h-12 min-w-0 flex-1 items-center justify-center text-sm tracking-[0.2px]",
                 pdpStrokeCtaClass,
+                pdpPillRadiusClass(squareButtonCorners),
               )}
             >
               <span className="translate-y-px">Keep shopping</span>
             </button>
             <button
               type="button"
-              className="font-extended flex h-12 min-w-0 flex-1 items-center justify-center rounded-full bg-black text-sm tracking-[0.2px] text-white"
+              className={cn(
+                "font-extended flex h-12 min-w-0 flex-1 items-center justify-center bg-black text-sm tracking-[0.2px] text-white",
+                pdpPillRadiusClass(squareButtonCorners),
+              )}
             >
               <span className="translate-y-px">Checkout</span>
             </button>

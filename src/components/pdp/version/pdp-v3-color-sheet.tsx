@@ -29,7 +29,7 @@ import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import type { TabbyColorOption } from "../pdp-tabby-colors";
-import { pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
+import { pdpPillRadiusClass, pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
 import {
   getV3ColorSheetSections,
@@ -108,6 +108,7 @@ function ColorRow({
   /** When true, omit the "In stock" subtitle — show low stock / sold out only. */
   hideInStockLabel?: boolean;
 }) {
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const selectable =
     combinationAvailable && pdpColorIsSelectable(availability);
   const showNotify = !selectable && availability === "notify" && Boolean(onNotify);
@@ -150,6 +151,7 @@ function ColorRow({
             className={cn(
               "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
               pdpStrokeCtaClass,
+              pdpPillRadiusClass(squareButtonCorners),
             )}
           >
             <MaterialIcon name="mail" size={18} className="shrink-0" aria-hidden />
@@ -177,6 +179,7 @@ function MaterialRow({
   onSelect: () => void;
   onNotify: () => void;
 }) {
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const { status, label, chromeSample } = material;
   const selectable = status === "current" || status === "in-stock";
   const dimmed = status === "out-of-stock" || status === "unavailable-in-color";
@@ -230,6 +233,7 @@ function MaterialRow({
             className={cn(
               "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
               pdpStrokeCtaClass,
+              pdpPillRadiusClass(squareButtonCorners),
             )}
           >
             <MaterialIcon name="mail" size={18} className="shrink-0" aria-hidden />

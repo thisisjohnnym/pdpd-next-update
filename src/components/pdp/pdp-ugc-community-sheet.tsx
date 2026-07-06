@@ -23,7 +23,7 @@ import {
   pdpUgcVideoCardInfiniteV4Class,
   pdpUgcVideoInfiniteScrollV4Class,
 } from "./pdp-carousel";
-import { PDP_UGC_VIDEO_CAROUSEL } from "./pdp-data";
+import { PDP_UGC_VIDEO_CAROUSEL, type PdpUgcVideo } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { pdpType } from "./pdp-type";
 import { PdpUgcVideoCard } from "./pdp-ugc-video-card";
@@ -34,10 +34,13 @@ import {
 } from "./use-infinite-centered-carousel";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { PdpUgcMediaToggle, type UgcMediaMode } from "./pdp-ugc-media-toggle";
+import { PdpUgcTopicToggle } from "./pdp-ugc-topic-toggle";
 import {
   PDP_UGC_COMMUNITY_COMPACT_SECTION,
   PDP_UGC_COMMUNITY_PHOTOS,
+  listUgcWildItemsForTopic,
   type PdpUgcCommunityPhoto,
+  type PdpUgcWildTopicId,
 } from "./version/pdp-data-v2";
 
 type PdpUgcCommunitySheetProps = {
@@ -45,14 +48,18 @@ type PdpUgcCommunitySheetProps = {
   onClose: () => void;
   /** Which tab opens first — defaults to videos for the +N more affordance. */
   initialMediaMode?: UgcMediaMode;
+  /** v5 topic filter — opens on the active Out in the wild theme. */
+  initialTopic?: PdpUgcWildTopicId;
+  /** When true, group photos + clips by lifestyle topic instead of media type. */
+  organizeByTopic?: boolean;
 };
 
 function UgcSheetPhotoGrid({ photos }: { photos: readonly PdpUgcCommunityPhoto[] }) {
   return (
-    <ul className="m-0 grid list-none grid-cols-2 gap-x-2 gap-y-4 p-0">
+    <ul className="m-0 grid list-none grid-cols-2 gap-x-3 gap-y-4 p-0">
       {photos.map((photo) => (
         <li key={photo.id} className="flex min-w-0 flex-col gap-2">
-          <div className="relative aspect-[9/16] overflow-hidden rounded-none bg-neutral-100">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-none bg-neutral-100">
             <Image
               src={photo.src}
               alt={photo.alt}
@@ -82,8 +89,7 @@ function UgcSheetPhotoGrid({ photos }: { photos: readonly PdpUgcCommunityPhoto[]
   );
 }
 
-function UgcSheetVideoRail() {
-  const { videos } = PDP_UGC_VIDEO_CAROUSEL;
+function UgcSheetVideoRail({ videos }: { videos: readonly PdpUgcVideo[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLElement | null>(null);
   const loopedVideos = useMemo(() => loopCarouselItems(videos), [videos]);
@@ -94,6 +100,10 @@ function UgcSheetVideoRail() {
   useEffect(() => {
     setScrollRoot(scrollRef.current);
   }, []);
+
+  if (videos.length === 0) {
+    return null;
+  }
 
   return (
     <div className={cn(pdpCarouselScrollWrapClass, "relative -mx-3")}>
@@ -123,18 +133,36 @@ export function PdpUgcCommunitySheet({
   open,
   onClose,
   initialMediaMode = "videos",
+  initialTopic = "weekend",
+  organizeByTopic = false,
 }: PdpUgcCommunitySheetProps) {
   const titleId = useId();
   const mounted = useOverlayDismiss(open, onClose);
   const [mediaMode, setMediaMode] = useState<UgcMediaMode>(initialMediaMode);
+  const [activeTopic, setActiveTopic] = useState<PdpUgcWildTopicId>(initialTopic);
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
+  const { videos } = PDP_UGC_VIDEO_CAROUSEL;
+
+  const topicItems = useMemo(
+    () => listUgcWildItemsForTopic(activeTopic, videos),
+    [activeTopic, videos],
+  );
+  const topicPhotos = useMemo(
+    () => topicItems.filter((item) => item.kind === "photo").map((item) => item.photo),
+    [topicItems],
+  );
+  const topicVideos = useMemo(
+    () => topicItems.filter((item) => item.kind === "video").map((item) => item.video),
+    [topicItems],
+  );
 
   useEffect(() => {
     if (open) {
       setHasBeenOpen(true);
       setMediaMode(initialMediaMode);
+      setActiveTopic(initialTopic);
     }
-  }, [open, initialMediaMode]);
+  }, [open, initialMediaMode, initialTopic]);
 
   if (!mounted) {
     return null;
@@ -178,7 +206,14 @@ export function PdpUgcCommunitySheet({
             <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-3")}>
               {headline}
             </h2>
-            <PdpUgcMediaToggle value={mediaMode} onChange={setMediaMode} />
+            {organizeByTopic ? (
+              <PdpUgcTopicToggle
+                value={activeTopic}
+                onChange={setActiveTopic}
+              />
+            ) : (
+              <PdpUgcMediaToggle value={mediaMode} onChange={setMediaMode} />
+            )}
           </div>
 
           <div
@@ -188,8 +223,17 @@ export function PdpUgcCommunitySheet({
             )}
           >
             {hasBeenOpen ? (
-              mediaMode === "videos" ? (
-                <UgcSheetVideoRail />
+              organizeByTopic ? (
+                <div className="flex flex-col gap-6">
+                  {topicVideos.length > 0 ? (
+                    <UgcSheetVideoRail videos={topicVideos} />
+                  ) : null}
+                  {topicPhotos.length > 0 ? (
+                    <UgcSheetPhotoGrid photos={topicPhotos} />
+                  ) : null}
+                </div>
+              ) : mediaMode === "videos" ? (
+                <UgcSheetVideoRail videos={videos} />
               ) : (
                 <UgcSheetPhotoGrid photos={PDP_UGC_COMMUNITY_PHOTOS} />
               )
