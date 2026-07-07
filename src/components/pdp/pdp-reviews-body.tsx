@@ -120,15 +120,18 @@ type PdpReviewsBodyProps = {
   onCancelReply: () => void;
 };
 
-/** Stars + "4.8 · 128 reviews · 96% recommend" — shared by full reviews and the v2 interstitial */
+/** Stars + "4.8 · 128 reviews" — shared by full reviews and the v2 interstitial */
 export function PdpReviewRatingSummary({ className }: { className?: string }) {
-  const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
+  const { average, count } = PDP_REVIEWS_SUMMARY;
+  const { hideReviewCountRecommend } = getPdpVersionConfig(usePdpVersion());
 
   return (
     <div className={cn("flex flex-wrap items-center gap-x-2 gap-y-1", className)}>
       <PdpStarRating rating={average} />
       <p className="font-extended m-0 text-sm tracking-[0.2px] text-black">
-        {average.toFixed(1)} · {count} reviews · {recommendPercent}% recommend
+        {hideReviewCountRecommend
+          ? average.toFixed(1)
+          : `${average.toFixed(1)} · ${count} reviews`}
       </p>
     </div>
   );
@@ -162,7 +165,7 @@ export function PdpReviewsBody({
   const { productId } = useActiveProduct();
   const { aiSummaryBody, ugcStories } = getPdpReviewsContent(productId);
   const { count } = PDP_REVIEWS_SUMMARY;
-  const { showReviewComments: allowComments, squareButtonCorners } =
+  const { showReviewComments: allowComments, squareButtonCorners, hideTextLinkArrows } =
     getPdpVersionConfig(usePdpVersion());
   const [internalFeedFilter, setInternalFeedFilter] =
     useState<PdpReviewFeedFilter>("reviews");
@@ -234,6 +237,7 @@ export function PdpReviewsBody({
             <PdpTextLinkCta
               type="button"
               onClick={onWriteReview}
+              hideIcon={hideTextLinkArrows}
               className={cn("shrink-0", pdpType.label)}
             >
               Write a review

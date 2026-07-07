@@ -10,7 +10,7 @@ import { PdpTextLinkCta } from "../pdp-text-link-cta";
 import { pdpType } from "../pdp-type";
 
 /**
- * v2-only mid-page ratings teaser. Compact stars + "average · count · recommend%" with a
+ * v2-only mid-page ratings teaser. Compact stars + "average · count" with a
  * link into the full reviews module below. No comments, AI card, or UGC strip.
  */
 export function PdpReviewInterstitial({ onReadAll }: { onReadAll?: () => void }) {

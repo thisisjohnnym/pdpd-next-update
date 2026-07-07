@@ -86,6 +86,7 @@ export function PdpV2MoreLikeThis({
           )}
           aria-label="More like this products"
         >
+          {/* fallow-ignore-next-line complexity */}
           {items.map((item, index) => (
             <PdpRevealItem
               key={item.id}
@@ -122,25 +123,32 @@ export function PdpV2MoreLikeThis({
                 />
               </div>
 
-              <p
+              <div
                 className={cn(
-                  // Reserve two lines so price + ATB never staircase across cards
-                  "font-extended m-0 line-clamp-2 min-h-[2.75em] leading-snug text-black",
-                  leftAlignModuleHeadings ? "text-left" : "text-center",
-                  moreLikeThisLargeCards ? "text-[13px]" : pdpType.body,
+                  // Reserve two name lines + price so ATB rows align; slack sits below price
+                  "flex flex-col gap-0.5",
+                  moreLikeThisLargeCards ? "min-h-[3.5rem]" : "min-h-[3.25rem]",
                 )}
               >
-                {item.name}
-              </p>
-              <p
-                className={cn(
-                  "font-extended -mt-1 m-0 text-neutral-500",
-                  leftAlignModuleHeadings ? "text-left" : "text-center",
-                  moreLikeThisLargeCards ? "text-[12px]" : pdpType.label,
-                )}
-              >
-                {item.price}
-              </p>
+                <p
+                  className={cn(
+                    "font-extended m-0 line-clamp-2 leading-snug text-black",
+                    leftAlignModuleHeadings ? "text-left" : "text-center",
+                    moreLikeThisLargeCards ? "text-[13px]" : pdpType.body,
+                  )}
+                >
+                  {item.name}
+                </p>
+                <p
+                  className={cn(
+                    "font-extended m-0 text-neutral-500",
+                    leftAlignModuleHeadings ? "text-left" : "text-center",
+                    moreLikeThisLargeCards ? "text-[12px]" : pdpType.label,
+                  )}
+                >
+                  {item.price}
+                </p>
+              </div>
 
               <button
                 type="button"

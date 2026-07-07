@@ -11,6 +11,10 @@ import {
   getManualPlaybackPreload,
 } from "./pdp-media-policy";
 import { usePdpRuntime } from "./pdp-runtime-context";
+import {
+  readVideoPlaybackCache,
+  writeVideoPlaybackCache,
+} from "./pdp-video-playback-cache";
 import { logVideoTelemetry } from "./pdp-video-telemetry";
 
 /** Max wait for the first decoded frame before we surface the poster + tap-to-play fallback */
@@ -24,6 +28,8 @@ type UseHeroVideoPlaybackInput = {
   poster?: string;
   preload: "auto" | "metadata" | "none";
   tapToTogglePlayback: boolean;
+  /** Stay mounted (paused) when inactive — avoids cold-start flashes in carousels */
+  keepMounted?: boolean;
 };
 
 type HeroVideoPlayback = {
@@ -59,6 +65,7 @@ export function useHeroVideoPlayback({
   poster,
   preload,
   tapToTogglePlayback,
+  keepMounted = false,
 }: UseHeroVideoPlaybackInput): HeroVideoPlayback {
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
@@ -169,7 +176,17 @@ export function useHeroVideoPlayback({
       return;
     }
 
+    const video = videoRef.current;
+    if (video) {
+      writeVideoPlaybackCache(src, video);
+    }
+
     videoDecoderRegistry.setState(resolvedDecoderId, "PAUSED");
+
+    if (keepMounted) {
+      setIsMounted(true);
+      return;
+    }
 
     const unloadTimer = window.setTimeout(() => {
       videoDecoderRegistry.setState(resolvedDecoderId, "UNLOADED");
@@ -180,7 +197,7 @@ export function useHeroVideoPlayback({
     return () => {
       window.clearTimeout(unloadTimer);
     };
-  }, [isActive, resolvedDecoderId, priorityAutoplay]);
+  }, [isActive, keepMounted, resolvedDecoderId, priorityAutoplay, src]);
 
   useEffect(() => {
     if (isMounted || !isActive) {
@@ -194,9 +211,49 @@ export function useHeroVideoPlayback({
 
   useEffect(() => {
     return () => {
+      const video = videoRef.current;
+      if (video) {
+        writeVideoPlaybackCache(src, video);
+      }
       videoDecoderRegistry.release(resolvedDecoderId);
     };
-  }, [resolvedDecoderId]);
+  }, [resolvedDecoderId, src]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isMounted || !isClientReady) {
+      return;
+    }
+
+    const cached = readVideoPlaybackCache(src);
+    if (!cached || cached.currentTime <= 0) {
+      return;
+    }
+
+    // fallow-ignore-next-line complexity
+    const restoreTime = () => {
+      if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+        return;
+      }
+
+      const duration = video.duration;
+      const target =
+        Number.isFinite(duration) && duration > 0
+          ? Math.min(cached.currentTime, duration - 0.05)
+          : cached.currentTime;
+
+      if (Math.abs(video.currentTime - target) > 0.15) {
+        video.currentTime = target;
+      }
+    };
+
+    restoreTime();
+    video.addEventListener("loadedmetadata", restoreTime);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", restoreTime);
+    };
+  }, [isMounted, isClientReady, src]);
 
   useEffect(() => {
     if (!lowPowerMode && network.autoplayAllowed) {
@@ -616,6 +673,10 @@ export function useHeroVideoPlayback({
       return preload;
     }
 
+    if (keepMounted) {
+      return getActiveVideoPreload(network);
+    }
+
     if (preload === "none") {
       return getInactiveVideoPreload(network);
     }
@@ -625,7 +686,7 @@ export function useHeroVideoPlayback({
 
   // Last-resort black is only used when there is no poster to fall back to.
   const heroBlackout =
-    showBlurReveal && !poster && (!isClientReady || !previewVisible);
+    showBlurReveal && !poster && !videoFrameVisible && !isClientReady;
 
   return {
     videoRef,

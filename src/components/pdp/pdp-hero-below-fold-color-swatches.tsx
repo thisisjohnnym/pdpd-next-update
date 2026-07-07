@@ -26,8 +26,6 @@ type PdpHeroBelowFoldColorSwatchesProps = {
   onColorSelect: (id: string) => void;
   /** Render inside the docked hero footer — no outer section padding or seam. */
   embedded?: boolean;
-  /** Tuck the silhouette nav behind its heading (v5 desktop sticky panel). */
-  collapsibleSilhouettes?: boolean;
 };
 
 /** Full-width color rail — sits below the hero shell so it is not above the fold. */
@@ -35,7 +33,6 @@ export function PdpHeroBelowFoldColorSwatches({
   selectedColorId,
   onColorSelect,
   embedded = false,
-  collapsibleSilhouettes = false,
 }: PdpHeroBelowFoldColorSwatchesProps) {
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
@@ -151,7 +148,7 @@ export function PdpHeroBelowFoldColorSwatches({
         <div
           className={cn(
             "flex flex-col",
-            isTabbyProduct && showTabbyAlsoAvailableAs ? "gap-7" : "gap-8",
+            isTabbyProduct && showTabbyAlsoAvailableAs ? "gap-4" : "gap-8",
           )}
         >
           <PdpGroupedProductColorSwatchGrid
@@ -180,7 +177,7 @@ export function PdpHeroBelowFoldColorSwatches({
           />
 
           {isTabbyProduct && showTabbyAlsoAvailableAs ? (
-            <PdpTabbyAlsoAvailableAs collapsible={collapsibleSilhouettes} />
+            <PdpTabbyAlsoAvailableAs />
           ) : null}
         </div>
       </section>

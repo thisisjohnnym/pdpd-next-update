@@ -63,29 +63,29 @@ export const PDP_CRAFTSMANSHIP_V4_CARDS = [
     id: "leather",
     title: "Glove-tanned leather",
     body: "Soft, full-grain leather designed to develop character over time.",
-    src: "/images/hero/tabby26/ccx04_b4bk_a99.webp",
-    alt: "Macro detail of full-grain glovetanned leather and gold hardware on Tabby Shoulder Bag 26",
+    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
+    alt: "Close-up of Tabby Shoulder Bag 26 full-grain leather with gold COACH hardware and hangtag",
   },
   {
     id: "hardware",
     title: "Signature hardware",
     body: "The iconic C clasp brings Coach heritage into focus.",
-    src: "/images/gallery/tabby-c-clasp-closeup.png",
-    alt: "Close-up of the polished gold C turn-lock clasp with COACH engraving on black glovetanned leather",
+    src: "/images/gallery/tabby-c-clasp-closeup.jpg",
+    alt: "Close-up of the gold C turn-lock clasp with COACH engraving on black glovetanned leather",
   },
   {
     id: "interior",
     title: "Interior function",
     body: "Room for daily essentials with thoughtful organization.",
-    src: "/images/gallery/tabby-leather-interior-open.png",
-    alt: "Open interior of Tabby Shoulder Bag 26 showing accordion compartments and slip pocket",
+    src: "/images/gallery/tabby-leather-interior-open.jpg",
+    alt: "Open interior of Tabby Shoulder Bag 26 showing accordion compartments and gold hardware",
   },
   {
     id: "carry",
     title: "Carry options",
     body: "Designed to be worn shoulder or crossbody.",
-    src: "/images/hero/tabby26/ccx04_b4bk_a21.webp",
-    alt: "Tabby Shoulder Bag 26 in black leather with the long crossbody strap extended",
+    src: "/images/gallery/tabby-shoulder-crossbody-straps.jpg",
+    alt: "Tabby Shoulder Bag 26 in black leather with shoulder and crossbody straps attached",
   },
 ] satisfies PdpCraftsmanshipV4Card[];
 
@@ -163,7 +163,7 @@ const PDP_UGC_WILD_VIDEO_TOPICS: Record<string, PdpUgcWildTopicId> = {
 
 /** v4 section intro — subtext between headline and TikTok CTA (Paper L5X-0). */
 export const PDP_UGC_COMMUNITY_SECTION = {
-  subtext: "Real people, real context — not random snaps.",
+  subtext: "Real people, real context.",
 } as const;
 
 /** Customer photo in the UGC community carousel — portrait stills with context. */
@@ -275,7 +275,7 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
 /** v5 testimonials band — headline + intro above topic tabs (Figma 409:460). */
 export const PDP_UGC_TESTIMONIALS_SECTION = {
   headline: "Out in the wild",
-  subtext: "Real people, real context — not random snaps.",
+  subtext: "Real people, real context.",
 } as const;
 
 /** Editorial testimonial card — quote, attribution, social, and review CTA (v5). */
@@ -462,6 +462,7 @@ function ugcTestimonialToHeroSlide(
       alt: testimonial.alt,
       shotType: "lifestyle",
       headerSurface: "light",
+      galleryCategory: "ugc",
     };
   }
 
@@ -471,6 +472,7 @@ function ugcTestimonialToHeroSlide(
     alt: testimonial.alt,
     shotType: "on-model",
     headerSurface: "light",
+    galleryCategory: "ugc",
   };
 }
 

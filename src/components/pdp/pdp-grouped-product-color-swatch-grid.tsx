@@ -11,7 +11,7 @@ import {
   pdpColorAvailabilityLabel,
   pdpColorIsSelectable,
 } from "./pdp-data";
-import { ColorSwatchCircle } from "./pdp-color-swatch";
+import { ColorSwatchTile, SQUARE_SWATCH_TILE_FOCAL, SQUARE_SWATCH_TILE_ZOOM } from "./pdp-color-swatch";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
 import type { TabbySize } from "./pdp-tabby-variants";
@@ -44,7 +44,7 @@ function tabbyFamilyLabel(size: TabbySize): string {
   return `Tabby ${size}`;
 }
 
-/** Color + size picker — circular swatches, then family image tiles (Tabby). */
+/** Color + size picker — 1:1 thumbnail swatches, then family image tiles (Tabby). */
 export function PdpGroupedProductColorSwatchGrid({
   colors,
   selectedId,
@@ -92,7 +92,7 @@ export function PdpGroupedProductColorSwatchGrid({
           role="listbox"
           aria-label="Choose color"
           className={cn(
-            "pdp-carousel-draggable flex min-w-0 items-center gap-3 overflow-x-auto overscroll-x-contain py-2.5",
+            "pdp-carousel-draggable flex min-w-0 items-center gap-2 overflow-x-auto overscroll-x-contain py-2.5",
             colorCarouselClassName,
             "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           )}
@@ -131,22 +131,24 @@ export function PdpGroupedProductColorSwatchGrid({
                       : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
                 }
                 className={cn(
-                  "relative shrink-0 rounded-full p-0.5 transition-[box-shadow,opacity] duration-200 ease-out",
-                  isSelected ? "ring-2 ring-black ring-offset-2 ring-offset-white" : "",
+                  "relative shrink-0 overflow-hidden border-2 p-0 transition-[border-color,opacity] duration-200 ease-out",
+                  isSelected ? "border-black" : "border-transparent",
                   !isSelectable && !isNotify && "cursor-not-allowed opacity-40",
                   (isSelectable || isNotify) && pdpPressableIconClass,
                 )}
               >
-                <ColorSwatchCircle
+                <ColorSwatchTile
                   src={color.swatch}
-                  fill={color.chromeSample}
-                  sizeClass="size-9"
+                  widthClass="w-11"
+                  sizes="44px"
+                  zoom={SQUARE_SWATCH_TILE_ZOOM}
+                  objectPosition={SQUARE_SWATCH_TILE_FOCAL}
                   dimmed={!isSelectable && !isNotify}
                 />
                 {isNotify ? (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-0.5 flex items-center justify-center rounded-full bg-black/35"
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35"
                   >
                     <MaterialIcon name="mail" size={14} className="text-white" />
                   </span>

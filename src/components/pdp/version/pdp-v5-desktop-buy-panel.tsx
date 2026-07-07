@@ -60,7 +60,6 @@ export function PdpV5DesktopBuyPanel({
         selectedColorId={selectedColorId}
         onColorSelect={onColorSelect}
         embedded
-        collapsibleSilhouettes
       />
     </div>
   );

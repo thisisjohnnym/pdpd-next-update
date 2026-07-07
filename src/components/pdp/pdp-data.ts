@@ -3005,7 +3005,7 @@ type PdpCommunityMediaItem = {
 const PDP_COMMUNITY_VALIDATION = {
   moment: "Moment #6",
   title: "Community validation",
-  caption: "Real people, real context — not random snaps.",
+  caption: "Real people, real context.",
   items: [
     {
       id: PDP_UGC_CONTEXT.stories[1]!.id,

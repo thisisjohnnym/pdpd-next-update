@@ -1,7 +1,6 @@
 import { PDP_GALLERY_SLIDES } from "../pdp-data";
 import {
   HERO_GALLERY_V5_LEAD_SRC,
-  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
   type PdpHeroGallerySlide,
 } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
@@ -339,9 +338,8 @@ export type PdpVersionConfig = {
    */
   useRailLeatherAgingSlider: boolean;
   /**
-   * Drop the "· {count} reviews · {percent}% recommend" tail from the reviews
-   * summary line — keep the stars + average only. v5 only; v4 keeps the full
-   * aggregate line.
+   * Drop the "· {count} reviews" tail from the reviews summary line — keep the
+   * stars + average only. v5 only; v4 keeps the full aggregate line.
    */
   hideReviewCountRecommend: boolean;
   /**
@@ -419,6 +417,11 @@ export type PdpVersionConfig = {
    * restore. v1-v4 keep it.
    */
   showArTryOn: boolean;
+  /**
+   * Compact category rail over the hero gallery — UGC · 360 · AR · Fits inside.
+   * Replaces the standalone AR button when active. v5 only.
+   */
+  showHeroGalleryCategoryRail: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -503,6 +506,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showHeroFitsInsideCta: false,
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
+  showHeroGalleryCategoryRail: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -597,6 +601,7 @@ const V2_CONFIG: PdpVersionConfig = {
   showHeroFitsInsideCta: false,
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
+  showHeroGalleryCategoryRail: false,
 };
 
 /**
@@ -683,8 +688,6 @@ const V5_CONFIG: PdpVersionConfig = {
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
-  // v5 hero land leads with the creator unboxing clip ahead of the base slides.
-  heroGalleryPrependLeadSlide: HERO_GALLERY_V5_UGC_LEAD_SLIDE,
   // v5 weaves Out in the wild UGC into the hero carousel after the lead pair.
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
     HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
@@ -696,7 +699,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useRailLeatherAgingSlider: true,
   // v5 reviews summary drops the aggregate star row (photos + AI summary carry trust).
   hideReviewSummaryRating: true,
-  // v5 reviews summary shows stars + average only (no count / recommend tail).
+  // v5 reviews summary shows stars + average only (no review count tail).
   hideReviewCountRecommend: true,
   // v5 bumps the reviews AI-summary tray text up a step.
   enlargeReviewAiSummary: true,
@@ -720,8 +723,9 @@ const V5_CONFIG: PdpVersionConfig = {
   showHeroFitsInsideCta: true,
   // v5 swaps the tick indicator for a full-bleed progress bar at the gallery seam.
   useHeroGalleryProgressBar: true,
-  // Hide the AR "Try On" affordance for now (easy to restore).
+  // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
+  showHeroGalleryCategoryRail: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

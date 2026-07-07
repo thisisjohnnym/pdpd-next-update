@@ -53,7 +53,7 @@ export function useHeaderContrast(
 
     const menuEl = header?.querySelector("button");
     const bagEl = header?.querySelector('[data-pdp-header-action="bag"]');
-    const logoEl = header?.querySelector("svg")?.parentElement ?? null;
+    const logoEl = header?.querySelector("[data-pdp-header-wordmark]") ?? null;
 
     const luminance = sampleBackdropLuminanceZones(rect, {
       menu: menuEl,
@@ -106,6 +106,28 @@ export function useHeaderContrast(
     return () => {
       track.removeEventListener("scroll", onGalleryScroll);
       if (scrollTimer) window.clearTimeout(scrollTimer);
+    };
+  }, [measure]);
+
+  useEffect(() => {
+    const heroRegions = [
+      document.querySelector("[data-hero-section]"),
+      document.querySelector("[data-pdp-desktop-hero-media]"),
+    ].filter((node): node is Element => node !== null);
+
+    if (heroRegions.length === 0) {
+      return;
+    }
+
+    const onHeroRegionResize = () => {
+      measure();
+    };
+
+    const resizeObserver = new ResizeObserver(onHeroRegionResize);
+    heroRegions.forEach((node) => resizeObserver.observe(node));
+
+    return () => {
+      resizeObserver.disconnect();
     };
   }, [measure]);
 

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/cn";
 
 import { usePdpHeroGallery } from "./pdp-hero-gallery-context";
+import { useHeroGalleryIdleVisible } from "./use-hero-gallery-idle-visible";
 import { useReducedMotion } from "./use-reduced-motion";
 
 /**
@@ -19,6 +20,8 @@ export function PdpHeroGalleryProgressBar({
 }) {
   const { activeIndex, count, surface } = usePdpHeroGallery();
   const reducedMotion = useReducedMotion();
+  const idleVisible = useHeroGalleryIdleVisible();
+  const chromeAwake = visible && idleVisible;
 
   if (count <= 1) {
     return null;
@@ -32,9 +35,11 @@ export function PdpHeroGalleryProgressBar({
     <div
       aria-hidden
       className={cn(
-        "pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[39] h-[3px] overflow-hidden",
+        "pdp-hero-ui-chrome pdp-video-controls-pop pointer-events-none absolute inset-x-0 bottom-0 z-[39] h-[3px] overflow-hidden",
+        "data-[state=closed]:translate-y-0 data-[state=open]:translate-y-0",
         isDark ? "bg-white/25" : "bg-neutral-900/15",
       )}
+      data-state={chromeAwake ? "open" : "closed"}
       style={{ visibility: visible ? "visible" : "hidden" }}
     >
       <span

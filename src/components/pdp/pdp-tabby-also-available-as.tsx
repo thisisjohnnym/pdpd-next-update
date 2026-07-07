@@ -13,22 +13,11 @@ import { useTabbyVariant } from "./pdp-tabby-variant-context";
 import { pdpPressableClass, pdpType } from "./pdp-type";
 import { usePdpVersion } from "./version/pdp-version-context";
 
-type PdpTabbyAlsoAvailableAsProps = {
-  /**
-   * Tuck the silhouette list behind the heading as a disclosure (closed by
-   * default). Used in the v5 desktop buy panel so the sticky rail stays compact;
-   * mobile keeps the list fully exposed.
-   */
-  collapsible?: boolean;
-};
-
 /** How many silhouettes to tease before the "View all" reveal. */
 const TABBY_FAMILY_TEASER_COUNT = 2;
 
 /** Editorial family navigation — adjacent Tabby silhouettes as separate PDPs. */
-export function PdpTabbyAlsoAvailableAs({
-  collapsible = false,
-}: PdpTabbyAlsoAvailableAsProps) {
+export function PdpTabbyAlsoAvailableAs() {
   const router = useRouter();
   const version = usePdpVersion();
   const { styleId, size, selectedColorId } = useTabbyVariant();
@@ -44,7 +33,6 @@ export function PdpTabbyAlsoAvailableAs({
     return null;
   }
 
-  const expanded = collapsible ? open : true;
   const teaserLinks = links.slice(0, TABBY_FAMILY_TEASER_COUNT);
   const extraLinks = links.slice(TABBY_FAMILY_TEASER_COUNT);
   const hasMore = extraLinks.length > 0;
@@ -94,38 +82,51 @@ export function PdpTabbyAlsoAvailableAs({
 
   return (
     <nav
-      aria-label="Explore Other Tabby Silhouettes"
-      className="pdp-tabby-family-explorer flex flex-col gap-1.5 border-0"
+      aria-label="Explore other Tabby silhouettes"
+      className="pdp-tabby-family-explorer flex flex-col gap-1 border-0"
     >
-      {collapsible ? (
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
+      <button
+        type="button"
+        onClick={() => {
+          setOpen((value) => {
+            if (value) {
+              setShowAll(false);
+            }
+            return !value;
+          });
+        }}
+        aria-expanded={open}
+        className={cn(
+          "font-extended m-0 inline-flex w-fit items-center gap-1 text-neutral-600 underline-offset-2 hover:text-black hover:underline",
+          pdpType.micro,
+          pdpPressableClass,
+        )}
+      >
+        <span>Explore other silhouettes</span>
+        <MaterialIcon
+          name="expand_more"
+          size={16}
+          aria-hidden
           className={cn(
-            "font-extended m-0 flex w-full items-center justify-between gap-3 text-black",
-            pdpType.label,
-            pdpPressableClass,
+            "shrink-0 text-neutral-400 transition-transform duration-200 motion-reduce:transition-none",
+            open && "rotate-180",
           )}
-        >
-          <span>Explore Other Tabby Silhouettes</span>
-          <MaterialIcon
-            name="expand_more"
-            size={20}
-            aria-hidden
-            className={cn(
-              "shrink-0 text-neutral-500 transition-transform duration-200",
-              open && "rotate-180",
-            )}
-          />
-        </button>
-      ) : (
-        <p className={cn("font-extended m-0 text-black", pdpType.label)}>
-          Explore Other Tabby Silhouettes
-        </p>
-      )}
+        />
+      </button>
 
-      <div className={cn(collapsible && !expanded && "hidden")}>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+      >
+        <div
+          className={cn(
+            "min-h-0 overflow-hidden transition-opacity duration-300 ease-out motion-reduce:transition-none",
+            open ? "opacity-100" : "opacity-0",
+          )}
+          aria-hidden={!open}
+        >
         <ul className="m-0 flex list-none flex-col p-0">
           {teaserLinks.map((link, index) => renderRow(link, index === 0))}
         </ul>
@@ -180,6 +181,7 @@ export function PdpTabbyAlsoAvailableAs({
             </button>
           </>
         ) : null}
+        </div>
       </div>
     </nav>
   );

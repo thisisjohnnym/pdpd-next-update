@@ -88,13 +88,18 @@ export function PdpOverlayHeader({
         />
       </button>
 
-      <CoachWordmark
-        className={cn(
-          "h-2.5 w-auto -translate-y-px",
-          chromeTransitionClass,
-          contrastZones.logo === "light" ? "text-white" : "text-neutral-900",
-        )}
-      />
+      <span
+        data-pdp-header-wordmark
+        className="flex items-center justify-center"
+      >
+        <CoachWordmark
+          className={cn(
+            "h-2.5 w-auto -translate-y-px",
+            chromeTransitionClass,
+            contrastZones.logo === "light" ? "text-white" : "text-neutral-900",
+          )}
+        />
+      </span>
 
       <button
         type="button"
