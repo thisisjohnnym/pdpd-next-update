@@ -79,6 +79,8 @@ import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
+import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
+import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
 import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
 import { PdpV2UgcCommunity } from "./version/pdp-v2-ugc-community";
 import { PdpV2FullSlide } from "./version/pdp-v2-full-slide";
@@ -105,11 +107,7 @@ function gallerySection(
   } = {},
 ) {
   return (
-    <PdpScrollReveal
-      key={key}
-      surface={options.surface ?? "transparent"}
-      lazyMount
-    >
+    <PdpScrollReveal key={key} surface={options.surface ?? "transparent"}>
       {child}
     </PdpScrollReveal>
   );
@@ -177,6 +175,8 @@ type PdpGalleryPortraitSlideProps = {
   headerSurface?: "light" | "dark";
   aspect?: "4/5" | "9/16";
   dragZoom?: boolean;
+  headline?: string;
+  subtext?: string;
 };
 
 function portraitBackgroundClass(
@@ -292,6 +292,47 @@ function PortraitMedia({
   );
 }
 
+function PortraitCopyAbove({
+  headline,
+  subtext,
+  leftAlign = true,
+}: {
+  headline?: string;
+  subtext?: string;
+  leftAlign?: boolean;
+}) {
+  if (!headline && !subtext) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "mb-5 flex w-full flex-col gap-1.5 px-4",
+        leftAlign ? "items-start" : "items-center text-center",
+      )}
+    >
+      {headline ? (
+        <PdpTextReveal
+          as="h2"
+          className={cn(pdpType.headline, "m-0 w-full text-balance text-black")}
+        >
+          {headline}
+        </PdpTextReveal>
+      ) : null}
+      {subtext ? (
+        <PdpTextReveal
+          as="p"
+          delay={100}
+          className={cn(pdpType.body, "m-0 w-full text-balance text-neutral-600")}
+        >
+          {subtext}
+        </PdpTextReveal>
+      ) : null}
+    </div>
+  );
+}
+
 function PortraitHotspots({ hotspots }: { hotspots?: PdpProductHotspot[] }) {
   if (!hotspots?.length) {
     return null;
@@ -394,15 +435,13 @@ function PortraitOverlays({
 }: PortraitOverlaysProps) {
   return (
     <div className="pointer-events-none col-start-1 row-start-1 z-10 grid size-full min-h-0 grid-cols-1 grid-rows-1">
-      <div className="pointer-events-auto relative col-start-1 row-start-1 size-full min-h-0">
+      <div className="relative col-start-1 row-start-1 size-full min-h-0">
         <PortraitHotspots hotspots={hotspots} />
         <PortraitInfluencerBadge influencer={influencer} />
-        <div className="pointer-events-auto">
-          <PortraitStrapCard
-            strapOptionsId={strapOptionsId}
-            onOpenStrapOptions={onOpenStrapOptions}
-          />
-        </div>
+        <PortraitStrapCard
+          strapOptionsId={strapOptionsId}
+          onOpenStrapOptions={onOpenStrapOptions}
+        />
       </div>
       <div className="pointer-events-none col-start-1 row-start-1 flex size-full min-h-0 flex-col items-start justify-end pb-4 pl-3">
         <PortraitShopTheLookButton
@@ -435,11 +474,17 @@ function PdpGalleryPortraitSlide({
   headerSurface,
   aspect = "4/5",
   dragZoom = false,
+  headline,
+  subtext,
 }: PdpGalleryPortraitSlideProps) {
+  const { useV4ModuleSpacing, leftAlignModuleHeadings } =
+    getPdpVersionConfig(usePdpVersion());
   const panel = PDP_PANEL_SCROLL;
   const fitContain = panel && panelContain;
   const headerLight = fitContain || (insetMargins && !panel);
   const resolvedHeaderSurface = portraitHeaderSurface(headerSurface, headerLight);
+  const showCopyAbove =
+    useV4ModuleSpacing && Boolean(headline || subtext);
 
   return (
     <section
@@ -447,10 +492,19 @@ function PdpGalleryPortraitSlide({
         "relative w-full shrink-0 overflow-hidden",
         portraitBackgroundClass(panel, fitContain, insetMargins),
         galleryPanelClassName(isLastPanel),
+        showCopyAbove && "pt-14",
       )}
       data-header-surface={resolvedHeaderSurface}
       style={portraitSectionStyle(panel, reserveBottomCta)}
     >
+      {showCopyAbove ? (
+        <PortraitCopyAbove
+          headline={headline}
+          subtext={subtext}
+          leftAlign={leftAlignModuleHeadings}
+        />
+      ) : null}
+
       <div className={cn(portraitFrameClass(panel, aspect, insetMargins), "grid")}>
         <PdpRevealItem className="relative col-start-1 row-start-1 size-full min-h-0">
           <PortraitMedia
@@ -555,7 +609,7 @@ function PdpGalleryVideoSlide({
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
             skeletonTone={PDP_PANEL_SCROLL ? "dark" : "light"}
-            showControls
+            tapToTogglePlayback
             showMuteControl={showMuteControl}
             className={cn(
               "size-full object-cover object-center",
@@ -657,26 +711,55 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // "The details" sits after the Studio Product + Editorial slides (matches r2).
+          // v5: Feel → Details → What customers are saying → Up close → Aging.
+          // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
-              ? [
-                  <ChapterAnchor
-                    key={`anchor-the-details-${index}`}
-                    id="the-details"
-                  />,
-                  <PdpScrollReveal
-                    key={`product-details-${index}`}
-                    className={ECOMM_MODULE_CLASS}
-                    surface="light"
-                  >
-                    <PdpProductDetailsModule
-                      showHeading={versionConfig.showDetailsHeading}
-                      useV4Specs={versionConfig.useV4Specs}
-                      useV4Spacing={versionConfig.useV4ModuleSpacing}
-                    />
-                  </PdpScrollReveal>,
-                ]
+              ? (() => {
+                  const ugcWildStrip: ReactNode[] = versionConfig.useV4CompactUgcStrip
+                    ? [
+                        <PdpScrollReveal
+                          key={`ugc-wild-strip-${index}`}
+                          className={ECOMM_MODULE_CLASS}
+                          surface={
+                            versionConfig.useV5UgcTestimonialCarousel ? "dark" : "light"
+                          }
+                        >
+                          <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />
+                        </PdpScrollReveal>,
+                      ]
+                    : [];
+
+                  const detailsModule: ReactNode[] = [
+                    <ChapterAnchor
+                      key={`anchor-the-details-${index}`}
+                      id="the-details"
+                    />,
+                    <PdpScrollReveal
+                      key={`product-details-${index}`}
+                      className={ECOMM_MODULE_CLASS}
+                      surface="light"
+                    >
+                      <PdpProductDetailsModule
+                        showHeading={versionConfig.showDetailsHeading}
+                        useV4Specs={versionConfig.useV4Specs}
+                        useV4Spacing={versionConfig.useV4ModuleSpacing}
+                        useV4DetailsTileCarousel={
+                          versionConfig.useV4DetailsTileCarousel
+                        }
+                        useV5DetailsSheet={versionConfig.useV5DetailsSheet}
+                        showCloserLook={versionConfig.showDetailsCloserLook}
+                        leftAlignModuleHeadings={
+                          versionConfig.leftAlignModuleHeadings
+                        }
+                      />
+                    </PdpScrollReveal>,
+                  ];
+
+                  return versionConfig.useV5UgcTestimonialCarousel
+                    ? [...detailsModule, ...ugcWildStrip]
+                    : [...ugcWildStrip, ...detailsModule];
+                })()
               : [];
 
           // fallow-ignore-next-line complexity
@@ -718,11 +801,21 @@ export function PdpGalleryView({
 
           if (slide.type === "leather-aging") {
             return [
-              <ChapterAnchor key={`anchor-the-feel-${index}`} id="the-feel" />,
+              ...(versionConfig.useV4CompactUgcStrip
+                ? []
+                : [
+                    <ChapterAnchor
+                      key={`anchor-the-feel-${index}`}
+                      id="the-feel"
+                    />,
+                  ]),
               gallerySection(
                 `leather-aging-${index}`,
                 versionConfig.useSimplifiedLeatherAging ? (
-                  <PdpV2LeatherAging />
+                  <PdpV2LeatherAging
+                    onQuickAdd={() => onAddSimilarToBag?.()}
+                    showCareUpsell={versionConfig.showLeatherCareUpsell}
+                  />
                 ) : (
                   <PdpLeatherAgingModule
                     isLastPanel={isLastPanel}
@@ -820,10 +913,14 @@ export function PdpGalleryView({
           }
 
           if (slide.type === "ugc-community") {
+            if (versionConfig.useV4CompactUgcStrip) {
+              return [];
+            }
+
             return [
               gallerySection(
                 `ugc-community-${index}`,
-                <PdpV2UgcCommunity />,
+                <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />,
                 { surface: "light" },
               ),
             ];
@@ -843,7 +940,25 @@ export function PdpGalleryView({
             return [
               gallerySection(
                 `editorial-carousel-${index}`,
-                <PdpV2EditorialCarousel />,
+                versionConfig.useV4CraftsmanshipLayout ? (
+                  <PdpV4Craftsmanship />
+                ) : (
+                  <PdpV2EditorialCarousel />
+                ),
+                { surface: "light" },
+              ),
+            ];
+          }
+
+          if (slide.type === "ways-to-wear") {
+            if (!versionConfig.showWaysToWearModule) {
+              return [];
+            }
+
+            return [
+              gallerySection(
+                `ways-to-wear-${index}`,
+                <PdpV5WaysToWear />,
                 { surface: "light" },
               ),
             ];
@@ -853,7 +968,21 @@ export function PdpGalleryView({
             return [];
           }
 
+          const isV5FeelLead =
+            versionConfig.useV4CompactUgcStrip &&
+            slide.dragZoom &&
+            (slide.src.includes("tabby-product-front-916") ||
+              slide.src.includes("tabby-feel-the-leather-lifestyle"));
+
           return [
+            ...(isV5FeelLead
+              ? [
+                  <ChapterAnchor
+                    key={`anchor-the-feel-${index}`}
+                    id="the-feel"
+                  />,
+                ]
+              : []),
             gallerySection(
               `immersive-${index}-${slide.src}`,
               <PdpGalleryPortraitSlide
@@ -882,13 +1011,15 @@ export function PdpGalleryView({
                 headerSurface={slide.headerSurface}
                 aspect={slide.aspect}
                 dragZoom={slide.dragZoom}
+                headline={slide.headline}
+                subtext={slide.subtext}
               />,
               { surface: "light" },
             ),
           ];
           })();
 
-          return [...slideSections, ...detailsBlock];
+          return [...detailsBlock, ...slideSections];
         })}
         <div ref={galleryEndRef} aria-hidden className="h-px w-full shrink-0" />
       </div>

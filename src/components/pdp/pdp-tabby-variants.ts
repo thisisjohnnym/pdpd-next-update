@@ -231,16 +231,22 @@ export function getTabbyProductTitle(
   return `Tabby Shoulder Bag ${size}`;
 }
 
+/** Editorial family-nav label — "Soft Tabby", "Pillow Tabby", … */
+export function getTabbyFamilyNavLabel(styleId: TabbyStyleId): string {
+  const style = getTabbyStyle(styleId);
+
+  if (styleId === "pillow-quilted") {
+    return "Pillow Tabby";
+  }
+
+  if (styleId === "classic") {
+    return "Classic Tabby";
+  }
+
+  return `${style.label} Tabby`;
+}
+
 export function tabbyProductPath(slug: string, colorId?: string): string {
   const base = `/products/${slug}`;
   return colorId ? `${base}?color=${encodeURIComponent(colorId)}` : base;
-}
-
-/** Update shareable URL without Next navigation — keeps hero video playing. */
-export function replaceTabbyBrowserUrl(slug: string, colorId?: string): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.history.replaceState(window.history.state, "", tabbyProductPath(slug, colorId));
 }

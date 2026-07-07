@@ -220,109 +220,117 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
   }, [reducedMotion]);
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) {
-      return;
-    }
+    let cleanup: (() => void) | undefined;
+    let retryRafId = 0;
 
-    let dragging = false;
-    let startX = 0;
-    let startScrollLeft = 0;
-    let moved = 0;
-    let settleTimer = 0;
-
-    const clearSettleTimer = () => {
-      if (settleTimer) {
-        window.clearTimeout(settleTimer);
-        settleTimer = 0;
-      }
-      el.removeEventListener("scrollend", finishSettle);
-    };
-
-    const finishSettle = () => {
-      clearSettleTimer();
-      el.classList.remove("pdp-carousel-dragging");
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" || event.button !== 0) {
+    const attach = () => {
+      const el = scrollRef.current;
+      if (!el) {
+        retryRafId = requestAnimationFrame(attach);
         return;
       }
 
-      clearSettleTimer();
-      dragging = true;
-      moved = 0;
-      startX = event.clientX;
-      startScrollLeft = el.scrollLeft;
-      el.classList.add("pdp-carousel-dragging");
+      let dragging = false;
+      let startX = 0;
+      let startScrollLeft = 0;
+      let moved = 0;
+      let settleTimer = 0;
 
-      try {
-        el.setPointerCapture(event.pointerId);
-      } catch {
-        /* capture unsupported — drag still works via document-level fallback */
-      }
+      const clearSettleTimer = () => {
+        if (settleTimer) {
+          window.clearTimeout(settleTimer);
+          settleTimer = 0;
+        }
+        el.removeEventListener("scrollend", finishSettle);
+      };
+
+      const finishSettle = () => {
+        clearSettleTimer();
+        el.classList.remove("pdp-carousel-dragging");
+      };
+
+      const onPointerDown = (event: PointerEvent) => {
+        if (event.pointerType !== "mouse" || event.button !== 0) {
+          return;
+        }
+
+        clearSettleTimer();
+        dragging = true;
+        moved = 0;
+        startX = event.clientX;
+        startScrollLeft = el.scrollLeft;
+        el.classList.add("pdp-carousel-dragging");
+
+        try {
+          el.setPointerCapture(event.pointerId);
+        } catch {
+          /* capture unsupported — drag still works via document-level fallback */
+        }
+      };
+
+      const onPointerMove = (event: PointerEvent) => {
+        if (!dragging) {
+          return;
+        }
+
+        const dx = event.clientX - startX;
+        moved = Math.max(moved, Math.abs(dx));
+        el.scrollLeft = startScrollLeft - dx;
+      };
+
+      const endDrag = (event: PointerEvent) => {
+        if (!dragging) {
+          return;
+        }
+
+        dragging = false;
+
+        el.scrollTo({
+          left: nearestChildScrollLeft(el),
+          behavior: reducedMotionRef.current ? "auto" : "smooth",
+        });
+
+        if (supportsScrollEndEvent()) {
+          el.addEventListener("scrollend", finishSettle, { once: true });
+        } else {
+          settleTimer = window.setTimeout(finishSettle, DRAG_SETTLE_FALLBACK_MS);
+        }
+
+        if (el.hasPointerCapture(event.pointerId)) {
+          el.releasePointerCapture(event.pointerId);
+        }
+      };
+
+      const onClickCapture = (event: MouseEvent) => {
+        if (moved > DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+
+      el.addEventListener("pointerdown", onPointerDown);
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerup", endDrag);
+      el.addEventListener("pointercancel", endDrag);
+      el.addEventListener("click", onClickCapture, { capture: true });
+
+      cleanup = () => {
+        clearSettleTimer();
+        el.removeEventListener("pointerdown", onPointerDown);
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerup", endDrag);
+        el.removeEventListener("pointercancel", endDrag);
+        el.removeEventListener("click", onClickCapture, { capture: true });
+      };
     };
 
-    const onPointerMove = (event: PointerEvent) => {
-      if (!dragging) {
-        return;
-      }
-
-      const dx = event.clientX - startX;
-      moved = Math.max(moved, Math.abs(dx));
-      el.scrollLeft = startScrollLeft - dx;
-    };
-
-    const endDrag = (event: PointerEvent) => {
-      if (!dragging) {
-        return;
-      }
-
-      dragging = false;
-
-      // scroll-snap-type is still "none" here (see .pdp-carousel-dragging in
-      // globals.css) — animate to the target ourselves first, then hand snap
-      // back. Restoring snap before the tween finishes lets the browser's own
-      // (instant) correction preempt it, which is exactly the jump this fixes.
-      el.scrollTo({
-        left: nearestChildScrollLeft(el),
-        behavior: reducedMotionRef.current ? "auto" : "smooth",
-      });
-
-      if (supportsScrollEndEvent()) {
-        el.addEventListener("scrollend", finishSettle, { once: true });
-      } else {
-        settleTimer = window.setTimeout(finishSettle, DRAG_SETTLE_FALLBACK_MS);
-      }
-
-      if (el.hasPointerCapture(event.pointerId)) {
-        el.releasePointerCapture(event.pointerId);
-      }
-    };
-
-    // A drag ending under the pointer would otherwise fire a click on
-    // whatever it lands on — swallow it once the pointer has moved enough
-    // to count as a drag rather than a tap.
-    const onClickCapture = (event: MouseEvent) => {
-      if (moved > DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-
-    el.addEventListener("pointerdown", onPointerDown);
-    el.addEventListener("pointermove", onPointerMove);
-    el.addEventListener("pointerup", endDrag);
-    el.addEventListener("pointercancel", endDrag);
-    el.addEventListener("click", onClickCapture, { capture: true });
+    attach();
 
     return () => {
-      clearSettleTimer();
-      el.removeEventListener("pointerdown", onPointerDown);
-      el.removeEventListener("pointermove", onPointerMove);
-      el.removeEventListener("pointerup", endDrag);
-      el.removeEventListener("pointercancel", endDrag);
-      el.removeEventListener("click", onClickCapture, { capture: true });
+      if (retryRafId) {
+        cancelAnimationFrame(retryRafId);
+      }
+      cleanup?.();
     };
   }, [scrollRef]);
 }
@@ -519,6 +527,52 @@ export function useCarouselCoverflow(scrollRef: RefObject<HTMLDivElement | null>
   }, [scrollRef, reducedMotion]);
 }
 
+/** Maps snap-start scroll position to the active item index (finite rails) */
+export function useCarouselSnapStartActiveIndex(
+  scrollRef: RefObject<HTMLDivElement | null>,
+) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    const updateActiveIndex = () => {
+      const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+      const anchor = el.scrollLeft + paddingLeft;
+      let closestIndex = 0;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (let index = 0; index < el.children.length; index += 1) {
+        const child = el.children[index] as HTMLElement;
+        const distance = Math.abs(child.offsetLeft - anchor);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      }
+
+      setActiveIndex(closestIndex);
+    };
+
+    updateActiveIndex();
+    el.addEventListener("scroll", updateActiveIndex, { passive: true });
+
+    const ro = new ResizeObserver(updateActiveIndex);
+    ro.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", updateActiveIndex);
+      ro.disconnect();
+    };
+  }, [scrollRef]);
+
+  return activeIndex;
+}
+
 /** Maps center-snapped scroll position to the active source item index */
 function useCarouselActiveIndex(
   scrollRef: RefObject<HTMLDivElement | null>,
@@ -618,9 +672,15 @@ export function useInfiniteFullBleedCarousel(
       setActiveLoopedIndex(target);
     };
 
-    requestAnimationFrame(() => {
+    const scrollToStart = () => {
       scrollToChild(startIndex);
       setActiveLoopedIndex(startIndex);
+    };
+
+    requestAnimationFrame(() => {
+      scrollToStart();
+      // First rAF can run before slide widths exist — retry once layout settles.
+      requestAnimationFrame(scrollToStart);
     });
 
     if (itemCount < 2) {

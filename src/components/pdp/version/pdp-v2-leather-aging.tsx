@@ -13,6 +13,9 @@ import {
 import { cn } from "@/lib/cn";
 
 import { PDP_LEATHER_AGING } from "../pdp-data";
+import { PdpLeatherAgingCareUpsell } from "../pdp-leather-aging-care-upsell";
+import { PdpModuleHeading } from "../pdp-module-heading";
+import { pdpModuleHeadlineDisplayClass, pdpModuleIntroClass } from "../pdp-module-section";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpType } from "../pdp-type";
@@ -88,8 +91,19 @@ function LeatherAgingStages({ stageIndex }: { stageIndex: number }) {
  * slider (dot track + labels). Square corners. Same tap interaction and frozen
  * `PDP_LEATHER_AGING` data as the v2 layout.
  */
-function PdpLeatherAgingV4() {
-  const { stages, title } = PDP_LEATHER_AGING;
+function PdpLeatherAgingV4({
+  showCareUpsell = false,
+  onQuickAdd,
+}: {
+  showCareUpsell?: boolean;
+  onQuickAdd?: () => void;
+}) {
+  const {
+    leatherAgingHeaderAboveImage,
+    useConsistentModuleHeadings,
+    useRailLeatherAgingSlider,
+  } = getPdpVersionConfig(usePdpVersion());
+  const { stages, title, intro } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
   const reducedMotion = useReducedMotion();
 
@@ -229,6 +243,321 @@ function PdpLeatherAgingV4() {
       ? "transition-none"
       : "transition-[left,width,height] duration-300 ease-out";
 
+  const idleDotFillClass = leatherAgingHeaderAboveImage
+    ? "bg-white"
+    : "bg-[#EEE9E7]";
+
+  const stageCaption = leatherAgingHeaderAboveImage ? (
+    <p className={cn(pdpModuleIntroClass("left"), "m-0 text-pretty leading-snug")}>
+      {intro}
+    </p>
+  ) : (
+    <p
+      className={cn(
+        pdpModuleIntroClass("center"),
+        "min-h-[52px]",
+      )}
+    >
+      {`${stage.timeline} — ${stage.summary}`}
+    </p>
+  );
+
+  // ── Apple-style rail knob geometry (v5) ────────────────────────────────
+  // 26px white circle → radius 13px. The track is inset by that radius so the
+  // knob center can reach 0%/100% without the knob ever clipping the card edge.
+  const RAIL_KNOB = 26;
+  const RAIL_INSET = RAIL_KNOB / 2;
+  const railKnobScale = !isDragging ? 1 : hasMoved ? 1.14 : 1.07;
+  const railKnobShadow = isDragging
+    ? "0 2px 6px rgba(0,0,0,0.22), 0 10px 24px rgba(0,0,0,0.18), inset 0 0 0 0.5px rgba(0,0,0,0.06)"
+    : "0 1px 2px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.12), inset 0 0 0 0.5px rgba(0,0,0,0.06)";
+  // easeOutQuint settle on release; 1:1 (no positional transition) while dragging.
+  const railKnobMotionClass = isDragging
+    ? "transition-[transform,box-shadow] duration-150 ease-out"
+    : reducedMotion
+      ? "transition-none"
+      : "transition-[left,transform,box-shadow] duration-[350ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]";
+  const railFillMotionClass =
+    isDragging || reducedMotion
+      ? "transition-none"
+      : "transition-[width] duration-[350ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]";
+
+  const railStageSlider = (
+    <div className="mx-auto flex w-full flex-col gap-[18px] px-2 select-none">
+      {/* continuous rail — press and drag the knob between stages */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-valuemin={0}
+        aria-valuemax={maxIndex}
+        aria-valuenow={displayStageIndex}
+        aria-valuetext={displayStage.label}
+        aria-label="Leather aging over time"
+        className={cn(
+          "relative -my-3 flex h-11 cursor-grab touch-none select-none items-center py-3",
+          "[outline:none] focus-visible:[outline:2px_solid_#1a1a1a] focus-visible:[outline-offset:4px] focus-visible:[border-radius:9999px]",
+          isDragging && "cursor-grabbing",
+        )}
+        onPointerDown={handlePointerDown}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+            event.preventDefault();
+            commitStageIndex(stageIndex - 1);
+          }
+
+          if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+            event.preventDefault();
+            commitStageIndex(stageIndex + 1);
+          }
+        }}
+      >
+        <div
+          className="relative w-full"
+          style={{ paddingLeft: RAIL_INSET, paddingRight: RAIL_INSET }}
+        >
+          <div ref={trackRef} className="relative h-[26px]">
+            {/* base track */}
+            <span
+              aria-hidden
+              className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-black/12"
+            />
+            {/* progress fill */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#1a1a1a]",
+                railFillMotionClass,
+              )}
+              style={{ width: `${renderedProgress}%` }}
+            />
+            {/* stage ticks — white once the fill passes them, faint ahead */}
+            {stages.map((item, index) => {
+              const tickProgress = agingProgressFromStageIndex(index, maxIndex);
+              const passed = tickProgress <= renderedProgress + 0.5;
+
+              return (
+                <span
+                  key={item.id}
+                  aria-hidden
+                  className={cn(
+                    "absolute top-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full",
+                    passed ? "bg-white/85" : "bg-black/25",
+                  )}
+                  style={{ left: `${tickProgress}%` }}
+                />
+              );
+            })}
+            {/* knob */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute top-1/2 rounded-full bg-white",
+                railKnobMotionClass,
+              )}
+              style={{
+                left: `${renderedProgress}%`,
+                width: RAIL_KNOB,
+                height: RAIL_KNOB,
+                transform: `translate(-50%, -50%) scale(${railKnobScale})`,
+                boxShadow: railKnobShadow,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* stage labels — centered under each tick; tap to jump */}
+      <div className="relative h-4">
+        <div
+          className="absolute top-0"
+          style={{ left: RAIL_INSET, right: RAIL_INSET }}
+        >
+          {stages.map((item, index) => {
+            const active = stageIndex === index;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => commitStageIndex(index)}
+                aria-current={active ? "step" : undefined}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${agingProgressFromStageIndex(index, maxIndex)}%`,
+                  transform: "translateX(-50%)",
+                }}
+                className={cn(
+                  "font-extended whitespace-nowrap text-[12px] leading-[1.1] transition-colors duration-200",
+                  active ? "text-black" : "text-black/40",
+                )}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const dotStageSlider = (
+    <div
+      className={cn(
+        "flex w-full flex-col gap-[18px] select-none",
+        leatherAgingHeaderAboveImage
+          ? "mx-auto w-full max-w-[300px]"
+          : "mx-auto max-w-[calc(100%-3rem)]",
+      )}
+    >
+      {/* dot track — press and drag the salmon thumb between stages */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-valuemin={0}
+        aria-valuemax={maxIndex}
+        aria-valuenow={displayStageIndex}
+        aria-valuetext={displayStage.label}
+        aria-label="Leather aging over time"
+        className={cn(
+          "relative -my-3 flex h-11 cursor-grab touch-none select-none items-center py-3",
+          "[outline:none] focus-visible:[outline:2px_solid_#1a1a1a] focus-visible:[outline-offset:2px]",
+          isDragging && "cursor-grabbing",
+        )}
+        onPointerDown={handlePointerDown}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+            event.preventDefault();
+            commitStageIndex(stageIndex - 1);
+          }
+
+          if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+            event.preventDefault();
+            commitStageIndex(stageIndex + 1);
+          }
+        }}
+      >
+        {/* decorative track: idle ring markers + connecting lines */}
+        <div className="flex w-full items-center">
+          {stages.map((item, index) => {
+            const isLast = index === maxIndex;
+
+            return (
+              <Fragment key={item.id}>
+                <span
+                  aria-hidden
+                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center"
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "h-[14px] w-[14px] rounded-full border-2 border-solid border-black",
+                      idleDotFillClass,
+                    )}
+                  />
+                </span>
+                {!isLast ? (
+                  <span aria-hidden className="flex flex-1 items-center px-1">
+                    <span aria-hidden className="h-[2px] grow bg-black" />
+                  </span>
+                ) : null}
+              </Fragment>
+            );
+          })}
+        </div>
+
+        {/* moving thumb — inset to map 0–100 onto the dot centers */}
+        <div
+          ref={trackRef}
+          className="pointer-events-none absolute inset-y-0 left-[9px] right-[9px]"
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1a1a1a]",
+              thumbMotionClass,
+            )}
+            style={{
+              left: `${renderedProgress}%`,
+              width: thumbSize.width,
+              height: thumbSize.height,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* stage labels — centered under each dot/pill using the same
+          9px-inset percentage math as the thumb; tap to jump. */}
+      <div className="relative h-4">
+        <div className="absolute inset-x-[9px] top-0">
+          {stages.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => commitStageIndex(index)}
+              aria-current={stageIndex === index ? "step" : undefined}
+              // Inline position/left/transform to beat the global
+              // `.font-extended { position: relative }` rule in globals.css.
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `${agingProgressFromStageIndex(index, maxIndex)}%`,
+                transform: "translateX(-50%)",
+              }}
+              className="font-extended whitespace-nowrap text-[12px] leading-[1.1] text-black transition-colors active:text-neutral-600"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const stageSlider = useRailLeatherAgingSlider ? railStageSlider : dotStageSlider;
+
+  if (leatherAgingHeaderAboveImage) {
+    return (
+      <section
+        data-header-surface="light"
+        className="w-full shrink-0 bg-white px-4 py-6"
+      >
+        {/* Warm container matches the product shot's cream ground (#F2EDEA) so
+            the image melts into the card instead of floating on white. */}
+        <div className="flex flex-col bg-[#F2EDEA] px-4 pt-6 pb-6">
+          <PdpRevealItem>
+            <div className="mb-3 flex flex-col gap-2">
+              <PdpModuleHeading spacing="none" className="text-left">
+                {title}
+              </PdpModuleHeading>
+              {stageCaption}
+            </div>
+          </PdpRevealItem>
+
+          <PdpRevealItem delay={revealStaggerDelay(1)}>
+            <div className="relative h-[430px] w-full overflow-hidden bg-[#F2EDEA]">
+              <LeatherAgingStages stageIndex={stageIndex} />
+            </div>
+          </PdpRevealItem>
+
+          <PdpRevealItem delay={revealStaggerDelay(2)}>
+            <div className="flex w-full flex-col items-stretch gap-4 pt-5">
+              {stageSlider}
+              {showCareUpsell ? (
+                <PdpLeatherAgingCareUpsell
+                  stageIndex={stageIndex}
+                  isDragging={isDragging}
+                  onQuickAdd={onQuickAdd}
+                  className="mt-0 w-[294px]"
+                />
+              ) : null}
+            </div>
+          </PdpRevealItem>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section data-header-surface="light" className="w-full shrink-0 bg-white px-4">
       <div className="overflow-hidden">
@@ -243,117 +572,27 @@ function PdpLeatherAgingV4() {
           <div className="flex w-full flex-col items-center gap-2">
             <PdpTextReveal
               as="h2"
-              className="font-extended m-0 self-stretch text-center text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-balance text-black"
+              className={cn(
+                pdpModuleHeadlineDisplayClass(useConsistentModuleHeadings),
+                "self-stretch text-center",
+              )}
             >
               {title}
             </PdpTextReveal>
-            {/* Reserve height for the longest (2-years) caption so the card
-                never resizes as the stage changes. Reads the committed stage —
-                text + photo only change on release, not mid-drag. */}
-            <p className="font-extended m-0 min-h-[52px] self-stretch text-center text-[12px] leading-[1.4] tracking-[-0.01em] text-balance text-black">
-              {`${stage.timeline} — ${stage.summary}`}
-            </p>
+            {stageCaption}
           </div>
 
-          <div className="flex w-[294px] flex-col gap-[18px] select-none">
-            {/* dot track — press and drag the salmon thumb between stages */}
-            <div
-              role="slider"
-              tabIndex={0}
-              aria-valuemin={0}
-              aria-valuemax={maxIndex}
-              aria-valuenow={displayStageIndex}
-              aria-valuetext={displayStage.label}
-              aria-label="Leather aging over time"
-              className={cn(
-                "relative -my-3 flex h-11 cursor-grab touch-none select-none items-center py-3",
-                "[outline:none] focus-visible:[outline:2px_solid_#c3897f] focus-visible:[outline-offset:2px]",
-                isDragging && "cursor-grabbing",
-              )}
-              onPointerDown={handlePointerDown}
-              onKeyDown={(event) => {
-                if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
-                  event.preventDefault();
-                  commitStageIndex(stageIndex - 1);
-                }
+          <div className="flex w-full flex-col items-center gap-4">
+            {stageSlider}
 
-                if (event.key === "ArrowRight" || event.key === "ArrowUp") {
-                  event.preventDefault();
-                  commitStageIndex(stageIndex + 1);
-                }
-              }}
-            >
-              {/* decorative track: idle ring markers + connecting lines */}
-              <div className="flex w-full items-center">
-                {stages.map((item, index) => {
-                  const isLast = index === maxIndex;
-
-                  return (
-                    <Fragment key={item.id}>
-                      <span
-                        aria-hidden
-                        className="flex h-[18px] w-[18px] shrink-0 items-center justify-center"
-                      >
-                        <span
-                          aria-hidden
-                          className="h-[14px] w-[14px] rounded-full border-2 border-solid border-black bg-[#EEE9E7]"
-                        />
-                      </span>
-                      {!isLast ? (
-                        <span aria-hidden className="flex flex-1 items-center px-1">
-                          <span aria-hidden className="h-[2px] grow bg-black" />
-                        </span>
-                      ) : null}
-                    </Fragment>
-                  );
-                })}
-              </div>
-
-              {/* moving thumb — inset to map 0–100 onto the dot centers */}
-              <div
-                ref={trackRef}
-                className="pointer-events-none absolute inset-y-0 left-[9px] right-[9px]"
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C3897F]",
-                    thumbMotionClass,
-                  )}
-                  style={{
-                    left: `${renderedProgress}%`,
-                    width: thumbSize.width,
-                    height: thumbSize.height,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* stage labels — centered under each dot/pill using the same
-                9px-inset percentage math as the thumb; tap to jump. */}
-            <div className="relative h-4">
-              <div className="absolute inset-x-[9px] top-0">
-                {stages.map((item, index) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => commitStageIndex(index)}
-                    aria-current={stageIndex === index ? "step" : undefined}
-                    // Inline position/left/transform to beat the global
-                    // `.font-extended { position: relative }` rule in globals.css.
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: `${agingProgressFromStageIndex(index, maxIndex)}%`,
-                      transform: "translateX(-50%)",
-                    }}
-                    className="font-extended whitespace-nowrap text-[12px] leading-[1.1] text-black transition-colors active:text-neutral-600"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {showCareUpsell ? (
+              <PdpLeatherAgingCareUpsell
+                stageIndex={stageIndex}
+                isDragging={isDragging}
+                onQuickAdd={onQuickAdd}
+                className="mt-0 w-[294px]"
+              />
+            ) : null}
           </div>
         </div>
         </PdpRevealItem>
@@ -375,7 +614,13 @@ function PdpLeatherAgingV4() {
  *
  * v4 (Paper r5 `JFT-0`) restructures this — see `PdpLeatherAgingV4`.
  */
-export function PdpV2LeatherAging() {
+export function PdpV2LeatherAging({
+  showCareUpsell = false,
+  onQuickAdd,
+}: {
+  showCareUpsell?: boolean;
+  onQuickAdd?: () => void;
+} = {}) {
   const { useV4LeatherAgingLayout } = getPdpVersionConfig(usePdpVersion());
   const { stages, title, image } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
@@ -384,7 +629,12 @@ export function PdpV2LeatherAging() {
   const stage = stages[stageIndex]!;
 
   if (useV4LeatherAgingLayout) {
-    return <PdpLeatherAgingV4 />;
+    return (
+      <PdpLeatherAgingV4
+        showCareUpsell={showCareUpsell}
+        onQuickAdd={onQuickAdd}
+      />
+    );
   }
 
   return (
@@ -446,7 +696,7 @@ export function PdpV2LeatherAging() {
                         className={cn(
                           "rounded-full transition-[width,height,background-color] duration-300 ease-out",
                           active
-                            ? "size-[22px] bg-[#c38980]"
+                            ? "size-[22px] bg-[#1a1a1a]"
                             : "size-3 border-2 border-solid border-black bg-[#eee9e7]",
                         )}
                       />

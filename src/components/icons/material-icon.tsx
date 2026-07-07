@@ -7,7 +7,7 @@ type MaterialIconProps = {
   className?: string;
   style?: CSSProperties;
   /** Optical size (default 24) */
-  size?: 18 | 20 | 24 | 26;
+  size?: 14 | 15 | 16 | 18 | 20 | 24 | 26;
   /** Filled variant */
   filled?: boolean;
   ariaHidden?: boolean;

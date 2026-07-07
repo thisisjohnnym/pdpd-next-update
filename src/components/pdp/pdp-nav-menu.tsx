@@ -11,7 +11,9 @@ import { cn } from "@/lib/cn";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpBottomSheetScrollRegionClass } from "./pdp-bottom-sheet";
 import { PDP_NAV, type PdpNavCategory, type PdpNavHighlight } from "./pdp-nav-data";
-import { pdpPressableClass, pdpPressableIconClass, pdpType } from "./pdp-type";
+import { pdpPressableClass, pdpPressableIconClass, pdpPillRadiusClass, pdpType } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpNavMenuProps = {
@@ -117,6 +119,7 @@ function NavAccordionItem({
 export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
   const titleId = useId();
   const mounted = useOverlayDismiss(open, onClose);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const [brandTab, setBrandTab] = useState<NavBrandTab>("coach");
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
@@ -220,7 +223,8 @@ export function PdpNavMenu({ open, onClose }: PdpNavMenuProps) {
                   type="search"
                   placeholder={PDP_NAV.searchPlaceholder}
                   className={cn(
-                    "font-extended h-11 w-full rounded-full border border-neutral-300 bg-white pl-10 pr-4 text-sm tracking-[0.2px] text-black outline-none placeholder:text-neutral-500 focus:border-black",
+                    "font-extended h-11 w-full border border-neutral-300 bg-white pl-10 pr-4 text-sm tracking-[0.2px] text-black outline-none placeholder:text-neutral-500 focus:border-black",
+                    pdpPillRadiusClass(squareButtonCorners),
                   )}
                 />
               </label>

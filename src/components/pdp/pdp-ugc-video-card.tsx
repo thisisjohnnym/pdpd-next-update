@@ -7,6 +7,8 @@ import { cn } from "@/lib/cn";
 
 import type { PdpUgcVideo } from "./pdp-data";
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 type PdpUgcVideoCardProps = {
   video: PdpUgcVideo;
@@ -20,6 +22,7 @@ export function PdpUgcVideoCard({
   scrollRoot,
   className,
 }: PdpUgcVideoCardProps) {
+  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
   const cardRef = useRef<HTMLElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -80,7 +83,10 @@ export function PdpUgcVideoCard({
     >
       <div
         data-coverflow-layer
-        className="pdp-ugc-coverflow-layer relative aspect-[9/16] w-full overflow-hidden rounded-[14px] bg-black"
+        className={cn(
+          "pdp-ugc-coverflow-layer relative aspect-[9/16] w-full overflow-hidden bg-black [&_video]:rounded-none",
+          useV4ModuleSpacing ? "rounded-none" : "rounded-[14px]",
+        )}
       >
         {mounted ? (
           <PdpGalleryHeroVideo

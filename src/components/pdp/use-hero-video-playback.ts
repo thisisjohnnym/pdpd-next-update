@@ -24,6 +24,13 @@ type UseHeroVideoPlaybackInput = {
   poster?: string;
   preload: "auto" | "metadata" | "none";
   tapToTogglePlayback: boolean;
+  /** When false the clip plays once and fires `onEnded`. Defaults to true. */
+  loop?: boolean;
+  onEnded?: () => void;
+  /** When false, skip the hero blur-reveal path (object-cover). Defaults to priorityAutoplay. */
+  blurReveal?: boolean;
+  /** Playback speed multiplier. Defaults to 1. */
+  playbackRate?: number;
 };
 
 type HeroVideoPlayback = {
@@ -41,6 +48,7 @@ type HeroVideoPlayback = {
   showFrozenPlayOverlay: boolean;
   effectivePreload: "auto" | "metadata" | "none";
   playbackHint: "play" | "pause" | null;
+  showTapPausedOverlay: boolean;
   togglePlayback: () => void;
   toggleMute: () => void;
 };
@@ -58,6 +66,10 @@ export function useHeroVideoPlayback({
   poster,
   preload,
   tapToTogglePlayback,
+  loop = true,
+  onEnded,
+  blurReveal,
+  playbackRate = 1,
 }: UseHeroVideoPlaybackInput): HeroVideoPlayback {
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
@@ -229,18 +241,43 @@ export function useHeroVideoPlayback({
       setIsPlaying(!video.paused && !video.ended);
     };
 
+    const handleEnded = () => {
+      syncPlaying();
+      onEnded?.();
+    };
+
     syncPlaying();
 
-    for (const type of ["play", "playing", "pause", "ended"] as const) {
+    for (const type of ["play", "playing", "pause"] as const) {
       video.addEventListener(type, syncPlaying);
     }
+    video.addEventListener("ended", handleEnded);
 
     return () => {
-      for (const type of ["play", "playing", "pause", "ended"] as const) {
+      for (const type of ["play", "playing", "pause"] as const) {
         video.removeEventListener(type, syncPlaying);
       }
+      video.removeEventListener("ended", handleEnded);
     };
-  }, [isMounted, isClientReady, src]);
+  }, [isMounted, isClientReady, src, onEnded]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+    video.loop = loop;
+
+    const applyPlaybackRate = () => {
+      video.playbackRate = playbackRate;
+    };
+
+    applyPlaybackRate();
+    video.addEventListener("loadedmetadata", applyPlaybackRate);
+    return () => {
+      video.removeEventListener("loadedmetadata", applyPlaybackRate);
+    };
+  }, [loop, playbackRate, isMounted, src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -404,6 +441,14 @@ export function useHeroVideoPlayback({
     }
   }, [isActive, isPlaying, autoplayRestricted, firstFrameTimedOut, src]);
 
+  const attemptPlay = (video: HTMLVideoElement) => {
+    if (video.ended && !loop) {
+      return;
+    }
+
+    void video.play().catch(onPlayRejected);
+  };
+
   const onPlayRejected = (error?: unknown) => {
     if (!mountedRef.current) {
       return;
@@ -439,7 +484,7 @@ export function useHeroVideoPlayback({
       }
 
       logVideoTelemetry("autoplay_attempt", { src, readyState: video.readyState });
-      void video.play().catch(onPlayRejected);
+      attemptPlay(video);
     };
 
     tryPlay();
@@ -450,7 +495,7 @@ export function useHeroVideoPlayback({
       video.removeEventListener("loadeddata", tryPlay);
       video.removeEventListener("canplay", tryPlay);
     };
-  }, [priorityAutoplay, isMounted, isClientReady, shouldPlay, src]);
+  }, [priorityAutoplay, isMounted, isClientReady, shouldPlay, src, loop]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -470,11 +515,8 @@ export function useHeroVideoPlayback({
     }
 
     logVideoTelemetry("autoplay_attempt", { src, readyState: video.readyState });
-    void video.play().catch((error) => {
-      onPlayRejected(error);
-      video.pause();
-    });
-  }, [shouldPlay, isActive, isMounted, isClientReady, src, userPaused, priorityAutoplay]);
+    attemptPlay(video);
+  }, [shouldPlay, isActive, isMounted, isClientReady, src, userPaused, priorityAutoplay, loop]);
 
   useEffect(() => {
     if (!lifecycle.isVisible || !shouldPlay) {
@@ -486,8 +528,8 @@ export function useHeroVideoPlayback({
       return;
     }
 
-    void video.play().catch(onPlayRejected);
-  }, [lifecycle.isVisible, shouldPlay, priorityAutoplay]);
+    attemptPlay(video);
+  }, [lifecycle.isVisible, shouldPlay, priorityAutoplay, loop]);
 
   useEffect(() => {
     return () => {
@@ -557,7 +599,7 @@ export function useHeroVideoPlayback({
     setIsMuted(userMutedRef.current);
   };
 
-  const showBlurReveal = priorityAutoplay;
+  const showBlurReveal = blurReveal ?? priorityAutoplay;
 
   // Latch the intro blur-reveal: once the hero has un-blurred on first play,
   // a later pause should keep the frame sharp (normal playback feel) instead
@@ -586,6 +628,13 @@ export function useHeroVideoPlayback({
         firstFrameTimedOut ||
         !canAutoplayPriorityHero
       : manualPlaybackRequired && (isReady || Boolean(poster) || firstFrameTimedOut));
+
+  const showTapPausedOverlay =
+    tapToTogglePlayback &&
+    isActive &&
+    userPaused &&
+    !isPlaying &&
+    !showFrozenPlayOverlay;
 
   const effectivePreload: "auto" | "metadata" | "none" = (() => {
     if (priorityAutoplay && isActive) {
@@ -632,6 +681,7 @@ export function useHeroVideoPlayback({
     showBlurReveal,
     heroBlackout,
     showFrozenPlayOverlay,
+    showTapPausedOverlay,
     effectivePreload,
     playbackHint,
     togglePlayback,

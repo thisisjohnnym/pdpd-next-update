@@ -22,3 +22,6 @@ const WEBM_ASSETS = [
   "/videos/soft-tabby-showcase.webm",
   "/videos/what-fits-inside.webm",
 ] as const;
+
+/** v6 one-shot 360° hero intro (MP4 only). */
+export const HERO_360_INTRO_VIDEO_SRC = "/videos/tabby26-360-intro.mp4";

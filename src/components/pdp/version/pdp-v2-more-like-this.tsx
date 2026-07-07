@@ -1,32 +1,55 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
+import {
+  pdpCarouselScrollClass,
+  pdpCarouselScrollWrapClass,
+} from "../pdp-carousel";
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
-import { pdpType } from "../pdp-type";
+import { pdpPillRadiusClass, pdpType } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
+import { useDragToScroll } from "../use-infinite-centered-carousel";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
+/** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` bumps image; ATB stays compact. */
+const MORE_LIKE_THIS_CARD = {
+  default: { width: 158, imageHeight: 198, buttonHeight: 38 },
+  large: { width: 174, imageHeight: 218, buttonHeight: 32 },
+} as const;
+
 /**
  * v2-only simplified "More like this" module (Paper B6C-0).
  *
- * Horizontal scroll rail with 158×198px product cards and a pill "Add to bag"
- * button. Matches Paper's fixed-width card layout exactly.
+ * Horizontal scroll rail with fixed-width product cards and a pill "Add to bag"
+ * button. v5 optionally renders larger cards via `moreLikeThisLargeCards`.
  */
 export function PdpV2MoreLikeThis({
   onAddToBag,
 }: {
   onAddToBag?: (id: string) => void;
 }) {
-  const { leftAlignModuleHeadings, squareProductCardCorners, useV4ModuleSpacing } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    leftAlignModuleHeadings,
+    squareProductCardCorners,
+    useV4ModuleSpacing,
+    moreLikeThisLargeCards,
+    squareButtonCorners,
+  } = getPdpVersionConfig(usePdpVersion());
+  const card = moreLikeThisLargeCards
+    ? MORE_LIKE_THIS_CARD.large
+    : MORE_LIKE_THIS_CARD.default;
   const { eyebrow, items } = PDP_MORE_LIKE_THIS;
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useDragToScroll(scrollRef);
 
   return (
     <section
@@ -52,47 +75,54 @@ export function PdpV2MoreLikeThis({
         </PdpTextReveal>
       </div>
 
-      {/* Static 3-card clip — 3rd card peeks; not scrollable (Paper B6C-0) */}
-      <div className="overflow-clip">
+      <div className={pdpCarouselScrollWrapClass}>
         <div
+          ref={scrollRef}
           className={cn(
-            "flex pb-1",
-            useV4ModuleSpacing ? "gap-4 px-4" : "gap-2 px-2",
+            pdpCarouselScrollClass,
+            "pdp-carousel-draggable flex items-start pb-1",
+            useV4ModuleSpacing ? "gap-3 pr-4" : "gap-2 pr-2",
           )}
+          aria-label="More like this products"
         >
           {items.map((item, index) => (
             <PdpRevealItem
               key={item.id}
               delay={revealStaggerDelay(index)}
-              className="flex w-[158px] shrink-0 flex-col gap-2"
+              className="flex shrink-0 snap-start snap-always flex-col gap-2"
+              style={{ width: card.width }}
             >
               <div
                 className={cn(
-                  "relative h-[198px] w-[158px] overflow-hidden",
+                  "relative overflow-hidden",
                   squareProductCardCorners ? "rounded-none" : "rounded-xl",
                 )}
+                style={{ width: card.width, height: card.imageHeight }}
               >
                 <Image
                   src={item.imageSrc}
                   alt={item.imageAlt}
                   fill
                   className="object-cover object-center"
-                  sizes="158px"
+                  sizes={`${card.width}px`}
                 />
               </div>
 
               <p
                 className={cn(
-                  "font-extended m-0 text-center leading-snug text-black",
-                  pdpType.body,
+                  // Reserve two lines so price + ATB never staircase across cards
+                  "font-extended m-0 line-clamp-2 min-h-[2.75em] leading-snug text-black",
+                  leftAlignModuleHeadings ? "text-left" : "text-center",
+                  moreLikeThisLargeCards ? "text-[13px]" : pdpType.body,
                 )}
               >
                 {item.name}
               </p>
               <p
                 className={cn(
-                  "font-extended -mt-1 m-0 text-center text-neutral-500",
-                  pdpType.label,
+                  "font-extended -mt-1 m-0 text-neutral-500",
+                  leftAlignModuleHeadings ? "text-left" : "text-center",
+                  moreLikeThisLargeCards ? "text-[12px]" : pdpType.label,
                 )}
               >
                 {item.price}
@@ -102,27 +132,13 @@ export function PdpV2MoreLikeThis({
                 type="button"
                 onClick={() => onAddToBag?.(item.id)}
                 className={cn(
-                  "font-extended inline-flex h-[38px] w-full items-center justify-center gap-1.5 rounded-full border border-[#D4D4D4] text-black transition-colors active:bg-neutral-50",
+                  "font-extended inline-flex w-full items-center justify-center border border-[#D4D4D4] px-2 text-black transition-colors active:bg-neutral-50",
+                  pdpPillRadiusClass(squareButtonCorners),
                   pdpType.micro,
                 )}
+                style={{ height: card.buttonHeight }}
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                  style={{ flexShrink: 0 }}
-                >
-                  <path
-                    d="M6 8h12l-1 12H7L6 8Zm3 0V6a3 3 0 0 1 6 0v2"
-                    fill="none"
-                    stroke="#171717"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Add to bag
+                <span className="translate-y-0.5">Add to bag</span>
               </button>
             </PdpRevealItem>
           ))}

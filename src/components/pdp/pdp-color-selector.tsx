@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -11,6 +11,9 @@ import {
   pdpColorIsSelectable,
 } from "./pdp-data";
 import { useActiveProduct } from "./pdp-active-product-context";
+import {
+  pdpCarouselScrollClass,
+} from "./pdp-carousel";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { ColorSwatchCircle, ColorSwatchImage } from "./pdp-color-swatch";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
@@ -28,6 +31,7 @@ import {
   pdpVariantPillFrostBaseClass,
   pdpVariantPillFrostClass,
 } from "./pdp-type";
+import { useDragToScroll } from "./use-infinite-centered-carousel";
 
 type PdpColorSelectorColor = PdpColor | TabbyColorOption;
 
@@ -57,10 +61,86 @@ type PdpColorSelectorProps = {
   squared?: boolean;
   /** Lift the inline pill with the floating buy-bar shadow (scrolled state) */
   elevated?: boolean;
+  /** Hide the grey "Color" caption — show swatch + shade name + chevron only */
+  hideLabel?: boolean;
+  /** Horizontal swatch row — no dropdown tray (v5 buy bar) */
+  exposeAllSwatches?: boolean;
 };
 
 /** Floating buy-bar elevation — matches the AR button drop shadow */
 const FLOATING_PILL_SHADOW = "shadow-[0_4px_14px_rgba(0,0,0,0.12)]";
+
+function PdpInlineColorSwatchCarousel({
+  colors,
+  selectedId,
+  onSelect,
+}: {
+  colors: PdpColorSelectorColor[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useDragToScroll(scrollRef);
+
+  return (
+    <div
+      ref={scrollRef}
+      role="listbox"
+      aria-label="Choose color"
+      className={cn(
+        pdpCarouselScrollClass,
+        "pdp-carousel-draggable flex min-w-0 items-center gap-2.5 py-0.5 pl-0 scroll-pl-0",
+      )}
+    >
+      {colors.map((color) => {
+        const isSelected = color.id === selectedId;
+        const isSelectable =
+          isCombinationAvailable(color) &&
+          pdpColorIsSelectable(color.availability);
+
+        return (
+          <button
+            key={color.id}
+            type="button"
+            role="option"
+            aria-selected={isSelected}
+            aria-disabled={!isSelectable}
+            disabled={!isSelectable}
+            onClick={() => isSelectable && onSelect(color.id)}
+            aria-label={
+              isSelectable
+                ? `Select ${color.name}`
+                : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+            }
+            className={cn(
+              "relative shrink-0 rounded-full p-0.5 transition-[box-shadow,opacity] duration-200 ease-out",
+              isSelected && "ring-2 ring-black ring-offset-2",
+              !isSelectable && "cursor-not-allowed opacity-40",
+              isSelectable && pdpPressableIconClass,
+            )}
+          >
+            {"swatch" in color && color.swatch ? (
+              <ColorSwatchCircle src={color.swatch} sizeClass="size-9" />
+            ) : (
+              <ColorSwatchCircle
+                fill={color.chromeSample ?? "#d4d4d4"}
+                sizeClass="size-9"
+              />
+            )}
+            {!isSelectable && color.availability === "notify" ? (
+              <span
+                aria-hidden
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30"
+              >
+                <MaterialIcon name="mail" size={16} className="text-white" />
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function PdpColorDropup({
   colors,
@@ -72,6 +152,7 @@ function PdpColorDropup({
   heightClass,
   squared = false,
   elevated = false,
+  hideLabel = false,
 }: Pick<
   PdpColorSelectorProps,
   | "colors"
@@ -83,6 +164,7 @@ function PdpColorDropup({
   | "heightClass"
   | "squared"
   | "elevated"
+  | "hideLabel"
 >) {
   const [open, setOpen] = useState(false);
   const { productId } = useActiveProduct();
@@ -99,6 +181,10 @@ function PdpColorDropup({
   const setSheetOpen = (next: boolean) => {
     setOpen(next);
     onOpenChange?.(next);
+  };
+
+  const toggleSheet = () => {
+    setSheetOpen(!open);
   };
 
   const handleSelect = (id: string) => {
@@ -153,7 +239,10 @@ function PdpColorDropup({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Color: ${coachColor.full}, ${pdpColorAvailabilityLabel(selected.availability)}. Choose another color.`}
-        onClick={() => setSheetOpen(!open)}
+        onClick={(event) => {
+          event.stopPropagation();
+          toggleSheet();
+        }}
         className={cn(
           pillClass,
           "transition-[background-color,box-shadow] duration-300 ease-out",
@@ -162,16 +251,26 @@ function PdpColorDropup({
           elevated && FLOATING_PILL_SHADOW,
         )}
       >
-        <ColorSwatchCircle src={selected.swatch} sizeClass="size-7" sizes="32px" />
-        <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 leading-none">
-          <span
-            className={cn(
-              "truncate text-[11px] leading-none tracking-[0.2px]",
-              frost ? "text-white/55" : "text-neutral-400",
-            )}
-          >
-            Color
-          </span>
+        <ColorSwatchCircle
+          fill={selected.chromeSample ?? "#d4d4d4"}
+          sizeClass="size-7"
+        />
+        <span
+          className={cn(
+            "flex min-w-0 flex-1 leading-none",
+            hideLabel ? "items-center" : "flex-col items-start gap-0.5",
+          )}
+        >
+          {!hideLabel ? (
+            <span
+              className={cn(
+                "truncate text-[11px] leading-none tracking-[0.2px]",
+                frost ? "text-white/55" : "text-neutral-400",
+              )}
+            >
+              Color
+            </span>
+          ) : null}
           <span
             className="max-w-full truncate text-[14px] leading-none"
             title={coachColor.full}
@@ -214,9 +313,21 @@ export function PdpColorSelector({
   heightClass,
   squared = false,
   elevated = false,
+  hideLabel = false,
+  exposeAllSwatches = false,
 }: PdpColorSelectorProps) {
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
   const isOverlay = variant === "overlay";
+
+  if (inline && exposeAllSwatches) {
+    return (
+      <PdpInlineColorSwatchCarousel
+        colors={colors}
+        selectedId={selectedId}
+        onSelect={onSelect}
+      />
+    );
+  }
 
   if (inline) {
     return (
@@ -230,6 +341,7 @@ export function PdpColorSelector({
         heightClass={heightClass}
         squared={squared}
         elevated={elevated}
+        hideLabel={hideLabel}
       />
     );
   }

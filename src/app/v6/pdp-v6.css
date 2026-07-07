@@ -1,0 +1,218 @@
+/*
+ * v6-only styles — feedback round after frozen v5.
+ *
+ * RULES (enforced by scripts/check-pdp-version-boundaries.mjs):
+ * - Every selector here MUST be scoped under [data-pdp-version="v6"].
+ * - Never edit shared .pdp-* rules in globals.css for v6-only needs.
+ *
+ * Initial copy mirrors v5 so /v6 starts identical to the frozen /v5 baseline.
+ * Add v6-only overrides here as feedback lands.
+ */
+
+[data-pdp-version="v6"] {
+  /* v6 design tokens land here as the round evolves. */
+}
+
+/* Match the v2/v3/v4/v5 calm land — suppress hero-land enter animations. */
+[data-pdp-version="v6"] .pdp-hero-header-enter,
+[data-pdp-version="v6"] .pdp-hero-hud-enter,
+[data-pdp-version="v6"] .pdp-hero-bottom-enter {
+  animation: none;
+}
+
+[data-pdp-version="v6"] .pdp-social-rail-item {
+  opacity: 1;
+  animation: none;
+}
+
+/* Gallery → docked buy bar — no hairline between studio ground and white tray. */
+[data-pdp-version="v6"] .pdp-hero-immersive--fill-frame {
+  background-color: #f0f0f0;
+  margin-bottom: -1px;
+}
+
+[data-pdp-version="v6"] .pdp-hero-docked-footer {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v6"] .pdp-hero-docked-footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  pointer-events: none;
+}
+
+/* Below-fold color rail — no section dividers between ATB, tabs, and swatches. */
+[data-pdp-version="v6"] .pdp-hero-below-fold-colors,
+[data-pdp-version="v6"] [aria-label="Color and size"],
+[data-pdp-version="v6"] [aria-label="All colors"] {
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v6"] .pdp-hero-below-fold-colors [role="tablist"],
+[data-pdp-version="v6"] .pdp-hero-below-fold-colors [role="listbox"],
+[data-pdp-version="v6"] [aria-label="Color and size"] [role="tablist"],
+[data-pdp-version="v6"] [aria-label="Color and size"] [role="listbox"],
+[data-pdp-version="v6"] [aria-label="All colors"] [role="tablist"],
+[data-pdp-version="v6"] [aria-label="All colors"] [role="listbox"] {
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v6"] .pdp-ugc-compact-card,
+[data-pdp-version="v6"] .pdp-ugc-compact-card img {
+  border-radius: 0;
+}
+
+/* Explore Other Tabby Silhouettes — editorial product navigation below color + ATB. */
+[data-pdp-version="v6"] .pdp-tabby-family-explorer {
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v6"] .pdp-tabby-family-explorer li:last-child {
+  border-bottom-width: 0;
+}
+
+/* "What customers are saying" band — left-aligned editorial testimonial (Figma 409:460). */
+[data-pdp-version="v6"] .pdp-v5-ugc-testimonials {
+  background-color: #1f241e;
+}
+
+/* ── Desktop responsive split (lg+) ──────────────────────────────────────────
+ * At the desktop breakpoint the v6 Tabby hero becomes a two-column layout:
+ * a scrolling product media rail on the left and a sticky buy panel on the
+ * right (Miu Miu-style). Below-fold modules center to a focused column. Mobile
+ * (< 1024px) is untouched — the split is `hidden lg:grid` and the mobile hero
+ * is `lg:hidden`. */
+@media (min-width: 1024px) {
+  /* Whiten the page backdrop so the centered below-fold gutters are not black. */
+  [data-pdp-version="v6"] .pdp-v5-page-root {
+    background-color: #fff;
+  }
+
+  /* Desktop 24/20/8 grid (docs/design-system/grid.md): 1440 frame, 20px
+   * margins, 8px gutter, 24 columns. Media spans 15 cols, buy rail spans 9. */
+  [data-pdp-version="v6"] .pdp-v5-desktop-split {
+    max-width: var(--grid-max-width-desktop, 1440px);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin-desktop, 20px);
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    column-gap: var(--grid-gutter-desktop, 8px);
+    align-items: stretch;
+    background-color: #fff;
+  }
+
+  [data-pdp-version="v6"] .pdp-v5-desktop-split__media {
+    grid-column: span 15;
+  }
+
+  [data-pdp-version="v6"] .pdp-v5-desktop-split__rail {
+    grid-column: span 9;
+    position: relative;
+  }
+
+  /* Sticky buy panel — offset below the fixed overlay header. */
+  [data-pdp-version="v6"] .pdp-v5-desktop-split__rail-inner {
+    position: sticky;
+    top: calc(var(--pdp-safe-area-top) + 4.5rem);
+    padding: 2.75rem 0 3rem 1.75rem;
+  }
+
+  /* Product media rail — uniform stacked frames on the studio ground. */
+  [data-pdp-version="v6"] .pdp-v5-desktop-media {
+    gap: var(--grid-gutter-desktop, 8px);
+  }
+
+  /* Below-fold modules follow the 1440 grid frame — they can expand wide. */
+  [data-pdp-version="v6"] .pdp-safe-area-main {
+    max-width: var(--grid-max-width-desktop, 1440px);
+    margin-inline: auto;
+  }
+
+  /* The full-width header's bag icon sits over the white buy panel, so its
+   * light-chrome (white) treatment would vanish. Force it dark on desktop —
+   * the menu + wordmark stay over the media column and keep their contrast. */
+  [data-pdp-version="v6"] [data-header-chrome] [data-pdp-header-action="bag"] {
+    color: #171717;
+  }
+
+  /* "Up close and personal" — drop the horizontal carousel on desktop and lay
+   * the four craftsmanship cards out as full-width columns on the grid. */
+  [data-pdp-version="v6"] .pdp-craftsmanship-header {
+    padding-inline: var(--grid-margin-desktop, 20px);
+  }
+
+  [data-pdp-version="v6"] .pdp-craftsmanship-rail {
+    position: static;
+    left: auto;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: none;
+    translate: none;
+    /* Tailwind v4 drives translate via these custom props; zero them so the
+     * bleed wrap does not shift the in-flow desktop grid. */
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+  }
+
+  [data-pdp-version="v6"] .pdp-craftsmanship-track {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--grid-gutter-desktop, 8px);
+    padding-inline: var(--grid-margin-desktop, 20px);
+    overflow: visible;
+  }
+
+  [data-pdp-version="v6"] .pdp-craftsmanship-card {
+    width: auto;
+  }
+}
+
+/* ── v6 360° intro — hide chrome until choreographed reveal ─────────────── */
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-intro-chrome,
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] [data-header-chrome],
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] [data-header-chrome] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Seamless studio ground — footer tray + shell match gallery #f0f0f0 during intro. */
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-shell,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-shell,
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-media-frame--docked,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-media-frame--docked,
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-docked-footer,
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-below-fold-colors {
+  background-color: #f0f0f0;
+}
+
+[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before,
+[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-docked-footer::before {
+  background: #f0f0f0;
+}
+
+[data-pdp-version="v6"] .pdp-hero-360-intro-layer {
+  background-color: #f0f0f0;
+}
+
+/* ── v6 vertical hero gallery (mobile UXR variant) ───────────────────────── */
+[data-pdp-version="v6"] [data-hero-gallery-vertical] {
+  scroll-behavior: smooth;
+}
+
+[data-pdp-version="v6"] [data-hero-gallery-vertical] [data-hero-vertical-slide] {
+  min-height: 100%;
+}

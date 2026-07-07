@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties } from "react";
+import { type CSSProperties, type PointerEvent, useRef } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -32,10 +32,64 @@ type PdpGalleryHeroVideoProps = {
   poster?: string;
   /** Above-the-fold hero — aggressive preload and decoder priority; autoplay still respects low power */
   priorityAutoplay?: boolean;
+  /** Loop playback — false for one-shot intro clips. Defaults to true. */
+  loop?: boolean;
+  onEnded?: () => void;
+  /** When false, skip the hero blur-reveal path (object-cover). Defaults to priorityAutoplay. */
+  blurReveal?: boolean;
+  /** Match gallery Image slides — absolute inset-0 within a relative slide cell. */
+  fill?: boolean;
+  /** Letterbox on #f0f0f0 instead of the video element's default black. */
+  studioGround?: boolean;
+  /** Playback speed multiplier. Defaults to 1. */
+  playbackRate?: number;
+  /** Skip the opacity fade-in when the first frame appears (intro clips). */
+  instantReveal?: boolean;
 };
 
 const CONTROL_BUTTON_CLASS =
   "flex size-8 items-center justify-center text-white transition-opacity active:opacity-75";
+
+const TAP_MOVE_THRESHOLD_PX = 12;
+
+/** Match poster / skeleton framing to the video element's object-fit classes. */
+function resolveMediaFraming(className?: string, style?: CSSProperties) {
+  const objectFit = className?.includes("object-contain")
+    ? "contain"
+    : "cover";
+  const objectPosition =
+    typeof style?.objectPosition === "string" ? style.objectPosition : "center";
+  const fitClass =
+    objectFit === "contain" ? "object-contain" : "object-cover";
+
+  return { objectFit, objectPosition, fitClass };
+}
+
+function PosterFrame({
+  poster,
+  fitClass,
+  objectPosition,
+  visible,
+}: {
+  poster: string;
+  fitClass: string;
+  objectPosition: string;
+  visible: boolean;
+}) {
+  return (
+    <img
+      src={poster}
+      alt=""
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute inset-0 z-[1] size-full object-center transition-opacity duration-500",
+        fitClass,
+        visible ? "opacity-100" : "opacity-0",
+      )}
+      style={{ objectPosition }}
+    />
+  );
+}
 
 export function PdpGalleryHeroVideo({
   className,
@@ -53,6 +107,13 @@ export function PdpGalleryHeroVideo({
   decoderId,
   poster,
   priorityAutoplay = false,
+  loop = true,
+  onEnded,
+  blurReveal,
+  fill = false,
+  studioGround = false,
+  playbackRate = 1,
+  instantReveal = false,
 }: PdpGalleryHeroVideoProps) {
   const {
     videoRef,
@@ -66,6 +127,7 @@ export function PdpGalleryHeroVideo({
     showBlurReveal,
     heroBlackout,
     showFrozenPlayOverlay,
+    showTapPausedOverlay,
     effectivePreload,
     playbackHint,
     togglePlayback,
@@ -78,16 +140,71 @@ export function PdpGalleryHeroVideo({
     poster,
     preload,
     tapToTogglePlayback,
+    loop,
+    onEnded,
+    blurReveal,
+    playbackRate,
   });
 
   const videoSources = resolveVideoSources(src);
+  const { fitClass: posterFitClass, objectPosition: posterObjectPosition } =
+    resolveMediaFraming(className, style);
 
-  const canTapVideo = !passThroughTouch && (tapToTogglePlayback || showControls);
+  const useTapCaptureLayer = tapToTogglePlayback;
+  const videoIgnoresPointer = passThroughTouch || useTapCaptureLayer;
+  const canTapVideo =
+    !videoIgnoresPointer && (tapToTogglePlayback || showControls);
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
-  const playbackOverlayIcon = playbackHint ?? (showFrozenPlayOverlay ? "play" : null);
+  const playbackOverlayIcon =
+    playbackHint ??
+    (showFrozenPlayOverlay || showTapPausedOverlay ? "play" : null);
+  const overlayInteractive = showFrozenPlayOverlay || showTapPausedOverlay;
+
+  const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const tapMovedRef = useRef(false);
+
+  const resetTapCapture = () => {
+    tapStartRef.current = null;
+    tapMovedRef.current = false;
+  };
+
+  const handleTapCapturePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    tapStartRef.current = { x: event.clientX, y: event.clientY };
+    tapMovedRef.current = false;
+  };
+
+  const handleTapCapturePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const start = tapStartRef.current;
+    if (!start) {
+      return;
+    }
+
+    const dx = Math.abs(event.clientX - start.x);
+    const dy = Math.abs(event.clientY - start.y);
+    if (dx > TAP_MOVE_THRESHOLD_PX || dy > TAP_MOVE_THRESHOLD_PX) {
+      tapMovedRef.current = true;
+    }
+  };
+
+  const handleTapCapturePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = tapStartRef.current;
+    resetTapCapture();
+
+    if (!start || tapMovedRef.current) {
+      return;
+    }
+
+    const dx = Math.abs(event.clientX - start.x);
+    const dy = Math.abs(event.clientY - start.y);
+    if (dx <= TAP_MOVE_THRESHOLD_PX && dy <= TAP_MOVE_THRESHOLD_PX) {
+      togglePlayback();
+    }
+  };
 
   const videoClassName = cn(
+    fill && "absolute inset-0 h-full w-full",
+    studioGround && "bg-[#f0f0f0]",
     className,
     showBlurReveal
       ? cn(
@@ -95,19 +212,19 @@ export function PdpGalleryHeroVideo({
           videoFrameVisible && "is-visible",
         )
       : cn(
-          "transition-opacity duration-300",
-          priorityAutoplay || isReady ? "opacity-100" : "opacity-0",
+          instantReveal ? "opacity-100" : "transition-opacity duration-300",
+          !instantReveal && (priorityAutoplay || isReady ? "opacity-100" : "opacity-0"),
         ),
     canTapVideo && "cursor-pointer",
-    passThroughTouch && "pointer-events-none",
-    allowHorizontalPan && !passThroughTouch && "[touch-action:pan-x_pan-y]",
+    videoIgnoresPointer && "pointer-events-none",
+    allowHorizontalPan && !canTapVideo && "[touch-action:pan-x_pan-y]",
   );
 
   const videoElement = (
     <video
       ref={videoRef}
       key={src}
-      loop
+      loop={loop}
       muted
       playsInline
       preload={effectivePreload}
@@ -128,41 +245,41 @@ export function PdpGalleryHeroVideo({
       <div
         aria-hidden
         className={cn(
-          "relative size-full",
+          fill ? "absolute inset-0" : "relative size-full overflow-hidden",
           !poster && !priorityAutoplay && "motion-safe:animate-pulse",
-          skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900",
-          className,
+          !poster &&
+            (skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900"),
+          studioGround && "bg-[#f0f0f0]",
+          !fill && className,
         )}
-        style={{
-          ...style,
-          ...(poster
-            ? {
-                backgroundImage: `url(${poster})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : undefined),
-        }}
-      />
+        style={style}
+      >
+        {poster ? (
+          <PosterFrame
+            poster={poster}
+            fitClass={posterFitClass}
+            objectPosition={posterObjectPosition}
+            visible
+          />
+        ) : null}
+      </div>
     );
   }
 
   return (
     <div
       className={cn(
-        "relative size-full",
+        fill ? "absolute inset-0" : "relative size-full",
         passThroughTouch &&
           (allowHorizontalPan ? "[touch-action:pan-x_pan-y]" : "touch-pan-y"),
       )}
     >
       {poster ? (
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 z-[1] bg-cover bg-center transition-opacity duration-500",
-            videoFrameVisible ? "opacity-0" : "opacity-100",
-          )}
-          style={{ backgroundImage: `url(${poster})` }}
+        <PosterFrame
+          poster={poster}
+          fitClass={posterFitClass}
+          objectPosition={posterObjectPosition}
+          visible={showBlurReveal ? !videoFrameVisible : !isPlaying}
         />
       ) : null}
 
@@ -193,22 +310,32 @@ export function PdpGalleryHeroVideo({
         videoElement
       )}
 
+      {useTapCaptureLayer ? (
+        <div
+          className="absolute inset-0 z-[2] [touch-action:pan-x_pan-y]"
+          onPointerDown={handleTapCapturePointerDown}
+          onPointerMove={handleTapCapturePointerMove}
+          onPointerUp={handleTapCapturePointerUp}
+          onPointerCancel={resetTapCapture}
+        />
+      ) : null}
+
       {playbackOverlayIcon ? (
         <div
           className={cn(
             "absolute inset-0 z-[3] flex items-center justify-center",
-            showFrozenPlayOverlay && "pointer-events-auto",
+            overlayInteractive && "pointer-events-auto",
             playbackHint && "pointer-events-none",
           )}
         >
           <button
             type="button"
             aria-label={playbackOverlayIcon === "play" ? "Play video" : "Pause video"}
-            onClick={showFrozenPlayOverlay ? togglePlayback : undefined}
+            onClick={overlayInteractive ? togglePlayback : undefined}
             className={cn(
               "flex size-[4.25rem] items-center justify-center rounded-full bg-black/55 pdp-backdrop-blur-degrade",
               playbackHint && "motion-safe:animate-[pdp-playback-hint_650ms_ease-out_both]",
-              showFrozenPlayOverlay && "transition-transform active:scale-[0.96]",
+              overlayInteractive && "transition-transform active:scale-[0.96]",
             )}
           >
             <MaterialIcon
@@ -221,7 +348,7 @@ export function PdpGalleryHeroVideo({
       ) : null}
 
       {showControlChrome ? (
-        <div className="pointer-events-auto absolute bottom-3 right-3 z-[2] flex items-center gap-1.5">
+        <div className="pointer-events-auto absolute bottom-3 right-3 z-[4] flex items-center gap-1.5">
           {showMuteControl ? (
             <button
               type="button"

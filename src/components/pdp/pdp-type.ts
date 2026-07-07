@@ -34,6 +34,11 @@ export const pdpPressableIconClass = "pdp-pressable pdp-pressable--icon";
 /** "Add" / "Added" label beside Material add icon — counters .font-extended top nudge */
 export const pdpAddIconLabelClass = "font-extended pdp-add-icon-label";
 
+/** Pill CTA corner radius — squared on v5, full pill elsewhere */
+export function pdpPillRadiusClass(square = false) {
+  return square ? "rounded-none" : "rounded-full";
+}
+
 /** Pill outline CTA — white fill, soft grey stroke (Add buttons, sheet actions) */
 export const pdpStrokeCtaClass =
   "rounded-full border border-neutral-200 bg-white text-black transition-colors active:bg-neutral-50 pdp-pressable";

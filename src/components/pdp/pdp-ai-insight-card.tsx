@@ -18,11 +18,13 @@ export type PdpAiInsightContentProps = {
   size?: "default" | "compact" | "xs";
   /** Collapse the body to this many lines with a Read more toggle */
   clampBodyLines?: number;
+  moreLabel?: string;
+  lessLabel?: string;
 };
 
 /** Shared icon + title + body row for AI insight callouts */
 // fallow-ignore-next-line complexity
-export function PdpAiInsightContent({
+function PdpAiInsightContent({
   title,
   body,
   eyebrow,
@@ -32,6 +34,8 @@ export function PdpAiInsightContent({
   iconVariant = "default",
   size = "default",
   clampBodyLines,
+  moreLabel,
+  lessLabel,
 }: PdpAiInsightContentProps) {
   const compact = size === "compact" || size === "xs";
   const extraSmall = size === "xs";
@@ -98,6 +102,8 @@ export function PdpAiInsightContent({
             text={body}
             className={bodyClass}
             clampLines={clampBodyLines}
+            moreLabel={moreLabel}
+            lessLabel={lessLabel}
           />
         ) : (
           <p className={bodyClass}>{body}</p>
@@ -145,6 +151,8 @@ export function PdpAiInsightCard({
   contained = false,
   containedSurface = "elevated",
   clampBodyLines,
+  moreLabel,
+  lessLabel,
 }: PdpAiInsightCardProps) {
   const minimal = variant === "minimal";
   const extraSmall = size === "xs";
@@ -205,6 +213,8 @@ export function PdpAiInsightCard({
         iconVariant={minimal && contained && !extraSmall ? "compact" : "default"}
         size={minimal ? (size === "default" ? "compact" : size) : size}
         clampBodyLines={clampBodyLines}
+        moreLabel={moreLabel}
+        lessLabel={lessLabel}
       />
 
       {footer ? (

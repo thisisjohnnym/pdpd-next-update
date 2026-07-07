@@ -6,7 +6,12 @@ import { useEffect } from "react";
 import { useActiveProduct } from "./pdp-active-product-context";
 import type { PdpProductId } from "./pdp-products";
 import { getPdpColors } from "./pdp-product-colors";
-import { productPath, replaceProductBrowserUrl } from "./pdp-product-routes";
+import {
+  productPath,
+  replaceProductBrowserUrl,
+  versionedProductPath,
+} from "./pdp-product-routes";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 /** Keeps ?color= in sync while viewing non-Tabby products */
 export function PdpProductUrlSync({
@@ -15,6 +20,7 @@ export function PdpProductUrlSync({
   activeColorId: string;
 }) {
   const { productId } = useActiveProduct();
+  const version = usePdpVersion();
 
   useEffect(() => {
     if (typeof window === "undefined" || productId !== "kira") {
@@ -22,11 +28,11 @@ export function PdpProductUrlSync({
     }
 
     replaceProductBrowserUrl(
-      productPath("kira", {
+      versionedProductPath(version, "kira", {
         colorId: activeColorId,
       }),
     );
-  }, [activeColorId, productId]);
+  }, [activeColorId, productId, version]);
 
   return null;
 }

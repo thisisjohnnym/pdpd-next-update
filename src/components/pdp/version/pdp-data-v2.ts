@@ -1,4 +1,15 @@
-import { PDP_GALLERY_SLIDES, type PdpGallerySlide } from "../pdp-data";
+import {
+  PDP_GALLERY_SLIDES,
+  type PdpGalleryImmersiveSlide,
+  type PdpGallerySlide,
+  type PdpUgcVideo,
+} from "../pdp-data";
+
+/** v4/v5 immersive slides may carry optional copy above the frame. */
+export type PdpGalleryImmersiveSlideV2 = PdpGalleryImmersiveSlide & {
+  headline?: string;
+  subtext?: string;
+};
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -17,11 +28,18 @@ export type PdpGalleryUgcCommunitySlide = {
   type: "ugc-community";
 };
 
+/** v5-only styling carousel — shoulder, crossbody, and on-model looks */
+export type PdpGalleryWaysToWearSlide = {
+  type: "ways-to-wear";
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
-  | PdpGallerySlide
+  | Exclude<PdpGallerySlide, PdpGalleryImmersiveSlide>
+  | PdpGalleryImmersiveSlideV2
   | PdpGalleryEditorialCarouselSlide
-  | PdpGalleryUgcCommunitySlide;
+  | PdpGalleryUgcCommunitySlide
+  | PdpGalleryWaysToWearSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
 export type PdpEditorialV2Card = {
@@ -32,10 +50,56 @@ export type PdpEditorialV2Card = {
   cta?: { label: string; href: string };
 };
 
+/** v4 craftsmanship card — title + short body beneath a large image */
+export type PdpCraftsmanshipV4Card = {
+  id: string;
+  title: string;
+  body: string;
+  src: string;
+  alt: string;
+};
+
+export const PDP_CRAFTSMANSHIP_V4_SECTION = {
+  headline: "Get up close and personal",
+  intro:
+    "A closer look at the materials, hardware, and construction that define the Tabby.",
+} as const;
+
 /**
- * v2 editorial carousel cards (Paper AN3-0). Standalone content — lives here, not in the
- * frozen pdp-data.ts. Images verified against public/images/gallery/ alt text.
+ * v4 craftsmanship editorial — distinct imagery from the Details closer-look
+ * tiles and the studio drag-zoom slide (no product-front-916 repeat).
  */
+export const PDP_CRAFTSMANSHIP_V4_CARDS = [
+  {
+    id: "leather",
+    title: "Glove-tanned leather",
+    body: "Soft, full-grain leather designed to develop character over time.",
+    src: "/images/hero/tabby26/ccx04_b4bk_a99.webp",
+    alt: "Macro detail of full-grain glovetanned leather and gold hardware on Tabby Shoulder Bag 26",
+  },
+  {
+    id: "hardware",
+    title: "Signature hardware",
+    body: "The iconic C clasp brings Coach heritage into focus.",
+    src: "/images/gallery/tabby-c-clasp-closeup.png",
+    alt: "Close-up of the polished gold C turn-lock clasp with COACH engraving on black glovetanned leather",
+  },
+  {
+    id: "interior",
+    title: "Interior function",
+    body: "Room for daily essentials with thoughtful organization.",
+    src: "/images/gallery/tabby-leather-interior-open.png",
+    alt: "Open interior of Tabby Shoulder Bag 26 showing accordion compartments and slip pocket",
+  },
+  {
+    id: "carry",
+    title: "Carry options",
+    body: "Designed to be worn shoulder or crossbody.",
+    src: "/images/hero/tabby26/ccx04_b4bk_a21.webp",
+    alt: "Tabby Shoulder Bag 26 in black leather with the long crossbody strap extended",
+  },
+] satisfies PdpCraftsmanshipV4Card[];
+
 export const PDP_EDITORIAL_V2_CARDS: PdpEditorialV2Card[] = [
   {
     id: "model-tee",
@@ -66,6 +130,358 @@ export const PDP_EDITORIAL_V2_CARDS: PdpEditorialV2Card[] = [
     cta: { label: "See what fits inside", href: "#faq-what-fits" },
   },
 ];
+
+/** v4 section intro — headline + subtext above the editorial carousel (Paper L2X-0). */
+export const PDP_EDITORIAL_V2_SECTION = {
+  headline: "The craft, up close",
+  subtext:
+    "On model, in the studio, and packed for the day — full-grain leather from every angle.",
+} as const;
+
+/** v4 compact UGC strip — before The Details (Paper r5). */
+export const PDP_UGC_COMMUNITY_COMPACT_SECTION = {
+  headline: "Out in the wild",
+  socialHandle: {
+    label: "@coach.ny",
+    href: "https://www.instagram.com/coach/",
+  },
+  /** Portrait tiles shown before the +N more card. */
+  previewCount: 3,
+} as const;
+
+/** Lifestyle themes for the v5 Out in the wild strip — replaces Videos / Photos. */
+export type PdpUgcWildTopicId = "weekend" | "commute" | "going-out" | "style";
+
+type PdpUgcWildTopic = {
+  id: PdpUgcWildTopicId;
+  label: string;
+};
+
+export const PDP_UGC_WILD_TOPICS = [
+  { id: "weekend", label: "Weekend" },
+  { id: "commute", label: "Commute" },
+  { id: "going-out", label: "Going out" },
+  { id: "style", label: "Style" },
+] satisfies PdpUgcWildTopic[];
+
+/** TikTok clip → theme (ids from `PDP_UGC_VIDEO_CAROUSEL`). */
+const PDP_UGC_WILD_VIDEO_TOPICS: Record<string, PdpUgcWildTopicId> = {
+  "ugc-rachblaire": "weekend",
+  "ugc-katiemcev0y": "commute",
+  "ugc-itsnani333": "going-out",
+  "ugc-lolalilylang": "style",
+};
+
+/** v4 section intro — subtext between headline and TikTok CTA (Paper L5X-0). */
+export const PDP_UGC_COMMUNITY_SECTION = {
+  subtext: "Real people, real context — not random snaps.",
+} as const;
+
+/** Customer photo in the UGC community carousel — portrait stills with context. */
+export type PdpUgcCommunityPhoto = {
+  id: string;
+  src: string;
+  alt: string;
+  handle?: string;
+  caption?: string;
+  /** Short pull quote from the customer */
+  quote?: string;
+  verified?: boolean;
+  /** v5 Out in the wild topic grouping */
+  topicId: PdpUgcWildTopicId;
+};
+
+/** v4 UGC community photo rail — contextual customer stills (not studio product shots). */
+export const PDP_UGC_COMMUNITY_PHOTOS = [
+  {
+    id: "coffee-run",
+    src: "/images/reviews/ugc-coffee-run.png",
+    alt: "Customer in a brown track jacket and plaid skirt with Tabby Shoulder Bag 26 outside a coffee shop",
+    handle: "Jordan L.",
+    caption: "Saturday coffee run",
+    quote: "My go-to for slow weekend mornings.",
+    verified: true,
+    topicId: "weekend",
+  },
+  {
+    id: "city-commute",
+    src: "/images/reviews/ugc-on-street.png",
+    alt: "Customer at Spring St subway station with Tabby Shoulder Bag 26 and coffee in hand",
+    handle: "Alex R.",
+    caption: "City commute",
+    quote: "Reads polished without feeling precious.",
+    verified: true,
+    topicId: "commute",
+  },
+  {
+    id: "mirror-selfie",
+    src: "/images/reviews/ugc-mirror-selfie.png",
+    alt: "Customer mirror selfie with Tabby Shoulder Bag 26",
+    handle: "Mia T.",
+    caption: "Getting ready",
+    quote: "Higher on the hip — exactly where I want it for going out.",
+    verified: true,
+    topicId: "going-out",
+  },
+  {
+    id: "outfit-flat",
+    src: "/images/reviews/ugc-outfit-flat.png",
+    alt: "Customer outfit flat lay with Tabby Shoulder Bag 26",
+    handle: "Sam K.",
+    caption: "OOTD flat lay",
+    quote: "Anchors the whole look without trying too hard.",
+    topicId: "style",
+  },
+  {
+    id: "white-tabby-home",
+    src: "/images/reviews/ugc-white-tabby-home.png",
+    alt: "Customer at home with Tabby Shoulder Bag 26 in chalk leather on a sofa",
+    handle: "Emma W.",
+    caption: "At home",
+    quote: "The chalk leather looks even better in natural light.",
+    verified: true,
+    topicId: "weekend",
+  },
+  {
+    id: "katiemcev0y-store",
+    src: "/images/reviews/ugc-katiemcev0y.png",
+    alt: "TikTok creator @katiemcev0y holding multiple Tabby Shoulder Bag 26 colorways in store",
+    handle: "@katiemcev0y",
+    caption: "Picking a color",
+    quote: "Hard to choose just one — the Tabby 26 works in every finish.",
+    verified: true,
+    topicId: "commute",
+  },
+  {
+    id: "itsnani333-compare",
+    src: "/images/reviews/ugc-itsnani333.png",
+    alt: "TikTok creator @itsnani333 comparing Tabby Shoulder Bag 26 and Pillow Tabby",
+    handle: "@itsnani333",
+    caption: "Tabby family compare",
+    quote: "Structured for work days, but I reach for this one on nights out too.",
+    verified: true,
+    topicId: "going-out",
+  },
+  {
+    id: "pink-tabby-stanley",
+    src: "/images/reviews/ugc-pink-tabby-stanley.png",
+    alt: "Customer styling a pink quilted Tabby Shoulder Bag 26 with a Stanley tumbler",
+    handle: "Priya N.",
+    caption: "Desk-to-dinner",
+    quote: "The pink quilted Tabby is my everyday desk-to-dinner bag.",
+    topicId: "style",
+  },
+  {
+    id: "silver-quilted-charm",
+    src: "/images/reviews/ugc-silver-quilted-charm.png",
+    alt: "Customer with silver quilted Tabby Shoulder Bag 26 and cherry bag charm",
+    handle: "Leah S.",
+    caption: "Night out",
+    quote: "Added a cherry charm and it instantly felt dressier.",
+    verified: true,
+    topicId: "going-out",
+  },
+] satisfies PdpUgcCommunityPhoto[];
+
+/** Editorial testimonial card — quote, attribution, social, and review CTA (v5). */
+export type PdpUgcTestimonial = {
+  id: string;
+  src: string;
+  alt: string;
+  quote: string;
+  authorName: string;
+  productLabel: string;
+  socialPlatform: "instagram" | "tiktok";
+  socialHandle: string;
+  socialHref: string;
+  topicId: PdpUgcWildTopicId;
+  videoSrc?: string;
+};
+
+// fallow-ignore-next-line unused-export
+export const PDP_UGC_TESTIMONIALS = [
+  {
+    id: "testimonial-coffee-run",
+    src: "/images/reviews/ugc-coffee-run.png",
+    alt: "Customer in a brown track jacket and plaid skirt with Tabby Shoulder Bag 26 outside a coffee shop",
+    quote:
+      "My go-to for slow weekend mornings — comfortable, effortless, and goes with everything.",
+    authorName: "Jordan L.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@jordanl.style",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "weekend",
+  },
+  {
+    id: "testimonial-city-commute",
+    src: "/images/reviews/ugc-on-street.png",
+    alt: "Customer at Spring St subway station with Tabby Shoulder Bag 26 and coffee in hand",
+    quote:
+      "Reads polished without feeling precious — I carry it every day on my commute.",
+    authorName: "Alex R.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@alexreads",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "commute",
+  },
+  {
+    id: "testimonial-mirror-selfie",
+    src: "/images/reviews/ugc-mirror-selfie.png",
+    alt: "Customer mirror selfie with Tabby Shoulder Bag 26",
+    quote:
+      "Higher on the hip — exactly where I want it for going out. The quilting hits different in person.",
+    authorName: "Mia T.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@miatstyles",
+    socialHref: "https://www.tiktok.com/@coach",
+    topicId: "going-out",
+  },
+  {
+    id: "testimonial-lolalilylang",
+    src: "/images/reviews/ugc-lolalilylang.png",
+    alt: "TikTok creator @lolalilylang styling Tabby Shoulder Bag 26",
+    quote: "This front pocket fits more than you'd think — my everyday grab-and-go bag.",
+    authorName: "Lola L.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@lolalilylang",
+    socialHref: "https://www.tiktok.com/@lolalilylang",
+    topicId: "style",
+    videoSrc: "/videos/ugc-lolalilylang.mp4",
+  },
+  {
+    id: "testimonial-outfit-flat",
+    src: "/images/reviews/ugc-outfit-flat.png",
+    alt: "Customer outfit flat lay with Tabby Shoulder Bag 26",
+    quote: "Anchors the whole look without trying too hard.",
+    authorName: "Sam K.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@samkootd",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "style",
+  },
+  {
+    id: "testimonial-rachblaire",
+    src: "/images/reviews/ugc-rachblaire.png",
+    alt: "TikTok creator @rachblaire styling Tabby Shoulder Bag 26",
+    quote: "Weekend trip tested. Crossbody all day, zero issues.",
+    authorName: "Rachel B.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@rachblaire",
+    socialHref: "https://www.tiktok.com/@rachblaire",
+    topicId: "weekend",
+    videoSrc: "/videos/ugc-rachblaire.mp4",
+  },
+  {
+    id: "testimonial-white-tabby-home",
+    src: "/images/reviews/ugc-white-tabby-home.png",
+    alt: "Customer at home with Tabby Shoulder Bag 26 in chalk leather on a sofa",
+    quote: "The chalk leather looks even better in natural light — my lazy Sunday staple.",
+    authorName: "Emma W.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@emmaw.style",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "weekend",
+  },
+  {
+    id: "testimonial-katiemcev0y",
+    src: "/images/reviews/ugc-katiemcev0y.png",
+    alt: "TikTok creator @katiemcev0y holding multiple Tabby Shoulder Bag 26 colorways in store",
+    quote: "Hard to choose just one — the Tabby 26 works in every finish for the office.",
+    authorName: "Katie M.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@katiemcev0y",
+    socialHref: "https://www.tiktok.com/@katiemcev0y",
+    topicId: "commute",
+    videoSrc: "/videos/ugc-katiemcev0y.mp4",
+  },
+  {
+    id: "testimonial-itsnani333",
+    src: "/images/reviews/ugc-itsnani333.png",
+    alt: "TikTok creator @itsnani333 comparing Tabby Shoulder Bag 26 and Pillow Tabby",
+    quote: "Structured for work days, but I reach for this one on nights out too.",
+    authorName: "Nani T.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@itsnani333",
+    socialHref: "https://www.tiktok.com/@itsnani333",
+    topicId: "going-out",
+    videoSrc: "/videos/ugc-itsnani333.mp4",
+  },
+  {
+    id: "testimonial-pink-tabby-stanley",
+    src: "/images/reviews/ugc-pink-tabby-stanley.png",
+    alt: "Customer styling a pink quilted Tabby Shoulder Bag 26 with a Stanley tumbler",
+    quote: "The pink quilted Tabby is my everyday desk-to-dinner bag.",
+    authorName: "Priya N.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@priyanstyles",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "style",
+  },
+  {
+    id: "testimonial-silver-quilted-charm",
+    src: "/images/reviews/ugc-silver-quilted-charm.png",
+    alt: "Customer with silver quilted Tabby Shoulder Bag 26 and cherry bag charm",
+    quote: "Added a cherry charm and it instantly felt dressier for date night.",
+    authorName: "Leah S.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@leahstyles",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "going-out",
+  },
+] satisfies PdpUgcTestimonial[];
+
+export function listUgcTestimonialsForTopic(
+  topicId: PdpUgcWildTopicId,
+): PdpUgcTestimonial[] {
+  const topicItems = PDP_UGC_TESTIMONIALS.filter((item) => item.topicId === topicId);
+  const clips = topicItems.filter((item) => item.videoSrc);
+  const photos = topicItems.filter((item) => !item.videoSrc);
+
+  // Lead with TikTok clips, then UGC stills — first frame is always video when available.
+  return [...clips, ...photos];
+}
+
+export type PdpUgcWildPreviewItem =
+  | { kind: "video"; id: string; video: PdpUgcVideo }
+  | { kind: "photo"; id: string; photo: PdpUgcCommunityPhoto };
+
+/** Photos + videos for one lifestyle topic — alternates clip then still. */
+export function listUgcWildItemsForTopic(
+  topicId: PdpUgcWildTopicId,
+  videos: readonly PdpUgcVideo[],
+): PdpUgcWildPreviewItem[] {
+  const photos = PDP_UGC_COMMUNITY_PHOTOS.filter((photo) => photo.topicId === topicId);
+  const topicVideos = videos.filter(
+    (video) => PDP_UGC_WILD_VIDEO_TOPICS[video.id] === topicId,
+  );
+  const items: PdpUgcWildPreviewItem[] = [];
+  const max = Math.max(photos.length, topicVideos.length);
+
+  for (let index = 0; index < max; index += 1) {
+    const video = topicVideos[index];
+    const photo = photos[index];
+
+    if (video) {
+      items.push({ kind: "video", id: video.id, video });
+    }
+    if (photo) {
+      items.push({ kind: "photo", id: photo.id, photo });
+    }
+  }
+
+  return items;
+}
 
 /**
  * Slide types dropped from the v2 page flow (kept in v1).
@@ -110,12 +526,21 @@ function isHardwareDetailSlide(slide: PdpGallerySlide): boolean {
  *  1. Drop removed slide types and every standalone `editorial` — all editorial
  *     frames live in `PdpV2EditorialCarousel` (`PDP_EDITORIAL_V2_CARDS`).
  *  2. Drop trench portrait + hardware detail immersives (carousel / ecomm handle them).
- *  3. Prepend ugc-community after hero (Paper AFC-0).
- *  4. Insert `editorial-carousel-v2` right after the studio product slide (Paper AN3-0).
+ *  3. Insert ugc-community after the studio product slide (Paper AFC-0) — below
+ *     product specs and the studio drag-zoom frame, before the editorial carousel.
+ *  4. Insert `editorial-carousel-v2` right after ugc-community (Paper AN3-0).
  *
- * Resulting gallery scroll: ugc-community → studio product → editorial carousel → leather aging.
+ * When `omitStudioProduct` is true (v4 hero gallery owns the drag-zoom frame),
+ * the studio immersive is dropped but the ugc + editorial block still inserts at
+ * the top of the scroll gallery.
+ *
+ * Resulting gallery scroll: The Details → studio product → ugc-community →
+ * editorial carousel → leather aging.
  */
-export function buildV2Slides(v1Slides: PdpGallerySlide[]): PdpGallerySlideV2[] {
+export function buildV2Slides(
+  v1Slides: PdpGallerySlide[],
+  options?: { omitStudioProduct?: boolean },
+): PdpGallerySlideV2[] {
   const trimmed = v1Slides.filter((slide) => {
     if (V2_REMOVED_SLIDE_TYPES.has(slide.type)) {
       return false;
@@ -127,20 +552,146 @@ export function buildV2Slides(v1Slides: PdpGallerySlide[]): PdpGallerySlideV2[] 
     if (isTrenchPortraitSlide(slide) || isHardwareDetailSlide(slide)) {
       return false;
     }
+    if (options?.omitStudioProduct && isStudioProductSlide(slide)) {
+      return false;
+    }
     return true;
   });
 
-  const result: PdpGallerySlideV2[] = [{ type: "ugc-community" }];
+  const result: PdpGallerySlideV2[] = [];
+  let insertedUgcBlock = false;
+
+  const pushUgcBlock = () => {
+    if (insertedUgcBlock) {
+      return;
+    }
+    result.push({ type: "ugc-community" });
+    result.push({ type: "editorial-carousel-v2" });
+    insertedUgcBlock = true;
+  };
+
+  if (options?.omitStudioProduct) {
+    pushUgcBlock();
+  }
 
   for (const slide of trimmed) {
     result.push(slide);
     if (isStudioProductSlide(slide)) {
-      result.push({ type: "editorial-carousel-v2" });
+      pushUgcBlock();
     }
   }
 
   return result;
 }
 
-/** Tabby v2 gallery — ugc-community after hero, grouped craft carousel; strap/view-more removed */
+/** Tabby v2 gallery — Details, studio product, ugc-community, then editorial carousel */
 export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALLERY_SLIDES);
+
+/** v4 studio drag-zoom slide — 4:5 frame with copy above the image (Paper KJY-0). */
+const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
+  headline: "Feel the leather",
+  subtext:
+    "Crafted to be seen—and examined. Hold to explore the leather grain, signature hardware, and the details that make every Tabby unique.",
+  aspect: "4/5" as const,
+  objectPosition: "center 62%",
+} as const;
+
+function patchStudioProductSlideForV4(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  return slides.map((slide) => {
+    if (slide.type !== "immersive" || slide.src !== STUDIO_PRODUCT_SRC) {
+      return slide;
+    }
+    return {
+      ...slide,
+      aspect: PDP_STUDIO_PRODUCT_SLIDE_V4.aspect,
+      objectPosition: PDP_STUDIO_PRODUCT_SLIDE_V4.objectPosition,
+      headline: PDP_STUDIO_PRODUCT_SLIDE_V4.headline,
+      subtext: PDP_STUDIO_PRODUCT_SLIDE_V4.subtext,
+    };
+  });
+}
+
+/** Apply v4-only gallery slide patches (studio product reframing, etc.). */
+export function applyV4GallerySlidePatches(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  return patchStudioProductSlideForV4(slides).filter(
+    (slide) => slide.type !== "ugc-community",
+  );
+}
+
+/** Tabby v4 gallery — same flow as v2 with the studio product slide reframed for r5. */
+export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePatches(
+  buildV2Slides(PDP_GALLERY_SLIDES),
+);
+
+export const PDP_WAYS_TO_WEAR_SECTION = {
+  headline: "Ways to wear",
+  body:
+    "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
+} as const;
+
+export type PdpWaysToWearStyle = {
+  id: string;
+  label: string;
+  caption: string;
+  src: string;
+  alt: string;
+};
+
+/** Shoulder and crossbody carry — large editorial stills for v5 */
+export const PDP_WAYS_TO_WEAR_STYLES = [
+  {
+    id: "shoulder",
+    label: "Shoulder carry",
+    caption: "Relaxed, elevated styling for everyday wear.",
+    src: "/images/gallery/tabby-leather-on-model-tee.png",
+    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a Coach tee and suede skirt",
+  },
+  {
+    id: "crossbody",
+    label: "Crossbody",
+    caption: "Hands-free comfort for commuting, travel, and everyday movement.",
+    src: "/images/gallery/tabby-on-model-trench.jpg",
+    alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
+  },
+] satisfies PdpWaysToWearStyle[];
+
+/**
+ * v5 swaps the "Feel the leather" studio drag-zoom frame for a sunlit lifestyle
+ * beat. v4 keeps the studio product still — this override lives in the v5-only
+ * patch so the frozen v4 baseline is untouched.
+ */
+const FEEL_THE_LEATHER_V5_SRC =
+  "/images/gallery/tabby-feel-the-leather-lifestyle.jpg";
+
+/**
+ * Insert the v5 Ways to wear module immediately after Up close / editorial
+ * carousel, and swap the Feel the leather studio slide for the lifestyle image.
+ */
+export function applyV5GallerySlidePatches(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  const result: PdpGallerySlideV2[] = [];
+
+  for (const slide of slides) {
+    if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
+      result.push({
+        ...slide,
+        src: FEEL_THE_LEATHER_V5_SRC,
+        alt: "Model holding the black Tabby Shoulder Bag 26 in quilted leather on sunlit stone steps",
+        objectPosition: "center 48%",
+      });
+      continue;
+    }
+
+    result.push(slide);
+    if (slide.type === "editorial-carousel-v2") {
+      result.push({ type: "ways-to-wear" });
+    }
+  }
+
+  return result;
+}

@@ -1,16 +1,18 @@
 ---
-description: PDP v1–v4 version boundaries — read before any PDP edit. Keeps frozen baselines safe while building the latest round.
+description: PDP v1–v5 version boundaries — read before any PDP edit. Keeps frozen baselines safe while building the latest round.
 alwaysApply: true
 ---
 
-# PDP Versions (v1 frozen … v4 active)
+# PDP Versions (v1 frozen … v6 active)
 
-The PDP ships four comparison routes on one deploy from **`main`**:
+The PDP ships six comparison routes on one deploy from **`main`**:
 
 - **v1** (`/v1`, legacy `/`) — frozen brand baseline
 - **v2** (`/v2`) — first stakeholder pivot (frozen)
 - **v3** (`/v3`) — Paper r4 pivot (frozen)
-- **v4** (`/v4`) — Paper r5 / latest feedback round — **active work**
+- **v4** (`/v4`) — Paper r5 feedback round (frozen)
+- **v5** (`/v5`) — Sean r5 polish round (frozen)
+- **v6** (`/v6`) — post-v5 feedback round — **active work**
 
 **Docs (read before edits):**
 
@@ -22,11 +24,11 @@ The PDP ships four comparison routes on one deploy from **`main`**:
 ## Rules
 
 - Read `docs/pdp-versions.md` before editing any PDP code.
-- New round work goes in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1/v2/v3 defaults.
-- Do not branch on `version === "v2"` / `"v3"` / `"v4"` across the codebase. Add a flag to `PdpVersionConfig`.
+- New round work goes in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1/v2/v3/v4/v5 defaults.
+- Do not branch on `version === "v2"` / `"v3"` / `"v4"` / `"v5"` / `"v6"` across the codebase. Add a flag to `PdpVersionConfig`.
 - Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for new-round needs.
 - Never add version-only CSS to `globals.css`. Use `src/app/vN/pdp-vN.css` scoped under `[data-pdp-version="vN"]`. Treat `globals.css` edits as cross-version.
-- Shared `pdp-v2-*` components render on `/v2`, `/v3`, and `/v4` — gate v4-only layout behind v4 flags.
+- Shared `pdp-v2-*` components render on `/v2`–`/v6` — gate v4/v5/v6-only layout behind flags.
 - After any change, confirm older routes still match baseline, then run `pnpm check:versions`.
 - Before stakeholder share: follow pre-ship checklist in `docs/deploy-and-links.md` (`vercel --prod` updates production).
 
@@ -38,4 +40,6 @@ The PDP ships four comparison routes on one deploy from **`main`**:
 - v2 chapters: `src/components/pdp/version/pdp-section-chapters-v2.ts`
 - v3 hero/CTA/color-sheet: `src/components/pdp/version/pdp-v3-*.tsx`
 - v4 specs: `src/components/pdp/version/pdp-v4-specs.ts`
+- v5 desktop/UGC: `src/components/pdp/version/pdp-v5-*.tsx`
+- v6 feedback: add flags to `V6_CONFIG` + `src/app/v6/pdp-v6.css`
 - Boundary checks: `scripts/check-pdp-version-boundaries.mjs`

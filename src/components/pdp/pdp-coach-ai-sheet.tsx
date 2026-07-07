@@ -23,7 +23,9 @@ import {
   getPdpCoachAiContent,
   resolveCoachAiAnswer,
 } from "./pdp-coach-ai-content";
-import { pdpBodyRhythm, pdpPressableClass } from "./pdp-type";
+import { pdpBodyRhythm, pdpPillRadiusClass, pdpPressableClass } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import {
   useBodyScrollLock,
   useVisualViewportFrame,
@@ -194,6 +196,7 @@ function ChatComposer({
 }) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const [text, setText] = useState("");
   const trimmed = text.trim();
   const canSend = trimmed.length > 0;
@@ -236,7 +239,8 @@ function ChatComposer({
           }}
           placeholder={placeholder}
           className={cn(
-            "min-h-11 min-w-0 flex-1 rounded-full border-0 bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+            "min-h-11 min-w-0 flex-1 border-0 bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+            pdpPillRadiusClass(squareButtonCorners),
             "font-extended text-base tracking-[0.2px] text-black outline-none",
             "placeholder:text-neutral-500 focus:bg-[#ececec]",
             "[touch-action:manipulation] [-webkit-tap-highlight-color:transparent]",
@@ -248,7 +252,8 @@ function ChatComposer({
           disabled={!canSend}
           aria-label="Send message"
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors",
+            "flex size-11 shrink-0 items-center justify-center transition-colors",
+            pdpPillRadiusClass(squareButtonCorners),
             canSend
               ? "bg-black text-white active:bg-neutral-800"
               : "bg-neutral-100 text-neutral-400",

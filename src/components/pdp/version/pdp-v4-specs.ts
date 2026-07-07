@@ -1,22 +1,87 @@
 import type { PdpProductSpec } from "../pdp-data";
 
+/** Editorial Details spec row — alias avoids mutating frozen `pdp-data.ts`. */
+export type PdpProductDetailSpec = PdpProductSpec;
+
+/** v4 Details fact — editorial spec row (Paper r5 `LD6-0`). */
+export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
+  /** Apply tabular numerals to measured values (dimensions, weight). */
+  tabular?: boolean;
+  /** Quiet second line — keeps the primary value to one short phrase. */
+  hint?: string;
+};
+
+/** v4/v5 Details module — intro beneath "The Details" heading. */
+export const PDP_V4_DETAILS_SECTION = {
+  intro:
+    "Full-grain leather, measured dimensions, and shoulder-or-crossbody carry — the essentials at a glance.",
+} as const;
+
 /**
- * v4-only Details spec chips (Paper r5 `LD6-0`).
+ * v4-only Details facts (Paper r5 `LD6-0`).
  *
- * Replaces the frozen three-up `PDP_PRODUCT_DETAILS.specs` ("Dimensions 10\" × 6\"",
- * Weight, Strap drop) with a labeled five-up layout: a 3-up dimension row
- * (Height / Width / Depth) followed by a 2-up row (Weight / Strap drop).
- *
- * Values sourced from coach.com's Tabby Shoulder Bag 26 in Pebbled Leather
- * (style CH857, $475): Length 10.25" / Height 6.0" / Width 3.25". Coach's
- * "Length" (side-to-side) maps to our Width; their "Width" (front-to-back) maps
- * to our Depth. Weight (0.9 lb) and Strap drop (22") reuse the frozen v1 values
- * verbatim — the frozen `pdp-data.ts` is never mutated for v4.
+ * Row pairs are ordered short-with-short so the two-column grid stays even.
+ * Longer context lives on optional `hint` lines instead of wrapping values.
  */
 export const PDP_V4_SPECS = [
-  { id: "height", label: "Height", value: '6"' },
-  { id: "width", label: "Width", value: '10"' },
-  { id: "depth", label: "Depth", value: '3.25"' },
-  { id: "weight", label: "Weight", value: "0.9 lb" },
-  { id: "drop", label: "Strap drop", value: '22"' },
-] satisfies PdpProductSpec[];
+  {
+    id: "material",
+    label: "Material",
+    value: "Full-grain leather",
+    hint: "Glove-tanned",
+  },
+  {
+    id: "dimensions",
+    label: "Dimensions",
+    value: "10 × 6 × 3.25 in",
+    tabular: true,
+  },
+  {
+    id: "weight",
+    label: "Weight",
+    value: "0.9 lb",
+    tabular: true,
+  },
+  {
+    id: "fits",
+    label: "Fits",
+    value: "Phone · wallet · keys",
+  },
+  {
+    id: "strap",
+    label: "Strap",
+    value: '22" drop',
+    hint: "Adjustable · shoulder or crossbody",
+    tabular: true,
+  },
+  {
+    id: "hardware",
+    label: "Hardware",
+    value: "Signature C clasp",
+    hint: "Turn-lock · brushed gold",
+  },
+] satisfies PdpProductDetailSpecV4[];
+
+/**
+ * v5 Details — editorial two-column sheet (Paper node 407:399).
+ *
+ * Larger 16px label/value pairs, one hairline under every fact, no hint lines,
+ * and no vertical column rule. Copy + column order mirror the Figma frame
+ * exactly. Column-major: left = Material / Weight / Dimensions,
+ * right = Strap / Fits / Hardware.
+ */
+export const PDP_V5_DETAILS_INTRO =
+  "Full-grain leather, measured dimensions, and shoulder-or-crossbody carry - the essentials at a glance.";
+
+export const PDP_V5_DETAILS_COLUMNS = [
+  [
+    { id: "material", label: "Material", value: "Full-grain leather" },
+    { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
+    { id: "dimensions", label: "Dimensions", value: "10 x 6 x 3.25", tabular: true },
+  ],
+  [
+    { id: "strap", label: "Strap", value: '22" drop', tabular: true },
+    { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+    { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+  ],
+] satisfies [PdpProductDetailSpecV4[], PdpProductDetailSpecV4[]];

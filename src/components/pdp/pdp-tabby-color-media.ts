@@ -4,7 +4,7 @@ import {
   type PdpGalleryPhoto,
   type PdpGallerySlide,
 } from "./pdp-data";
-import { buildV2Slides, type PdpGallerySlideV2 } from "./version/pdp-data-v2";
+import { buildV2Slides, applyV4GallerySlidePatches, applyV5GallerySlidePatches, type PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpVersion } from "./version/pdp-version-context";
 
@@ -82,6 +82,8 @@ function swapPurpleMorePhotos(photos: PdpGalleryPhoto[]): PdpGalleryPhoto[] {
 /**
  * Gallery scroll — swap on-model frames when a colorway has dedicated lifestyle assets.
  * Version-aware: v2/v3 reshape the swapped list (UGC after hero, grouped craft carousel, removals).
+ * v4 additionally reframes the studio drag-zoom immersive (4:5 + copy above).
+ * v5 inherits the same gallery patches when the compact UGC strip is active.
  */
 export function getTabbyGallerySlidesForColor(
   colorId: string,
@@ -91,9 +93,27 @@ export function getTabbyGallerySlidesForColor(
     ? swapPurpleModelSlides(PDP_GALLERY_SLIDES)
     : PDP_GALLERY_SLIDES;
 
-  return getPdpVersionConfig(version).galleryUsesV2Slides
-    ? buildV2Slides(v1Slides)
-    : v1Slides;
+  const config = getPdpVersionConfig(version);
+
+  if (!config.galleryUsesV2Slides) {
+    return v1Slides;
+  }
+
+  const v2Slides = buildV2Slides(v1Slides, {
+    omitStudioProduct: config.heroGalleryStudioDragZoom,
+  });
+
+  // v5 (and v4) drop the standalone ugc-community slide when the compact strip
+  // is injected beside The Details, and patch the studio drag-zoom frame copy.
+  const applyV4Patches = config.useV4CompactUgcStrip;
+
+  let slides = applyV4Patches ? applyV4GallerySlidePatches(v2Slides) : v2Slides;
+
+  if (config.showWaysToWearModule) {
+    slides = applyV5GallerySlidePatches(slides);
+  }
+
+  return slides;
 }
 
 /** View more photos sheet — keep extended gallery in sync with color selection */

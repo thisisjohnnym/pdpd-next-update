@@ -60,13 +60,17 @@ export function ColorSwatchImage({
 
 export function ColorSwatchCircle({
   src,
+  fill,
   sizeClass,
   sizes = "40px",
   dimmed = false,
   objectPosition,
   zoom,
 }: {
-  src: string;
+  /** Product image — legacy photo swatch */
+  src?: string;
+  /** Solid fill — simple color chip (color drawer rows) */
+  fill?: string;
   sizeClass: string;
   sizes?: string;
   dimmed?: boolean;
@@ -77,17 +81,21 @@ export function ColorSwatchCircle({
     <span
       aria-hidden
       className={cn(
-        "relative block shrink-0 overflow-hidden rounded-full border border-black/5 bg-neutral-100 transition-opacity duration-200 ease-out",
+        "relative block shrink-0 overflow-hidden rounded-full border border-black/10 transition-opacity duration-200 ease-out",
         sizeClass,
         dimmed && "opacity-40",
+        !fill && "border-black/5 bg-neutral-100",
       )}
+      style={fill ? { backgroundColor: fill } : undefined}
     >
-      <ColorSwatchImage
-        src={src}
-        sizes={sizes}
-        objectPosition={objectPosition}
-        zoom={zoom}
-      />
+      {src && !fill ? (
+        <ColorSwatchImage
+          src={src}
+          sizes={sizes}
+          objectPosition={objectPosition}
+          zoom={zoom}
+        />
+      ) : null}
     </span>
   );
 }

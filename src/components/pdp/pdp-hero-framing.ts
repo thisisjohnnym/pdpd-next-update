@@ -29,7 +29,7 @@ export type PdpHeroFraming = {
 };
 
 /** Seamless studio ground — matches the sampled #f0f0f0 backdrop baked into the stills */
-const PDP_HERO_STUDIO_BG = "#f0f0f0";
+export const PDP_HERO_STUDIO_BG = "#f0f0f0";
 
 const HERO_FRAMING: Record<PdpHeroShotType, PdpHeroFraming> = {
   // Slide 0 lifestyle video — fill the frame, hold the model + bag above bottom chrome

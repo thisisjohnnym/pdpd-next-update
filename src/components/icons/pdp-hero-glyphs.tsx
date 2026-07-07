@@ -78,7 +78,7 @@ export function PdpHeroMenuGlyph({
   );
 }
 
-export function formatHeroBagCount(count: number) {
+function formatHeroBagCount(count: number) {
   if (count > 9) {
     return "+9";
   }

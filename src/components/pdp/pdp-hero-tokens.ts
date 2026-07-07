@@ -43,10 +43,10 @@ export const HERO_NAV_PADDING_TOP_V4_PX = 18;
 export const HERO_NAV_ICON_HIT_V4_PX = 28;
 
 /** v4 gallery overlay row side padding — Paper r5 `LYZ-0` paddingInline */
-export const HERO_GALLERY_OVERLAY_PADDING_INLINE_V4_PX = 16;
+const HERO_GALLERY_OVERLAY_PADDING_INLINE_V4_PX = 16;
 
 /** v4 gallery overlay row bottom padding — Paper r5 `LYZ-0` paddingBottom */
-export const HERO_GALLERY_OVERLAY_PADDING_BOTTOM_V4_PX = 16;
+const HERO_GALLERY_OVERLAY_PADDING_BOTTOM_V4_PX = 16;
 
 /** Hero UI stays fully visible until this fraction of viewport scrolled */
 export const HERO_UI_FADE_START_VIEWPORT = 0.8;

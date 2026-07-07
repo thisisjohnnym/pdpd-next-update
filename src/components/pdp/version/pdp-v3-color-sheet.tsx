@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
@@ -28,7 +28,8 @@ import { ColorSwatchCircle } from "../pdp-color-swatch";
 import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
+import type { TabbyColorOption } from "../pdp-tabby-colors";
+import { pdpPillRadiusClass, pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
 import {
   getV3ColorSheetSections,
@@ -86,23 +87,33 @@ function SectionToggle({
 }
 
 function ColorRow({
-  swatch,
+  fill,
   name,
   availability,
   isSelected,
   onSelect,
   onNotify,
+  combinationAvailable = true,
+  hideInStockLabel = false,
 }: {
-  swatch: string;
+  fill: string;
   name: string;
   availability: Parameters<typeof pdpColorAvailabilityLabel>[0];
   isSelected: boolean;
   onSelect: () => void;
   /** When set, a sold-out color shows a Notify me affordance (v4 Paper r5). */
   onNotify?: () => void;
+  /** Offered for the current style + size — rows without it stay visible but disabled. */
+  combinationAvailable?: boolean;
+  /** When true, omit the "In stock" subtitle — show low stock / sold out only. */
+  hideInStockLabel?: boolean;
 }) {
-  const selectable = pdpColorIsSelectable(availability);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+  const selectable =
+    combinationAvailable && pdpColorIsSelectable(availability);
   const showNotify = !selectable && availability === "notify" && Boolean(onNotify);
+  const showAvailabilityLabel =
+    !hideInStockLabel || availability !== "in_stock";
 
   return (
     <li role="presentation">
@@ -119,12 +130,14 @@ function ColorRow({
             selectable ? pdpPressableClass : "opacity-60",
           )}
         >
-          <ColorSwatchCircle src={swatch} sizeClass="size-12" dimmed={!selectable} />
+          <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn("text-black", pdpType.label)}>{name}</span>
-            <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
-              {pdpColorAvailabilityLabel(availability)}
-            </span>
+            {showAvailabilityLabel ? (
+              <span className={cn(pdpType.micro, pdpColorAvailabilityClass(availability))}>
+                {pdpColorAvailabilityLabel(availability)}
+              </span>
+            ) : null}
           </span>
           {isSelected ? (
             <MaterialIcon name="check" size={18} className="shrink-0 text-black" aria-hidden />
@@ -138,6 +151,7 @@ function ColorRow({
             className={cn(
               "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
               pdpStrokeCtaClass,
+              pdpPillRadiusClass(squareButtonCorners),
             )}
           >
             <MaterialIcon name="mail" size={18} className="shrink-0" aria-hidden />
@@ -165,7 +179,8 @@ function MaterialRow({
   onSelect: () => void;
   onNotify: () => void;
 }) {
-  const { status, label, swatch } = material;
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+  const { status, label, chromeSample } = material;
   const selectable = status === "current" || status === "in-stock";
   const dimmed = status === "out-of-stock" || status === "unavailable-in-color";
 
@@ -188,7 +203,11 @@ function MaterialRow({
             selectable ? pdpPressableClass : "cursor-default",
           )}
         >
-          <ColorSwatchCircle src={swatch ?? ""} sizeClass="size-12" dimmed={dimmed} />
+          <ColorSwatchCircle
+            fill={chromeSample ?? "#d4d4d4"}
+            sizeClass="size-12"
+            dimmed={dimmed}
+          />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn(dimmed ? "text-neutral-400" : "text-black", pdpType.label)}>
               {label}
@@ -214,6 +233,7 @@ function MaterialRow({
             className={cn(
               "font-extended inline-flex shrink-0 items-center gap-1.5 px-3 py-2 text-[11px] tracking-[0.2px]",
               pdpStrokeCtaClass,
+              pdpPillRadiusClass(squareButtonCorners),
             )}
           >
             <MaterialIcon name="mail" size={18} className="shrink-0" aria-hidden />
@@ -242,12 +262,33 @@ export function PdpV3ColorSheet({
   const titleId = useId();
   const tabby = useOptionalTabbyVariant();
   const version = usePdpVersion();
-  const { demoPopularColorStates } = getPdpVersionConfig(version);
+  const {
+    demoPopularColorStates,
+    hideColorSheetSizePrice,
+    flatColorSheet,
+    hideInStockColorLabel,
+  } = getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
+  const ignoreBackdropCloseRef = useRef(false);
   const [popularExpanded, setPopularExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
   const [notifyLabel, setNotifyLabel] = useState<string | null>(null);
   const [notifyToastOpen, setNotifyToastOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    ignoreBackdropCloseRef.current = true;
+    const frame = requestAnimationFrame(() => {
+      ignoreBackdropCloseRef.current = false;
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [open]);
 
   if (!mounted || !tabby || typeof document === "undefined" || !document.body) {
     return null;
@@ -267,8 +308,12 @@ export function PdpV3ColorSheet({
     : materials.slice(0, MATERIALS_COLLAPSED);
   const hiddenMaterials = materials.length - MATERIALS_COLLAPSED;
 
-  const handleColorSelect = (id: string) => {
-    tabby.setSelectedColorId(id);
+  const handleColorSelect = (color: TabbyColorOption) => {
+    if (!color.combinationAvailable || !pdpColorIsSelectable(color.availability)) {
+      return;
+    }
+
+    tabby.setSelectedColorId(color.id);
     onClose();
   };
 
@@ -314,7 +359,12 @@ export function PdpV3ColorSheet({
           type="button"
           aria-label="Close color picker"
           className={pdpBottomSheetBackdropClass()}
-          onClick={onClose}
+          onClick={() => {
+            if (ignoreBackdropCloseRef.current) {
+              return;
+            }
+            onClose();
+          }}
           tabIndex={open ? 0 : -1}
         />
 
@@ -338,29 +388,68 @@ export function PdpV3ColorSheet({
 
           <div className={pdpBottomSheetBodyClass}>
             <div data-pdp-sheet-scroll className={pdpBottomSheetScrollRegionClass("px-3 pt-0.5")}>
-              <div className="mb-4 flex items-baseline justify-between gap-3">
+              <div
+                className={cn(
+                  "mb-4",
+                  !hideColorSheetSizePrice &&
+                    "flex items-baseline justify-between gap-3",
+                )}
+              >
                 <h2 id={titleId} className={cn("m-0", pdpType.headline)}>
                   Choose color
                 </h2>
-                <span className={cn("shrink-0 text-neutral-500", pdpType.label)}>
-                  Size {tabby.size} · {tabby.summary.price}
-                </span>
+                {!hideColorSheetSizePrice ? (
+                  <span className={cn("shrink-0 text-neutral-500", pdpType.label)}>
+                    Size {tabby.size} · {tabby.summary.price}
+                  </span>
+                ) : null}
               </div>
 
-              <section aria-label="Popular colors" className="border-t border-neutral-100 pt-4">
-                <p className={cn("mb-1", SECTION_LABEL_CLASS)}>Popular Colors</p>
-                <ul role="listbox" aria-label="Popular colors" className="m-0 flex list-none flex-col">
-                  {visiblePopular.map((color) => (
+              {flatColorSheet ? (
+                <ul
+                  role="listbox"
+                  aria-label="Colors"
+                  className="m-0 flex list-none flex-col border-t border-neutral-100 pt-2"
+                >
+                  {popularColors.map((color) => (
                     <ColorRow
                       key={color.id}
-                      swatch={color.swatch}
+                      fill={color.chromeSample}
                       name={color.name}
                       availability={color.availability}
                       isSelected={
                         color.id === tabby.selectedColorId &&
                         color.combinationAvailable
                       }
-                      onSelect={() => handleColorSelect(color.id)}
+                      combinationAvailable={color.combinationAvailable}
+                      hideInStockLabel={hideInStockColorLabel}
+                      onSelect={() => handleColorSelect(color)}
+                      onNotify={
+                        color.availability === "notify"
+                          ? () => setNotifyLabel(color.name)
+                          : undefined
+                      }
+                    />
+                  ))}
+                </ul>
+              ) : (
+                <>
+              <section aria-label="Popular colors" className="border-t border-neutral-100 pt-4">
+                <p className={cn("mb-1", SECTION_LABEL_CLASS)}>Popular Colors</p>
+                <ul role="listbox" aria-label="Popular colors" className="m-0 flex list-none flex-col">
+                  {visiblePopular.map((color) => (
+                    <ColorRow
+                      key={color.id}
+                      fill={color.chromeSample}
+                      name={color.name}
+                      availability={color.availability}
+                      isSelected={
+                        color.id === tabby.selectedColorId &&
+                        color.combinationAvailable
+                      }
+                      combinationAvailable={color.combinationAvailable}
+                      hideInStockLabel={hideInStockColorLabel}
+                      onSelect={() => handleColorSelect(color)}
                       onNotify={
                         demoPopularColorStates
                           ? () => setNotifyLabel(color.name)
@@ -449,6 +538,8 @@ export function PdpV3ColorSheet({
                   })}
                 </ul>
               </section>
+                </>
+              )}
             </div>
 
             <div className="shrink-0 pb-[max(16px,var(--pdp-safe-area-bottom))]" />

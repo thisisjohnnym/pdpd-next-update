@@ -1,4 +1,4 @@
-# PDP Versions (v1 / v2 / v3 / v4)
+# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6)
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
@@ -6,8 +6,8 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round.
-- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, and **`/v4`** on the same deploy.
+- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round (frozen). **v6** is the active feedback round.
+- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, and **`/v6`** on the same deploy.
 - v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
@@ -42,7 +42,9 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
 | v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
 | v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
-| v4 (latest) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
+| v4 (r5 feedback) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
+| v5 (Sean polish — frozen) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) |
+| v6 (feedback — active) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
 
 Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
 
@@ -54,10 +56,10 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v4`) from one codebase.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v6`) from one codebase.
 
 1. All prototype work lands on **`main`**.
-2. Route versions (`/v1`–`/v4`) are frozen comparison URLs — not separate git branches.
+2. Route versions (`/v1`–`/v6`) are frozen comparison URLs — not separate git branches.
 3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
 
 When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
@@ -297,6 +299,54 @@ r5 was originally scoped from a verbal feedback checklist, which missed several 
 **Leather aging restructure (v4):** the r5 Leather aging artboards (`JFT-0` / `LM2-0` / …) restructure the module — image on top (no warm header band above it), then a single warm `#EFEAE7` block holding a centered title, per-stage description, and the stage slider. The block is **not** plain white (an earlier draft of this note wrongly said white). The shared `PdpV2LeatherAging` renders this v4 layout behind the `useV4LeatherAgingLayout` flag; v2/v3 keep the r3/r4 `AP5-0` layout (warm header band above the image, caption below the slider).
 
 For the full r5 (v4) module map, node-verify workflow, and Definition of Done, see [pdp-r5-parity.md](pdp-r5-parity.md) and the round changelog [rounds/r5-v4.md](rounds/r5-v4.md).
+
+---
+
+## 8.6. v5 — Sean r5 polish (skelly import)
+
+v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the frozen v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, flat color sheet, desktop split layout, UGC testimonials, and module spacing polish. **v1–v4 are unchanged.** **`/v5` is frozen** — new work goes to **`/v6`**.
+
+### v5-only files
+
+| File | Role |
+|------|------|
+| `src/app/v5/` | Route folder — `layout.tsx`, `pdp-v5.css`, `pdp-v5-root-marker.tsx` |
+| `src/components/pdp/version/pdp-v5-desktop-*.tsx` | Desktop media column + sticky buy panel |
+| `src/components/pdp/version/pdp-v5-ugc-testimonials.tsx` | UGC testimonial carousel |
+| `src/components/pdp/version/pdp-v5-ways-to-wear*.tsx` | Ways to wear styling module |
+
+### Key v5 flags (`V5_CONFIG` in `pdp-version-config.ts`)
+
+| Flag | Purpose |
+|------|---------|
+| `desktopSplitLayout` | lg+ split — media left, sticky buy panel right |
+| `flatColorSheet` | Single flat color list (no materials/sizes sections) |
+| `useV5DetailsSheet` | Editorial two-column Details sheet |
+| `useV5UgcTestimonialCarousel` | UGC quote carousel in reviews |
+| `showWaysToWearModule` | Styling compare slider module |
+| `showFloatingBuyBar: false` | Docked hero ATB only (no sticky floating bar) |
+| `lockHeroGalleryTemplate` | Preserve gallery slide order on colorway switch |
+
+Full flag list: `V5_CONFIG` in `pdp-version-config.ts`. Deploy links: [deploy-and-links.md](deploy-and-links.md).
+
+---
+
+## 8.7. v6 — post-v5 feedback round
+
+v6 is the active feedback round after freezing `/v5`. It **inherits the frozen v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`). Add new flags to `V6_CONFIG` — never edit `V5_CONFIG` in place. **v1–v5 are unchanged.**
+
+### v6-only files
+
+| File | Role |
+|------|------|
+| `src/app/v6/` | Route folder — `layout.tsx`, `pdp-v6.css`, `pdp-v6-root-marker.tsx` |
+| `docs/rounds/r7-v6.md` | Round changelog |
+
+### Key v6 flags (`V6_CONFIG` in `pdp-version-config.ts`)
+
+Currently mirrors `V5_CONFIG` with no overrides. Add flags here as feedback lands.
+
+Full changelog: [rounds/r7-v6.md](rounds/r7-v6.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
 
 ---
 

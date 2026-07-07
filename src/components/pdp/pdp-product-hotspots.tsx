@@ -61,7 +61,7 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
           type="button"
           aria-label="Close detail"
           className={cn(
-            "pdp-fade absolute inset-0 z-10",
+            "pointer-events-auto pdp-fade absolute inset-0 z-10",
             card.state === "open" ? "opacity-100" : "opacity-0",
           )}
           onClick={() => setActiveId(null)}
@@ -88,7 +88,7 @@ export function PdpProductHotspots({ hotspots }: PdpProductHotspotsProps) {
                 handleToggle(hotspot.id);
               }}
               className={cn(
-                "relative flex size-14 items-center justify-center transition-[opacity,scale] duration-200 ease-out",
+                "pointer-events-auto relative flex size-14 items-center justify-center transition-[opacity,scale] duration-200 ease-out",
                 isActive && "pointer-events-none scale-75 opacity-0",
               )}
             >

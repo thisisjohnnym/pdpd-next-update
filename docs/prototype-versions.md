@@ -90,25 +90,25 @@ Open production (or local) `/v1`, `/v2`, `/v3` side by side with `/v4`. Older ro
 
 ---
 
-## Start a new round (e.g. `/v5`)
+## Start a new round (e.g. `/v6`)
 
 Copy this checklist when stakeholder feedback starts the next round:
 
 ### Code
 
-1. Add `src/app/v5/` — `layout.tsx` (`data-pdp-version="v5"`), `page.tsx`, `products/[slug]/page.tsx`
-2. Add `src/app/v5/pdp-v5.css` + `pdp-v5-root-marker.tsx` if portaled chrome needs v5 scope
+1. Add `src/app/v6/` — `layout.tsx` (`data-pdp-version="v6"`), `page.tsx`, `products/[slug]/page.tsx`
+2. Add `src/app/v6/pdp-v6.css` + `pdp-v6-root-marker.tsx` if portaled chrome needs v6 scope
 3. Extend `PdpVersion` type in `pdp-version-context.tsx`
-4. Add `V5_CONFIG` in `pdp-version-config.ts` — **spread `V4_CONFIG`**, then set new flags
-5. Add v5-only components under `src/components/pdp/version/` as needed
-6. Extend `scripts/check-pdp-version-boundaries.mjs` import guards for `v5`
-7. Add `v5` to CI branch list in `.github/workflows/ci.yml` if needed
+4. Add `V6_CONFIG` in `pdp-version-config.ts` — **spread `V5_CONFIG`**, then set new flags
+5. Add v6-only components under `src/components/pdp/version/` as needed
+6. Extend `scripts/check-pdp-version-boundaries.mjs` import guards for `v6`
+7. Add `v6` to CI branch list in `.github/workflows/ci.yml` if needed
 
 ### Docs
 
-1. Copy [rounds/_template.md](rounds/_template.md) → `docs/rounds/r6-v5.md`
+1. Copy [rounds/_template.md](rounds/_template.md) → `docs/rounds/r7-v6.md`
 2. Add row to [rounds/README.md](rounds/README.md)
-3. Add section **8.6** (or next) to [pdp-versions.md](pdp-versions.md) for v5 flags
+3. Add section **8.7** (or next) to [pdp-versions.md](pdp-versions.md) for v6 flags
 4. Update [deploy-and-links.md](deploy-and-links.md) stakeholder cheat sheet
 
 ### Ship

@@ -125,13 +125,13 @@ export function PdpScrollReveal({
 }: PdpScrollRevealProps) {
   const version = usePdpVersion();
   const { useV4GranularScrollReveal } = getPdpVersionConfig(version);
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const nearView = useLazyNearView(triggerRef, lazyMount);
+  const [triggerEl, setTriggerEl] = useState<HTMLDivElement | null>(null);
+  const nearView = useLazyNearView(triggerEl, lazyMount);
   const shouldMount = !lazyMount || nearView;
 
   return (
     <div
-      ref={triggerRef}
+      ref={setTriggerEl}
       className={cn(
         "w-full shrink-0",
         surface === "dark" && "bg-black",

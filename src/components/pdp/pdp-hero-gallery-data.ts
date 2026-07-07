@@ -13,10 +13,15 @@ import type { PdpHeroShotType } from "./pdp-hero-framing";
  */
 export type PdpHeroSurface = "dark" | "light";
 
+/** Contextual CTA pinned to the hero gallery overlay on specific slides */
+export type PdpHeroOverlayCta = "fits-inside";
+
 type PdpHeroGalleryBaseSlide = {
   alt: string;
   shotType: PdpHeroShotType;
   headerSurface: PdpHeroSurface;
+  /** When set, the gallery overlay shows a CTA while this slide is active */
+  overlayCta?: PdpHeroOverlayCta;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -30,6 +35,8 @@ export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
 export type PdpHeroGalleryImageSlide = PdpHeroGalleryBaseSlide & {
   kind: "image";
   src: string;
+  /** Press-and-hold magnifier lens — studio product front (916) */
+  dragZoom?: boolean;
 };
 
 export type PdpHeroGallerySlide =
@@ -41,6 +48,19 @@ const HERO_STILL_BASE = "/images/hero/tabby26";
 /** The A0 product still promoted to slide 0 in v4 (Paper r5). */
 const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
 
+/** Native 9:16 studio product — drag-zoom lead in v4 hero gallery. */
+const HERO_STUDIO_DRAG_ZOOM_SRC =
+  "/images/gallery/tabby-product-front-916.jpg";
+
+const HERO_STUDIO_DRAG_ZOOM_SLIDE: PdpHeroGalleryImageSlide = {
+  kind: "image",
+  src: HERO_STUDIO_DRAG_ZOOM_SRC,
+  alt: "Tabby Shoulder Bag 26 in black full-grain leather, front view with gold C turnlock clasp and detachable straps",
+  shotType: "product",
+  headerSurface: "light",
+  dragZoom: true,
+};
+
 /** The broken/too-small feature-callout still and its r5 replacement (Paper r5). */
 const HERO_FEATURE_CALLOUT_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`;
 const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101-r5.png`;
@@ -48,17 +68,38 @@ const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk
 /**
  * v4 (Paper r5) hero gallery treatment. Returns a new array (never mutates the
  * frozen source) so v1/v2/v3 are unaffected:
- *   - Lead with the A0 product still instead of the lifestyle land video.
+ *   - Optionally lead with the studio drag-zoom product still (916) instead of
+ *     the lifestyle land video — `heroGalleryStudioDragZoom`.
+ *   - Otherwise lead with the A0 product still — `leadGalleryWithProductStill`.
  *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
  */
 export function applyV4HeroGallery(
   slides: PdpHeroGallerySlide[],
+  options: {
+    leadGalleryWithProductStill?: boolean;
+    heroGalleryStudioDragZoom?: boolean;
+  } = {},
 ): PdpHeroGallerySlide[] {
-  const swapped = slides.map((slide) =>
-    slide.src === HERO_FEATURE_CALLOUT_SRC
-      ? { ...slide, src: HERO_FEATURE_CALLOUT_R5_SRC }
-      : slide,
-  );
+  const swapped = slides
+    .map((slide) =>
+      slide.src === HERO_FEATURE_CALLOUT_SRC
+        ? { ...slide, src: HERO_FEATURE_CALLOUT_R5_SRC }
+        : slide,
+    )
+    .filter(
+      (slide) =>
+        options.heroGalleryStudioDragZoom ||
+        options.leadGalleryWithProductStill ||
+        slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
+    );
+
+  if (options.heroGalleryStudioDragZoom) {
+    return [HERO_STUDIO_DRAG_ZOOM_SLIDE, ...swapped];
+  }
+
+  if (!options.leadGalleryWithProductStill) {
+    return swapped;
+  }
 
   const leadIndex = swapped.findIndex(
     (slide) => slide.src === HERO_LEAD_PRODUCT_STILL_SRC,
@@ -73,6 +114,56 @@ export function applyV4HeroGallery(
     ...swapped.slice(0, leadIndex),
     ...swapped.slice(leadIndex + 1),
   ];
+}
+
+/** v5 hero land — on-model lifestyle video (white nav, cinematic open). */
+export const HERO_GALLERY_V5_LEAD_SRC = PDP_GALLERY_IMMERSIVE_HERO_VIDEO;
+
+/**
+ * v5 hero land — creator unboxing clip promoted to slide 0. Portrait 9:16
+ * lifestyle video shot on a soft cream backdrop, so it uses the dark nav
+ * (`headerSurface: "light"`) and gets the priority blur-reveal open.
+ */
+export const HERO_GALLERY_V5_UGC_LEAD_SLIDE: PdpHeroGalleryVideoSlide = {
+  kind: "video",
+  src: "/videos/tabby26-hero-lead.mp4",
+  poster: "/images/posters/tabby26-hero-lead.jpg",
+  alt: "Creator unboxing Tabby Shoulder Bag 26 from its Coach dust bag against a soft cream backdrop",
+  shotType: "lifestyle",
+  headerSurface: "light",
+  priority: true,
+};
+
+/** Move a slide to index 0 without mutating the frozen source array. */
+export function promoteHeroGallerySlideToLead(
+  slides: PdpHeroGallerySlide[],
+  leadSrc: string,
+): PdpHeroGallerySlide[] {
+  const leadIndex = slides.findIndex((slide) => slide.src === leadSrc);
+
+  if (leadIndex <= 0) {
+    return slides;
+  }
+
+  const leadSlide = slides[leadIndex]!;
+
+  return [
+    leadSlide,
+    ...slides.slice(0, leadIndex),
+    ...slides.slice(leadIndex + 1),
+  ];
+}
+
+/**
+ * Prepend an extra lead slide (deduped by `src`) without mutating the source
+ * array. Used to inject a version-specific hero land video ahead of the frozen
+ * base slides.
+ */
+export function prependHeroGalleryLeadSlide(
+  slides: PdpHeroGallerySlide[],
+  leadSlide: PdpHeroGallerySlide,
+): PdpHeroGallerySlide[] {
+  return [leadSlide, ...slides.filter((slide) => slide.src !== leadSlide.src)];
 }
 
 /**
@@ -119,6 +210,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Overhead view inside Tabby Shoulder Bag 26 showing the accordion compartments and zip pocket",
     shotType: "detail",
     headerSurface: "light",
+    overlayCta: "fits-inside",
   },
   {
     kind: "video",

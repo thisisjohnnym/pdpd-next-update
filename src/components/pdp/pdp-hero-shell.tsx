@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { cn } from "@/lib/cn";
+
 import { PdpBrandBarReveal } from "./pdp-brand-bar-reveal";
 import {
   HERO_INSET_PX,
@@ -57,7 +59,7 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
   const phoneRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
-  const { showBrandSwitcher } = getPdpVersionConfig(usePdpVersion());
+  const { showBrandSwitcher, heroDockedBuyBar } = getPdpVersionConfig(usePdpVersion());
 
   useEffect(
     () => () => {
@@ -76,11 +78,24 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
   return (
     <div
       ref={phoneRef}
-      className="relative flex min-h-[var(--pdp-immersive-height,100svh)] flex-1 flex-col overflow-clip bg-white"
+      className={cn(
+        "pdp-hero-shell relative flex flex-1 flex-col overflow-clip bg-white",
+        heroDockedBuyBar
+          ? "h-[var(--pdp-immersive-height,100svh)] max-h-[var(--pdp-immersive-height,100svh)]"
+          : "min-h-[var(--pdp-immersive-height,100svh)]",
+      )}
     >
       {showBrandSwitcher ? <PdpBrandBarReveal /> : null}
       <div ref={heroRef} className="flex min-h-0 flex-1 flex-col">
-        <div ref={mediaFrameRef} className="relative flex min-h-0 flex-1 flex-col">
+        <div
+          ref={mediaFrameRef}
+          className={cn(
+            "relative min-h-0 flex-1",
+            heroDockedBuyBar
+              ? "pdp-hero-media-frame--docked grid"
+              : "flex flex-col",
+          )}
+        >
           {children}
         </div>
       </div>

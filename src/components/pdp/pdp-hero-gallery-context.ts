@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import type { PdpHeroSurface } from "./pdp-hero-gallery-data";
+import type { PdpHeroOverlayCta, PdpHeroSurface } from "./pdp-hero-gallery-data";
 
 export type PdpHeroGalleryState = {
   /** Index of the slide currently snapped into view */
@@ -11,6 +11,8 @@ export type PdpHeroGalleryState = {
   count: number;
   /** Active slide's nav surface — drives indicator tone (white on video, dark on stills) */
   surface: PdpHeroSurface;
+  /** Optional overlay CTA for the active slide (e.g. interior open → What fits inside) */
+  overlayCta?: PdpHeroOverlayCta;
 };
 
 const PdpHeroGalleryContext = createContext<PdpHeroGalleryState>({

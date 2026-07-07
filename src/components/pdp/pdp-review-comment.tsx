@@ -15,7 +15,9 @@ import { cn } from "@/lib/cn";
 import { pdpCarouselImageClass } from "./pdp-carousel";
 import { PdpParallaxMedia, refreshPdpParallax } from "./pdp-parallax-media";
 import { PdpReviewLikeButton } from "./pdp-review-like-button";
-import { pdpPressableClass, pdpType } from "./pdp-type";
+import { pdpPressableClass, pdpPillRadiusClass, pdpType } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import {
   getCommentAuthorAvatar,
   type PdpCustomerComment,
@@ -23,7 +25,7 @@ import {
   type PdpReviewReply,
 } from "./pdp-data";
 
-type StarSize = 18 | 20;
+type StarSize = 16 | 18 | 20;
 
 export function PdpStarRating({
   rating,
@@ -527,7 +529,7 @@ type FormalReviewCardProps = {
   variant: "compact" | "full";
 };
 
-/** Structured buyer review — title, description, stars, and recommend tags */
+/** Structured buyer review — title, description, and stars */
 function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
   const [expanded, setExpanded] = useState(false);
   const description = comment.body ?? comment.quote;
@@ -600,22 +602,6 @@ function FormalReviewCard({ comment, variant }: FormalReviewCardProps) {
             </>
           ) : null}
         </p>
-
-        {comment.recommendTags?.length ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {comment.recommendTags.map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-neutral-700",
-                  pdpType.micro,
-                )}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
 
         {photo ? (
           <PdpParallaxMedia className="relative mt-3 aspect-[4/3] w-full max-w-[220px] bg-neutral-100">
@@ -883,6 +869,7 @@ export function PdpReviewCommentBox({
   const inputId = useId();
   const localInputRef = useRef<HTMLInputElement>(null);
   const inputRef = externalInputRef ?? localInputRef;
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const [text, setText] = useState("");
 
   const trimmed = text.trim();
@@ -993,7 +980,8 @@ export function PdpReviewCommentBox({
           }}
           placeholder={composerPlaceholder}
           className={cn(
-            "pdp-comment-composer__input min-h-11 min-w-0 flex-1 rounded-full border-0 bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+            "pdp-comment-composer__input min-h-11 min-w-0 flex-1 border-0 bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+            pdpPillRadiusClass(squareButtonCorners),
             "font-extended text-base tracking-[0.2px] text-black outline-none",
             "placeholder:text-neutral-500 focus:bg-[#ececec]",
             "[touch-action:manipulation] [-webkit-tap-highlight-color:transparent]",

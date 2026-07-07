@@ -22,10 +22,6 @@ export const pdpCarouselScrollClass = cn(
 /** Outer wrapper for bleed carousels — pair with pdpCarouselScrollClass */
 export const pdpCarouselScrollWrapClass = pdpCarouselBleedWrapClass;
 
-/** 1.5 cards visible — gap-3 (12px) */
-export const pdpCarouselCard15Class =
-  "w-[calc((100vw-1.5rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.75rem)/3)]";
-
 /** 1.5 cards visible — gap-2 (8px) */
 export const pdpCarouselCard15Gap2Class =
   "w-[calc((100vw-1.25rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
@@ -45,6 +41,16 @@ const pdpUgcStoryCardClass =
 /** UGC story cards — compact rail for reviews (~1.8 across) */
 export const pdpUgcStoryCardCompactClass =
   "w-[calc((100vw-1.25rem)/1.8)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
+
+/** Real customer moments — portrait cards (~2 across with peek). */
+export const pdpReviewUgcMomentCardClass =
+  "w-[calc((100vw-1.25rem)/2)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3.5)]";
+
+/** v5 Out in the wild + Real customer moments — matches reviews highlight card width. */
+export const pdpUgcWildMomentCardClass = cn(
+  pdpUgcStoryCardCompactClass,
+  "relative aspect-[4/5] overflow-hidden rounded-none bg-neutral-200 [&_img]:rounded-none [&_video]:rounded-none",
+);
 
 /** UGC video tiles (9:16) — ~1.1 across with next clip peek, gap-2 */
 const pdpUgcVideoCardClass =
@@ -75,11 +81,33 @@ const pdpCarouselInfiniteCenteredPeekScrollClass = cn(
 export const pdpUgcVideoCardInfiniteClass =
   "w-[calc((100vw-1.25rem)/1.2)] shrink-0 snap-center snap-always lg:w-[calc((100vw-2.25rem)/2.2)]";
 
+/** v4 UGC community — slightly narrower tiles for a quieter side peek (Paper L5X-0). */
+export const pdpUgcVideoCardInfiniteV4Class =
+  "w-[calc((100vw-1.25rem)/1.35)] shrink-0 snap-center snap-always lg:w-[calc((100vw-2.25rem)/2.45)]";
+
+
 /** UGC video infinite rail — active tile centered with side peek */
 export const pdpUgcVideoInfiniteScrollClass = cn(
   pdpCarouselInfiniteCenteredScrollClass,
   "px-[calc((100vw-((100vw-1.25rem)/1.2))/2)]",
   "lg:px-[calc((100vw-((100vw-2.25rem)/2.2))/2)]",
+);
+
+/** v4 UGC community — scroll padding matched to the narrower tile width. */
+export const pdpUgcVideoInfiniteScrollV4Class = cn(
+  pdpCarouselInfiniteCenteredScrollClass,
+  "px-[calc((100vw-((100vw-1.25rem)/1.35))/2)]",
+  "lg:px-[calc((100vw-((100vw-2.25rem)/2.45))/2)]",
+);
+
+/** Details closer-look tiles — one tile + next-item peek (finite snap-start rail) */
+export const pdpDetailTileCardClass =
+  "w-[calc((100vw-1.25rem)/1.12)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/1.35)]";
+
+/** Finite details peek rail — left-aligned snap with grid margin bleed */
+export const pdpDetailTileScrollClass = cn(
+  pdpCarouselScrollClass,
+  "flex gap-3 lg:gap-4",
 );
 
 /** As seen on celebrity tiles — ~1.2 across with name overlay, gap-2 */

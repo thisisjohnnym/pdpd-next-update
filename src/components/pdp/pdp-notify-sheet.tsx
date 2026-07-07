@@ -17,10 +17,13 @@ import {
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import {
+  pdpPillRadiusClass,
   pdpPressableSolidClass,
   pdpStrokeCtaMutedClass,
   pdpType,
 } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpNotifySheetProps = {
@@ -47,6 +50,7 @@ export function PdpNotifySheet({
   const errorId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const mounted = useOverlayDismiss(open, onClose);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -147,7 +151,8 @@ export function PdpNotifySheet({
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? errorId : undefined}
               className={cn(
-                "min-h-12 w-full rounded-full border bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+                "min-h-12 w-full border bg-[#f3f3f3] px-4 pt-3 pb-2.5",
+                pdpPillRadiusClass(squareButtonCorners),
                 "font-extended text-base tracking-[0.2px] text-black outline-none",
                 "placeholder:text-neutral-500 focus:bg-[#ececec]",
                 "[touch-action:manipulation] [-webkit-tap-highlight-color:transparent]",
@@ -169,7 +174,8 @@ export function PdpNotifySheet({
               type="submit"
               disabled={email.trim().length === 0}
               className={cn(
-                "font-extended mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-4 text-sm tracking-[0.2px]",
+                "font-extended mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 px-4 text-sm tracking-[0.2px]",
+                pdpPillRadiusClass(squareButtonCorners),
                 email.trim().length === 0
                   ? pdpStrokeCtaMutedClass
                   : cn(
