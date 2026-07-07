@@ -23,12 +23,18 @@ export type PdpGalleryWaysToWearSlide = {
   type: "ways-to-wear";
 };
 
+/** v5-only full-bleed video between leather aging and reviews */
+export type PdpGalleryCraftedToLastVideoSlide = {
+  type: "crafted-to-last-video";
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
   | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
-  | PdpGalleryWaysToWearSlide;
+  | PdpGalleryWaysToWearSlide
+  | PdpGalleryCraftedToLastVideoSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
 export type PdpEditorialV2Card = {
@@ -637,7 +643,7 @@ export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALL
 const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
   headline: "Feel the leather",
   subtext:
-    "Crafted to be seen—and examined. Hold to explore the leather grain, signature hardware, and the details that make every Tabby unique.",
+    "Crafted to be seen—and felt. Full-grain leather, signature hardware, and the details that make every Tabby unique.",
   aspect: "4/5" as const,
   objectPosition: "center 62%",
 } as const;
@@ -672,6 +678,18 @@ export function applyV4GallerySlidePatches(
 export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePatches(
   buildV2Slides(PDP_GALLERY_SLIDES),
 );
+
+export const PDP_CRAFTED_TO_LAST_SECTION = {
+  headline: "Crafted to last",
+  body:
+    "Hand-stitched seams and signature hardware on glovetanned full-grain leather — precision you can see and feel up close.",
+} as const;
+
+export const PDP_CRAFTED_TO_LAST_VIDEO = {
+  src: "/videos/crafted-to-last.webm",
+  poster: "/images/posters/crafted-to-last.jpg",
+  alt: "Crafted to last — Coach glovetanned leather craftsmanship",
+} as const;
 
 export const PDP_WAYS_TO_WEAR_SECTION = {
   headline: "Ways to wear",
@@ -736,6 +754,22 @@ export function applyV5GallerySlidePatches(
     result.push(slide);
     if (slide.type === "editorial-carousel-v2") {
       result.push({ type: "ways-to-wear" });
+    }
+  }
+
+  return result;
+}
+
+/** Insert the v5 crafted-to-last video immediately after leather aging. */
+export function applyV5CraftedToLastVideoPatch(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  const result: PdpGallerySlideV2[] = [];
+
+  for (const slide of slides) {
+    result.push(slide);
+    if (slide.type === "leather-aging") {
+      result.push({ type: "crafted-to-last-video" });
     }
   }
 

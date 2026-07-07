@@ -80,6 +80,7 @@ import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
 import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
+import { PdpV5CraftedToLastVideo } from "./version/pdp-v5-crafted-to-last-video";
 import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
 import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
 import { PdpV2UgcCommunity } from "./version/pdp-v2-ugc-community";
@@ -942,6 +943,20 @@ export function PdpGalleryView({
                 ) : (
                   <PdpV2EditorialCarousel />
                 ),
+                { surface: "light" },
+              ),
+            ];
+          }
+
+          if (slide.type === "crafted-to-last-video") {
+            if (!versionConfig.showCraftedToLastVideo) {
+              return [];
+            }
+
+            return [
+              gallerySection(
+                `crafted-to-last-video-${index}`,
+                <PdpV5CraftedToLastVideo />,
                 { surface: "light" },
               ),
             ];

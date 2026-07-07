@@ -185,7 +185,7 @@ export type PdpVersionConfig = {
   hideBuyBarColorLabel: boolean;
   /**
    * Drop the shopping_bag icon on the docked + floating buy-bar Add to bag pill.
-   * v5 only — v1/v2/v3/v4 keep the icon beside the label.
+   * v4+ — v1/v2/v3 keep the icon beside the label.
    */
   hideBuyBarAtbIcon: boolean;
   /**
@@ -237,7 +237,7 @@ export type PdpVersionConfig = {
    */
   squareProductCardCorners: boolean;
   /**
-   * Square pill CTAs — Add to bag, color selector, reviews, sheets. v5 only.
+   * Square pill CTAs — Add to bag, color selector, reviews, sheets. v4+.
    */
   squareButtonCorners: boolean;
   /**
@@ -378,6 +378,10 @@ export type PdpVersionConfig = {
    */
   showWaysToWearModule: boolean;
   /**
+   * Full-bleed "Crafted to last" video after leather aging, before reviews. v5 only.
+   */
+  showCraftedToLastVideo: boolean;
+  /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
    */
@@ -499,6 +503,7 @@ const V1_CONFIG: PdpVersionConfig = {
   useV5UgcTestimonialCarousel: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
+  showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
@@ -594,6 +599,7 @@ const V2_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,
+  showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
@@ -655,6 +661,9 @@ const V4_CONFIG: PdpVersionConfig = {
   enableHeroReveal: false,
   // r5 scroll-triggered per-element reveals (headlines blur, blocks lift).
   useV4GranularScrollReveal: true,
+  // r5 feedback: square Add to bag + drop the shopping_bag icon.
+  hideBuyBarAtbIcon: true,
+  squareButtonCorners: true,
 };
 
 /**
@@ -712,6 +721,7 @@ const V5_CONFIG: PdpVersionConfig = {
   moreLikeThisLargeCards: true,
   squareButtonCorners: true,
   showWaysToWearModule: true,
+  showCraftedToLastVideo: true,
   demoHeroColorSwatchRow: true,
   showTabbyAlsoAvailableAs: true,
   showReviewHighlightTags: false,
