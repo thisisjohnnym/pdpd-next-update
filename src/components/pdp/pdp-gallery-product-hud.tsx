@@ -18,6 +18,7 @@ import {
   useHeroUiChrome,
 } from "./use-hero-ui-chrome";
 import { useReducedMotion } from "./use-reduced-motion";
+import { pdpDisplayTracking, pdpProductTitleClass } from "./pdp-type";
 
 const heroHudLightShadow = "drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]";
 const heroHudDarkShadow = "drop-shadow-[0_1px_3px_rgba(255,255,255,0.35)]";
@@ -58,7 +59,7 @@ export function PdpGalleryProductHud() {
         </div>
         <div
           className={cn(
-            "font-extended tracking-[0.2px]",
+            pdpProductTitleClass,
             chromeTransitionClass,
             lightChrome ? "text-white" : "text-neutral-900",
             lightChrome ? heroHudLightShadow : heroHudDarkShadow,
@@ -70,7 +71,8 @@ export function PdpGalleryProductHud() {
           </div>
           <p
             className={cn(
-              "mt-0.5 text-xs font-normal leading-none tracking-[0.2px]",
+              "mt-0.5 text-xs font-normal leading-none",
+              pdpDisplayTracking,
               chromeTransitionClass,
               lightChrome ? "text-white/75" : "text-neutral-900/70",
             )}

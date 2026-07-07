@@ -17,6 +17,7 @@ import {
 } from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { pdpType } from "./pdp-type";
 import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
@@ -94,10 +95,10 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+                    <p className={cn(pdpType.productNameCompact, "truncate text-black")}>
                       {item.name}
                     </p>
-                    <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600 tabular-nums">
+                    <p className={cn(pdpType.productNameCompact, "mt-1 text-neutral-600 tabular-nums")}>
                       {item.price}
                     </p>
                   </div>

@@ -184,6 +184,10 @@ export type PdpVersionConfig = {
    */
   hideBuyBarColorLabel: boolean;
   /**
+   * Hide the "Color: {shade}" caption above the below-fold swatch row. v5 only.
+   */
+  hideHeroColorSwatchLabel: boolean;
+  /**
    * Drop the shopping_bag icon on the docked + floating buy-bar Add to bag pill.
    * v4+ — v1/v2/v3 keep the icon beside the label.
    */
@@ -387,6 +391,20 @@ export type PdpVersionConfig = {
    */
   demoHeroColorSwatchRow: boolean;
   /**
+   * Collapse the below-fold hero color row — short preview plus a +N more tile
+   * that opens the full color sheet. v5 only.
+   */
+  collapseHeroColorSwatches: boolean;
+  /**
+   * Swatches shown before the +N more tile (selected color is always included).
+   */
+  heroColorSwatchPreviewCount: number;
+  /**
+   * Fixed +N more label — when > 0, replaces the data-driven hidden count.
+   * 0 = auto.
+   */
+  heroColorSwatchMoreCountOverride: number;
+  /**
    * Hide Tabby size cards in the buy-box selector and show editorial
    * "Explore Other Tabby Silhouettes" product navigation below color. v5 only.
    */
@@ -467,6 +485,7 @@ const V1_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
@@ -505,6 +524,9 @@ const V1_CONFIG: PdpVersionConfig = {
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 0,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
@@ -562,6 +584,7 @@ const V2_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
@@ -601,6 +624,9 @@ const V2_CONFIG: PdpVersionConfig = {
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 0,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
@@ -680,6 +706,7 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 story: Feel the leather → Details → What customers are saying → Up close → Aging.
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
   inlineBuyBarColorSwatches: true,
@@ -723,6 +750,9 @@ const V5_CONFIG: PdpVersionConfig = {
   showWaysToWearModule: true,
   showCraftedToLastVideo: true,
   demoHeroColorSwatchRow: true,
+  collapseHeroColorSwatches: true,
+  heroColorSwatchPreviewCount: 5,
+  heroColorSwatchMoreCountOverride: 6,
   showTabbyAlsoAvailableAs: true,
   showReviewHighlightTags: false,
   // v5 desktop responsive split — media left, sticky buy panel right at lg+.

@@ -37,17 +37,8 @@ export function PdpTabbyAlsoAvailableAs() {
   const extraLinks = links.slice(TABBY_FAMILY_TEASER_COUNT);
   const hasMore = extraLinks.length > 0;
 
-  const renderRow = (
-    link: (typeof links)[number],
-    isFirst: boolean,
-  ) => (
-    <li
-      key={link.id}
-      className={cn(
-        "border-t border-neutral-200",
-        isFirst && "border-t-0",
-      )}
-    >
+  const renderRow = (link: (typeof links)[number]) => (
+    <li key={link.id}>
       {link.kind === "internal" ? (
         <button
           type="button"
@@ -127,32 +118,17 @@ export function PdpTabbyAlsoAvailableAs() {
           )}
           aria-hidden={!open}
         >
-        <ul className="m-0 flex list-none flex-col p-0">
-          {teaserLinks.map((link, index) => renderRow(link, index === 0))}
+        <ul className="m-0 flex list-none flex-col gap-0 p-0">
+          {teaserLinks.map((link) => renderRow(link))}
         </ul>
 
         {hasMore ? (
           <>
-            <div
-              className={cn(
-                "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
-                showAll ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-              )}
-            >
-              <div
-                className={cn(
-                  "min-h-0 overflow-hidden transition-opacity duration-300 ease-out motion-reduce:transition-none",
-                  showAll ? "opacity-100" : "opacity-0",
-                )}
-              >
-                <ul
-                  className="m-0 flex list-none flex-col p-0"
-                  aria-hidden={!showAll}
-                >
-                  {extraLinks.map((link) => renderRow(link, false))}
-                </ul>
-              </div>
-            </div>
+            {showAll ? (
+              <ul className="m-0 flex list-none flex-col gap-0 p-0">
+                {extraLinks.map((link) => renderRow(link))}
+              </ul>
+            ) : null}
 
             <button
               type="button"

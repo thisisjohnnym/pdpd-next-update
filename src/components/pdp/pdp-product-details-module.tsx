@@ -79,7 +79,7 @@ function MacroHero() {
           <PdpTextReveal
             as="h2"
             delay={revealStaggerDelay(1)}
-            className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-[-0.01em] text-balance text-white"
+            className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-tight text-balance text-white"
           >
             {eyebrow}
           </PdpTextReveal>
@@ -104,7 +104,7 @@ function SpecCell({
         colClass,
       )}
     >
-      <span className="font-extended text-xl font-normal leading-[22px] tracking-[-0.02em] text-neutral-900 tabular-nums">
+      <span className={cn(pdpType.headline, "tabular-nums text-neutral-900")}>
         {spec.value}
       </span>
       <span className="w-full text-center font-sans text-[11px] capitalize leading-[14px] text-neutral-500">
@@ -494,7 +494,7 @@ export function PdpProductDetailsModule({
         {showHeading ? (
           <PdpTextReveal
             as="h3"
-            className="font-extended m-0 text-xl font-normal leading-6 tracking-[-0.01em] text-balance text-neutral-900"
+            className={cn(pdpType.headline, "m-0 leading-6")}
           >
             {closerLook.heading}
           </PdpTextReveal>

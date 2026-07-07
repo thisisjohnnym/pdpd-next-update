@@ -90,7 +90,7 @@ export function PdpRecentlyViewedCarousel() {
                         </span>
                         <span className="flex flex-col gap-0.5">
                           <span
-                            className={`font-extended text-black ${pdpType.body}`}
+                            className={`font-extended text-black ${pdpType.productName}`}
                           >
                             {item.name}
                           </span>

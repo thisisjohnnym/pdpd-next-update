@@ -10,8 +10,8 @@ const COACH_SWATCH_ZOOM = 3.25;
 
 /** Hero color row — square tiles need extra zoom vs circular chips */
 export const SQUARE_SWATCH_TILE_ZOOM = 4.5;
-/** Anchor on clasp — sits above the grey studio fill in Coach swatch frames */
-export const SQUARE_SWATCH_TILE_FOCAL = "50% 78%";
+/** Anchor on clasp — centered in the hero square crop */
+export const SQUARE_SWATCH_TILE_FOCAL = "50% 72%";
 
 /** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
 const PRODUCT_SWATCH_FOCAL = "50% 58%";
@@ -72,6 +72,7 @@ export function ColorSwatchTile({
   dimmed = false,
   objectPosition,
   zoom,
+  fillParent = false,
 }: {
   /** Product image — legacy photo swatch */
   src?: string;
@@ -82,15 +83,22 @@ export function ColorSwatchTile({
   dimmed?: boolean;
   objectPosition?: string;
   zoom?: number;
+  /** Fill a relative square parent (hero collapsed swatch row). */
+  fillParent?: boolean;
 }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "relative block aspect-square shrink-0 overflow-hidden border border-black/10 transition-opacity duration-200 ease-out",
-        widthClass,
+        "overflow-hidden transition-opacity duration-200 ease-out",
+        fillParent
+          ? "absolute inset-0 size-full border-0"
+          : cn(
+              "relative block border border-black/10",
+              cn("aspect-square shrink-0", widthClass),
+            ),
         dimmed && "opacity-40",
-        !fill && "border-black/5 bg-neutral-100",
+        !fill && !fillParent && "border-black/5 bg-neutral-100",
       )}
       style={fill ? { backgroundColor: fill } : undefined}
     >

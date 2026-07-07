@@ -692,7 +692,7 @@ export const PDP_CRAFTED_TO_LAST_VIDEO = {
 } as const;
 
 export const PDP_WAYS_TO_WEAR_SECTION = {
-  headline: "Ways to wear",
+  headline: "Made to move",
   body:
     "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
 } as const;

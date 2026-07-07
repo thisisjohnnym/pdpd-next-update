@@ -7,6 +7,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
+import { pdpChromeLabelClass, pdpType, pdpPressableClass } from "./pdp-type";
 import { PdpJumpBarTitle } from "./pdp-jump-bar-title";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpChapterAnchorId } from "./pdp-section-chapters";
@@ -16,7 +17,6 @@ import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { useMountTransition } from "./use-mount-transition";
 import { useRafLerp } from "./use-raf-lerp";
 import { BOTTOM_CHROME_OFFSET } from "./pdp-viewport-chrome";
-import { pdpType, pdpPressableClass } from "./pdp-type";
 
 export function PdpSectionIndicator({
   suppressed = false,
@@ -115,7 +115,7 @@ export function PdpSectionIndicator({
           >
             <MaterialIcon name="list" size={18} />
             <span className="flex items-baseline gap-2">
-              <span className="font-extended text-[13px] font-normal tracking-[0.2px]">
+              <span className={cn(pdpChromeLabelClass, "text-[13px]")}>
                 {activeLabel}
               </span>
               <span className="shrink-0 tabular-nums text-[11px]">
@@ -236,7 +236,7 @@ export function PdpSectionIndicator({
                               className="flex size-5 shrink-0 items-center justify-center"
                             />
                             <span className="flex min-w-0 flex-1 flex-col">
-                              <span className="font-extended text-[15px] font-normal tracking-[0.2px] text-black">
+                              <span className={cn(pdpChromeLabelClass, "text-[15px] text-black")}>
                                 {chapter.label}
                               </span>
                               {chapter.sub ? (

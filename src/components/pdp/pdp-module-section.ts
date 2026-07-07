@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-import { pdpType, pdpBodyRhythm } from "./pdp-type";
+import { pdpType, pdpBodyRhythm, pdpDisplayTracking } from "./pdp-type";
 
 type PdpModuleSectionOptions = {
   /** White default; muted for recently viewed */
@@ -46,7 +46,7 @@ export function pdpModuleHeadingLeadClass() {
 
 /** Legacy r5 24px module title — v4 UGC/Reviews; v5 uses `pdpModuleHeadlineDisplayClass`. */
 const pdpModuleHeadlineR5Class =
-  "font-extended m-0 text-[24px] font-normal leading-[1.2] tracking-[-0.02em] text-balance text-black";
+  `font-extended m-0 text-[24px] font-normal leading-[1.2] ${pdpDisplayTracking} text-balance text-black`;
 
 /** Module H1 — `consistent` true → `pdpType.headline` (Details / Out in the wild scale). */
 export function pdpModuleHeadlineDisplayClass(consistent: boolean) {

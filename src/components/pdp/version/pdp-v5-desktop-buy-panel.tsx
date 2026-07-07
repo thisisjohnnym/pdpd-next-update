@@ -6,7 +6,7 @@ import { useActiveProduct } from "../pdp-active-product-context";
 import { PdpBuyBarRow } from "../pdp-buy-bar-row";
 import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swatches";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpType } from "../pdp-type";
+import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
 
 type PdpV5DesktopBuyPanelProps = {
   selectedColorId: string;
@@ -36,14 +36,14 @@ export function PdpV5DesktopBuyPanel({
     <div className="pdp-v5-desktop-buy-panel flex w-full flex-col gap-6 bg-white">
       <div className="flex items-start justify-between gap-4">
         <div className="font-extended flex min-w-0 flex-col text-neutral-900">
-          <p className="min-w-0 text-lg leading-[120%] tracking-[0.4px]">
+          <p className={cn(pdpProductTitleClass, "min-w-0 text-lg leading-[120%]")}>
             {summary.name}
           </p>
           <p className={cn(pdpType.label, "mt-1 min-w-0 text-neutral-500")}>
             {summary.subtitle}
           </p>
         </div>
-        <p className="font-extended shrink-0 text-lg leading-none tabular-nums text-neutral-900">
+        <p className={cn(pdpProductPriceClass, "shrink-0 text-lg leading-none text-neutral-900")}>
           {summary.price}
         </p>
       </div>

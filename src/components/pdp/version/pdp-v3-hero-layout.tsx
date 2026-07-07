@@ -10,7 +10,7 @@ import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swatches";
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpType } from "../pdp-type";
+import { pdpDisplayTracking, pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -70,12 +70,13 @@ export function PdpV3HeroLayout({
         >
           <div className="flex items-start justify-between gap-4">
             <div className="font-extended flex min-w-0 flex-col text-neutral-900">
-              <p className="min-w-0 truncate text-base leading-[115%] tracking-[0.4px]">
+              <p className={cn(pdpProductTitleClass, "min-w-0 truncate text-base leading-[115%]")}>
                 {summary.name}
               </p>
               <p
                 className={cn(
-                  "min-w-0 truncate leading-[115%] tracking-[0.4px]",
+                  pdpProductTitleClass,
+                  "min-w-0 truncate leading-[115%]",
                   heroMaterialSubtitleLine
                     ? cn(pdpType.label, "mt-1 text-neutral-500")
                     : "text-xs text-neutral-900",
@@ -84,7 +85,7 @@ export function PdpV3HeroLayout({
                 {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
               </p>
             </div>
-            <p className="font-extended shrink-0 text-base leading-none tabular-nums text-neutral-900">
+            <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
               {summary.price}
             </p>
           </div>

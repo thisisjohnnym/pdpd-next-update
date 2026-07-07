@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 
 import { useReducedMotion } from "./use-reduced-motion";
+import { pdpChromeLabelClass } from "./pdp-type";
 
 type PdpJumpBarTitleProps = {
   labels: string[];
@@ -110,7 +111,8 @@ export function PdpJumpBarTitle({
               <>
                 <span
                   className={cn(
-                    "pdp-jump-bar-title__label font-extended text-[13px] font-normal tracking-[0.2px] text-black",
+                    pdpChromeLabelClass,
+                    "pdp-jump-bar-title__label text-[13px] text-black",
                     "pdp-jump-bar-title__label--incoming",
                     motionActive && "pdp-jump-bar-title__label--incoming-active",
                   )}
@@ -119,7 +121,8 @@ export function PdpJumpBarTitle({
                 </span>
                 <span
                   className={cn(
-                    "pdp-jump-bar-title__label font-extended text-[13px] font-normal tracking-[0.2px] text-black",
+                    pdpChromeLabelClass,
+                    "pdp-jump-bar-title__label text-[13px] text-black",
                     "pdp-jump-bar-title__label--outgoing",
                     motionActive && "pdp-jump-bar-title__label--outgoing-active",
                   )}
@@ -131,7 +134,8 @@ export function PdpJumpBarTitle({
               <>
                 <span
                   className={cn(
-                    "pdp-jump-bar-title__label font-extended text-[13px] font-normal tracking-[0.2px] text-black",
+                    pdpChromeLabelClass,
+                    "pdp-jump-bar-title__label text-[13px] text-black",
                     "pdp-jump-bar-title__label--outgoing",
                     motionActive && "pdp-jump-bar-title__label--outgoing-active",
                   )}
@@ -140,7 +144,8 @@ export function PdpJumpBarTitle({
                 </span>
                 <span
                   className={cn(
-                    "pdp-jump-bar-title__label font-extended text-[13px] font-normal tracking-[0.2px] text-black",
+                    pdpChromeLabelClass,
+                    "pdp-jump-bar-title__label text-[13px] text-black",
                     "pdp-jump-bar-title__label--incoming",
                     motionActive && "pdp-jump-bar-title__label--incoming-active",
                   )}
@@ -150,7 +155,12 @@ export function PdpJumpBarTitle({
               </>
             )
           ) : (
-            <span className="pdp-jump-bar-title__label font-extended text-[13px] font-normal tracking-[0.2px] text-black">
+            <span
+              className={cn(
+                pdpChromeLabelClass,
+                "pdp-jump-bar-title__label text-[13px] text-black",
+              )}
+            >
               {currentLabel}
             </span>
           )}

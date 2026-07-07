@@ -20,6 +20,7 @@ import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import type { TabbySize } from "./pdp-tabby-variants";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { PdpV3ColorSheet } from "./version/pdp-v3-color-sheet";
 
 type PdpHeroBelowFoldColorSwatchesProps = {
   selectedColorId: string;
@@ -36,11 +37,21 @@ export function PdpHeroBelowFoldColorSwatches({
 }: PdpHeroBelowFoldColorSwatchesProps) {
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
-  const { useV4ModuleSpacing, demoHeroColorSwatchRow, showTabbyAlsoAvailableAs } =
-    getPdpVersionConfig(usePdpVersion());
+  const version = usePdpVersion();
+  const {
+    useV4ModuleSpacing,
+    demoHeroColorSwatchRow,
+    showTabbyAlsoAvailableAs,
+    collapseHeroColorSwatches,
+    heroColorSwatchPreviewCount,
+    heroColorSwatchMoreCountOverride,
+    useV3ColorSheet,
+    hideHeroColorSwatchLabel,
+  } = getPdpVersionConfig(version);
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
   const [notifyLabel, setNotifyLabel] = useState<string | null>(null);
   const [notifyToastOpen, setNotifyToastOpen] = useState(false);
+  const [colorSheetOpen, setColorSheetOpen] = useState(false);
 
   const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
   const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
@@ -134,6 +145,13 @@ export function PdpHeroBelowFoldColorSwatches({
         }}
       />
 
+      {useV3ColorSheet && isTabbyProduct ? (
+        <PdpV3ColorSheet
+          open={colorSheetOpen}
+          onClose={() => setColorSheetOpen(false)}
+        />
+      ) : null}
+
       <section
         aria-label={showTabbyAlsoAvailableAs ? "Color" : "Color and size"}
         className={cn(
@@ -168,12 +186,20 @@ export function PdpHeroBelowFoldColorSwatches({
                 : undefined
             }
             colorCarouselClassName={
-              embedded
-                ? "px-2 scroll-px-2"
-                : useV4ModuleSpacing
-                  ? "-mx-4 px-4 scroll-px-4"
-                  : "-mx-3 px-3 scroll-px-3"
+              collapseHeroColorSwatches
+                ? undefined
+                : embedded
+                  ? undefined
+                  : useV4ModuleSpacing
+                    ? "-mx-4 px-4 scroll-px-4"
+                    : "-mx-3 px-3 scroll-px-3"
             }
+            collapsedPreviewCount={
+              collapseHeroColorSwatches ? heroColorSwatchPreviewCount : undefined
+            }
+            moreCountOverride={heroColorSwatchMoreCountOverride}
+            onOpenColorSheet={() => setColorSheetOpen(true)}
+            hideColorLabel={hideHeroColorSwatchLabel}
           />
 
           {isTabbyProduct && showTabbyAlsoAvailableAs ? (

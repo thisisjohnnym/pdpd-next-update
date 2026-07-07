@@ -2,18 +2,36 @@
 export const pdpBodyRhythm =
   "font-normal leading-[1.35] tracking-[0.2px] text-pretty" as const;
 
+/** Display-level tracking — module titles, product names, sticky chrome */
+export const pdpDisplayTracking = "tracking-tight" as const;
+
+/** Primary product name row (hero footer, buy panel, stripped hero) */
+export const pdpProductTitleClass =
+  `font-extended ${pdpDisplayTracking}` as const;
+
+/** Price beside primary product name */
+export const pdpProductPriceClass =
+  `font-extended ${pdpDisplayTracking} tabular-nums` as const;
+
+/** Sticky chrome labels — jump bar, section nav */
+export const pdpChromeLabelClass =
+  `font-extended font-normal ${pdpDisplayTracking}` as const;
+
 /** Mobile-first PDP copy — Helvetica Extended everywhere */
 export const pdpType = {
   /**
    * Primary H1 / display headline — PDP module + sheet titles
-   * (coach.com ref: 32px / 1.15 / 0.2px — PDP keeps mobile text-xl scale)
+   * (coach.com ref: 32px / 1.15 / 0.2px — PDP keeps mobile text-xl scale + tracking-tight)
    */
-  headline:
-    "font-extended text-xl font-normal tracking-[0.4px] text-balance text-black",
+  headline: `font-extended text-xl font-normal ${pdpDisplayTracking} text-balance text-black`,
   /** Captions, quotes, descriptive paragraphs */
   caption: `font-extended text-sm ${pdpBodyRhythm} lg:text-xs`,
   /** Product names, spec values, list rows */
   body: `font-extended text-sm ${pdpBodyRhythm} lg:text-xs`,
+  /** Product titles in rails, cards, and compare rows */
+  productName: `font-extended text-sm font-normal leading-[1.35] ${pdpDisplayTracking} text-pretty lg:text-xs`,
+  /** Compact product titles — shop-the-look, picker rows */
+  productNameCompact: `font-extended text-xs font-normal leading-[1.35] ${pdpDisplayTracking} lg:text-[11px]`,
   /** Prices, metadata, secondary lines */
   label: `font-extended text-xs ${pdpBodyRhythm} lg:text-[11px]`,
   /** Badges, chips, time labels */

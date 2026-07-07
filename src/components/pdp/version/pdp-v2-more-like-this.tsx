@@ -67,9 +67,9 @@ export function PdpV2MoreLikeThis({
         <PdpTextReveal
           as="h2"
           className={cn(
-            "font-extended m-0 font-normal tracking-tight text-black",
-            leftAlignModuleHeadings ? "text-left" : "text-center",
             pdpType.headline,
+            "m-0",
+            leftAlignModuleHeadings ? "text-left" : "text-center",
           )}
         >
           {eyebrow}
@@ -134,7 +134,7 @@ export function PdpV2MoreLikeThis({
                   className={cn(
                     "font-extended m-0 line-clamp-2 leading-snug text-black",
                     leftAlignModuleHeadings ? "text-left" : "text-center",
-                    moreLikeThisLargeCards ? "text-[13px]" : pdpType.body,
+                    moreLikeThisLargeCards ? cn(pdpType.productName, "text-[13px]") : pdpType.productName,
                   )}
                 >
                   {item.name}

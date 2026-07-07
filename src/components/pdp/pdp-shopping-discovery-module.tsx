@@ -81,7 +81,7 @@ export function PdpMoreLikeThisModule({
                           />
                         </div>
                         <p
-                          className={`font-extended mt-2 line-clamp-2 text-black ${pdpType.label}`}
+                          className={`font-extended mt-2 line-clamp-2 text-black ${pdpType.productName}`}
                         >
                           {item.name}
                         </p>

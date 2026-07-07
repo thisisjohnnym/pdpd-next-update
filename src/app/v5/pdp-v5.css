@@ -47,9 +47,11 @@
 }
 
 /* Below-fold color rail — no section dividers between ATB, tabs, and swatches. */
+[data-pdp-version="v5"] .pdp-hero-docked-footer .pdp-hero-below-fold-colors,
 [data-pdp-version="v5"] .pdp-hero-below-fold-colors,
 [data-pdp-version="v5"] [aria-label="Color and size"],
-[data-pdp-version="v5"] [aria-label="All colors"] {
+[data-pdp-version="v5"] [aria-label="All colors"],
+[data-pdp-version="v5"] [aria-label="Color"] {
   border: 0;
   box-shadow: none;
 }
@@ -70,13 +72,11 @@
 }
 
 /* Explore Other Tabby Silhouettes — editorial product navigation below color + ATB. */
-[data-pdp-version="v5"] .pdp-tabby-family-explorer {
+[data-pdp-version="v5"] .pdp-tabby-family-explorer,
+[data-pdp-version="v5"] .pdp-tabby-family-explorer li,
+[data-pdp-version="v5"] .pdp-tabby-family-explorer button {
   border: 0;
   box-shadow: none;
-}
-
-[data-pdp-version="v5"] .pdp-tabby-family-explorer li:last-child {
-  border-bottom-width: 0;
 }
 
 /* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */

@@ -357,7 +357,7 @@ export function PdpV2Reviews({
         >
           <PdpTextReveal
             as="h2"
-            className="font-extended m-0 text-xl font-normal tracking-tight text-black"
+            className={cn(pdpType.headline, "m-0")}
           >
             Reviews
           </PdpTextReveal>
