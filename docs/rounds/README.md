@@ -17,8 +17,8 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 6, 2026 |
-| Commit | `3f2b22a` — feat(v6): ship 360 intro and vertical mobile gallery |
+| Date | Jul 7, 2026 |
+| Commit | `d7fe1f5` — fix(v6): beige UGC band, carousel drag snap, and footer rhythm |
 | URL | https://pdp-next-sigma.vercel.app/v6 |
 
 Update this section after every `vercel --prod`.
