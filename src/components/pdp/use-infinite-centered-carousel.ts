@@ -116,7 +116,7 @@ export function useInfiniteCenteredCarousel(
 
     // fallow-ignore-next-line complexity
     const recenterIfAtEdge = () => {
-      if (blockWidth <= 0 || pointerDown) {
+      if (blockWidth <= 0 || pointerDown || isCarouselDragSettling(el)) {
         return;
       }
 
@@ -179,22 +179,59 @@ const DRAG_CLICK_SUPPRESS_THRESHOLD_PX = 6;
 /** Longest a smooth settle should ever take — fallback for browsers without `scrollend`. */
 const DRAG_SETTLE_FALLBACK_MS = 500;
 
-/** Nearest child's centered scrollLeft to whatever position the rail is currently at. */
+const CAROUSEL_DRAGGING_CLASS = "pdp-carousel-dragging";
+
+function readScrollPaddingLeft(el: HTMLElement): number {
+  return parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
+}
+
+/** Center-snapped rails (UGC infinite) vs snap-start peek rails (reviews, details). */
+function isCenterSnappedRail(el: HTMLElement): boolean {
+  const firstChild = el.children[0] as HTMLElement | undefined;
+  if (!firstChild) {
+    return false;
+  }
+
+  return getComputedStyle(firstChild).scrollSnapAlign === "center";
+}
+
+function snapTargetScrollLeft(el: HTMLElement, child: HTMLElement): number {
+  if (isCenterSnappedRail(el)) {
+    return getCenteredScrollLeft(el, child);
+  }
+
+  return child.offsetLeft - readScrollPaddingLeft(el);
+}
+
+/** Nearest child's snap scrollLeft — matches the rail's snap-align mode. */
 function nearestChildScrollLeft(el: HTMLElement): number {
-  const viewportCenter = el.scrollLeft + el.clientWidth / 2;
+  const paddingLeft = readScrollPaddingLeft(el);
+  const useCenter = isCenterSnappedRail(el);
+  const probe = useCenter
+    ? el.scrollLeft + el.clientWidth / 2
+    : el.scrollLeft + paddingLeft;
+
   let target = el.scrollLeft;
   let bestDistance = Number.POSITIVE_INFINITY;
 
   for (const child of Array.from(el.children) as HTMLElement[]) {
-    const childCenter = child.offsetLeft + child.offsetWidth / 2;
-    const distance = Math.abs(childCenter - viewportCenter);
+    const comparePoint = useCenter
+      ? child.offsetLeft + child.offsetWidth / 2
+      : child.offsetLeft;
+    const distance = Math.abs(comparePoint - probe);
+
     if (distance < bestDistance) {
       bestDistance = distance;
-      target = getCenteredScrollLeft(el, child);
+      target = snapTargetScrollLeft(el, child);
     }
   }
 
-  return target;
+  const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+  return Math.min(Math.max(0, target), maxScroll);
+}
+
+function isCarouselDragSettling(el: HTMLElement): boolean {
+  return el.classList.contains(CAROUSEL_DRAGGING_CLASS);
 }
 
 /**
@@ -246,7 +283,7 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
 
       const finishSettle = () => {
         clearSettleTimer();
-        el.classList.remove("pdp-carousel-dragging");
+        el.classList.remove(CAROUSEL_DRAGGING_CLASS);
       };
 
       const onPointerDown = (event: PointerEvent) => {
@@ -259,7 +296,7 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
         moved = 0;
         startX = event.clientX;
         startScrollLeft = el.scrollLeft;
-        el.classList.add("pdp-carousel-dragging");
+        el.classList.add(CAROUSEL_DRAGGING_CLASS);
 
         try {
           el.setPointerCapture(event.pointerId);
@@ -728,7 +765,7 @@ export function useInfiniteFullBleedCarousel(
     let idleTimer = 0;
 
     const recenterIfAtEdge = () => {
-      if (blockWidth <= 0 || pointerDown) {
+      if (blockWidth <= 0 || pointerDown || isCarouselDragSettling(el)) {
         return;
       }
 

@@ -6,7 +6,6 @@ import { cn } from "@/lib/cn";
 
 import { CoachWordmark } from "./pdp-brand-logos";
 import { PDP_SITE_FOOTER, type PdpSiteFooterGroup } from "./pdp-data";
-import { pdpModuleSectionClass } from "./pdp-module-section";
 import { pdpPressableClass, pdpType } from "./pdp-type";
 
 function FooterLinkGroup({ group }: { group: PdpSiteFooterGroup }) {
@@ -41,10 +40,10 @@ export function PdpSiteFooter({ embedded = false }: { embedded?: boolean }) {
       style={{ backgroundColor: "#171717" }}
       className={
         embedded
-          ? "relative w-full shrink-0 pt-8 pb-7 text-white"
+          ? "relative w-full shrink-0 pt-4 pb-4 text-white"
           : cn(
-              pdpModuleSectionClass({ rhythm: "break" }),
-              "-mb-[var(--pdp-safe-area-bottom)] pt-8 pb-[calc(1.75rem+var(--pdp-safe-area-bottom))] text-white",
+              "relative w-full shrink-0",
+              "-mb-[var(--pdp-safe-area-bottom)] pt-4 pb-[max(16px,var(--pdp-safe-area-bottom))] text-white",
             )
       }
     >

@@ -721,9 +721,7 @@ export function PdpGalleryView({
                         <PdpScrollReveal
                           key={`ugc-wild-strip-${index}`}
                           className={ECOMM_MODULE_CLASS}
-                          surface={
-                            versionConfig.useV5UgcTestimonialCarousel ? "dark" : "light"
-                          }
+                          surface="light"
                         >
                           <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />
                         </PdpScrollReveal>,

@@ -506,6 +506,12 @@ html.font-extended {
   -webkit-user-select: none;
 }
 
+/* Mandatory snap on children can still tug during live mouse drags on narrow viewports. */
+.pdp-carousel-draggable.pdp-carousel-dragging > * {
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
+}
+
 /* Build picker pills — overflow-x scroll clips vertically unless padded */
 .pdp-build-picker-scroll {
   overflow-x: auto;
@@ -1130,6 +1136,7 @@ html.pdp-panel-scroll {
 }
 .pdp-icon-swap__layer[data-active="false"] {
   opacity: 0;
+  visibility: hidden;
   transform: scale(0.25);
   filter: blur(4px);
 }
@@ -1215,6 +1222,7 @@ html.pdp-panel-scroll {
   .pdp-icon-swap__layer[data-active="false"] {
     transform: none;
     filter: none;
+    visibility: hidden;
   }
   .pdp-msg-enter {
     animation: none;
