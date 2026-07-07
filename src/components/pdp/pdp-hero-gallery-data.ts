@@ -48,6 +48,11 @@ const HERO_STILL_BASE = "/images/hero/tabby26";
 /** The A0 product still promoted to slide 0 in v4 (Paper r5). */
 const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
 
+/** Stable key for deduping and React keys. */
+export function getHeroGallerySlideKey(slide: PdpHeroGallerySlide): string {
+  return slide.src;
+}
+
 /** Native 9:16 studio product — drag-zoom lead in v4 hero gallery. */
 const HERO_STUDIO_DRAG_ZOOM_SRC =
   "/images/gallery/tabby-product-front-916.jpg";
@@ -73,7 +78,7 @@ const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk
  *   - Otherwise lead with the A0 product still — `leadGalleryWithProductStill`.
  *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
  */
-export function applyV4HeroGallery(
+function applyV4HeroGallery(
   slides: PdpHeroGallerySlide[],
   options: {
     leadGalleryWithProductStill?: boolean;
@@ -135,7 +140,7 @@ export const HERO_GALLERY_V5_UGC_LEAD_SLIDE: PdpHeroGalleryVideoSlide = {
 };
 
 /** Move a slide to index 0 without mutating the frozen source array. */
-export function promoteHeroGallerySlideToLead(
+function promoteHeroGallerySlideToLead(
   slides: PdpHeroGallerySlide[],
   leadSrc: string,
 ): PdpHeroGallerySlide[] {
@@ -159,11 +164,85 @@ export function promoteHeroGallerySlideToLead(
  * array. Used to inject a version-specific hero land video ahead of the frozen
  * base slides.
  */
-export function prependHeroGalleryLeadSlide(
+function prependHeroGalleryLeadSlide(
   slides: PdpHeroGallerySlide[],
   leadSlide: PdpHeroGallerySlide,
 ): PdpHeroGallerySlide[] {
-  return [leadSlide, ...slides.filter((slide) => slide.src !== leadSlide.src)];
+  const leadKey = getHeroGallerySlideKey(leadSlide);
+  return [
+    leadSlide,
+    ...slides.filter((slide) => getHeroGallerySlideKey(slide) !== leadKey),
+  ];
+}
+
+/** Insert extra slides after a given index (deduped by `src`). */
+function insertHeroGallerySlidesAfter(
+  slides: PdpHeroGallerySlide[],
+  insertSlides: PdpHeroGallerySlide[],
+  afterIndex: number,
+): PdpHeroGallerySlide[] {
+  if (insertSlides.length === 0) {
+    return slides;
+  }
+
+  const existingKeys = new Set(slides.map(getHeroGallerySlideKey));
+  const uniqueInserts = insertSlides.filter(
+    (slide) => !existingKeys.has(getHeroGallerySlideKey(slide)),
+  );
+
+  if (uniqueInserts.length === 0) {
+    return slides;
+  }
+
+  const index = Math.max(0, Math.min(afterIndex, slides.length - 1));
+
+  return [
+    ...slides.slice(0, index + 1),
+    ...uniqueInserts,
+    ...slides.slice(index + 1),
+  ];
+}
+
+export type HeroGalleryOrderingOptions = {
+  leadGalleryWithProductStill?: boolean;
+  heroGalleryStudioDragZoom?: boolean;
+  heroGalleryLeadSlideSrc?: string;
+  heroGalleryPrependLeadSlide?: PdpHeroGallerySlide;
+  heroGalleryUgcSlides?: PdpHeroGallerySlide[];
+  /** Index after which UGC slides are inserted — defaults to 1 (after lead pair). */
+  heroGalleryUgcInsertAfterIndex?: number;
+};
+
+/** Version-aware hero slide ordering — shared by mobile carousel + desktop rail. */
+export function orderHeroGallerySlides(
+  slides: PdpHeroGallerySlide[],
+  options: HeroGalleryOrderingOptions = {},
+): PdpHeroGallerySlide[] {
+  let result =
+    options.leadGalleryWithProductStill || options.heroGalleryStudioDragZoom
+      ? applyV4HeroGallery(slides, {
+          leadGalleryWithProductStill: options.leadGalleryWithProductStill,
+          heroGalleryStudioDragZoom: options.heroGalleryStudioDragZoom,
+        })
+      : slides;
+
+  if (options.heroGalleryLeadSlideSrc) {
+    result = promoteHeroGallerySlideToLead(result, options.heroGalleryLeadSlideSrc);
+  }
+
+  if (options.heroGalleryPrependLeadSlide) {
+    result = prependHeroGalleryLeadSlide(result, options.heroGalleryPrependLeadSlide);
+  }
+
+  if (options.heroGalleryUgcSlides?.length) {
+    result = insertHeroGallerySlidesAfter(
+      result,
+      options.heroGalleryUgcSlides,
+      options.heroGalleryUgcInsertAfterIndex ?? 1,
+    );
+  }
+
+  return result;
 }
 
 /**

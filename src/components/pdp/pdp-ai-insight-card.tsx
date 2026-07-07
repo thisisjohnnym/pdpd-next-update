@@ -130,6 +130,8 @@ export type PdpAiInsightCardProps = PdpAiInsightContentProps & {
   /** Minimal only — compact callout; pair with containedSurface for flat grey vs elevated white */
   contained?: boolean;
   containedSurface?: "elevated" | "flat";
+  /** Square tray corners (v5 reviews AI summary) */
+  squareCorners?: boolean;
 };
 
 /** White insight card — browsing nudges, compare tips, reviews summary, etc. */
@@ -150,12 +152,14 @@ export function PdpAiInsightCard({
   variant = "card",
   contained = false,
   containedSurface = "elevated",
+  squareCorners = false,
   clampBodyLines,
   moreLabel,
   lessLabel,
 }: PdpAiInsightCardProps) {
   const minimal = variant === "minimal";
   const extraSmall = size === "xs";
+  const cornerClass = squareCorners ? "rounded-none" : "rounded-lg";
 
   return (
     <div
@@ -164,7 +168,7 @@ export function PdpAiInsightCard({
         minimal
           ? contained
             ? cn(
-                "rounded-lg",
+                cornerClass,
                 containedSurface === "flat"
                   ? "bg-neutral-50"
                   : "bg-white shadow-sm",
@@ -173,8 +177,12 @@ export function PdpAiInsightCard({
               )
             : "px-0 py-0"
           : cn(
-              "rounded-lg bg-white shadow-sm",
-              extraSmall ? "px-3 py-2.5" : "rounded-xl px-4 py-4",
+              "bg-white shadow-sm",
+              extraSmall
+                ? cn(cornerClass, "px-3 py-2.5")
+                : squareCorners
+                  ? "rounded-none px-4 py-4"
+                  : "rounded-xl px-4 py-4",
               onDismiss && (extraSmall ? "pr-8" : "pr-10"),
             ),
         className,

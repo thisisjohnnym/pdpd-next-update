@@ -6,16 +6,30 @@ import { cn } from "@/lib/cn";
 
 import { PdpGalleryHeroVideo } from "../pdp-gallery-hero-video";
 import {
-  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
+  getHeroGallerySlideKey,
   PDP_HERO_GALLERY_SLIDES,
-  prependHeroGalleryLeadSlide,
+  orderHeroGallerySlides,
 } from "../pdp-hero-gallery-data";
+import { getPdpVersionConfig } from "./pdp-version-config";
+import { usePdpVersion } from "./pdp-version-context";
 
-/** v5 leads the media rail with the creator unboxing clip (mirrors the mobile hero). */
-const PDP_V5_DESKTOP_MEDIA_SLIDES = prependHeroGalleryLeadSlide(
-  PDP_HERO_GALLERY_SLIDES,
-  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
-);
+/** v5 desktop rail mirrors the mobile hero carousel ordering. */
+function usePdpV5DesktopMediaSlides() {
+  const version = usePdpVersion();
+  const {
+    heroGalleryLeadSlideSrc,
+    heroGalleryPrependLeadSlide,
+    heroGalleryUgcSlides,
+    heroGalleryUgcInsertAfterIndex,
+  } = getPdpVersionConfig(version);
+
+  return orderHeroGallerySlides(PDP_HERO_GALLERY_SLIDES, {
+    heroGalleryLeadSlideSrc,
+    heroGalleryPrependLeadSlide,
+    heroGalleryUgcSlides,
+    heroGalleryUgcInsertAfterIndex,
+  });
+}
 
 /**
  * v5 desktop media column (lg+ only).
@@ -30,11 +44,13 @@ const PDP_V5_DESKTOP_MEDIA_SLIDES = prependHeroGalleryLeadSlide(
  * still owns everything below lg.
  */
 export function PdpV5DesktopMediaColumn() {
+  const slides = usePdpV5DesktopMediaSlides();
+
   return (
     <div className="pdp-v5-desktop-media grid w-full grid-cols-2 gap-2 bg-[#f0f0f0]">
-      {PDP_V5_DESKTOP_MEDIA_SLIDES.map((slide, index) => (
+      {slides.map((slide, index) => (
         <figure
-          key={`${slide.src}-${index}`}
+          key={`${getHeroGallerySlideKey(slide)}-${index}`}
           className={cn(
             "relative m-0 w-full overflow-hidden bg-[#f0f0f0]",
             "aspect-[4/5]",

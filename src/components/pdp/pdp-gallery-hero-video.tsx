@@ -6,8 +6,13 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_HERO_VIDEO } from "./pdp-data";
+import { PdpIconSwap } from "./pdp-icon-swap";
+import { pdpPillRadiusClass } from "./pdp-type";
 import { resolveVideoSources } from "./pdp-video-sources";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 import { useHeroVideoPlayback } from "./use-hero-video-playback";
+import { useMountTransition } from "./use-mount-transition";
 
 type PdpGalleryHeroVideoProps = {
   className?: string;
@@ -32,10 +37,27 @@ type PdpGalleryHeroVideoProps = {
   poster?: string;
   /** Above-the-fold hero — aggressive preload and decoder priority; autoplay still respects low power */
   priorityAutoplay?: boolean;
+  /** Frost pill shell radius — pass `pdpPillRadiusClass()` for square corners */
+  controlShellClassName?: string;
+  /** Pin controls above hero UI chrome (gallery overlay / progress bar) */
+  controlsElevated?: boolean;
+  /** Corner placement for the playback control pill */
+  controlsPosition?: "bottom-left" | "bottom-right";
 };
 
 const CONTROL_BUTTON_CLASS =
-  "flex size-8 items-center justify-center text-white transition-opacity active:opacity-75";
+  "flex size-8 items-center justify-center text-white transition-opacity active:scale-[0.96] active:opacity-75";
+
+const PILL_CONTROL_SHELL_CLASS =
+  "flex items-center gap-3 px-3.5 py-2 pdp-frost-dark ring-1 ring-inset ring-white/20";
+
+const CONTROLS_POSITION_CLASS = {
+  "bottom-left": "bottom-3 left-3",
+  "bottom-right": "bottom-3 right-3",
+} as const;
+
+const PILL_CONTROL_BUTTON_CLASS =
+  "flex size-7 items-center justify-center text-white transition-opacity active:scale-[0.96] active:opacity-75";
 
 const TAP_MOVE_THRESHOLD_PX = 12;
 
@@ -84,7 +106,7 @@ export function PdpGalleryHeroVideo({
   isActive = true,
   src = PDP_GALLERY_HERO_VIDEO,
   ariaLabel = "360° product view of Tabby Shoulder Bag 26",
-  showControls = false,
+  showControls = true,
   showMuteControl = true,
   preload = "none",
   skeletonTone = "dark",
@@ -94,7 +116,13 @@ export function PdpGalleryHeroVideo({
   decoderId,
   poster,
   priorityAutoplay = false,
+  controlShellClassName,
+  controlsElevated = false,
+  controlsPosition = "bottom-right",
 }: PdpGalleryHeroVideoProps) {
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+  const resolvedControlShellClassName =
+    controlShellClassName ?? pdpPillRadiusClass(squareButtonCorners);
   const {
     videoRef,
     isMounted,
@@ -130,12 +158,23 @@ export function PdpGalleryHeroVideo({
   const videoIgnoresPointer = passThroughTouch || useTapCaptureLayer;
   const canTapVideo =
     !videoIgnoresPointer && (tapToTogglePlayback || showControls);
+  const isHeroGalleryChrome =
+    passThroughTouch && !showControls && !showMuteControl;
   const showPlaybackButton = showControls && !tapToTogglePlayback;
   const showControlChrome = showMuteControl || showPlaybackButton;
+  const usePillControls = showControlChrome && !isHeroGalleryChrome;
+  const showPlaybackInPill = usePillControls && (tapToTogglePlayback || showControls);
   const playbackOverlayIcon =
     playbackHint ??
     (showFrozenPlayOverlay || showTapPausedOverlay ? "play" : null);
+  const pillPlaybackIcon =
+    playbackHint ?? (isPlaying ? "pause" : "play_arrow");
   const overlayInteractive = showFrozenPlayOverlay || showTapPausedOverlay;
+  const showCenterPlaybackOverlay =
+    Boolean(playbackOverlayIcon) && !usePillControls;
+  const controlsPositionClass = CONTROLS_POSITION_CLASS[controlsPosition];
+  const controlsLayerClass = controlsElevated ? "z-[40]" : "z-[4]";
+  const controlsTransition = useMountTransition(isActive && showControlChrome, 280);
 
   const tapStartRef = useRef<{ x: number; y: number } | null>(null);
   const tapMovedRef = useRef(false);
@@ -252,7 +291,11 @@ export function PdpGalleryHeroVideo({
           poster={poster}
           fitClass={posterFitClass}
           objectPosition={posterObjectPosition}
-          visible={showBlurReveal ? !videoFrameVisible : !isPlaying}
+          visible={
+            showBlurReveal
+              ? !videoFrameVisible || showFrozenPlayOverlay
+              : !isPlaying
+          }
         />
       ) : null}
 
@@ -293,7 +336,7 @@ export function PdpGalleryHeroVideo({
         />
       ) : null}
 
-      {playbackOverlayIcon ? (
+      {showCenterPlaybackOverlay ? (
         <div
           className={cn(
             "absolute inset-0 z-[3] flex items-center justify-center",
@@ -320,44 +363,144 @@ export function PdpGalleryHeroVideo({
         </div>
       ) : null}
 
-      {showControlChrome ? (
-        <div className="pointer-events-auto absolute bottom-3 right-3 z-[4] flex items-center gap-1.5">
-          {showMuteControl ? (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                toggleMute();
-              }}
-              aria-label={isMuted ? "Unmute video" : "Mute video"}
-              aria-pressed={!isMuted}
-              className={CONTROL_BUTTON_CLASS}
+      {controlsTransition.mounted ? (
+        usePillControls ? (
+          <div
+            className={cn(
+              "absolute",
+              controlsPositionClass,
+              controlsLayerClass,
+              controlsTransition.state === "open"
+                ? "pointer-events-auto"
+                : "pointer-events-none",
+            )}
+          >
+            <div
+              className={cn(
+                PILL_CONTROL_SHELL_CLASS,
+                resolvedControlShellClassName,
+                "pdp-video-controls-pop pdp-video-controls-stagger",
+              )}
+              data-state={controlsTransition.state}
             >
-              <MaterialIcon
-                name={isMuted ? "volume_off" : "volume_up"}
-                size={18}
-                className="text-white"
-              />
-            </button>
-          ) : null}
-          {showPlaybackButton ? (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                togglePlayback();
-              }}
-              aria-label={isPlaying ? "Pause video" : "Play video"}
-              className={CONTROL_BUTTON_CLASS}
-            >
-              <MaterialIcon
-                name={isPlaying ? "pause" : "play_arrow"}
-                size={18}
-                className="text-white"
-              />
-            </button>
-          ) : null}
-        </div>
+              {showPlaybackInPill ? (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    togglePlayback();
+                  }}
+                  aria-label={isPlaying ? "Pause video" : "Play video"}
+                  className={cn(
+                    PILL_CONTROL_BUTTON_CLASS,
+                    playbackHint &&
+                      "motion-safe:animate-[pdp-playback-hint_650ms_ease-out_both]",
+                  )}
+                >
+                  {playbackHint ? (
+                    <MaterialIcon
+                      name={pillPlaybackIcon}
+                      size={18}
+                      className="text-white"
+                    />
+                  ) : (
+                    <PdpIconSwap
+                      active={isPlaying}
+                      activeIcon={
+                        <MaterialIcon
+                          name="pause"
+                          size={18}
+                          className="text-white"
+                        />
+                      }
+                      inactiveIcon={
+                        <MaterialIcon
+                          name="play_arrow"
+                          size={18}
+                          className="text-white"
+                        />
+                      }
+                    />
+                  )}
+                </button>
+              ) : null}
+              {showMuteControl ? (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleMute();
+                  }}
+                  aria-label={isMuted ? "Unmute video" : "Mute video"}
+                  aria-pressed={!isMuted}
+                  className={PILL_CONTROL_BUTTON_CLASS}
+                >
+                  <MaterialIcon
+                    name={isMuted ? "volume_off" : "volume_up"}
+                    size={18}
+                    className="text-white"
+                  />
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "absolute flex items-center gap-1.5 pdp-video-controls-pop pdp-video-controls-stagger",
+              controlsPositionClass,
+              controlsLayerClass,
+              controlsTransition.state === "open"
+                ? "pointer-events-auto"
+                : "pointer-events-none",
+            )}
+            data-state={controlsTransition.state}
+          >
+            {showMuteControl ? (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleMute();
+                }}
+                aria-label={isMuted ? "Unmute video" : "Mute video"}
+                aria-pressed={!isMuted}
+                className={CONTROL_BUTTON_CLASS}
+              >
+                <MaterialIcon
+                  name={isMuted ? "volume_off" : "volume_up"}
+                  size={18}
+                  className="text-white"
+                />
+              </button>
+            ) : null}
+            {showPlaybackButton ? (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  togglePlayback();
+                }}
+                aria-label={isPlaying ? "Pause video" : "Play video"}
+                className={CONTROL_BUTTON_CLASS}
+              >
+                <PdpIconSwap
+                  active={isPlaying}
+                  activeIcon={
+                    <MaterialIcon name="pause" size={18} className="text-white" />
+                  }
+                  inactiveIcon={
+                    <MaterialIcon
+                      name="play_arrow"
+                      size={18}
+                      className="text-white"
+                    />
+                  }
+                />
+              </button>
+            ) : null}
+          </div>
+        )
       ) : null}
     </div>
   );

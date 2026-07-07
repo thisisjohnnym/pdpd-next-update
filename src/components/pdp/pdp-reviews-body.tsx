@@ -162,7 +162,8 @@ export function PdpReviewsBody({
   const { productId } = useActiveProduct();
   const { aiSummaryBody, ugcStories } = getPdpReviewsContent(productId);
   const { count } = PDP_REVIEWS_SUMMARY;
-  const { showReviewComments: allowComments } = getPdpVersionConfig(usePdpVersion());
+  const { showReviewComments: allowComments, squareButtonCorners } =
+    getPdpVersionConfig(usePdpVersion());
   const [internalFeedFilter, setInternalFeedFilter] =
     useState<PdpReviewFeedFilter>("reviews");
   const requestedFeedFilter = feedFilterProp ?? internalFeedFilter;
@@ -257,6 +258,7 @@ export function PdpReviewsBody({
           size="xs"
           contained
           containedSurface="flat"
+          squareCorners={squareButtonCorners}
           showIcon={false}
           clampBodyLines={1}
           body={aiSummaryBody}

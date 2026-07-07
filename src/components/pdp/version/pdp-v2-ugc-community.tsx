@@ -6,6 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 import { PDP_UGC_VIDEO_CAROUSEL, type PdpUgcVideo } from "../pdp-data";
+import { PdpGalleryHeroVideo } from "../pdp-gallery-hero-video";
 import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
@@ -454,26 +455,23 @@ function UgcCompactPreviewTile({
 /** Inline muted loop clip for the compact wild strip — poster-only when reduced motion. */
 function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
   const reducedMotion = useReducedMotion();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const tileRef = useRef<HTMLDivElement>(null);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
-    const el = videoRef.current;
-    if (!el || reducedMotion) {
+    const tile = tileRef.current;
+    if (!tile || reducedMotion) {
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          void el.play().catch(() => {});
-        } else {
-          el.pause();
-        }
+        setIsActive(entry.isIntersecting);
       },
       { threshold: 0.2 },
     );
 
-    observer.observe(el);
+    observer.observe(tile);
 
     return () => {
       observer.disconnect();
@@ -493,18 +491,19 @@ function UgcCompactVideoTile({ video }: { video: PdpUgcVideo }) {
   }
 
   return (
-    <video
-      ref={videoRef}
-      src={video.src}
-      poster={video.poster}
-      muted
-      autoPlay
-      loop
-      playsInline
-      preload="metadata"
-      aria-label={video.alt}
-      className="absolute inset-0 size-full rounded-none object-cover object-center"
-    />
+    <div ref={tileRef} className="absolute inset-0">
+      <PdpGalleryHeroVideo
+        decoderId={video.id}
+        src={video.src}
+        poster={video.poster}
+        ariaLabel={video.alt}
+        isActive={isActive}
+        preload="metadata"
+        skeletonTone="dark"
+        showMuteControl={false}
+        className="size-full rounded-none object-cover object-center"
+      />
+    </div>
   );
 }
 

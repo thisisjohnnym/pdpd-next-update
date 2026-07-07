@@ -520,11 +520,11 @@ function PdpLeatherAgingV4({
     return (
       <section
         data-header-surface="light"
-        className="w-full shrink-0 bg-white px-4 py-6"
+        className="w-full shrink-0 bg-[#F2EDEA] px-4 pt-10 pb-6"
       >
-        {/* Warm container matches the product shot's cream ground (#F2EDEA) so
-            the image melts into the card instead of floating on white. */}
-        <div className="flex flex-col bg-[#F2EDEA] px-4 pt-6 pb-6">
+        {/* Full-bleed warm block — cream ground (#F2EDEA) matches the product shot
+            so the image melts into the section instead of floating on white. */}
+        <div className="flex flex-col">
           <PdpRevealItem>
             <div className="mb-3 flex flex-col gap-2">
               <PdpModuleHeading spacing="none" className="text-left">

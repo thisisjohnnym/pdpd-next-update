@@ -14,11 +14,14 @@ export function PdpUgcTopicToggle({
   onChange,
   className,
   tone = "light",
+  solidInactive = false,
 }: {
   value: PdpUgcWildTopicId;
   onChange: (topicId: PdpUgcWildTopicId) => void;
   className?: string;
   tone?: "light" | "dark";
+  /** Keep inactive tabs black — active tab keeps the underline. */
+  solidInactive?: boolean;
 }) {
   return (
     <div
@@ -45,7 +48,9 @@ export function PdpUgcTopicToggle({
                   : "text-white/50 active:text-white/75"
                 : active
                   ? "text-black underline decoration-black underline-offset-[3px]"
-                  : "text-neutral-400 active:text-neutral-600",
+                  : solidInactive
+                    ? "text-black active:text-black/80"
+                    : "text-neutral-400 active:text-neutral-600",
             )}
           >
             {topic.label}

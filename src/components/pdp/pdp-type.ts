@@ -31,7 +31,7 @@ export const pdpPressableSolidClass = "pdp-pressable pdp-pressable--solid";
 /** Icon / ghost controls — slightly stronger scale */
 export const pdpPressableIconClass = "pdp-pressable pdp-pressable--icon";
 
-/** "Add" / "Added" label beside Material add icon — counters .font-extended top nudge */
+/** "Add" / "Added" label beside Material add icon — extended face optical nudge */
 export const pdpAddIconLabelClass = "font-extended pdp-add-icon-label";
 
 /** Pill CTA corner radius — squared on v5, full pill elsewhere */
@@ -41,11 +41,11 @@ export function pdpPillRadiusClass(square = false) {
 
 /** Pill outline CTA — white fill, soft grey stroke (Add buttons, sheet actions) */
 export const pdpStrokeCtaClass =
-  "rounded-full border border-neutral-200 bg-white text-black transition-colors active:bg-neutral-50 pdp-pressable";
+  "pdp-stroke-cta rounded-full border border-neutral-200 bg-white text-black transition-colors active:bg-neutral-50 pdp-pressable";
 
 /** Outline CTA disabled / added state — same border box as default so the pill does not shrink */
 export const pdpStrokeCtaMutedClass =
-  "rounded-full border border-neutral-200 bg-neutral-100 text-neutral-500";
+  "pdp-stroke-cta rounded-full border border-neutral-200 bg-neutral-100 text-neutral-500";
 
 /** Underlined text CTA — primary (Shop Shoulder Bags) */
 export const pdpTextLinkCtaClass =

@@ -79,9 +79,40 @@
   border-bottom-width: 0;
 }
 
-/* "What customers are saying" band — left-aligned editorial testimonial (Figma 409:460). */
+/* Add / Quick add pill — borderless on v5 (leather care upsell, bag sheet, etc.) */
+[data-pdp-version="v5"] .pdp-stroke-cta {
+  border: 0;
+}
+
+/* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */
 [data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
-  background-color: #1f241e;
+  background-color: #efeae7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-pdp-version="v5"] .pdp-v5-ugc-testimonial-slide {
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Hero "See what fits inside" — Apple light frost, no drop shadow. */
+[data-pdp-version="v5"] .pdp-v5-fits-inside-glass {
+  border: none;
+  background-color: rgb(255 255 255 / 0.42);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.08);
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2);
+  color: #0a0a0a;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  [data-pdp-version="v5"] .pdp-v5-fits-inside-glass {
+    background-color: rgb(255 255 255 / 0.88);
+  }
 }
 
 /* ── Desktop responsive split (lg+) ──────────────────────────────────────────

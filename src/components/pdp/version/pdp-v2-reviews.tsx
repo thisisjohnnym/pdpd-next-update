@@ -73,7 +73,8 @@ function ReviewUgcMomentCard({
   photo: PdpUgcCommunityPhoto;
   className?: string;
 }) {
-  const { hideReviewUgcMomentCaption } = getPdpVersionConfig(usePdpVersion());
+  const { hideReviewUgcMomentCaption, enlargeReviewUgcMomentText } =
+    getPdpVersionConfig(usePdpVersion());
   const showCaption = Boolean(photo.caption) && !hideReviewUgcMomentCaption;
 
   return (
@@ -93,12 +94,44 @@ function ReviewUgcMomentCard({
             <p className={cn(pdpType.micro, "m-0 text-neutral-500")}>{photo.caption}</p>
           ) : null}
           {photo.quote ? (
-            <p className={cn(pdpType.label, "m-0 text-pretty text-neutral-600")}>
+            <p
+              className={cn(
+                enlargeReviewUgcMomentText ? pdpType.body : pdpType.label,
+                "m-0 text-pretty text-neutral-600",
+              )}
+            >
               &ldquo;{photo.quote}&rdquo;
             </p>
           ) : null}
           {photo.handle ? (
-            <p className={cn(pdpType.micro, "m-0 text-neutral-400")}>{photo.handle}</p>
+            <div className="flex items-center gap-1">
+              <span
+                className={cn(
+                  enlargeReviewUgcMomentText ? pdpType.label : pdpType.micro,
+                  "text-neutral-400",
+                )}
+              >
+                {photo.handle}
+              </span>
+              {photo.verified ? (
+                <svg
+                  width={enlargeReviewUgcMomentText ? 13 : 12}
+                  height={enlargeReviewUgcMomentText ? 13 : 12}
+                  viewBox="0 0 24 24"
+                  aria-label="Verified customer"
+                >
+                  <circle cx="12" cy="12" r="10" fill="#1D9BF0" />
+                  <path
+                    d="M8 12.5l2.5 2.5 5-5.5"
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : null}
+            </div>
           ) : null}
         </figcaption>
       ) : null}
@@ -146,6 +179,7 @@ function V4ReviewSummary({
     squareButtonCorners,
     showReviewHighlightTags,
     hideReviewCountRecommend,
+    hideReviewSummaryRating,
     enlargeReviewAiSummary,
   } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
@@ -167,26 +201,28 @@ function V4ReviewSummary({
           >
             {headline}
           </PdpTextReveal>
-          <PdpRevealItem delay={revealStaggerDelay(1)}>
-            <div
-              className={cn(
-                "flex flex-wrap items-center gap-x-2 gap-y-1",
-                leftAlignModuleHeadings ? "justify-start" : "justify-center",
-              )}
-            >
-              <PdpStarRating rating={average} size={18} />
-              <span
+          {!hideReviewSummaryRating ? (
+            <PdpRevealItem delay={revealStaggerDelay(1)}>
+              <div
                 className={cn(
-                  "font-extended tabular-nums text-neutral-500",
-                  pdpType.micro,
+                  "flex flex-wrap items-center gap-x-2 gap-y-1",
+                  leftAlignModuleHeadings ? "justify-start" : "justify-center",
                 )}
               >
-                {hideReviewCountRecommend
-                  ? average.toFixed(1)
-                  : `${average.toFixed(1)} · ${count} reviews · ${recommendPercent}% recommend`}
-              </span>
-            </div>
-          </PdpRevealItem>
+                <PdpStarRating rating={average} size={18} />
+                <span
+                  className={cn(
+                    "font-extended tabular-nums text-neutral-500",
+                    pdpType.micro,
+                  )}
+                >
+                  {hideReviewCountRecommend
+                    ? average.toFixed(1)
+                    : `${average.toFixed(1)} · ${count} reviews · ${recommendPercent}% recommend`}
+                </span>
+              </div>
+            </PdpRevealItem>
+          ) : null}
         </div>
 
         {/* AI review summary — flat grey tray (matches reviews sheet) */}
@@ -196,6 +232,7 @@ function V4ReviewSummary({
             size={enlargeReviewAiSummary ? "compact" : "xs"}
             contained
             containedSurface="flat"
+            squareCorners={squareButtonCorners}
             showIcon={false}
             clampBodyLines={2}
             moreLabel="See more"
@@ -267,9 +304,15 @@ function V4ReviewSummary({
                 useConsistentModuleHeadings ? pdpType.body : pdpType.label,
               )}
             >
-              {useConsistentModuleHeadings
-                ? `View all ${count} reviews`
-                : "Read all reviews"}
+              <span
+                className={cn(
+                  useConsistentModuleHeadings && "inline-block translate-y-[2px]",
+                )}
+              >
+                {useConsistentModuleHeadings
+                  ? `View all ${count} reviews`
+                  : "Read all reviews"}
+              </span>
             </button>
           ) : null}
         </div>

@@ -30,6 +30,7 @@ import {
   PDP_V4_DETAILS_SECTION,
   PDP_V4_SPECS,
   PDP_V5_DETAILS_COLUMNS,
+  PDP_V5_DETAILS_HEADLINE,
   PDP_V5_DETAILS_INTRO,
   type PdpProductDetailSpecV4,
 } from "./version/pdp-v4-specs";
@@ -242,11 +243,11 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
   let staggerIndex = 0;
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-6 pb-14">
-      <PdpModuleHeading spacing="none" className="text-left">
-        {eyebrow}
-      </PdpModuleHeading>
-      <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 px-4 pt-12 pb-16">
+      <div className="flex flex-col gap-1.5">
+        <PdpModuleHeading spacing="none" className="text-left">
+          {eyebrow}
+        </PdpModuleHeading>
         <PdpTextReveal
           as="p"
           delay={100}
@@ -254,7 +255,8 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
         >
           {PDP_V5_DETAILS_INTRO}
         </PdpTextReveal>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+      </div>
+      <div className="grid grid-cols-2 gap-x-5 gap-y-5">
           {rows.map((row, rowIndex) =>
             row.map((spec, columnIndex) => {
               if (!spec) {
@@ -273,7 +275,6 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
             }),
           )}
         </div>
-      </div>
     </div>
   );
 }
@@ -437,7 +438,7 @@ export function PdpProductDetailsModule({
       )}
     >
       {useV5DetailsSheet ? (
-        <SpecSheetV5 eyebrow={eyebrow} />
+        <SpecSheetV5 eyebrow={PDP_V5_DETAILS_HEADLINE} />
       ) : useV4Specs ? (
         <div
           className={cn(
@@ -447,8 +448,7 @@ export function PdpProductDetailsModule({
         >
           <div
             className={cn(
-              "mb-5 flex flex-col",
-              v5DetailsLayout ? "gap-3" : "gap-2",
+              "mb-5 flex flex-col gap-1.5",
               leftAlignModuleHeadings ? "items-start" : "items-center text-center",
             )}
           >

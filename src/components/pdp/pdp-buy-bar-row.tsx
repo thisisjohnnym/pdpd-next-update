@@ -117,7 +117,7 @@ export function PdpBuyBarRow({
             aria-hidden
           />
         ) : null}
-        <span className="translate-y-px text-[14px]">Add to bag</span>
+        <span className="translate-y-0.5 text-[14px]">Add to bag</span>
       </span>
     </button>
   );

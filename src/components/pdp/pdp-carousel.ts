@@ -26,6 +26,10 @@ export const pdpCarouselScrollWrapClass = pdpCarouselBleedWrapClass;
 export const pdpCarouselCard15Gap2Class =
   "w-[calc((100vw-1.25rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
 
+/** v5 More like this — ~1.5 across with peek (gap-3 rail, pl-3 bleed) */
+export const pdpMoreLikeThisLargeCardClass =
+  "w-[calc((100vw-1.5rem)/1.5)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
+
 /** Compare rail — narrow columns with next-item peek */
 const pdpCompareCarouselCardClass =
   "w-[calc((100vw-1.25rem)/2.05)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/4)]";

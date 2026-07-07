@@ -2265,7 +2265,7 @@ const PDP_LEATHER_AGING_TWO_YEARS_IMAGE = {
 
 export const PDP_LEATHER_AGING = {
   moment: "Material",
-  title: "How it evolves over time",
+  title: "Where wear becomes beauty",
   intro:
     "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
   image: PDP_LEATHER_AGING_NEW_IMAGE,

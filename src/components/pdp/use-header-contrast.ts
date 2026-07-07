@@ -3,37 +3,77 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 import {
-  luminanceToForeground,
-  sampleBackdropLuminance,
-  type HeaderForeground,
+  defaultHeaderBandRect,
+  headerOverlapsHeroSection,
+  headerSurfaceToForeground,
+  luminanceZonesToForeground,
+  sampleBackdropLuminanceZones,
+  type HeaderContrastZones,
 } from "@/lib/header-contrast";
 
+import { useHeroChromeSurface } from "./pdp-hero-chrome-surface";
 import { useScrollSnapshot } from "./use-coalesced-scroll";
 
 const SCROLL_SAMPLE_MS = 120;
+const VIDEO_SAMPLE_MS = 200;
+
+const DEFAULT_ZONES: HeaderContrastZones = {
+  menu: "light",
+  logo: "light",
+  bag: "light",
+};
 
 export function useHeaderContrast(
   headerRef: RefObject<HTMLElement | null>,
-): HeaderForeground {
-  const [foreground, setForeground] = useState<HeaderForeground>("light");
+): HeaderContrastZones {
+  const [zones, setZones] = useState<HeaderContrastZones>(DEFAULT_ZONES);
+  const heroSurface = useHeroChromeSurface();
   const { scrollY } = useScrollSnapshot();
   const lastMeasureAt = useRef(0);
 
   const measure = useCallback(() => {
     const header = headerRef.current;
-    if (!header) return;
-
-    const rect = header.getBoundingClientRect();
+    const rect = header?.getBoundingClientRect() ?? defaultHeaderBandRect();
     if (rect.height <= 0 || rect.width <= 0) return;
 
-    const luminance = sampleBackdropLuminance(rect);
+    if (headerOverlapsHeroSection(rect)) {
+      const foreground = headerSurfaceToForeground(heroSurface);
+      setZones((current) => {
+        if (
+          current.menu === foreground &&
+          current.logo === foreground &&
+          current.bag === foreground
+        ) {
+          return current;
+        }
+        return { menu: foreground, logo: foreground, bag: foreground };
+      });
+      return;
+    }
+
+    const menuEl = header?.querySelector("button");
+    const bagEl = header?.querySelector('[data-pdp-header-action="bag"]');
+    const logoEl = header?.querySelector("svg")?.parentElement ?? null;
+
+    const luminance = sampleBackdropLuminanceZones(rect, {
+      menu: menuEl,
+      logo: logoEl,
+      bag: bagEl,
+    });
     if (luminance === null) return;
 
-    setForeground((current) => {
-      const next = luminanceToForeground(luminance, current);
-      return next === current ? current : next;
+    setZones((current) => {
+      const next = luminanceZonesToForeground(luminance, current);
+      if (
+        next.menu === current.menu &&
+        next.logo === current.logo &&
+        next.bag === current.bag
+      ) {
+        return current;
+      }
+      return next;
     });
-  }, [headerRef]);
+  }, [headerRef, heroSurface]);
 
   useEffect(() => {
     const now = performance.now();
@@ -46,18 +86,61 @@ export function useHeaderContrast(
   }, [scrollY, measure]);
 
   useEffect(() => {
+    measure();
+  }, [heroSurface, measure]);
+
+  useEffect(() => {
+    const track = document.querySelector("[data-hero-gallery-track]");
+    if (!track) return;
+
+    let scrollTimer = 0;
+    const onGalleryScroll = () => {
+      if (scrollTimer) return;
+      scrollTimer = window.setTimeout(() => {
+        scrollTimer = 0;
+        measure();
+      }, SCROLL_SAMPLE_MS);
+    };
+
+    track.addEventListener("scroll", onGalleryScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onGalleryScroll);
+      if (scrollTimer) window.clearTimeout(scrollTimer);
+    };
+  }, [measure]);
+
+  useEffect(() => {
     let mutationTimer = 0;
 
-    const handleImageLoad = () => {
+    let lastVideoSampleAt = 0;
+
+    const handleBackdropChange = () => {
+      measure();
+    };
+
+    const handleVideoTimeUpdate = () => {
+      const now = performance.now();
+      if (now - lastVideoSampleAt < VIDEO_SAMPLE_MS) {
+        return;
+      }
+      lastVideoSampleAt = now;
       measure();
     };
 
     const bindImageLoads = () => {
       document.querySelectorAll("img").forEach((img) => {
         if (!img.complete) {
-          img.addEventListener("load", handleImageLoad, { once: true });
+          img.addEventListener("load", handleBackdropChange, { once: true });
         }
       });
+    };
+
+    const bindHeroVideos = () => {
+      document
+        .querySelectorAll<HTMLVideoElement>("[data-hero-section] video")
+        .forEach((video) => {
+          video.addEventListener("timeupdate", handleVideoTimeUpdate);
+        });
     };
 
     const onResize = () => {
@@ -66,6 +149,7 @@ export function useHeaderContrast(
 
     measure();
     bindImageLoads();
+    bindHeroVideos();
     window.addEventListener("resize", onResize);
 
     const observer = new MutationObserver(() => {
@@ -73,6 +157,7 @@ export function useHeaderContrast(
       mutationTimer = window.setTimeout(() => {
         mutationTimer = 0;
         bindImageLoads();
+        bindHeroVideos();
         measure();
       }, 400);
     });
@@ -80,10 +165,15 @@ export function useHeaderContrast(
 
     return () => {
       window.removeEventListener("resize", onResize);
+      document
+        .querySelectorAll<HTMLVideoElement>("[data-hero-section] video")
+        .forEach((video) => {
+          video.removeEventListener("timeupdate", handleVideoTimeUpdate);
+        });
       observer.disconnect();
       if (mutationTimer) window.clearTimeout(mutationTimer);
     };
   }, [measure]);
 
-  return foreground;
+  return zones;
 }

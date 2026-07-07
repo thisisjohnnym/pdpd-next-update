@@ -609,7 +609,6 @@ function PdpGalleryVideoSlide({
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
             skeletonTone={PDP_PANEL_SCROLL ? "dark" : "light"}
-            tapToTogglePlayback
             showMuteControl={showMuteControl}
             className={cn(
               "size-full object-cover object-center",
@@ -721,9 +720,7 @@ export function PdpGalleryView({
                         <PdpScrollReveal
                           key={`ugc-wild-strip-${index}`}
                           className={ECOMM_MODULE_CLASS}
-                          surface={
-                            versionConfig.useV5UgcTestimonialCarousel ? "dark" : "light"
-                          }
+                          surface="light"
                         >
                           <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />
                         </PdpScrollReveal>,
