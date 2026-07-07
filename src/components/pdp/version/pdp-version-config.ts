@@ -291,6 +291,10 @@ export type PdpVersionConfig = {
    */
   useV5UgcTestimonialCarousel: boolean;
   /**
+   * 9:16 blush editorial quote card after What customers are saying. v5 only.
+   */
+  showEditorialQuoteCard: boolean;
+  /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
    */
@@ -520,6 +524,7 @@ const V1_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: false,
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
+  showEditorialQuoteCard: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
@@ -719,6 +724,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
+  showEditorialQuoteCard: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,

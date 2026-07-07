@@ -84,6 +84,36 @@
   background-color: #efeae7;
 }
 
+/* 9:16 editorial quote card — blush panel, serif pull quote, wide-track labels. */
+[data-pdp-version="v5"] .pdp-v5-quote-card {
+  background-color: #f0c8c4;
+}
+
+[data-pdp-version="v5"] .pdp-v5-quote-card__eyebrow,
+[data-pdp-version="v5"] .pdp-v5-quote-card__attribution {
+  font-family: var(--font-extended);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  line-height: 1.35;
+  color: #6b3340;
+}
+
+[data-pdp-version="v5"] .pdp-v5-quote-card__quote {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: clamp(1.375rem, 5.2vw, 1.625rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: #0a0a0a;
+}
+
+@media (min-width: 1024px) {
+  [data-pdp-version="v5"] .pdp-v5-quote-card {
+    max-width: 22.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-pdp-version="v5"] .pdp-v5-ugc-testimonial-slide {
     transform: none !important;

@@ -691,6 +691,14 @@ export const PDP_CRAFTED_TO_LAST_VIDEO = {
   alt: "Crafted to last — Coach glovetanned leather craftsmanship",
 } as const;
 
+/** v5 editorial quote card — 9:16 blush panel with celebrity pull quote */
+export const PDP_V5_EDITORIAL_QUOTE = {
+  eyebrow: "Why PinkPantheress loves it",
+  quote:
+    "I wanted a bag that feels effortless on the street, but still pulls a look together in one grab—Tabby does both.",
+  attribution: "PinkPantheress",
+} as const;
+
 export const PDP_WAYS_TO_WEAR_SECTION = {
   headline: "Made to move",
   body:
