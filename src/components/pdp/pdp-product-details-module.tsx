@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 
 import {
   PDP_PRODUCT_DETAILS,
-  type PdpProductDetailSpec,
+  type PdpProductSpec,
   type PdpProductDetailTile,
 } from "./pdp-data";
 import {
@@ -94,7 +94,7 @@ function SpecCell({
   spec,
   colClass,
 }: {
-  spec: PdpProductDetailSpec;
+  spec: PdpProductSpec;
   colClass?: string;
 }) {
   return (
@@ -115,7 +115,7 @@ function SpecCell({
 }
 
 /** Three-up spec row with hairline dividers — Paper AHD-0 */
-function SpecRow({ specs }: { specs: readonly PdpProductDetailSpec[] }) {
+function SpecRow({ specs }: { specs: readonly PdpProductSpec[] }) {
   return (
     <PdpRevealItem className="px-2 py-6">
       <div className="flex">

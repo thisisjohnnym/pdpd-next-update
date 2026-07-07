@@ -1,7 +1,7 @@
-import type { PdpProductDetailSpec } from "../pdp-data";
+import type { PdpProductSpec } from "../pdp-data";
 
 /** v4 Details fact — editorial spec row (Paper r5 `LD6-0`). */
-export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
+export type PdpProductDetailSpecV4 = PdpProductSpec & {
   /** Apply tabular numerals to measured values (dimensions, weight). */
   tabular?: boolean;
   /** Quiet second line — keeps the primary value to one short phrase. */
