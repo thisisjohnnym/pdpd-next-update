@@ -204,6 +204,16 @@ export type PdpVersionConfig = {
    */
   inlineBuyBarColorSwatches: boolean;
   /**
+   * Replace the below-fold swatch grid with compact color dots below Add to bag.
+   * v5 only.
+   */
+  useCompactBuyBarColorDots: boolean;
+  /**
+   * Solid color dots shown before the +N label in the compact buy-bar row.
+   * v5 only.
+   */
+  compactBuyBarColorDotCount: number;
+  /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
    */
@@ -493,6 +503,8 @@ const V1_CONFIG: PdpVersionConfig = {
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
+  useCompactBuyBarColorDots: false,
+  compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -593,6 +605,8 @@ const V2_CONFIG: PdpVersionConfig = {
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
+  useCompactBuyBarColorDots: false,
+  compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -714,7 +728,9 @@ const V5_CONFIG: PdpVersionConfig = {
   hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
-  inlineBuyBarColorSwatches: true,
+  useCompactBuyBarColorDots: true,
+  compactBuyBarColorDotCount: 3,
+  inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
@@ -755,11 +771,11 @@ const V5_CONFIG: PdpVersionConfig = {
   squareButtonCorners: true,
   showWaysToWearModule: true,
   showCraftedToLastVideo: true,
-  demoHeroColorSwatchRow: true,
-  collapseHeroColorSwatches: true,
-  heroColorSwatchPreviewCount: 5,
+  demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
   heroColorSwatchMoreCountOverride: 6,
-  showTabbyAlsoAvailableAs: true,
+  showTabbyAlsoAvailableAs: false,
   showReviewHighlightTags: false,
   // v5 desktop responsive split — media left, sticky buy panel right at lg+.
   desktopSplitLayout: true,

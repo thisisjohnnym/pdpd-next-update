@@ -11,7 +11,7 @@ const COACH_SWATCH_ZOOM = 3.25;
 /** Hero color row — square tiles need extra zoom vs circular chips */
 export const SQUARE_SWATCH_TILE_ZOOM = 4.5;
 /** Anchor on clasp — centered in the hero square crop */
-export const SQUARE_SWATCH_TILE_FOCAL = "50% 72%";
+export const SQUARE_SWATCH_TILE_FOCAL = "50% 80%";
 
 /** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
 const PRODUCT_SWATCH_FOCAL = "50% 58%";

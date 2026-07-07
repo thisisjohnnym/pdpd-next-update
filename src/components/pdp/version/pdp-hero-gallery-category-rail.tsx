@@ -19,7 +19,6 @@ import { usePdpHeroGallery } from "../pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS,
   PDP_HERO_GALLERY_CONTROL_ICON_SIZE,
-  PDP_HERO_GALLERY_CONTROL_SHELL_CLASS,
 } from "../pdp-hero-gallery-control-shell";
 import { pdpPressableClass } from "../pdp-type";
 import { useMountTransition } from "../use-mount-transition";
@@ -60,10 +59,10 @@ function CategoryRow({
       }
       onClick={() => onSelect(category.id)}
       className={cn(
-        "pointer-events-auto flex w-full items-center border-b border-l-2 border-b-white/10 border-l-transparent px-3 py-2.5 text-left transition-[opacity,transform,border-color] duration-200 ease-out last:border-b-0",
+        "pointer-events-auto flex w-full items-center border-b border-l-2 border-b-neutral-200 border-l-transparent px-3 py-2.5 text-left transition-[opacity,transform,border-color] duration-200 ease-out last:border-b-0",
         "disabled:pointer-events-none disabled:opacity-35",
         !disabled && "active:scale-[0.99]",
-        active && "border-l-white pl-[calc(0.75rem-2px)]",
+        active && "border-l-neutral-900 pl-[calc(0.75rem-2px)]",
         chromeTransitionClass,
         pdpPressableClass,
       )}
@@ -71,9 +70,8 @@ function CategoryRow({
       <span
         className={cn(
           "font-extended block text-[11px] tracking-[0.35px] transition-[color,opacity] duration-200 ease-out",
-          category.showCommunityCount && "tabular-nums",
           chromeTransitionClass,
-          active ? "text-white opacity-100" : "text-white/40",
+          active ? "text-neutral-900 opacity-100" : "text-neutral-500",
         )}
       >
         {label}
@@ -210,7 +208,10 @@ export function PdpHeroGalleryCategoryRail({
         aria-label={expanded ? "Close gallery sections" : "Explore gallery sections"}
         onClick={() => setExpanded((open) => !open)}
         className={cn(
-          PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS,
+          "flex size-11 shrink-0 items-center justify-center rounded-none",
+          expanded
+            ? "bg-white shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+            : PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS,
           chromeTransitionClass,
           pdpPressableClass,
         )}
@@ -218,7 +219,10 @@ export function PdpHeroGalleryCategoryRail({
         <MaterialIcon
           name={expanded ? "close" : "apps"}
           size={PDP_HERO_GALLERY_CONTROL_ICON_SIZE}
-          className={cn("text-white", chromeTransitionClass)}
+          className={cn(
+            expanded ? "text-neutral-900" : "text-white",
+            chromeTransitionClass,
+          )}
         />
       </button>
 
@@ -227,8 +231,7 @@ export function PdpHeroGalleryCategoryRail({
           id="pdp-hero-gallery-category-menu"
           aria-label="Gallery categories"
           className={cn(
-            "pdp-pop-up flex min-w-[11.5rem] flex-col rounded-none py-0.5",
-            PDP_HERO_GALLERY_CONTROL_SHELL_CLASS,
+            "pdp-pop-up flex min-w-[11.5rem] flex-col rounded-none bg-white py-0.5 shadow-[0_4px_20px_rgba(0,0,0,0.12)]",
             chromeTransitionClass,
           )}
           data-state={menu.state}

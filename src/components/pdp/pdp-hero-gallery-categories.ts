@@ -10,12 +10,7 @@ export type PdpHeroGalleryCategoryDef = {
   label: string;
   /** Scroll to the first matching slide, or invoke AR when `id === "ar"`. */
   action: "scroll" | "ar";
-  /** When true, label appends the community catalog count — e.g. Community (42). */
-  showCommunityCount?: boolean;
 };
-
-/** Total community posts surfaced in wayfinding — compact rail label. */
-const PDP_HERO_GALLERY_COMMUNITY_COUNT = 42;
 
 export const PDP_HERO_GALLERY_CATEGORIES: PdpHeroGalleryCategoryDef[] = [
   { id: "product-photos", label: "Product Photos", action: "scroll" },
@@ -23,22 +18,12 @@ export const PDP_HERO_GALLERY_CATEGORIES: PdpHeroGalleryCategoryDef[] = [
   { id: "fits-inside", label: "What's Inside", action: "scroll" },
   { id: "360", label: "360°", action: "scroll" },
   { id: "ar", label: "AR", action: "ar" },
-  {
-    id: "ugc",
-    label: "Community",
-    action: "scroll",
-    showCommunityCount: true,
-  },
+  { id: "ugc", label: "Community", action: "scroll" },
 ];
 
 export function formatHeroGalleryCategoryLabel(
   category: PdpHeroGalleryCategoryDef,
-  communityCount = PDP_HERO_GALLERY_COMMUNITY_COUNT,
 ): string {
-  if (category.showCommunityCount) {
-    return `${category.label} (${communityCount})`;
-  }
-
   return category.label;
 }
 

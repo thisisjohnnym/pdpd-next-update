@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 import { useActiveProduct } from "../pdp-active-product-context";
 import { PdpBuyBarRow } from "../pdp-buy-bar-row";
+import { PdpBuyBarCompactColor } from "../pdp-buy-bar-compact-color";
 import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swatches";
 import { PdpHeroShell } from "../pdp-hero-shell";
@@ -46,7 +47,7 @@ export function PdpV3HeroLayout({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches } =
+  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots } =
     getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
@@ -68,26 +69,37 @@ export function PdpV3HeroLayout({
             inlineBuyBarColorSwatches && "border-0",
           )}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="font-extended flex min-w-0 flex-col text-neutral-900">
-              <p className={cn(pdpProductTitleClass, "min-w-0 truncate text-base leading-[115%]")}>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-4">
+              <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate text-base leading-none")}>
                 {summary.name}
               </p>
+              <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
+                {summary.price}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
               <p
                 className={cn(
                   pdpProductTitleClass,
-                  "min-w-0 truncate leading-[115%]",
+                  "min-w-0 flex-1 truncate leading-none",
                   heroMaterialSubtitleLine
-                    ? cn(pdpType.label, "mt-1 text-neutral-500")
+                    ? cn(pdpType.label, "text-neutral-500")
                     : "text-xs text-neutral-900",
                 )}
               >
                 {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
               </p>
+              {useCompactBuyBarColorDots ? (
+                <PdpBuyBarCompactColor
+                  selectedColorId={selectedColorId}
+                  onColorSelect={onColorSelect}
+                  onColorSheetOpenChange={onColorSheetOpenChange}
+                  className="shrink-0"
+                />
+              ) : null}
             </div>
-            <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
-              {summary.price}
-            </p>
           </div>
 
           <PdpBuyBarRow
@@ -105,7 +117,7 @@ export function PdpV3HeroLayout({
         <div ref={sentinelRef} aria-hidden className="h-0 w-full shrink-0 overflow-hidden" />
       </PdpHeroShell>
 
-      {inlineBuyBarColorSwatches ? (
+      {inlineBuyBarColorSwatches && !useCompactBuyBarColorDots ? (
         <PdpHeroBelowFoldColorSwatches
           selectedColorId={selectedColorId}
           onColorSelect={onColorSelect}

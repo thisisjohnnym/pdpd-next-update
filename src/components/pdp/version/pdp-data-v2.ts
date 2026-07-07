@@ -1,5 +1,8 @@
 import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
-import type { PdpHeroGallerySlide } from "../pdp-hero-gallery-data";
+import type {
+  PdpHeroGallerySlide,
+  PdpHeroSurface,
+} from "../pdp-hero-gallery-data";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -297,6 +300,8 @@ export type PdpUgcTestimonial = {
   socialHref: string;
   topicId: PdpUgcWildTopicId;
   videoSrc?: string;
+  /** Nav contrast when promoted into the hero carousel (`dark` → white chrome). */
+  heroHeaderSurface?: PdpHeroSurface;
 };
 
 // fallow-ignore-next-line unused-export
@@ -313,6 +318,7 @@ export const PDP_UGC_TESTIMONIALS = [
     socialHandle: "@jordanl.style",
     socialHref: "https://www.instagram.com/coach/",
     topicId: "weekend",
+    heroHeaderSurface: "dark",
   },
   {
     id: "testimonial-city-commute",
@@ -460,6 +466,8 @@ export const HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS = [
 function ugcTestimonialToHeroSlide(
   testimonial: PdpUgcTestimonial,
 ): PdpHeroGallerySlide {
+  const headerSurface = testimonial.heroHeaderSurface ?? "light";
+
   if (testimonial.videoSrc) {
     return {
       kind: "video",
@@ -467,7 +475,7 @@ function ugcTestimonialToHeroSlide(
       poster: testimonial.src,
       alt: testimonial.alt,
       shotType: "lifestyle",
-      headerSurface: "light",
+      headerSurface,
       galleryCategory: "ugc",
     };
   }
@@ -477,7 +485,7 @@ function ugcTestimonialToHeroSlide(
     src: testimonial.src,
     alt: testimonial.alt,
     shotType: "on-model",
-    headerSurface: "light",
+    headerSurface,
     galleryCategory: "ugc",
   };
 }
@@ -691,12 +699,14 @@ export const PDP_CRAFTED_TO_LAST_VIDEO = {
   alt: "Crafted to last — Coach glovetanned leather craftsmanship",
 } as const;
 
-/** v5 editorial quote card — 9:16 blush panel with celebrity pull quote */
+/** v5 editorial quote card — 9:16 photo + blush pull quote */
 export const PDP_V5_EDITORIAL_QUOTE = {
-  eyebrow: "Why PinkPantheress loves it",
+  eyebrow: "Why PinkPantheress loves\u00a0it",
   quote:
     "I wanted a bag that feels effortless on the street, but still pulls a look together in one grab—Tabby does both.",
   attribution: "PinkPantheress",
+  src: "/images/editorial/pinkpantheress-tabby.png",
+  alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
 } as const;
 
 export const PDP_WAYS_TO_WEAR_SECTION = {

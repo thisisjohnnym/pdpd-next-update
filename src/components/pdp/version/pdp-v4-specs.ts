@@ -17,6 +17,39 @@ export const PDP_V4_DETAILS_SECTION = {
 /** v5 Details module headline — Paper node 407:399. */
 export const PDP_V5_DETAILS_HEADLINE = "Signature Details";
 
+/** v5 Signature Details — technical dimension sketches (swipeable front / side / strap). */
+export type PdpV5DetailsSketchSlide = {
+  id: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export const PDP_V5_DETAILS_SKETCHES = [
+  {
+    id: "front",
+    src: "/images/details/tabby-dimension-sketch.jpg",
+    alt: "Front view technical drawing of the Tabby Shoulder Bag 26 showing 26 cm width and 14 cm height",
+    width: 819,
+    height: 1024,
+  },
+  {
+    id: "side",
+    src: "/images/details/tabby-dimension-sketch-side.jpg",
+    alt: "Side view technical drawing of the Tabby Shoulder Bag 26 showing 14 cm height and 7 cm depth",
+    width: 857,
+    height: 1024,
+  },
+  {
+    id: "strap",
+    src: "/images/details/tabby-dimension-sketch-strap.jpg",
+    alt: "Technical drawing of the Tabby Shoulder Bag 26 shoulder strap showing a 22 inch drop",
+    width: 1024,
+    height: 874,
+  },
+] satisfies PdpV5DetailsSketchSlide[];
+
 /**
  * v4-only Details facts (Paper r5 `LD6-0`).
  *

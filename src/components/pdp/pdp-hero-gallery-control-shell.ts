@@ -1,5 +1,5 @@
 /** Shared frost shell — hero video pill controls + gallery category rail. */
-export const PDP_HERO_GALLERY_CONTROL_SHELL_CLASS =
+const PDP_HERO_GALLERY_CONTROL_SHELL_CLASS =
   "pdp-frost-dark ring-1 ring-inset ring-white/20";
 
 /** Horizontal video control pill (pause + mute) — py-2 + size-7 icons = 44px tall. */
