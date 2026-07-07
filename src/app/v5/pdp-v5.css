@@ -79,11 +79,6 @@
   border-bottom-width: 0;
 }
 
-/* Add / Quick add pill — borderless on v5 (leather care upsell, bag sheet, etc.) */
-[data-pdp-version="v5"] .pdp-stroke-cta {
-  border: 0;
-}
-
 /* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */
 [data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
   background-color: #efeae7;
