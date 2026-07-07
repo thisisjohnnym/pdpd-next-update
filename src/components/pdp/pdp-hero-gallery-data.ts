@@ -116,8 +116,8 @@ export function applyV4HeroGallery(
   ];
 }
 
-/** v5 hero land — 360° product spin. */
-export const HERO_GALLERY_V5_LEAD_SRC = "/videos/tabby26-spin.mp4";
+/** v5 hero land — on-model lifestyle video (white nav, cinematic open). */
+export const HERO_GALLERY_V5_LEAD_SRC = PDP_GALLERY_IMMERSIVE_HERO_VIDEO;
 
 /** Move a slide to index 0 without mutating the frozen source array. */
 export function promoteHeroGallerySlideToLead(

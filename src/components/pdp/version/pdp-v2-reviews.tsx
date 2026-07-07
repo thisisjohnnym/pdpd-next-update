@@ -35,8 +35,8 @@ import { usePdpVersion } from "./pdp-version-context";
  * v2-only simplified reviews section (Paper AYJ-0 "v2 — Reviews (reviews only)").
  *
  * v2: heading + aggregate stars + AI summary card + clipped review cards + CTAs.
- * v4: "What owners say" — rating, review highlights, UGC evidence, one
- * light pull-quote, then Read all reviews (depth lives in the tray).
+ * v4: "What owners say" — rating, UGC photo rail, compact highlights, then
+ * Read all reviews (depth lives in the tray).
  *
  * No tabs, no comments, no like buttons — those are off in v2 via version config.
  */
@@ -65,14 +65,6 @@ type PdpV2ReviewsProps = {
   onReadAll?: () => void;
   onWriteReview?: () => void;
 };
-
-function V4SectionLabel({ children }: { children: string }) {
-  return (
-    <p className="font-sans m-0 text-[11px] leading-[14px] tracking-[0.06em] text-neutral-600 uppercase">
-      {children}
-    </p>
-  );
-}
 
 function ReviewUgcMomentCard({
   photo,
@@ -125,7 +117,7 @@ function ReviewUgcMomentsRail() {
         )}
         aria-label="Real customer moments"
       >
-        {PDP_UGC_COMMUNITY_PHOTOS.slice(0, 4).map((photo) => (
+        {PDP_UGC_COMMUNITY_PHOTOS.map((photo) => (
           <ReviewUgcMomentCard
             key={photo.id}
             photo={photo}
@@ -146,7 +138,7 @@ function V4ReviewSummary({
   const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
   const { headline, reviewHighlights } = PDP_V4_REVIEWS_SUMMARY;
   const { body: aiBody, attribution: aiAttribution } = PDP_REVIEWS_AI_SUMMARY;
-  const { useConsistentModuleHeadings, squareButtonCorners } =
+  const { useConsistentModuleHeadings, squareButtonCorners, showReviewHighlightTags } =
     getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
@@ -205,13 +197,23 @@ function V4ReviewSummary({
           />
         </PdpRevealItem>
 
-        {/* Review highlights */}
+        {/* Customer photo rail — primary evidence */}
         <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
-          <div className="flex flex-col gap-2">
-            <V4SectionLabel>Review highlights</V4SectionLabel>
-            <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          <ReviewUgcMomentsRail />
+        </PdpRevealItem>
+
+        {/* Compact review highlights — secondary to photos */}
+        {showReviewHighlightTags ? (
+          <PdpRevealItem delay={revealStaggerDelay(4)} className="w-full">
+            <ul
+              className={cn(
+                "m-0 flex list-none flex-wrap gap-x-4 gap-y-1.5 p-0",
+                leftAlignModuleHeadings ? "justify-start" : "justify-center",
+              )}
+              aria-label="Review highlights"
+            >
               {reviewHighlights.map((item) => (
-                <li key={item} className="flex items-center gap-2">
+                <li key={item} className="flex items-center gap-1.5">
                   <MaterialIcon
                     name="check"
                     size={14}
@@ -220,9 +222,8 @@ function V4ReviewSummary({
                   />
                   <span
                     className={cn(
-                      useConsistentModuleHeadings
-                        ? cn(pdpType.body, "text-neutral-800")
-                        : "font-extended text-[13px] leading-[1.35] tracking-[0.2px] text-neutral-800",
+                      pdpType.micro,
+                      "text-neutral-600",
                     )}
                   >
                     {item}
@@ -230,13 +231,8 @@ function V4ReviewSummary({
                 </li>
               ))}
             </ul>
-          </div>
-        </PdpRevealItem>
-
-        {/* Customer photo rail — no section label */}
-        <PdpRevealItem delay={revealStaggerDelay(4)} className="w-full">
-          <ReviewUgcMomentsRail />
-        </PdpRevealItem>
+          </PdpRevealItem>
+        ) : null}
 
       </div>
 

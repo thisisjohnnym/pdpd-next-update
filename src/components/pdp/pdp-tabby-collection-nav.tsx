@@ -10,13 +10,15 @@ import { cn } from "@/lib/cn";
 import { pdpCarouselScrollClass } from "./pdp-carousel";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { useTabbyVariant } from "./pdp-tabby-variant-context";
-import { tabbyProductPath } from "./pdp-tabby-variants";
+import { versionedProductPath } from "./pdp-product-routes";
 import { pdpPressableClass, pdpType } from "./pdp-type";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 /** Family navigation — explore Tabby styles and sizes near the top of the PDP */
 // fallow-ignore-next-line complexity
 export function PdpTabbyCollectionNav() {
   const router = useRouter();
+  const version = usePdpVersion();
   const { slug, collectionItems } = useTabbyVariant();
 
   return (
@@ -42,7 +44,13 @@ export function PdpTabbyCollectionNav() {
                   <button
                     key={item.slug}
                     type="button"
-                    onClick={() => router.push(tabbyProductPath(item.slug))}
+                    onClick={() =>
+                      router.push(
+                        versionedProductPath(version, "tabby", {
+                          tabbySlug: item.slug,
+                        }),
+                      )
+                    }
                     aria-current={isActive ? "true" : undefined}
                     className={cn(
                       "flex w-[9.5rem] shrink-0 flex-col overflow-hidden rounded-xl border text-left transition-colors",

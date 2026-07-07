@@ -13,10 +13,12 @@ export function PdpUgcTopicToggle({
   value,
   onChange,
   className,
+  tone = "light",
 }: {
   value: PdpUgcWildTopicId;
   onChange: (topicId: PdpUgcWildTopicId) => void;
   className?: string;
+  tone?: "light" | "dark";
 }) {
   return (
     <div
@@ -37,9 +39,13 @@ export function PdpUgcTopicToggle({
             className={cn(
               "font-extended m-0 border-0 bg-transparent p-0 transition-colors",
               pdpType.label,
-              active
-                ? "text-black underline decoration-black underline-offset-[3px]"
-                : "text-neutral-400 active:text-neutral-600",
+              tone === "dark"
+                ? active
+                  ? "text-white underline decoration-white underline-offset-[3px]"
+                  : "text-white/50 active:text-white/75"
+                : active
+                  ? "text-black underline decoration-black underline-offset-[3px]"
+                  : "text-neutral-400 active:text-neutral-600",
             )}
           >
             {topic.label}

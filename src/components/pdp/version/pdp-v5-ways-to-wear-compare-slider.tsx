@@ -185,35 +185,11 @@ export function PdpV5WaysToWearCompareSlider({
         >
           <div className="absolute top-1/2 left-1/2 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.12)]">
             <MaterialIcon
-              name="code"
+              name="drag_indicator"
               size={18}
-              className="rotate-90 text-neutral-700"
+              className="text-neutral-700"
             />
           </div>
-        </div>
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] flex justify-between bg-gradient-to-t from-black/45 to-transparent px-3 pb-2.5 pt-8"
-        >
-          <span
-            className={cn(
-              pdpType.micro,
-              "font-extended text-white transition-opacity duration-200",
-              position >= 50 ? "opacity-100" : "opacity-55",
-            )}
-          >
-            {shoulder.label}
-          </span>
-          <span
-            className={cn(
-              pdpType.micro,
-              "font-extended text-white transition-opacity duration-200",
-              position < 50 ? "opacity-100" : "opacity-55",
-            )}
-          >
-            {crossbody.label}
-          </span>
         </div>
       </div>
 

@@ -252,7 +252,7 @@ export function PdpGalleryHeroVideo({
           poster={poster}
           fitClass={posterFitClass}
           objectPosition={posterObjectPosition}
-          visible={!videoFrameVisible}
+          visible={showBlurReveal ? !videoFrameVisible : !isPlaying}
         />
       ) : null}
 

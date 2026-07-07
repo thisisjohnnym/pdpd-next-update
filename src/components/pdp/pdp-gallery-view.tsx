@@ -711,45 +711,54 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: Feel → Out in the wild → Details → Up close → Aging.
-          // v2/v3: Details only at slide 0.
+          // v5: Feel → Details → What customers are saying → Up close → Aging.
+          // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
-              ? [
-                  ...(versionConfig.useV4CompactUgcStrip
+              ? (() => {
+                  const ugcWildStrip: ReactNode[] = versionConfig.useV4CompactUgcStrip
                     ? [
                         <PdpScrollReveal
                           key={`ugc-wild-strip-${index}`}
                           className={ECOMM_MODULE_CLASS}
-                          surface="light"
+                          surface={
+                            versionConfig.useV5UgcTestimonialCarousel ? "dark" : "light"
+                          }
                         >
-                          <PdpV2UgcCommunity />
+                          <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />
                         </PdpScrollReveal>,
                       ]
-                    : []),
-                  <ChapterAnchor
-                    key={`anchor-the-details-${index}`}
-                    id="the-details"
-                  />,
-                  <PdpScrollReveal
-                    key={`product-details-${index}`}
-                    className={ECOMM_MODULE_CLASS}
-                    surface="light"
-                  >
-                    <PdpProductDetailsModule
-                      showHeading={versionConfig.showDetailsHeading}
-                      useV4Specs={versionConfig.useV4Specs}
-                      useV4Spacing={versionConfig.useV4ModuleSpacing}
-                      useV4DetailsTileCarousel={
-                        versionConfig.useV4DetailsTileCarousel
-                      }
-                      showCloserLook={versionConfig.showDetailsCloserLook}
-                      leftAlignModuleHeadings={
-                        versionConfig.leftAlignModuleHeadings
-                      }
-                    />
-                  </PdpScrollReveal>,
-                ]
+                    : [];
+
+                  const detailsModule: ReactNode[] = [
+                    <ChapterAnchor
+                      key={`anchor-the-details-${index}`}
+                      id="the-details"
+                    />,
+                    <PdpScrollReveal
+                      key={`product-details-${index}`}
+                      className={ECOMM_MODULE_CLASS}
+                      surface="light"
+                    >
+                      <PdpProductDetailsModule
+                        showHeading={versionConfig.showDetailsHeading}
+                        useV4Specs={versionConfig.useV4Specs}
+                        useV4Spacing={versionConfig.useV4ModuleSpacing}
+                        useV4DetailsTileCarousel={
+                          versionConfig.useV4DetailsTileCarousel
+                        }
+                        showCloserLook={versionConfig.showDetailsCloserLook}
+                        leftAlignModuleHeadings={
+                          versionConfig.leftAlignModuleHeadings
+                        }
+                      />
+                    </PdpScrollReveal>,
+                  ];
+
+                  return versionConfig.useV5UgcTestimonialCarousel
+                    ? [...detailsModule, ...ugcWildStrip]
+                    : [...ugcWildStrip, ...detailsModule];
+                })()
               : [];
 
           // fallow-ignore-next-line complexity
@@ -910,7 +919,7 @@ export function PdpGalleryView({
             return [
               gallerySection(
                 `ugc-community-${index}`,
-                <PdpV2UgcCommunity />,
+                <PdpV2UgcCommunity onReadAllReviews={onReadAllReviews} />,
                 { surface: "light" },
               ),
             ];

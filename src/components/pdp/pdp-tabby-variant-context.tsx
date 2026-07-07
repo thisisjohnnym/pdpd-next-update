@@ -13,6 +13,7 @@ import {
 
 import { pdpColorIsSelectable } from "./pdp-data";
 import { useActiveProduct } from "./pdp-active-product-context";
+import { replaceTabbyBrowserUrl } from "./pdp-product-routes";
 import {
   getSizeAvailabilityForStyle,
   resolveTabbySelection,
@@ -33,12 +34,12 @@ import {
   getTabbySku,
   getTabbyStyle,
   parseTabbySlug,
-  replaceTabbyBrowserUrl,
   type TabbySize,
   type TabbySku,
   type TabbyStyle,
   type TabbyStyleId,
 } from "./pdp-tabby-variants";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 type TabbySizeOptionAvailability = {
   option: ReturnType<typeof getTabbySizeOption>;
@@ -101,6 +102,7 @@ export function TabbyVariantProvider({
 }) {
   const searchParams = useSearchParams();
   const { productId: activeProductId } = useActiveProduct();
+  const version = usePdpVersion();
   const [slug, setSlug] = useState(() => resolveInitialSlug(initialSlug));
 
   const parsed = parseTabbySlug(slug);
@@ -146,9 +148,9 @@ export function TabbyVariantProvider({
 
     if (resolved.slug !== slug) {
       setSlug(resolved.slug);
-      replaceTabbyBrowserUrl(resolved.slug, resolved.colorId);
+      replaceTabbyBrowserUrl(version, resolved.slug, resolved.colorId);
     }
-  }, [activeProductId, selectedColorId, slug]);
+  }, [activeProductId, selectedColorId, slug, version]);
 
   const paramColor = searchParams.get("color");
 
@@ -190,10 +192,10 @@ export function TabbyVariantProvider({
       setSlug(resolved.slug);
       setSelectedColorIdState(resolved.colorId);
       if (activeProductId === "tabby") {
-        replaceTabbyBrowserUrl(resolved.slug, resolved.colorId);
+        replaceTabbyBrowserUrl(version, resolved.slug, resolved.colorId);
       }
     },
-    [activeProductId],
+    [activeProductId, version],
   );
 
   const setSelectedColorId = useCallback(
@@ -205,10 +207,10 @@ export function TabbyVariantProvider({
 
       setSelectedColorIdState(colorId);
       if (activeProductId === "tabby") {
-        replaceTabbyBrowserUrl(slug, colorId);
+        replaceTabbyBrowserUrl(version, slug, colorId);
       }
     },
-    [activeProductId, colorOptions, slug],
+    [activeProductId, colorOptions, slug, version],
   );
 
   const selectColorAtSize = useCallback(

@@ -112,6 +112,7 @@ export function PdpOverlayHeader({
 
       <button
         type="button"
+        data-pdp-header-action="bag"
         aria-label={
           bagCount > 0
             ? `Shopping bag, ${bagCount} item${bagCount === 1 ? "" : "s"}`

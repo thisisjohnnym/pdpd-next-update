@@ -5,15 +5,21 @@ import { cn } from "@/lib/cn";
 
 import { PDP_PAY_OVER_TIME } from "./pdp-data";
 import { pdpPressableClass, pdpType } from "./pdp-type";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 /** Afterpay row — quiet inline link below colors or in the add-to-bag tray */
 export function PdpPayOverTimeCard({ embedded = false }: { embedded?: boolean }) {
   const { icon, amount, body } = PDP_PAY_OVER_TIME;
+  const { hidePayOverTimeCreditNote } = getPdpVersionConfig(usePdpVersion());
+  const displayBody = hidePayOverTimeCreditNote
+    ? "Pay over time with Afterpay."
+    : body;
 
   return (
     <button
       type="button"
-      aria-label={`${amount}. ${body}`}
+      aria-label={`${amount}. ${displayBody}`}
       className={cn(
         "flex w-full items-center gap-2.5 bg-transparent text-left",
         embedded ? "py-2" : "py-2.5",
@@ -34,7 +40,7 @@ export function PdpPayOverTimeCard({ embedded = false }: { embedded?: boolean })
         >
           {amount}
         </span>
-        <span className={cn(pdpType.micro, "text-neutral-400")}>{body}</span>
+        <span className={cn(pdpType.micro, "text-neutral-400")}>{displayBody}</span>
       </span>
       <MaterialIcon
         name="chevron_right"

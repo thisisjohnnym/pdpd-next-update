@@ -3,9 +3,11 @@
 import { cn } from "@/lib/cn";
 
 import { PdpHeroGalleryIndicator } from "../pdp-hero-gallery-indicator";
+import { usePdpHeroGallery } from "../pdp-hero-gallery-context";
 import { isHeroUiChromeVisible, useHeroUiChrome } from "../use-hero-ui-chrome";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpHeroFitsInsideButton } from "./pdp-hero-fits-inside-button";
 import { PdpV3ArButton } from "./pdp-v3-ar-button";
 
 /**
@@ -23,7 +25,12 @@ export function PdpV3GalleryOverlay({
 }) {
   const { opacity } = useHeroUiChrome();
   const visible = isHeroUiChromeVisible(opacity);
-  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+  const { useV4ModuleSpacing, showHeroFitsInsideCta } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
+  const { overlayCta } = usePdpHeroGallery();
+  const showFitsInside =
+    showHeroFitsInsideCta && overlayCta === "fits-inside";
 
   return (
     <div
@@ -37,7 +44,8 @@ export function PdpV3GalleryOverlay({
       <div className={cn("pointer-events-none", !useV4ModuleSpacing && "pl-2")}>
         <PdpHeroGalleryIndicator />
       </div>
-      <div className="pointer-events-none flex shrink-0 flex-col items-center">
+      <div className="pointer-events-none flex shrink-0 flex-col items-center gap-5">
+        {showFitsInside ? <PdpHeroFitsInsideButton /> : null}
         <PdpV3ArButton onOpenArTryOn={onOpenArTryOn} />
       </div>
     </div>

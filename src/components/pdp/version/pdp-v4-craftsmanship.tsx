@@ -44,7 +44,7 @@ function CraftsmanshipCard({
       id={anchorId}
       delay={revealStaggerDelay(index)}
       className={cn(
-        "flex w-[335px] shrink-0 snap-start snap-always flex-col gap-3",
+        "pdp-craftsmanship-card flex w-[335px] shrink-0 snap-start snap-always flex-col gap-3",
         className,
       )}
     >
@@ -76,11 +76,11 @@ export function PdpV4Craftsmanship() {
   return (
     <section
       data-header-surface="light"
-      className="w-full shrink-0 overflow-x-clip bg-white pt-6 pb-6"
+      className="pdp-craftsmanship w-full shrink-0 overflow-x-clip bg-white pt-6 pb-6"
     >
       <div
         className={cn(
-          "mb-5 flex flex-col gap-3 px-4",
+          "pdp-craftsmanship-header mb-5 flex flex-col gap-3 px-4",
           leftAlignModuleHeadings ? "items-start" : "items-center text-center",
         )}
       >
@@ -101,14 +101,15 @@ export function PdpV4Craftsmanship() {
         </PdpTextReveal>
       </div>
 
-      <div className={pdpCarouselScrollWrapClass}>
+      <div className={cn("pdp-craftsmanship-rail", pdpCarouselScrollWrapClass)}>
         <div
           ref={scrollRef}
           className={cn(
+            "pdp-craftsmanship-track",
             pdpCarouselScrollClass,
             "pdp-carousel-draggable flex items-start gap-4 pl-4 pb-2",
           )}
-          aria-label="Up close material highlights"
+          aria-label="Up close and personal material highlights"
         >
           {PDP_CRAFTSMANSHIP_V4_CARDS.map((card, index) => (
             <CraftsmanshipCard

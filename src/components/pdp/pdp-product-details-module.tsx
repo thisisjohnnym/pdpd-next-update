@@ -143,7 +143,7 @@ function SpecListV4({
   let staggerIndex = 0;
 
   return (
-    <div className="grid grid-cols-2 border-y border-neutral-200">
+    <div className="grid grid-cols-2">
       {specs.map((spec, index) => {
         const delay = revealStaggerDelay(staggerIndex);
         staggerIndex += 1;

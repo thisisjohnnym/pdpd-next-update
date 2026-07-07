@@ -1,10 +1,5 @@
-/** v4-only "What owners say" preview — scannable highlights before the full reviews tray. */
+/** v4-only "What owners say" preview — light highlights; photos carry the story. */
 export const PDP_V4_REVIEWS_SUMMARY = {
   headline: "What owners say",
-  reviewHighlights: [
-    "Premium leather",
-    "Comfortable crossbody",
-    "Fits everyday essentials",
-    "True to photos",
-  ],
+  reviewHighlights: ["Premium leather", "True to photos"],
 } as const;

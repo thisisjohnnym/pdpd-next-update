@@ -40,6 +40,7 @@ import { useHeroUiChromeVars } from "./use-hero-ui-chrome";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { PdpV3HeroLayout } from "./version/pdp-v3-hero-layout";
+import { PdpV5DesktopHeroSplit } from "./version/pdp-v5-desktop-hero-split";
 import { useHeroBuyBarVisibility } from "./version/use-hero-buy-bar-visibility";
 
 type BagConfirmation =
@@ -127,8 +128,13 @@ function PdpSocialViewInner() {
   };
 
   const versionConfig = getPdpVersionConfig(usePdpVersion());
-  const { showReviewComments, heroScrollsWithPage, floatingBuyBarWhenHeroHidden } =
-    versionConfig;
+  const {
+    showReviewComments,
+    heroScrollsWithPage,
+    floatingBuyBarWhenHeroHidden,
+    showFloatingBuyBar,
+    desktopSplitLayout,
+  } = versionConfig;
 
   const tabbyColorHero =
     !versionConfig.lockHeroGalleryTemplate &&
@@ -187,7 +193,7 @@ function PdpSocialViewInner() {
     heroSentinelRef,
     floatingBuyBarWhenHeroHidden,
   );
-  const showFloatingBuyBar = floatingBuyBarWhenHeroHidden
+  const floatingBuyBarVisible = floatingBuyBarWhenHeroHidden
     ? heroScrolledAway
     : true;
   const useV3Hero =
@@ -214,14 +220,25 @@ function PdpSocialViewInner() {
           onOpenReviews={() => openReviews("comments")}
         />
       ) : useV3Hero ? (
-        <PdpV3HeroLayout
-          selectedColorId={activeColorId}
-          onColorSelect={setSelectedColorId}
-          onAddToBag={handleAddToBag}
-          onOpenReviews={() => openReviews("comments")}
-          onOpenArTryOn={() => setArTryOnOpen(true)}
-          sentinelRef={heroSentinelRef}
-        />
+        <>
+          <div className={desktopSplitLayout ? "lg:hidden" : undefined}>
+            <PdpV3HeroLayout
+              selectedColorId={activeColorId}
+              onColorSelect={setSelectedColorId}
+              onAddToBag={handleAddToBag}
+              onOpenReviews={() => openReviews("comments")}
+              onOpenArTryOn={() => setArTryOnOpen(true)}
+              sentinelRef={heroSentinelRef}
+            />
+          </div>
+          {desktopSplitLayout ? (
+            <PdpV5DesktopHeroSplit
+              selectedColorId={activeColorId}
+              onColorSelect={setSelectedColorId}
+              onAddToBag={handleAddToBag}
+            />
+          ) : null}
+        </>
       ) : showBrandBar && product.hero.kind === "video" ? (
         <PdpHeroShell>
           <PdpGalleryHero
@@ -279,12 +296,14 @@ function PdpSocialViewInner() {
           />
         )}
       </SafeAreaMain>
-      <PdpBottomActions
-        selectedColorId={activeColorId}
-        onColorSelect={setSelectedColorId}
-        onAddToBag={handleAddToBag}
-        suppressed={chromeSuppressed || !showFloatingBuyBar}
-      />
+      {showFloatingBuyBar ? (
+        <PdpBottomActions
+          selectedColorId={activeColorId}
+          onColorSelect={setSelectedColorId}
+          onAddToBag={handleAddToBag}
+          suppressed={chromeSuppressed || !floatingBuyBarVisible}
+        />
+      ) : null}
       <PdpNavMenu open={navOpen} onClose={() => setNavOpen(false)} />
       <PdpReviewsSheet
         open={reviewsOpen}
@@ -318,6 +337,7 @@ function PdpSocialViewInner() {
       className={cn(
         "relative min-h-svh w-full overflow-x-clip",
         isStaticHero || isColorHero ? "bg-white" : "bg-black",
+        desktopSplitLayout && "pdp-v5-page-root",
       )}
     >
       {showBrandBar ? (

@@ -10,6 +10,7 @@
  *   3. import guard     — a route folder must not import a higher version's *-vN modules
  *                        (v1 → no v2/v3/v4/v5; v2 → no v3/v4/v5; v3 → no v4/v5; v4 → no v5)
  *   4. provider guard   — v1..v5 routes each pass their own version="vN"
+ *   5. routes guard     — Tabby browser URL sync preserves /vN prefix on version home routes
  *
  * Exit code 0 = clean, 1 = one or more violations.
  */
@@ -182,10 +183,75 @@ function checkRouteVersionProps() {
   }
 }
 
+// ── Guard 5: version-aware Tabby browser URLs ────────────────────────────────
+function checkTabbyBrowserUrls() {
+  const routesSrc = read(join(ROOT, "src/components/pdp/pdp-product-routes.ts"));
+  const variantsSrc = read(join(ROOT, "src/components/pdp/pdp-tabby-variants.ts"));
+
+  if (variantsSrc?.includes("export function replaceTabbyBrowserUrl")) {
+    fail(
+      "routes",
+      "pdp-tabby-variants.ts still exports replaceTabbyBrowserUrl — move version-aware URL sync to pdp-product-routes.ts.",
+    );
+  }
+
+  if (!routesSrc?.includes("export function tabbyBrowserUrl")) {
+    fail("routes", "pdp-product-routes.ts is missing tabbyBrowserUrl.");
+    return;
+  }
+
+  function pdpVersionPrefix(version) {
+    return version === "v1" ? "" : `/${version}`;
+  }
+
+  function isPdpVersionHomePathname(pathname, version) {
+    const home = pdpVersionPrefix(version) || "/";
+    if (pathname.includes("/products/")) return false;
+    return pathname === home || pathname === `${home}/`;
+  }
+
+  function versionedProductPath(version, slug, colorId) {
+    const base = `/products/${slug}`;
+    const path = colorId ? `${base}?color=${encodeURIComponent(colorId)}` : base;
+    if (version === "v1") return path;
+    return `${pdpVersionPrefix(version)}${path}`;
+  }
+
+  function tabbyBrowserUrl(version, slug, colorId, pathname) {
+    const query = colorId ? `?color=${encodeURIComponent(colorId)}` : "";
+    if (isPdpVersionHomePathname(pathname, version)) {
+      const home = pdpVersionPrefix(version) || "/";
+      return `${home}${query}`;
+    }
+    return versionedProductPath(version, slug, colorId);
+  }
+
+  const slug = "tabby-shoulder-bag-26-quilted";
+  const cases = [
+    [tabbyBrowserUrl("v5", slug, "brass-black", "/v5"), "/v5?color=brass-black"],
+    [
+      tabbyBrowserUrl("v5", slug, "brass-black", "/v5/products/tabby-shoulder-bag-26-quilted"),
+      "/v5/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+    [tabbyBrowserUrl("v1", slug, "brass-black", "/"), "/?color=brass-black"],
+    [
+      tabbyBrowserUrl("v1", slug, "brass-black", "/products/tabby-shoulder-bag-26-quilted"),
+      "/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+  ];
+
+  for (const [actual, expected] of cases) {
+    if (actual !== expected) {
+      fail("routes", `tabbyBrowserUrl expected ${expected}, got ${actual}.`);
+    }
+  }
+}
+
 checkFrozenV1Data();
 checkCssScoping();
 checkVersionImports();
 checkRouteVersionProps();
+checkTabbyBrowserUrls();
 
 if (failures.length > 0) {
   console.error("\nPDP version boundary check failed:\n");

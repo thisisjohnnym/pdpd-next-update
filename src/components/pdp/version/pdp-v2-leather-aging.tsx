@@ -279,7 +279,7 @@ function PdpLeatherAgingV4({
         aria-label="Leather aging over time"
         className={cn(
           "relative -my-3 flex h-11 cursor-grab touch-none select-none items-center py-3",
-          "[outline:none] focus-visible:[outline:2px_solid_#c3897f] focus-visible:[outline-offset:2px]",
+          "[outline:none] focus-visible:[outline:2px_solid_#1a1a1a] focus-visible:[outline-offset:2px]",
           isDragging && "cursor-grabbing",
         )}
         onPointerDown={handlePointerDown}
@@ -332,7 +332,7 @@ function PdpLeatherAgingV4({
           <span
             aria-hidden
             className={cn(
-              "absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C3897F]",
+              "absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1a1a1a]",
               thumbMotionClass,
             )}
             style={{
@@ -548,7 +548,7 @@ export function PdpV2LeatherAging({
                         className={cn(
                           "rounded-full transition-[width,height,background-color] duration-300 ease-out",
                           active
-                            ? "size-[22px] bg-[#c38980]"
+                            ? "size-[22px] bg-[#1a1a1a]"
                             : "size-3 border-2 border-solid border-black bg-[#eee9e7]",
                         )}
                       />

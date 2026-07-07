@@ -42,9 +42,9 @@ const pdpUgcStoryCardClass =
 export const pdpUgcStoryCardCompactClass =
   "w-[calc((100vw-1.25rem)/1.8)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3)]";
 
-/** Real customer moments — smaller portrait cards (~2.75 across with peek). */
+/** Real customer moments — portrait cards (~2 across with peek). */
 export const pdpReviewUgcMomentCardClass =
-  "w-[calc((100vw-1.25rem)/2.75)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/4.5)]";
+  "w-[calc((100vw-1.25rem)/2)] shrink-0 snap-start snap-always lg:w-[calc((100vw-2.25rem)/3.5)]";
 
 /** v5 Out in the wild + Real customer moments — matches reviews highlight card width. */
 export const pdpUgcWildMomentCardClass = cn(

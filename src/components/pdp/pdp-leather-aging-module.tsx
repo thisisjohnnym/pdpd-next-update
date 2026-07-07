@@ -253,7 +253,7 @@ export function PdpLeatherAgingModule({
                             "rounded-full",
                             dotMotionClass,
                             active
-                              ? "size-[22px] bg-[#c38980]"
+                              ? "size-[22px] bg-[#1a1a1a]"
                               : "size-3 border-2 border-solid border-black bg-white",
                           )}
                         />

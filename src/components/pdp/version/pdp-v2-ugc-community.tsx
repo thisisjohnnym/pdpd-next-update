@@ -38,6 +38,7 @@ import {
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 import { PdpUgcCommunitySheet } from "../pdp-ugc-community-sheet";
+import { PdpV5UgcTestimonials } from "./pdp-v5-ugc-testimonials";
 import { PdpUgcMediaToggle, type UgcMediaMode } from "../pdp-ugc-media-toggle";
 import { PdpUgcTopicToggle } from "../pdp-ugc-topic-toggle";
 import { useReducedMotion } from "../use-reduced-motion";
@@ -675,8 +676,17 @@ function UgcCommunityFull() {
   );
 }
 
-export function PdpV2UgcCommunity() {
-  const { useV4CompactUgcStrip } = getPdpVersionConfig(usePdpVersion());
+export function PdpV2UgcCommunity({
+  onReadAllReviews,
+}: {
+  onReadAllReviews?: () => void;
+} = {}) {
+  const { useV4CompactUgcStrip, useV5UgcTestimonialCarousel } =
+    getPdpVersionConfig(usePdpVersion());
+
+  if (useV4CompactUgcStrip && useV5UgcTestimonialCarousel) {
+    return <PdpV5UgcTestimonials />;
+  }
 
   if (useV4CompactUgcStrip) {
     return <UgcCompactWildStrip />;

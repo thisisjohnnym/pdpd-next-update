@@ -48,7 +48,7 @@ export type PdpCraftsmanshipV4Card = {
 };
 
 export const PDP_CRAFTSMANSHIP_V4_SECTION = {
-  headline: "Up close",
+  headline: "Up close and personal",
   intro:
     "A closer look at the materials, hardware, and construction that define the Tabby.",
 } as const;
@@ -220,7 +220,225 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
     quote: "Anchors the whole look without trying too hard.",
     topicId: "style",
   },
+  {
+    id: "white-tabby-home",
+    src: "/images/reviews/ugc-white-tabby-home.png",
+    alt: "Customer at home with Tabby Shoulder Bag 26 in chalk leather on a sofa",
+    handle: "Emma W.",
+    caption: "At home",
+    quote: "The chalk leather looks even better in natural light.",
+    verified: true,
+    topicId: "weekend",
+  },
+  {
+    id: "katiemcev0y-store",
+    src: "/images/reviews/ugc-katiemcev0y.png",
+    alt: "TikTok creator @katiemcev0y holding multiple Tabby Shoulder Bag 26 colorways in store",
+    handle: "@katiemcev0y",
+    caption: "Picking a color",
+    quote: "Hard to choose just one — the Tabby 26 works in every finish.",
+    verified: true,
+    topicId: "commute",
+  },
+  {
+    id: "itsnani333-compare",
+    src: "/images/reviews/ugc-itsnani333.png",
+    alt: "TikTok creator @itsnani333 comparing Tabby Shoulder Bag 26 and Pillow Tabby",
+    handle: "@itsnani333",
+    caption: "Tabby family compare",
+    quote: "Structured for work days, but I reach for this one on nights out too.",
+    verified: true,
+    topicId: "going-out",
+  },
+  {
+    id: "pink-tabby-stanley",
+    src: "/images/reviews/ugc-pink-tabby-stanley.png",
+    alt: "Customer styling a pink quilted Tabby Shoulder Bag 26 with a Stanley tumbler",
+    handle: "Priya N.",
+    caption: "Desk-to-dinner",
+    quote: "The pink quilted Tabby is my everyday desk-to-dinner bag.",
+    topicId: "style",
+  },
+  {
+    id: "silver-quilted-charm",
+    src: "/images/reviews/ugc-silver-quilted-charm.png",
+    alt: "Customer with silver quilted Tabby Shoulder Bag 26 and cherry bag charm",
+    handle: "Leah S.",
+    caption: "Night out",
+    quote: "Added a cherry charm and it instantly felt dressier.",
+    verified: true,
+    topicId: "going-out",
+  },
 ] satisfies PdpUgcCommunityPhoto[];
+
+/** Editorial testimonial card — quote, attribution, social, and review CTA (v5). */
+export type PdpUgcTestimonial = {
+  id: string;
+  src: string;
+  alt: string;
+  quote: string;
+  authorName: string;
+  productLabel: string;
+  socialPlatform: "instagram" | "tiktok";
+  socialHandle: string;
+  socialHref: string;
+  topicId: PdpUgcWildTopicId;
+  videoSrc?: string;
+};
+
+// fallow-ignore-next-line unused-export
+export const PDP_UGC_TESTIMONIALS = [
+  {
+    id: "testimonial-coffee-run",
+    src: "/images/reviews/ugc-coffee-run.png",
+    alt: "Customer in a brown track jacket and plaid skirt with Tabby Shoulder Bag 26 outside a coffee shop",
+    quote:
+      "My go-to for slow weekend mornings — comfortable, effortless, and goes with everything.",
+    authorName: "Jordan L.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@jordanl.style",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "weekend",
+  },
+  {
+    id: "testimonial-city-commute",
+    src: "/images/reviews/ugc-on-street.png",
+    alt: "Customer at Spring St subway station with Tabby Shoulder Bag 26 and coffee in hand",
+    quote:
+      "Reads polished without feeling precious — I carry it every day on my commute.",
+    authorName: "Alex R.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@alexreads",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "commute",
+  },
+  {
+    id: "testimonial-mirror-selfie",
+    src: "/images/reviews/ugc-mirror-selfie.png",
+    alt: "Customer mirror selfie with Tabby Shoulder Bag 26",
+    quote:
+      "Higher on the hip — exactly where I want it for going out. The quilting hits different in person.",
+    authorName: "Mia T.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@miatstyles",
+    socialHref: "https://www.tiktok.com/@coach",
+    topicId: "going-out",
+  },
+  {
+    id: "testimonial-lolalilylang",
+    src: "/images/reviews/ugc-lolalilylang.png",
+    alt: "TikTok creator @lolalilylang styling Tabby Shoulder Bag 26",
+    quote: "This front pocket fits more than you'd think — my everyday grab-and-go bag.",
+    authorName: "Lola L.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@lolalilylang",
+    socialHref: "https://www.tiktok.com/@lolalilylang",
+    topicId: "style",
+    videoSrc: "/videos/ugc-lolalilylang.mp4",
+  },
+  {
+    id: "testimonial-outfit-flat",
+    src: "/images/reviews/ugc-outfit-flat.png",
+    alt: "Customer outfit flat lay with Tabby Shoulder Bag 26",
+    quote: "Anchors the whole look without trying too hard.",
+    authorName: "Sam K.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@samkootd",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "style",
+  },
+  {
+    id: "testimonial-rachblaire",
+    src: "/images/reviews/ugc-rachblaire.png",
+    alt: "TikTok creator @rachblaire styling Tabby Shoulder Bag 26",
+    quote: "Weekend trip tested. Crossbody all day, zero issues.",
+    authorName: "Rachel B.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@rachblaire",
+    socialHref: "https://www.tiktok.com/@rachblaire",
+    topicId: "weekend",
+    videoSrc: "/videos/ugc-rachblaire.mp4",
+  },
+  {
+    id: "testimonial-white-tabby-home",
+    src: "/images/reviews/ugc-white-tabby-home.png",
+    alt: "Customer at home with Tabby Shoulder Bag 26 in chalk leather on a sofa",
+    quote: "The chalk leather looks even better in natural light — my lazy Sunday staple.",
+    authorName: "Emma W.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@emmaw.style",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "weekend",
+  },
+  {
+    id: "testimonial-katiemcev0y",
+    src: "/images/reviews/ugc-katiemcev0y.png",
+    alt: "TikTok creator @katiemcev0y holding multiple Tabby Shoulder Bag 26 colorways in store",
+    quote: "Hard to choose just one — the Tabby 26 works in every finish for the office.",
+    authorName: "Katie M.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@katiemcev0y",
+    socialHref: "https://www.tiktok.com/@katiemcev0y",
+    topicId: "commute",
+    videoSrc: "/videos/ugc-katiemcev0y.mp4",
+  },
+  {
+    id: "testimonial-itsnani333",
+    src: "/images/reviews/ugc-itsnani333.png",
+    alt: "TikTok creator @itsnani333 comparing Tabby Shoulder Bag 26 and Pillow Tabby",
+    quote: "Structured for work days, but I reach for this one on nights out too.",
+    authorName: "Nani T.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "tiktok",
+    socialHandle: "@itsnani333",
+    socialHref: "https://www.tiktok.com/@itsnani333",
+    topicId: "going-out",
+    videoSrc: "/videos/ugc-itsnani333.mp4",
+  },
+  {
+    id: "testimonial-pink-tabby-stanley",
+    src: "/images/reviews/ugc-pink-tabby-stanley.png",
+    alt: "Customer styling a pink quilted Tabby Shoulder Bag 26 with a Stanley tumbler",
+    quote: "The pink quilted Tabby is my everyday desk-to-dinner bag.",
+    authorName: "Priya N.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@priyanstyles",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "style",
+  },
+  {
+    id: "testimonial-silver-quilted-charm",
+    src: "/images/reviews/ugc-silver-quilted-charm.png",
+    alt: "Customer with silver quilted Tabby Shoulder Bag 26 and cherry bag charm",
+    quote: "Added a cherry charm and it instantly felt dressier for date night.",
+    authorName: "Leah S.",
+    productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
+    socialPlatform: "instagram",
+    socialHandle: "@leahstyles",
+    socialHref: "https://www.instagram.com/coach/",
+    topicId: "going-out",
+  },
+] satisfies PdpUgcTestimonial[];
+
+export function listUgcTestimonialsForTopic(
+  topicId: PdpUgcWildTopicId,
+): PdpUgcTestimonial[] {
+  const topicItems = PDP_UGC_TESTIMONIALS.filter((item) => item.topicId === topicId);
+  const clips = topicItems.filter((item) => item.videoSrc);
+  const photos = topicItems.filter((item) => !item.videoSrc);
+
+  // Lead with TikTok clips, then UGC stills — first frame is always video when available.
+  return [...clips, ...photos];
+}
 
 export type PdpUgcWildPreviewItem =
   | { kind: "video"; id: string; video: PdpUgcVideo }

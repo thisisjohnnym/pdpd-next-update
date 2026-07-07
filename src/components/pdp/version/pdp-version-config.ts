@@ -109,6 +109,11 @@ export type PdpVersionConfig = {
    */
   floatingBuyBarWhenHeroHidden: boolean;
   /**
+   * Mount the fixed floating Color + Add to bag bar. Disable when the docked
+   * hero footer ATB is sufficient (temporary v5 polish — easy to restore).
+   */
+  showFloatingBuyBar: boolean;
+  /**
    * Render the progressive in-context color drawer (Paper r4 `EU5-0` / `EIE-0`)
    * instead of the flat `PdpColorSheet`.
    */
@@ -250,6 +255,12 @@ export type PdpVersionConfig = {
    */
   useUgcTopicThemes: boolean;
   /**
+   * INEZ-style testimonial carousel — one portrait, pull quote, social link,
+   * and Full review CTA on a dark editorial band. v5 only; replaces the compact
+   * portrait strip when true.
+   */
+  useV5UgcTestimonialCarousel: boolean;
+  /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
    */
@@ -263,6 +274,11 @@ export type PdpVersionConfig = {
    * r3/r4 spacing. Exact per-module values live in the components.
    */
   useV4ModuleSpacing: boolean;
+  /**
+   * Checkmark tags under the reviews UGC rail ("Premium leather", etc.).
+   * v5 drops them — photos + AI summary carry the story.
+   */
+  showReviewHighlightTags: boolean;
   /**
    * Show the Coach / Coach Outlet brand switcher strip above the video hero
    * (`PdpBrandBarReveal`). v4 (Paper r5) hides it; v1/v2/v3 keep it. When false
@@ -310,9 +326,27 @@ export type PdpVersionConfig = {
   demoHeroColorSwatchRow: boolean;
   /**
    * Hide Tabby size cards in the buy-box selector and show editorial
-   * "Explore the Tabby family" product navigation below color. v5 only.
+   * "Explore Other Tabby Silhouettes" product navigation below color. v5 only.
    */
   showTabbyAlsoAvailableAs: boolean;
+  /**
+   * Responsive desktop layout — at lg+ the hero + product gallery becomes a
+   * two-column split (scrolling media left, sticky buy panel right) and the
+   * below-fold modules center to a max-width container. v5 only; mobile is
+   * untouched. v1-v4 keep the full-bleed mobile-stretch layout.
+   */
+  desktopSplitLayout: boolean;
+  /**
+   * Drop the "No impact to credit." sentence from the Afterpay pay-over-time
+   * card so the copy fits one line. v5 only — v1-v4 keep the full sentence.
+   */
+  hidePayOverTimeCreditNote: boolean;
+  /**
+   * Show a contextual "What fits" overlay action beside Try On in the hero
+   * gallery when the open-interior slide is active. Taps jump to the "what fits
+   * inside" capacity card. v5 only — requires the docked buy-bar gallery overlay.
+   */
+  showHeroFitsInsideCta: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -344,6 +378,7 @@ const V1_CONFIG: PdpVersionConfig = {
   heroScrollsWithPage: false,
   heroDockedBuyBar: false,
   floatingBuyBarWhenHeroHidden: false,
+  showFloatingBuyBar: true,
   useV3ColorSheet: false,
   showSectionJumpBar: true,
   useV4Specs: false,
@@ -372,16 +407,21 @@ const V1_CONFIG: PdpVersionConfig = {
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
+  showReviewHighlightTags: true,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
   useUgcTopicThemes: false,
+  useV5UgcTestimonialCarousel: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   demoHeroColorSwatchRow: false,
   showTabbyAlsoAvailableAs: false,
+  desktopSplitLayout: false,
+  hidePayOverTimeCreditNote: false,
+  showHeroFitsInsideCta: false,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -422,6 +462,7 @@ const V2_CONFIG: PdpVersionConfig = {
   heroScrollsWithPage: false,
   heroDockedBuyBar: false,
   floatingBuyBarWhenHeroHidden: false,
+  showFloatingBuyBar: true,
   useV3ColorSheet: false,
   showSectionJumpBar: true,
   useV4Specs: false,
@@ -450,17 +491,22 @@ const V2_CONFIG: PdpVersionConfig = {
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
+  showReviewHighlightTags: true,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
   useUgcTopicThemes: false,
+  useV5UgcTestimonialCarousel: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,
   demoHeroColorSwatchRow: false,
   showTabbyAlsoAvailableAs: false,
+  desktopSplitLayout: false,
+  hidePayOverTimeCreditNote: false,
+  showHeroFitsInsideCta: false,
 };
 
 /**
@@ -524,8 +570,10 @@ const V4_CONFIG: PdpVersionConfig = {
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
+  // v5 polish — docked hero ATB only; no sticky floating bar for now.
+  showFloatingBuyBar: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Feel the leather → Out in the wild → Details → Up close → Aging.
+  // v5 story: Feel the leather → Details → What customers are saying → Up close → Aging.
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideBuyBarAtbIcon: true,
@@ -537,6 +585,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CraftsmanshipLayout: true,
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
+  useV5UgcTestimonialCarousel: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,
@@ -551,6 +600,13 @@ const V5_CONFIG: PdpVersionConfig = {
   showWaysToWearModule: true,
   demoHeroColorSwatchRow: true,
   showTabbyAlsoAvailableAs: true,
+  showReviewHighlightTags: false,
+  // v5 desktop responsive split — media left, sticky buy panel right at lg+.
+  desktopSplitLayout: true,
+  // v5 trims the Afterpay card to one line (drops "No impact to credit.").
+  hidePayOverTimeCreditNote: true,
+  // v5 surfaces a "What fits" overlay action on the open-interior hero slide.
+  showHeroFitsInsideCta: true,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

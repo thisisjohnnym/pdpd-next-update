@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // Local /public assets hang in `/_next/image` on OneDrive-backed dev trees — serve as-is.
+    unoptimized: isDev,
     remotePatterns: [
       {
         protocol: "https",

@@ -13,16 +13,18 @@ import { PdpModuleHeading } from "./pdp-module-heading";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import { getDefaultColorId } from "./pdp-product-colors";
-import { productPath } from "./pdp-product-routes";
+import { productPath, versionedProductPath } from "./pdp-product-routes";
 import { getRecentlyViewedProductId } from "./pdp-products";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { pdpType, pdpPressableClass } from "./pdp-type";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 /** History rail — vertical list rows with viewed-time labels (Paper node 4CK-0) */
 export function PdpRecentlyViewedCarousel() {
   const router = useRouter();
   const { productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
+  const version = usePdpVersion();
 
   const handleViewAgain = (itemId: string) => {
     const targetProductId = getRecentlyViewedProductId(itemId);
@@ -31,7 +33,7 @@ export function PdpRecentlyViewedCarousel() {
     }
 
     router.push(
-      productPath(targetProductId, {
+      versionedProductPath(version, targetProductId, {
         tabbySlug: tabby?.slug,
         colorId: getDefaultColorId(targetProductId),
       }),

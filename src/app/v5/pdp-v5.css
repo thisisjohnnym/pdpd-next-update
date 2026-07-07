@@ -69,8 +69,116 @@
   border-radius: 0;
 }
 
-/* Explore the Tabby family — editorial product navigation below color + ATB. */
+/* Explore Other Tabby Silhouettes — editorial product navigation below color + ATB. */
 [data-pdp-version="v5"] .pdp-tabby-family-explorer {
   border: 0;
   box-shadow: none;
+}
+
+[data-pdp-version="v5"] .pdp-tabby-family-explorer li:last-child {
+  border-bottom-width: 0;
+}
+
+/* UGC testimonial band — INEZ-inspired editorial quote carousel. */
+[data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
+  background-color: #1e241e;
+}
+
+[data-pdp-version="v5"] .pdp-v5-ugc-testimonial-quote {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  text-wrap: pretty;
+}
+
+/* ── Desktop responsive split (lg+) ──────────────────────────────────────────
+ * At the desktop breakpoint the v5 Tabby hero becomes a two-column layout:
+ * a scrolling product media rail on the left and a sticky buy panel on the
+ * right (Miu Miu-style). Below-fold modules center to a focused column. Mobile
+ * (< 1024px) is untouched — the split is `hidden lg:grid` and the mobile hero
+ * is `lg:hidden`. */
+@media (min-width: 1024px) {
+  /* Whiten the page backdrop so the centered below-fold gutters are not black. */
+  [data-pdp-version="v5"] .pdp-v5-page-root {
+    background-color: #fff;
+  }
+
+  /* Desktop 24/20/8 grid (docs/design-system/grid.md): 1440 frame, 20px
+   * margins, 8px gutter, 24 columns. Media spans 15 cols, buy rail spans 9. */
+  [data-pdp-version="v5"] .pdp-v5-desktop-split {
+    max-width: var(--grid-max-width-desktop, 1440px);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin-desktop, 20px);
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    column-gap: var(--grid-gutter-desktop, 8px);
+    align-items: stretch;
+    background-color: #fff;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-desktop-split__media {
+    grid-column: span 15;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-desktop-split__rail {
+    grid-column: span 9;
+    position: relative;
+  }
+
+  /* Sticky buy panel — offset below the fixed overlay header. */
+  [data-pdp-version="v5"] .pdp-v5-desktop-split__rail-inner {
+    position: sticky;
+    top: calc(var(--pdp-safe-area-top) + 4.5rem);
+    padding: 2.75rem 0 3rem 1.75rem;
+  }
+
+  /* Product media rail — uniform stacked frames on the studio ground. */
+  [data-pdp-version="v5"] .pdp-v5-desktop-media {
+    gap: var(--grid-gutter-desktop, 8px);
+  }
+
+  /* Below-fold modules follow the 1440 grid frame — they can expand wide. */
+  [data-pdp-version="v5"] .pdp-safe-area-main {
+    max-width: var(--grid-max-width-desktop, 1440px);
+    margin-inline: auto;
+  }
+
+  /* The full-width header's bag icon sits over the white buy panel, so its
+   * light-chrome (white) treatment would vanish. Force it dark on desktop —
+   * the menu + wordmark stay over the media column and keep their contrast. */
+  [data-pdp-version="v5"] [data-header-chrome] [data-pdp-header-action="bag"] {
+    color: #171717;
+  }
+
+  /* "Up close and personal" — drop the horizontal carousel on desktop and lay
+   * the four craftsmanship cards out as full-width columns on the grid. */
+  [data-pdp-version="v5"] .pdp-craftsmanship-header {
+    padding-inline: var(--grid-margin-desktop, 20px);
+  }
+
+  [data-pdp-version="v5"] .pdp-craftsmanship-rail {
+    position: static;
+    left: auto;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: none;
+    translate: none;
+    /* Tailwind v4 drives translate via these custom props; zero them so the
+     * bleed wrap does not shift the in-flow desktop grid. */
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-craftsmanship-track {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--grid-gutter-desktop, 8px);
+    padding-inline: var(--grid-margin-desktop, 20px);
+    overflow: visible;
+  }
+
+  [data-pdp-version="v5"] .pdp-craftsmanship-card {
+    width: auto;
+  }
 }

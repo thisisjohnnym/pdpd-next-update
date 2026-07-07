@@ -11,7 +11,7 @@ import {
   PDP_RECENTLY_VIEWED_SECTION,
 } from "../pdp-data";
 import { getDefaultColorId } from "../pdp-product-colors";
-import { productPath } from "../pdp-product-routes";
+import { productPath, versionedProductPath } from "../pdp-product-routes";
 import { getRecentlyViewedProductId } from "../pdp-products";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { pdpType, pdpPressableClass } from "../pdp-type";
@@ -39,6 +39,7 @@ export function PdpV2RecentlyViewed() {
   const router = useRouter();
   const { productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
+  const version = usePdpVersion();
 
   const handleViewAgain = (itemId: string) => {
     const targetProductId = getRecentlyViewedProductId(itemId);
@@ -47,7 +48,7 @@ export function PdpV2RecentlyViewed() {
     }
 
     router.push(
-      productPath(targetProductId, {
+      versionedProductPath(version, targetProductId, {
         tabbySlug: tabby?.slug,
         colorId: getDefaultColorId(targetProductId),
       }),
