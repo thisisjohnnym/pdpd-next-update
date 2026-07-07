@@ -5,7 +5,17 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 import { PdpGalleryHeroVideo } from "../pdp-gallery-hero-video";
-import { PDP_HERO_GALLERY_SLIDES } from "../pdp-hero-gallery-data";
+import {
+  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
+  PDP_HERO_GALLERY_SLIDES,
+  prependHeroGalleryLeadSlide,
+} from "../pdp-hero-gallery-data";
+
+/** v5 leads the media rail with the creator unboxing clip (mirrors the mobile hero). */
+const PDP_V5_DESKTOP_MEDIA_SLIDES = prependHeroGalleryLeadSlide(
+  PDP_HERO_GALLERY_SLIDES,
+  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
+);
 
 /**
  * v5 desktop media column (lg+ only).
@@ -22,7 +32,7 @@ import { PDP_HERO_GALLERY_SLIDES } from "../pdp-hero-gallery-data";
 export function PdpV5DesktopMediaColumn() {
   return (
     <div className="pdp-v5-desktop-media grid w-full grid-cols-2 gap-2 bg-[#f0f0f0]">
-      {PDP_HERO_GALLERY_SLIDES.map((slide, index) => (
+      {PDP_V5_DESKTOP_MEDIA_SLIDES.map((slide, index) => (
         <figure
           key={`${slide.src}-${index}`}
           className={cn(

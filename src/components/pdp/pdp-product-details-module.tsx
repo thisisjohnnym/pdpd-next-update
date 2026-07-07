@@ -20,6 +20,7 @@ import { PdpModuleHeading } from "./pdp-module-heading";
 import { pdpModuleIntroClass } from "./pdp-module-section";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
+import { pdpType } from "./pdp-type";
 import { revealStaggerDelay } from "./use-pdp-element-reveal";
 import {
   useCarouselSnapStartActiveIndex,
@@ -28,6 +29,8 @@ import {
 import {
   PDP_V4_DETAILS_SECTION,
   PDP_V4_SPECS,
+  PDP_V5_DETAILS_COLUMNS,
+  PDP_V5_DETAILS_INTRO,
   type PdpProductDetailSpecV4,
 } from "./version/pdp-v4-specs";
 
@@ -185,6 +188,96 @@ function SpecListV4({
   );
 }
 
+/** One fact cell — label over value, hairline bottom-pinned so rows align. */
+function SpecSheetV5Cell({
+  spec,
+  delay,
+  showDivider = true,
+}: {
+  spec: PdpProductDetailSpecV4;
+  delay: number;
+  /** Last row drops its rule so it doesn't sit against the section below. */
+  showDivider?: boolean;
+}) {
+  return (
+    <PdpRevealItem delay={delay} className="flex flex-col">
+      <div className={cn("flex flex-col gap-2", showDivider && "pb-5")}>
+        <span className={cn(pdpType.label, "m-0 text-[#a1a1a1]")}>
+          {spec.label}
+        </span>
+        <span
+          className={cn(
+            pdpType.body,
+            "m-0 text-black",
+            spec.tabular && "tabular-nums",
+          )}
+        >
+          {spec.value}
+        </span>
+      </div>
+      {showDivider ? (
+        <div className="mt-auto h-px w-full bg-neutral-200" />
+      ) : null}
+    </PdpRevealItem>
+  );
+}
+
+/**
+ * v5 Details sheet (Paper node 407:399) — 28px heading, 16px intro, and a
+ * two-column fact list with a hairline under every fact and no vertical rule.
+ *
+ * Rendered as a row-aligned grid (row-major placement) so a wrapped value —
+ * e.g. "Phone - Wallet - Keys" on a narrow screen — never offsets the opposite
+ * column into a staircase. Cells stretch to the row height and the hairline
+ * bottom-pins, keeping every rule aligned across both columns.
+ */
+function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
+  const [leftColumn, rightColumn] = PDP_V5_DETAILS_COLUMNS;
+  const rowCount = Math.max(leftColumn.length, rightColumn.length);
+  const rows = Array.from({ length: rowCount }, (_, rowIndex) => [
+    leftColumn[rowIndex],
+    rightColumn[rowIndex],
+  ]);
+
+  let staggerIndex = 0;
+
+  return (
+    <div className="flex flex-col gap-4 px-4 pt-6 pb-14">
+      <PdpModuleHeading spacing="none" className="text-left">
+        {eyebrow}
+      </PdpModuleHeading>
+      <div className="flex flex-col gap-5">
+        <PdpTextReveal
+          as="p"
+          delay={100}
+          className={pdpModuleIntroClass("left")}
+        >
+          {PDP_V5_DETAILS_INTRO}
+        </PdpTextReveal>
+        <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+          {rows.map((row, rowIndex) =>
+            row.map((spec, columnIndex) => {
+              if (!spec) {
+                return <div key={`empty-${rowIndex}-${columnIndex}`} />;
+              }
+              const delay = revealStaggerDelay(staggerIndex);
+              staggerIndex += 1;
+              return (
+                <SpecSheetV5Cell
+                  key={spec.id}
+                  spec={spec}
+                  delay={delay}
+                  showDivider={rowIndex < rowCount - 1}
+                />
+              );
+            }),
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** One detail card — image with a title + caption beneath */
 function DetailTile({
   tile,
@@ -313,6 +406,7 @@ export function PdpProductDetailsModule({
   useV4Specs = false,
   useV4Spacing = false,
   useV4DetailsTileCarousel = false,
+  useV5DetailsSheet = false,
   showCloserLook = true,
   leftAlignModuleHeadings = false,
 }: {
@@ -324,6 +418,8 @@ export function PdpProductDetailsModule({
   useV4Spacing?: boolean;
   /** Horizontal peek rail for closer-look tiles instead of the 2×2 grid. v4 only. */
   useV4DetailsTileCarousel?: boolean;
+  /** Editorial two-column spec sheet (Paper node 407:399). v5 only. */
+  useV5DetailsSheet?: boolean;
   /** When false, hide the closer-look image tile gallery beneath the specs. */
   showCloserLook?: boolean;
   /** Left-align the module title on v4. */
@@ -340,7 +436,9 @@ export function PdpProductDetailsModule({
         useV4Spacing ? "pt-0" : "pt-14",
       )}
     >
-      {useV4Specs ? (
+      {useV5DetailsSheet ? (
+        <SpecSheetV5 eyebrow={eyebrow} />
+      ) : useV4Specs ? (
         <div
           className={cn(
             "px-4",

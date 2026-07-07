@@ -747,6 +747,7 @@ export function PdpGalleryView({
                         useV4DetailsTileCarousel={
                           versionConfig.useV4DetailsTileCarousel
                         }
+                        useV5DetailsSheet={versionConfig.useV5DetailsSheet}
                         showCloserLook={versionConfig.showDetailsCloserLook}
                         leftAlignModuleHeadings={
                           versionConfig.leftAlignModuleHeadings
@@ -970,7 +971,8 @@ export function PdpGalleryView({
           const isV5FeelLead =
             versionConfig.useV4CompactUgcStrip &&
             slide.dragZoom &&
-            slide.src.includes("tabby-product-front-916");
+            (slide.src.includes("tabby-product-front-916") ||
+              slide.src.includes("tabby-feel-the-leather-lifestyle"));
 
           return [
             ...(isV5FeelLead

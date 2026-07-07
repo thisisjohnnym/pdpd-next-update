@@ -1,5 +1,9 @@
 import { PDP_GALLERY_SLIDES } from "../pdp-data";
-import { HERO_GALLERY_V5_LEAD_SRC } from "../pdp-hero-gallery-data";
+import {
+  HERO_GALLERY_V5_LEAD_SRC,
+  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
+  type PdpHeroGallerySlide,
+} from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
 
 import {
@@ -146,6 +150,12 @@ export type PdpVersionConfig = {
    */
   heroGalleryLeadSlideSrc: string;
   /**
+   * Prepend an extra hero land slide ahead of the base slides (deduped by src),
+   * applied after `heroGalleryLeadSlideSrc`. Used to lead the gallery with a
+   * version-specific video. Undefined = disabled. v5 only.
+   */
+  heroGalleryPrependLeadSlide?: PdpHeroGallerySlide;
+  /**
    * Pin demo stock states (Sold out + Notify me) onto distinct Popular Colors in
    * the progressive color drawer so it always demos the sold-out affordance
    * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
@@ -236,6 +246,12 @@ export type PdpVersionConfig = {
    * pagination instead of the 2×2 column grid. v4 only (Paper r5 `LDS-0`).
    */
   useV4DetailsTileCarousel: boolean;
+  /**
+   * Editorial two-column Details sheet (Paper node 407:399) — 28px heading,
+   * 16px label/value pairs, one hairline under every fact, no hint lines, no
+   * vertical column rule. Replaces the compact v4 spec list. v5 only.
+   */
+  useV5DetailsSheet: boolean;
   /** Show the closer-look image tile gallery beneath the Details specs. */
   showDetailsCloserLook: boolean;
   /**
@@ -305,6 +321,30 @@ export type PdpVersionConfig = {
    */
   leatherAgingHeaderAboveImage: boolean;
   /**
+   * Replace the leather-aging dot-and-connector stepper with a continuous
+   * Apple-style rail slider (rounded track, near-black progress fill, subtle
+   * stage ticks, white circular knob with layered shadow that scales on press).
+   * v5 only — v1-v4 keep the dot track + morphing black pill thumb.
+   */
+  useRailLeatherAgingSlider: boolean;
+  /**
+   * Drop the "· {count} reviews · {percent}% recommend" tail from the reviews
+   * summary line — keep the stars + average only. v5 only; v4 keeps the full
+   * aggregate line.
+   */
+  hideReviewCountRecommend: boolean;
+  /**
+   * Bump the reviews AI-summary tray text up one step (compact 14px body vs the
+   * xs 11px). v5 only; v4 keeps the extra-small tray.
+   */
+  enlargeReviewAiSummary: boolean;
+  /**
+   * Hide the topic caption ("Saturday coffee run", etc.) above each quote in the
+   * reviews UGC moments rail — keep the quote + handle only. v5 only; v4 keeps
+   * the caption.
+   */
+  hideReviewUgcMomentCaption: boolean;
+  /**
    * Unify module H1s to `pdpType.headline` (20px) — matches The Details and
    * Out in the wild instead of the legacy 24px r5 override. v5 only.
    */
@@ -347,6 +387,18 @@ export type PdpVersionConfig = {
    * inside" capacity card. v5 only — requires the docked buy-bar gallery overlay.
    */
   showHeroFitsInsideCta: boolean;
+  /**
+   * Replace the bottom-left tick slide indicator with a full-bleed progress bar
+   * pinned to the gallery's bottom edge (reads as attached to the top of the
+   * white product footer). v5 only — v1-v4 keep the tick indicator.
+   */
+  useHeroGalleryProgressBar: boolean;
+  /**
+   * Show the AR "Try On" affordance (hero action rail / gallery overlay button
+   * that opens the UI-only try-on preview). Disabled on v5 for now — easy to
+   * restore. v1-v4 keep it.
+   */
+  showArTryOn: boolean;
 };
 
 const V1_CONFIG: PdpVersionConfig = {
@@ -402,6 +454,7 @@ const V1_CONFIG: PdpVersionConfig = {
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
   useV4DetailsTileCarousel: false,
+  useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
   showBrandSwitcher: true,
@@ -410,6 +463,10 @@ const V1_CONFIG: PdpVersionConfig = {
   showReviewHighlightTags: true,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
+  useRailLeatherAgingSlider: false,
+  hideReviewCountRecommend: false,
+  enlargeReviewAiSummary: false,
+  hideReviewUgcMomentCaption: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -422,6 +479,8 @@ const V1_CONFIG: PdpVersionConfig = {
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
   showHeroFitsInsideCta: false,
+  useHeroGalleryProgressBar: false,
+  showArTryOn: true,
 };
 
 const V2_CONFIG: PdpVersionConfig = {
@@ -486,6 +545,7 @@ const V2_CONFIG: PdpVersionConfig = {
   hideTextLinkArrows: false,
   useV4UgcHeadingType: false,
   useV4DetailsTileCarousel: false,
+  useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
   showBrandSwitcher: true,
@@ -494,6 +554,10 @@ const V2_CONFIG: PdpVersionConfig = {
   showReviewHighlightTags: true,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
+  useRailLeatherAgingSlider: false,
+  hideReviewCountRecommend: false,
+  enlargeReviewAiSummary: false,
+  hideReviewUgcMomentCaption: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -507,6 +571,8 @@ const V2_CONFIG: PdpVersionConfig = {
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
   showHeroFitsInsideCta: false,
+  useHeroGalleryProgressBar: false,
+  showArTryOn: true,
 };
 
 /**
@@ -581,6 +647,8 @@ const V5_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: true,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
+  // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
+  useV5DetailsSheet: true,
   showDetailsCloserLook: false,
   useV4CraftsmanshipLayout: true,
   useV4CompactUgcStrip: true,
@@ -591,8 +659,18 @@ const V5_CONFIG: PdpVersionConfig = {
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
+  // v5 hero land leads with the creator unboxing clip ahead of the base slides.
+  heroGalleryPrependLeadSlide: HERO_GALLERY_V5_UGC_LEAD_SLIDE,
   heroMaterialSubtitleLine: true,
   leatherAgingHeaderAboveImage: true,
+  // v5 leather-aging gets the continuous Apple-style rail slider.
+  useRailLeatherAgingSlider: true,
+  // v5 reviews summary shows stars + average only (no count / recommend tail).
+  hideReviewCountRecommend: true,
+  // v5 bumps the reviews AI-summary tray text up a step.
+  enlargeReviewAiSummary: true,
+  // v5 drops the topic caption above each reviews UGC quote.
+  hideReviewUgcMomentCaption: true,
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,
@@ -607,6 +685,10 @@ const V5_CONFIG: PdpVersionConfig = {
   hidePayOverTimeCreditNote: true,
   // v5 surfaces a "What fits" overlay action on the open-interior hero slide.
   showHeroFitsInsideCta: true,
+  // v5 swaps the tick indicator for a full-bleed progress bar at the gallery seam.
+  useHeroGalleryProgressBar: true,
+  // Hide the AR "Try On" affordance for now (easy to restore).
+  showArTryOn: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -15,7 +15,6 @@ import { useReducedMotion } from "../use-reduced-motion";
 
 import {
   listUgcTestimonialsForTopic,
-  type PdpUgcTestimonial,
   type PdpUgcWildTopicId,
 } from "./pdp-data-v2";
 import { getPdpVersionConfig } from "./pdp-version-config";
@@ -69,212 +68,139 @@ function SocialPlatformIcon({
   );
 }
 
-function TestimonialSlide({
-  item,
-  isActive,
-  isLeadSlide,
-}: {
-  item: PdpUgcTestimonial;
-  isActive: boolean;
-  isLeadSlide: boolean;
-}) {
-  const reducedMotion = useReducedMotion();
-  const isVideoClip = Boolean(item.videoSrc) && !reducedMotion;
-
-  return (
-    <article
-      aria-hidden={!isActive}
-      className="flex w-full min-w-full shrink-0 snap-center snap-always flex-col items-center px-4"
-    >
-      <div className="relative aspect-[4/5] w-full max-w-[320px] overflow-hidden bg-black/20">
-        {isVideoClip ? (
-          <PdpGalleryHeroVideo
-            decoderId={item.id}
-            src={item.videoSrc}
-            poster={item.src}
-            ariaLabel={item.alt}
-            isActive={isActive}
-            preload={isLeadSlide || isActive ? "auto" : "metadata"}
-            priorityAutoplay={isLeadSlide && isActive}
-            skeletonTone="dark"
-            allowHorizontalPan
-            tapToTogglePlayback
-            passThroughTouch
-            className="absolute inset-0 size-full object-cover object-center"
-          />
-        ) : (
-          <Image
-            src={item.src}
-            alt={item.alt}
-            fill
-            className="object-cover object-center"
-            sizes="320px"
-            priority={isActive}
-          />
-        )}
-      </div>
-
-      <blockquote className="pdp-v5-ugc-testimonial-quote m-0 mt-6 max-w-[22rem] text-center text-white">
-        &ldquo;{item.quote}&rdquo;
-      </blockquote>
-
-      <a
-        href={item.socialHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          "mt-4 inline-flex items-center gap-1.5 text-white underline-offset-[3px] transition-opacity hover:underline active:opacity-70",
-          pdpType.label,
-        )}
-        aria-label={`${item.socialHandle} on ${item.socialPlatform} (opens in new tab)`}
-      >
-        <SocialPlatformIcon platform={item.socialPlatform} className="shrink-0" />
-        {item.socialHandle}
-      </a>
-    </article>
-  );
-}
-
 /**
- * v5 — INEZ-inspired "What customers are saying" band.
+ * v5 — "What customers are saying" band (Figma node 409:460).
  *
- * One portrait at a time, pull quote, social link, dot + arrow nav.
+ * Left-aligned single testimonial per topic: title, topic tabs, one large
+ * media card, pull quote, and social attribution. Dark editorial band.
  */
 export function PdpV5UgcTestimonials() {
   const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTopic, setActiveTopic] = useState<PdpUgcWildTopicId>("weekend");
   const [activeIndex, setActiveIndex] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   const testimonials = useMemo(
     () => listUgcTestimonialsForTopic(activeTopic),
     [activeTopic],
   );
 
-  const scrollToIndex = useCallback((index: number) => {
-    const rail = scrollRef.current;
-    if (!rail || testimonials.length === 0) {
-      return;
-    }
+  const item = testimonials[activeIndex] ?? testimonials[0];
+  const isVideoClip = Boolean(item?.videoSrc) && !reducedMotion;
 
-    const clamped = Math.max(0, Math.min(index, testimonials.length - 1));
-    const slide = rail.children.item(clamped) as HTMLElement | null;
-    slide?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-    setActiveIndex(clamped);
-  }, [testimonials.length]);
-
-  useEffect(() => {
+  const handleTopicChange = (topic: PdpUgcWildTopicId) => {
+    setActiveTopic(topic);
     setActiveIndex(0);
-    const rail = scrollRef.current;
-    if (!rail) {
-      return;
-    }
+  };
 
-    rail.scrollTo({ left: 0, behavior: "auto" });
-    const leadSlide = rail.children.item(0) as HTMLElement | null;
-    leadSlide?.scrollIntoView({
-      behavior: "auto",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [activeTopic, testimonials]);
-
-  useEffect(() => {
-    const rail = scrollRef.current;
-    if (!rail || testimonials.length === 0) {
-      return;
-    }
-
-    const slides = Array.from(rail.children) as HTMLElement[];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const best = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (!best) {
-          return;
-        }
-
-        const index = slides.indexOf(best.target as HTMLElement);
-        if (index >= 0) {
-          setActiveIndex(index);
-        }
-      },
-      { root: rail, threshold: [0.55, 0.75] },
-    );
-
-    for (const slide of slides) {
-      observer.observe(slide);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [testimonials]);
-
-  const goPrev = () => scrollToIndex(activeIndex - 1);
-  const goNext = () => scrollToIndex(activeIndex + 1);
+  const goPrev = () => setActiveIndex((index) => Math.max(0, index - 1));
+  const goNext = () =>
+    setActiveIndex((index) => Math.min(testimonials.length - 1, index + 1));
 
   return (
     <section
       data-header-surface="dark"
-      className="pdp-v5-ugc-testimonials w-full shrink-0 overflow-x-clip py-10"
+      className="pdp-v5-ugc-testimonials w-full shrink-0 overflow-x-clip pb-12 pt-10"
     >
-      <div className="mb-5 flex flex-col items-center gap-4 px-4 text-center">
-        <PdpTextReveal
-          as="h2"
-          className={cn(
-            pdpModuleHeadlineDisplayClass(useConsistentModuleHeadings),
-            "text-white",
-          )}
-        >
-          What customers are saying
-        </PdpTextReveal>
+      <div className="mx-auto flex w-full max-w-[440px] flex-col items-center gap-6 px-3 text-center">
+        <header className="flex flex-col items-center gap-4">
+          <PdpTextReveal
+            as="h2"
+            className={cn(
+              pdpModuleHeadlineDisplayClass(useConsistentModuleHeadings),
+              "text-white",
+            )}
+          >
+            What customers are saying
+          </PdpTextReveal>
 
-        <PdpTextReveal as="div" delay={80}>
-          <PdpUgcTopicToggle value={activeTopic} onChange={setActiveTopic} tone="dark" />
-        </PdpTextReveal>
-      </div>
+          <PdpTextReveal as="div" delay={80}>
+            <PdpUgcTopicToggle value={activeTopic} onChange={handleTopicChange} tone="dark" />
+          </PdpTextReveal>
+        </header>
 
-      <div
-        ref={scrollRef}
-        className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="Customer testimonials"
-      >
-        {testimonials.map((item, index) => (
-          <TestimonialSlide
-            key={item.id}
-            item={item}
-            isActive={index === activeIndex}
-            isLeadSlide={index === 0}
-          />
-        ))}
-      </div>
+        {item ? (
+          <div className="flex w-full flex-col gap-4">
+            <div
+              key={item.id}
+              className="relative aspect-[416/434] w-full overflow-hidden bg-white/5"
+            >
+              {isVideoClip ? (
+                <PdpGalleryHeroVideo
+                  decoderId={item.id}
+                  src={item.videoSrc}
+                  poster={item.src}
+                  ariaLabel={item.alt}
+                  isActive
+                  preload="auto"
+                  priorityAutoplay
+                  skeletonTone="dark"
+                  allowHorizontalPan
+                  tapToTogglePlayback
+                  passThroughTouch
+                  className="absolute inset-0 size-full object-cover object-center"
+                />
+              ) : (
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  className="object-cover object-center"
+                  sizes="(min-width: 440px) 416px, 100vw"
+                  priority
+                />
+              )}
+            </div>
 
-      <div className="mt-6 flex items-center justify-center gap-3 px-4">
-        <button
-          type="button"
-          onClick={goPrev}
-          disabled={activeIndex <= 0}
-          aria-label="Previous testimonial"
-          className="flex size-8 items-center justify-center text-white transition-opacity disabled:opacity-30 active:opacity-70"
-        >
-          <MaterialIcon name="arrow_back" size={20} />
-        </button>
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={activeIndex >= testimonials.length - 1}
-          aria-label="Next testimonial"
-          className="flex size-8 items-center justify-center text-white transition-opacity disabled:opacity-30 active:opacity-70"
-        >
-          <MaterialIcon name="arrow_forward" size={20} />
-        </button>
+            <div className="flex w-full flex-col items-center gap-3">
+              <blockquote
+                className={cn(
+                  pdpType.caption,
+                  "m-0 min-h-[4.15em] text-balance text-center text-white",
+                )}
+              >
+                &ldquo;{item.quote}&rdquo;
+              </blockquote>
+
+              <a
+                href={item.socialHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "inline-flex items-center gap-1.5 text-white underline-offset-[3px] transition-opacity hover:underline active:opacity-70",
+                  pdpType.label,
+                )}
+                aria-label={`${item.socialHandle} on ${item.socialPlatform} (opens in new tab)`}
+              >
+                <SocialPlatformIcon platform={item.socialPlatform} className="shrink-0" />
+                {item.socialHandle}
+              </a>
+            </div>
+
+            {testimonials.length > 1 ? (
+              <div className="mt-1 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  disabled={activeIndex <= 0}
+                  aria-label="Previous testimonial"
+                  className="flex size-8 items-center justify-center text-white transition-opacity active:opacity-70 disabled:opacity-30"
+                >
+                  <MaterialIcon name="arrow_back" size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={activeIndex >= testimonials.length - 1}
+                  aria-label="Next testimonial"
+                  className="flex size-8 items-center justify-center text-white transition-opacity active:opacity-70 disabled:opacity-30"
+                >
+                  <MaterialIcon name="arrow_forward" size={20} />
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );

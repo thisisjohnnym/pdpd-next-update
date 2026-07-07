@@ -48,7 +48,7 @@ export type PdpCraftsmanshipV4Card = {
 };
 
 export const PDP_CRAFTSMANSHIP_V4_SECTION = {
-  headline: "Up close and personal",
+  headline: "Get up close and personal",
   intro:
     "A closer look at the materials, hardware, and construction that define the Tabby.",
 } as const;
@@ -647,13 +647,34 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
   },
 ] satisfies PdpWaysToWearStyle[];
 
-/** Insert the v5 Ways to wear module immediately after Up close / editorial carousel. */
+/**
+ * v5 swaps the "Feel the leather" studio drag-zoom frame for a sunlit lifestyle
+ * beat. v4 keeps the studio product still — this override lives in the v5-only
+ * patch so the frozen v4 baseline is untouched.
+ */
+const FEEL_THE_LEATHER_V5_SRC =
+  "/images/gallery/tabby-feel-the-leather-lifestyle.jpg";
+
+/**
+ * Insert the v5 Ways to wear module immediately after Up close / editorial
+ * carousel, and swap the Feel the leather studio slide for the lifestyle image.
+ */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
 ): PdpGallerySlideV2[] {
   const result: PdpGallerySlideV2[] = [];
 
   for (const slide of slides) {
+    if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
+      result.push({
+        ...slide,
+        src: FEEL_THE_LEATHER_V5_SRC,
+        alt: "Model holding the black Tabby Shoulder Bag 26 in quilted leather on sunlit stone steps",
+        objectPosition: "center 48%",
+      });
+      continue;
+    }
+
     result.push(slide);
     if (slide.type === "editorial-carousel-v2") {
       result.push({ type: "ways-to-wear" });

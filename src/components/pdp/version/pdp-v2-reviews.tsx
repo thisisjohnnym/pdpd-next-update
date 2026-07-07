@@ -73,6 +73,9 @@ function ReviewUgcMomentCard({
   photo: PdpUgcCommunityPhoto;
   className?: string;
 }) {
+  const { hideReviewUgcMomentCaption } = getPdpVersionConfig(usePdpVersion());
+  const showCaption = Boolean(photo.caption) && !hideReviewUgcMomentCaption;
+
   return (
     <figure className={cn("m-0 flex min-w-0 flex-col gap-1.5", className)}>
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-none bg-neutral-100">
@@ -84,9 +87,9 @@ function ReviewUgcMomentCard({
           sizes="32vw"
         />
       </div>
-      {(photo.caption || photo.quote || photo.handle) ? (
+      {(showCaption || photo.quote || photo.handle) ? (
         <figcaption className="flex flex-col gap-0.5">
-          {photo.caption ? (
+          {showCaption ? (
             <p className={cn(pdpType.micro, "m-0 text-neutral-500")}>{photo.caption}</p>
           ) : null}
           {photo.quote ? (
@@ -138,8 +141,13 @@ function V4ReviewSummary({
   const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
   const { headline, reviewHighlights } = PDP_V4_REVIEWS_SUMMARY;
   const { body: aiBody, attribution: aiAttribution } = PDP_REVIEWS_AI_SUMMARY;
-  const { useConsistentModuleHeadings, squareButtonCorners, showReviewHighlightTags } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    useConsistentModuleHeadings,
+    squareButtonCorners,
+    showReviewHighlightTags,
+    hideReviewCountRecommend,
+    enlargeReviewAiSummary,
+  } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
   return (
@@ -173,7 +181,9 @@ function V4ReviewSummary({
                   pdpType.micro,
                 )}
               >
-                {average.toFixed(1)} · {count} reviews · {recommendPercent}% recommend
+                {hideReviewCountRecommend
+                  ? average.toFixed(1)
+                  : `${average.toFixed(1)} · ${count} reviews · ${recommendPercent}% recommend`}
               </span>
             </div>
           </PdpRevealItem>
@@ -183,7 +193,7 @@ function V4ReviewSummary({
         <PdpRevealItem delay={revealStaggerDelay(2)} className="w-full">
           <PdpAiInsightCard
             variant="minimal"
-            size="xs"
+            size={enlargeReviewAiSummary ? "compact" : "xs"}
             contained
             containedSurface="flat"
             showIcon={false}

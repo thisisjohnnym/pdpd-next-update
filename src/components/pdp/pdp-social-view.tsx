@@ -134,7 +134,12 @@ function PdpSocialViewInner() {
     floatingBuyBarWhenHeroHidden,
     showFloatingBuyBar,
     desktopSplitLayout,
+    showArTryOn,
   } = versionConfig;
+
+  const handleOpenArTryOn = showArTryOn
+    ? () => setArTryOnOpen(true)
+    : undefined;
 
   const tabbyColorHero =
     !versionConfig.lockHeroGalleryTemplate &&
@@ -227,7 +232,7 @@ function PdpSocialViewInner() {
               onColorSelect={setSelectedColorId}
               onAddToBag={handleAddToBag}
               onOpenReviews={() => openReviews("comments")}
-              onOpenArTryOn={() => setArTryOnOpen(true)}
+              onOpenArTryOn={handleOpenArTryOn}
               sentinelRef={heroSentinelRef}
             />
           </div>
@@ -246,7 +251,7 @@ function PdpSocialViewInner() {
             poster={product.hero.poster}
             alt={product.hero.alt}
             onOpenReviews={() => openReviews("comments")}
-            onOpenArTryOn={() => setArTryOnOpen(true)}
+            onOpenArTryOn={handleOpenArTryOn}
             fillFrame
           />
         </PdpHeroShell>
@@ -261,7 +266,7 @@ function PdpSocialViewInner() {
               aspect: "4/5",
             }}
             onOpenReviews={() => openReviews("comments")}
-            onOpenArTryOn={() => setArTryOnOpen(true)}
+            onOpenArTryOn={handleOpenArTryOn}
           />
         ) : isStaticHero && product.hero.kind === "image" ? (
           <PdpStaticHero

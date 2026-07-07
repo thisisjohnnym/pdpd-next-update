@@ -22,6 +22,9 @@ type PdpTabbyAlsoAvailableAsProps = {
   collapsible?: boolean;
 };
 
+/** How many silhouettes to tease before the "View all" reveal. */
+const TABBY_FAMILY_TEASER_COUNT = 2;
+
 /** Editorial family navigation — adjacent Tabby silhouettes as separate PDPs. */
 export function PdpTabbyAlsoAvailableAs({
   collapsible = false,
@@ -30,6 +33,7 @@ export function PdpTabbyAlsoAvailableAs({
   const version = usePdpVersion();
   const { styleId, size, selectedColorId } = useTabbyVariant();
   const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const links = useMemo(
     () => getTabbyFamilyExplorerLinks(styleId, size, selectedColorId),
@@ -41,6 +45,52 @@ export function PdpTabbyAlsoAvailableAs({
   }
 
   const expanded = collapsible ? open : true;
+  const teaserLinks = links.slice(0, TABBY_FAMILY_TEASER_COUNT);
+  const extraLinks = links.slice(TABBY_FAMILY_TEASER_COUNT);
+  const hasMore = extraLinks.length > 0;
+
+  const renderRow = (
+    link: (typeof links)[number],
+    isFirst: boolean,
+  ) => (
+    <li
+      key={link.id}
+      className={cn(
+        "border-t border-neutral-200",
+        isFirst && "border-t-0",
+      )}
+    >
+      {link.kind === "internal" ? (
+        <button
+          type="button"
+          onClick={() =>
+            router.push(
+              versionedProductPath(version, "tabby", {
+                tabbySlug: link.slug,
+                colorId: link.colorId,
+              }),
+            )
+          }
+          className={cn(
+            "font-extended flex w-full items-center gap-3 py-2.5 text-left",
+            pdpPressableClass,
+          )}
+        >
+          <TabbyFamilyExplorerRowContent link={link} />
+        </button>
+      ) : (
+        <a
+          href={link.href}
+          className={cn(
+            "font-extended flex w-full items-center gap-3 py-2.5 text-left text-black no-underline",
+            pdpPressableClass,
+          )}
+        >
+          <TabbyFamilyExplorerRowContent link={link} />
+        </a>
+      )}
+    </li>
+  );
 
   return (
     <nav
@@ -75,49 +125,62 @@ export function PdpTabbyAlsoAvailableAs({
         </p>
       )}
 
-      <ul
-        className={cn(
-          "m-0 flex list-none flex-col p-0",
-          collapsible && !expanded && "hidden",
-        )}
-      >
-        {links.map((link) => (
-          <li
-            key={link.id}
-            className="border-t border-neutral-200 first:border-t-0"
-          >
-            {link.kind === "internal" ? (
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    versionedProductPath(version, "tabby", {
-                      tabbySlug: link.slug,
-                      colorId: link.colorId,
-                    }),
-                  )
-                }
+      <div className={cn(collapsible && !expanded && "hidden")}>
+        <ul className="m-0 flex list-none flex-col p-0">
+          {teaserLinks.map((link, index) => renderRow(link, index === 0))}
+        </ul>
+
+        {hasMore ? (
+          <>
+            <div
+              className={cn(
+                "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                showAll ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+              )}
+            >
+              <div
                 className={cn(
-                  "font-extended flex w-full items-center gap-3 py-2.5 text-left",
-                  pdpPressableClass,
+                  "min-h-0 overflow-hidden transition-opacity duration-300 ease-out motion-reduce:transition-none",
+                  showAll ? "opacity-100" : "opacity-0",
                 )}
               >
-                <TabbyFamilyExplorerRowContent link={link} />
-              </button>
-            ) : (
-              <a
-                href={link.href}
+                <ul
+                  className="m-0 flex list-none flex-col p-0"
+                  aria-hidden={!showAll}
+                >
+                  {extraLinks.map((link) => renderRow(link, false))}
+                </ul>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowAll((value) => !value)}
+              aria-expanded={showAll}
+              className={cn(
+                "font-extended mt-1 flex w-full items-center justify-center gap-1 py-2.5 text-neutral-600",
+                pdpType.micro,
+                pdpPressableClass,
+              )}
+            >
+              <span>
+                {showAll
+                  ? "Show less"
+                  : `View all ${links.length} silhouettes`}
+              </span>
+              <MaterialIcon
+                name="expand_more"
+                size={16}
+                aria-hidden
                 className={cn(
-                  "font-extended flex w-full items-center gap-3 py-2.5 text-left text-black no-underline",
-                  pdpPressableClass,
+                  "shrink-0 text-neutral-500 transition-transform duration-200 motion-reduce:transition-none",
+                  showAll && "rotate-180",
                 )}
-              >
-                <TabbyFamilyExplorerRowContent link={link} />
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
+              />
+            </button>
+          </>
+        ) : null}
+      </div>
     </nav>
   );
 }

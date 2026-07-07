@@ -119,6 +119,21 @@ export function applyV4HeroGallery(
 /** v5 hero land — on-model lifestyle video (white nav, cinematic open). */
 export const HERO_GALLERY_V5_LEAD_SRC = PDP_GALLERY_IMMERSIVE_HERO_VIDEO;
 
+/**
+ * v5 hero land — creator unboxing clip promoted to slide 0. Portrait 9:16
+ * lifestyle video shot on a soft cream backdrop, so it uses the dark nav
+ * (`headerSurface: "light"`) and gets the priority blur-reveal open.
+ */
+export const HERO_GALLERY_V5_UGC_LEAD_SLIDE: PdpHeroGalleryVideoSlide = {
+  kind: "video",
+  src: "/videos/tabby26-hero-lead.mp4",
+  poster: "/images/posters/tabby26-hero-lead.jpg",
+  alt: "Creator unboxing Tabby Shoulder Bag 26 from its Coach dust bag against a soft cream backdrop",
+  shotType: "lifestyle",
+  headerSurface: "light",
+  priority: true,
+};
+
 /** Move a slide to index 0 without mutating the frozen source array. */
 export function promoteHeroGallerySlideToLead(
   slides: PdpHeroGallerySlide[],
@@ -137,6 +152,18 @@ export function promoteHeroGallerySlideToLead(
     ...slides.slice(0, leadIndex),
     ...slides.slice(leadIndex + 1),
   ];
+}
+
+/**
+ * Prepend an extra lead slide (deduped by `src`) without mutating the source
+ * array. Used to inject a version-specific hero land video ahead of the frozen
+ * base slides.
+ */
+export function prependHeroGalleryLeadSlide(
+  slides: PdpHeroGallerySlide[],
+  leadSlide: PdpHeroGallerySlide,
+): PdpHeroGallerySlide[] {
+  return [leadSlide, ...slides.filter((slide) => slide.src !== leadSlide.src)];
 }
 
 /**
@@ -183,6 +210,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Overhead view inside Tabby Shoulder Bag 26 showing the accordion compartments and zip pocket",
     shotType: "detail",
     headerSurface: "light",
+    overlayCta: "fits-inside",
   },
   {
     kind: "video",
@@ -198,7 +226,6 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 open from above showing the empty leather-lined interior",
     shotType: "detail",
     headerSurface: "light",
-    overlayCta: "fits-inside",
   },
   {
     kind: "image",

@@ -12,6 +12,7 @@ import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
   applyV4HeroGallery,
+  prependHeroGalleryLeadSlide,
   promoteHeroGallerySlideToLead,
   type PdpHeroGallerySlide,
 } from "./pdp-hero-gallery-data";
@@ -112,6 +113,7 @@ export function PdpHeroGallery({
     leadGalleryWithProductStill,
     heroGalleryStudioDragZoom,
     heroGalleryLeadSlideSrc,
+    heroGalleryPrependLeadSlide,
   } = getPdpVersionConfig(usePdpVersion());
   const orderedSlides = useMemo(() => {
     let result =
@@ -126,12 +128,17 @@ export function PdpHeroGallery({
       result = promoteHeroGallerySlideToLead(result, heroGalleryLeadSlideSrc);
     }
 
+    if (heroGalleryPrependLeadSlide) {
+      result = prependHeroGalleryLeadSlide(result, heroGalleryPrependLeadSlide);
+    }
+
     return result;
   }, [
     slides,
     leadGalleryWithProductStill,
     heroGalleryStudioDragZoom,
     heroGalleryLeadSlideSrc,
+    heroGalleryPrependLeadSlide,
   ]);
   const loopedSlides = useMemo(
     () => loopCarouselItems(orderedSlides),

@@ -79,17 +79,9 @@
   border-bottom-width: 0;
 }
 
-/* UGC testimonial band — INEZ-inspired editorial quote carousel. */
+/* "What customers are saying" band — left-aligned editorial testimonial (Figma 409:460). */
 [data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
-  background-color: #1e241e;
-}
-
-[data-pdp-version="v5"] .pdp-v5-ugc-testimonial-quote {
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 1.0625rem;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
-  text-wrap: pretty;
+  background-color: #1f241e;
 }
 
 /* ── Desktop responsive split (lg+) ──────────────────────────────────────────

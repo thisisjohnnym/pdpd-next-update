@@ -151,7 +151,7 @@ export function PdpHeroBelowFoldColorSwatches({
         <div
           className={cn(
             "flex flex-col",
-            isTabbyProduct && showTabbyAlsoAvailableAs ? "gap-5" : "gap-8",
+            isTabbyProduct && showTabbyAlsoAvailableAs ? "gap-7" : "gap-8",
           )}
         >
           <PdpGroupedProductColorSwatchGrid

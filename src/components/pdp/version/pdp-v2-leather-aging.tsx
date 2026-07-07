@@ -98,8 +98,11 @@ function PdpLeatherAgingV4({
   showCareUpsell?: boolean;
   onQuickAdd?: () => void;
 }) {
-  const { leatherAgingHeaderAboveImage, useConsistentModuleHeadings } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    leatherAgingHeaderAboveImage,
+    useConsistentModuleHeadings,
+    useRailLeatherAgingSlider,
+  } = getPdpVersionConfig(usePdpVersion());
   const { stages, title, intro } = PDP_LEATHER_AGING;
   const maxIndex = stages.length - 1;
   const reducedMotion = useReducedMotion();
@@ -259,7 +262,146 @@ function PdpLeatherAgingV4({
     </p>
   );
 
-  const stageSlider = (
+  // ── Apple-style rail knob geometry (v5) ────────────────────────────────
+  // 26px white circle → radius 13px. The track is inset by that radius so the
+  // knob center can reach 0%/100% without the knob ever clipping the card edge.
+  const RAIL_KNOB = 26;
+  const RAIL_INSET = RAIL_KNOB / 2;
+  const railKnobScale = !isDragging ? 1 : hasMoved ? 1.14 : 1.07;
+  const railKnobShadow = isDragging
+    ? "0 2px 6px rgba(0,0,0,0.22), 0 10px 24px rgba(0,0,0,0.18), inset 0 0 0 0.5px rgba(0,0,0,0.06)"
+    : "0 1px 2px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.12), inset 0 0 0 0.5px rgba(0,0,0,0.06)";
+  // easeOutQuint settle on release; 1:1 (no positional transition) while dragging.
+  const railKnobMotionClass = isDragging
+    ? "transition-[transform,box-shadow] duration-150 ease-out"
+    : reducedMotion
+      ? "transition-none"
+      : "transition-[left,transform,box-shadow] duration-[350ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]";
+  const railFillMotionClass =
+    isDragging || reducedMotion
+      ? "transition-none"
+      : "transition-[width] duration-[350ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]";
+
+  const railStageSlider = (
+    <div className="mx-auto flex w-full flex-col gap-[18px] px-2 select-none">
+      {/* continuous rail — press and drag the knob between stages */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-valuemin={0}
+        aria-valuemax={maxIndex}
+        aria-valuenow={displayStageIndex}
+        aria-valuetext={displayStage.label}
+        aria-label="Leather aging over time"
+        className={cn(
+          "relative -my-3 flex h-11 cursor-grab touch-none select-none items-center py-3",
+          "[outline:none] focus-visible:[outline:2px_solid_#1a1a1a] focus-visible:[outline-offset:4px] focus-visible:[border-radius:9999px]",
+          isDragging && "cursor-grabbing",
+        )}
+        onPointerDown={handlePointerDown}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+            event.preventDefault();
+            commitStageIndex(stageIndex - 1);
+          }
+
+          if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+            event.preventDefault();
+            commitStageIndex(stageIndex + 1);
+          }
+        }}
+      >
+        <div
+          className="relative w-full"
+          style={{ paddingLeft: RAIL_INSET, paddingRight: RAIL_INSET }}
+        >
+          <div ref={trackRef} className="relative h-[26px]">
+            {/* base track */}
+            <span
+              aria-hidden
+              className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-black/12"
+            />
+            {/* progress fill */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#1a1a1a]",
+                railFillMotionClass,
+              )}
+              style={{ width: `${renderedProgress}%` }}
+            />
+            {/* stage ticks — white once the fill passes them, faint ahead */}
+            {stages.map((item, index) => {
+              const tickProgress = agingProgressFromStageIndex(index, maxIndex);
+              const passed = tickProgress <= renderedProgress + 0.5;
+
+              return (
+                <span
+                  key={item.id}
+                  aria-hidden
+                  className={cn(
+                    "absolute top-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full",
+                    passed ? "bg-white/85" : "bg-black/25",
+                  )}
+                  style={{ left: `${tickProgress}%` }}
+                />
+              );
+            })}
+            {/* knob */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute top-1/2 rounded-full bg-white",
+                railKnobMotionClass,
+              )}
+              style={{
+                left: `${renderedProgress}%`,
+                width: RAIL_KNOB,
+                height: RAIL_KNOB,
+                transform: `translate(-50%, -50%) scale(${railKnobScale})`,
+                boxShadow: railKnobShadow,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* stage labels — centered under each tick; tap to jump */}
+      <div className="relative h-4">
+        <div
+          className="absolute top-0"
+          style={{ left: RAIL_INSET, right: RAIL_INSET }}
+        >
+          {stages.map((item, index) => {
+            const active = stageIndex === index;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => commitStageIndex(index)}
+                aria-current={active ? "step" : undefined}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${agingProgressFromStageIndex(index, maxIndex)}%`,
+                  transform: "translateX(-50%)",
+                }}
+                className={cn(
+                  "font-extended whitespace-nowrap text-[12px] leading-[1.1] transition-colors duration-200",
+                  active ? "text-black" : "text-black/40",
+                )}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const dotStageSlider = (
     <div
       className={cn(
         "flex w-full flex-col gap-[18px] select-none",
@@ -372,40 +514,46 @@ function PdpLeatherAgingV4({
     </div>
   );
 
+  const stageSlider = useRailLeatherAgingSlider ? railStageSlider : dotStageSlider;
+
   if (leatherAgingHeaderAboveImage) {
     return (
       <section
         data-header-surface="light"
-        className="w-full shrink-0 bg-white px-4 pt-6 pb-6"
+        className="w-full shrink-0 bg-white px-4 py-6"
       >
-        <PdpRevealItem>
-          <div className="mb-3 flex flex-col gap-2">
-            <PdpModuleHeading spacing="none" className="text-left">
-              {title}
-            </PdpModuleHeading>
-            {stageCaption}
-          </div>
-        </PdpRevealItem>
+        {/* Warm container matches the product shot's cream ground (#F2EDEA) so
+            the image melts into the card instead of floating on white. */}
+        <div className="flex flex-col bg-[#F2EDEA] px-4 pt-6 pb-6">
+          <PdpRevealItem>
+            <div className="mb-3 flex flex-col gap-2">
+              <PdpModuleHeading spacing="none" className="text-left">
+                {title}
+              </PdpModuleHeading>
+              {stageCaption}
+            </div>
+          </PdpRevealItem>
 
-        <PdpRevealItem delay={revealStaggerDelay(1)}>
-          <div className="relative h-[430px] w-full bg-neutral-200">
-            <LeatherAgingStages stageIndex={stageIndex} />
-          </div>
-        </PdpRevealItem>
+          <PdpRevealItem delay={revealStaggerDelay(1)}>
+            <div className="relative h-[430px] w-full overflow-hidden bg-[#F2EDEA]">
+              <LeatherAgingStages stageIndex={stageIndex} />
+            </div>
+          </PdpRevealItem>
 
-        <PdpRevealItem delay={revealStaggerDelay(2)}>
-          <div className="flex w-full flex-col items-stretch gap-4 border-t border-neutral-200 pt-5">
-            {stageSlider}
-            {showCareUpsell ? (
-              <PdpLeatherAgingCareUpsell
-                stageIndex={stageIndex}
-                isDragging={isDragging}
-                onQuickAdd={onQuickAdd}
-                className="mt-0 w-[294px]"
-              />
-            ) : null}
-          </div>
-        </PdpRevealItem>
+          <PdpRevealItem delay={revealStaggerDelay(2)}>
+            <div className="flex w-full flex-col items-stretch gap-4 pt-5">
+              {stageSlider}
+              {showCareUpsell ? (
+                <PdpLeatherAgingCareUpsell
+                  stageIndex={stageIndex}
+                  isDragging={isDragging}
+                  onQuickAdd={onQuickAdd}
+                  className="mt-0 w-[294px]"
+                />
+              ) : null}
+            </div>
+          </PdpRevealItem>
+        </div>
       </section>
     );
   }

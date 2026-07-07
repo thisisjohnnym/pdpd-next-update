@@ -110,9 +110,10 @@ export function PdpV2MoreLikeThis({
 
               <p
                 className={cn(
-                  "font-extended m-0 leading-snug text-black",
+                  // Reserve two lines so price + ATB never staircase across cards
+                  "font-extended m-0 line-clamp-2 min-h-[2.75em] leading-snug text-black",
                   leftAlignModuleHeadings ? "text-left" : "text-center",
-                  moreLikeThisLargeCards ? "text-[15px]" : pdpType.body,
+                  moreLikeThisLargeCards ? "text-[13px]" : pdpType.body,
                 )}
               >
                 {item.name}
@@ -121,7 +122,7 @@ export function PdpV2MoreLikeThis({
                 className={cn(
                   "font-extended -mt-1 m-0 text-neutral-500",
                   leftAlignModuleHeadings ? "text-left" : "text-center",
-                  moreLikeThisLargeCards ? "text-sm" : pdpType.label,
+                  moreLikeThisLargeCards ? "text-[12px]" : pdpType.label,
                 )}
               >
                 {item.price}

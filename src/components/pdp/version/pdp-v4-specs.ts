@@ -58,3 +58,27 @@ export const PDP_V4_SPECS = [
     hint: "Turn-lock · brushed gold",
   },
 ] satisfies PdpProductDetailSpecV4[];
+
+/**
+ * v5 Details — editorial two-column sheet (Paper node 407:399).
+ *
+ * Larger 16px label/value pairs, one hairline under every fact, no hint lines,
+ * and no vertical column rule. Copy + column order mirror the Figma frame
+ * exactly. Column-major: left = Material / Weight / Dimensions,
+ * right = Strap / Fits / Hardware.
+ */
+export const PDP_V5_DETAILS_INTRO =
+  "Full-grain leather, measured dimensions, and shoulder-or-crossbody carry - the essentials at a glance.";
+
+export const PDP_V5_DETAILS_COLUMNS = [
+  [
+    { id: "material", label: "Material", value: "Full-grain leather" },
+    { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
+    { id: "dimensions", label: "Dimensions", value: "10 x 6 x 3.25", tabular: true },
+  ],
+  [
+    { id: "strap", label: "Strap", value: '22" drop', tabular: true },
+    { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+    { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+  ],
+] satisfies [PdpProductDetailSpecV4[], PdpProductDetailSpecV4[]];

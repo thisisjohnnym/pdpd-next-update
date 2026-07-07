@@ -67,7 +67,8 @@ function CraftsmanshipCard({
  * hardware, interior, and carry stories.
  */
 export function PdpV4Craftsmanship() {
-  const { leftAlignModuleHeadings } = getPdpVersionConfig(usePdpVersion());
+  const { leftAlignModuleHeadings, useV4ModuleSpacing } =
+    getPdpVersionConfig(usePdpVersion());
   const { headline, intro } = PDP_CRAFTSMANSHIP_V4_SECTION;
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +77,11 @@ export function PdpV4Craftsmanship() {
   return (
     <section
       data-header-surface="light"
-      className="pdp-craftsmanship w-full shrink-0 overflow-x-clip bg-white pt-6 pb-6"
+      className={cn(
+        "pdp-craftsmanship w-full shrink-0 overflow-x-clip bg-white pb-6",
+        // Match the "Ways to wear" top gap so the module above sits evenly (r5).
+        useV4ModuleSpacing ? "pt-14" : "pt-6",
+      )}
     >
       <div
         className={cn(
@@ -109,7 +114,7 @@ export function PdpV4Craftsmanship() {
             pdpCarouselScrollClass,
             "pdp-carousel-draggable flex items-start gap-4 pl-4 pb-2",
           )}
-          aria-label="Up close and personal material highlights"
+          aria-label="Get up close and personal material highlights"
         >
           {PDP_CRAFTSMANSHIP_V4_CARDS.map((card, index) => (
             <CraftsmanshipCard
