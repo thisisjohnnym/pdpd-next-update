@@ -1,7 +1,4 @@
-import type { PdpProductSpec } from "../pdp-data";
-
-/** Editorial Details spec row — alias avoids mutating frozen `pdp-data.ts`. */
-export type PdpProductDetailSpec = PdpProductSpec;
+import type { PdpProductDetailSpec } from "../pdp-data";
 
 /** v4 Details fact — editorial spec row (Paper r5 `LD6-0`). */
 export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
@@ -11,11 +8,14 @@ export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
   hint?: string;
 };
 
-/** v4/v5 Details module — intro beneath "The Details" heading. */
+/** v4/v5 Details module — intro beneath the Details heading. */
 export const PDP_V4_DETAILS_SECTION = {
   intro:
     "Full-grain leather, measured dimensions, and shoulder-or-crossbody carry — the essentials at a glance.",
 } as const;
+
+/** v5 Details module headline — Paper node 407:399. */
+export const PDP_V5_DETAILS_HEADLINE = "Signature Details";
 
 /**
  * v4-only Details facts (Paper r5 `LD6-0`).

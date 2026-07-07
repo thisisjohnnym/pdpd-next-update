@@ -1,8 +1,29 @@
 /** Foreground color for overlay chrome — white on dark backdrops, black on light */
 export type HeaderForeground = "light" | "dark";
 
+/** Map `data-header-surface` / hero slide hints to nav foreground color. */
+export function headerSurfaceToForeground(
+  surface: "light" | "dark",
+): HeaderForeground {
+  return surface === "light" ? "dark" : "light";
+}
+
+/** Per-control contrast — menu, wordmark, and bag can sit on different backdrops. */
+export type HeaderContrastZones = {
+  menu: HeaderForeground;
+  logo: HeaderForeground;
+  bag: HeaderForeground;
+};
+
 const LUMINANCE_THRESHOLD = 0.58;
 const HYSTERESIS = 0.05;
+
+/** Horizontal probe fractions aligned to the hero header grid columns. */
+const HEADER_ZONE_FRACTIONS: Record<keyof HeaderContrastZones, number> = {
+  menu: 0.15,
+  logo: 0.5,
+  bag: 0.85,
+};
 
 function relativeLuminance(r: number, g: number, b: number): number {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
@@ -152,20 +173,37 @@ function sampleMediaAtPoint(
   return readPixelLuminance(media, source.sx, source.sy);
 }
 
+function readHeaderSurfaceLuminance(el: Element): number | null {
+  const surface = el.closest<HTMLElement>("[data-header-surface]");
+  if (surface?.dataset.headerSurface === "light") return 0.95;
+  if (surface?.dataset.headerSurface === "dark") return 0.05;
+  return null;
+}
+
 function sampleAtPoint(clientX: number, clientY: number): number | null {
   const stack = document.elementsFromPoint(clientX, clientY);
 
+  // Section/slide hints are authoritative — a dark product on a light studio
+  // ground still needs dark nav (docs/pdp-hero-chrome.md).
   for (const el of stack) {
     if (el.closest("[data-header-chrome]")) continue;
 
-    const surface = el.closest<HTMLElement>("[data-header-surface]");
-    if (surface?.dataset.headerSurface === "light") return 0.95;
-    if (surface?.dataset.headerSurface === "dark") return 0.05;
+    const surfaceLum = readHeaderSurfaceLuminance(el);
+    if (surfaceLum !== null) return surfaceLum;
+  }
+
+  // Fall back to media pixels for regions without an explicit surface hint.
+  for (const el of stack) {
+    if (el.closest("[data-header-chrome]")) continue;
 
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const lum = sampleMediaAtPoint(el, clientX, clientY);
       if (lum !== null) return lum;
     }
+  }
+
+  for (const el of stack) {
+    if (el.closest("[data-header-chrome]")) continue;
 
     if (el instanceof HTMLElement) {
       const bg = getComputedStyle(el).backgroundColor;
@@ -177,21 +215,104 @@ function sampleAtPoint(clientX: number, clientY: number): number | null {
   return null;
 }
 
-export function sampleBackdropLuminance(sampleRect: DOMRect): number | null {
-  const y = sampleRect.top + sampleRect.height * 0.55;
-  const xs = [0.25, 0.5, 0.75].map(
-    (fraction) => sampleRect.left + sampleRect.width * fraction,
+/** True when the fixed header band overlaps the hero gallery section. */
+export function headerOverlapsHeroSection(headerRect: DOMRect): boolean {
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  const heroSection = document.querySelector("[data-hero-section]");
+  if (!heroSection) {
+    return false;
+  }
+
+  const heroRect = heroSection.getBoundingClientRect();
+  return heroRect.top < headerRect.bottom && heroRect.bottom > headerRect.top;
+}
+
+/** Default probe band when no header element is mounted yet. */
+export function defaultHeaderBandRect(): DOMRect {
+  const width = typeof window !== "undefined" ? window.innerWidth : 375;
+  const top =
+    typeof document !== "undefined"
+      ? Number.parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--pdp-safe-area-top",
+          ),
+        ) || 0
+      : 0;
+  const height = 56;
+
+  return new DOMRect(0, top, width, height);
+}
+
+function sampleBackdropLuminance(sampleRect: DOMRect): number | null {
+  const zones = sampleBackdropLuminanceZones(sampleRect);
+  if (!zones) return null;
+
+  const samples = Object.values(zones).filter(
+    (value): value is number => value !== null,
   );
-
-  const samples = xs
-    .map((x) => sampleAtPoint(x, y))
-    .filter((value): value is number => value !== null);
-
   if (samples.length === 0) return null;
   return samples.reduce((sum, value) => sum + value, 0) / samples.length;
 }
 
-export function luminanceToForeground(
+function sampleBackdropAtAnchor(
+  anchor: Element,
+  sampleY: number,
+): number | null {
+  const rect = anchor.getBoundingClientRect();
+  if (rect.width <= 0) return null;
+
+  // Probe on the icon's column but below the interactive hit target so
+  // elementsFromPoint reaches the hero media behind the chrome.
+  return sampleAtPoint(rect.left + rect.width / 2, sampleY);
+}
+
+export function sampleBackdropLuminanceZones(
+  sampleRect: DOMRect,
+  anchors?: Partial<Record<keyof HeaderContrastZones, Element | null>>,
+): Record<keyof HeaderContrastZones, number | null> | null {
+  if (sampleRect.height <= 0 || sampleRect.width <= 0) return null;
+
+  const sampleY = sampleRect.top + sampleRect.height * 0.55;
+
+  const fromAnchor = (key: keyof HeaderContrastZones) => {
+    const anchor = anchors?.[key];
+    if (anchor) {
+      return sampleBackdropAtAnchor(anchor, sampleY);
+    }
+    return sampleAtPoint(
+      sampleRect.left + sampleRect.width * HEADER_ZONE_FRACTIONS[key],
+      sampleY,
+    );
+  };
+
+  return {
+    menu: fromAnchor("menu"),
+    logo: fromAnchor("logo"),
+    bag: fromAnchor("bag"),
+  };
+}
+
+export function luminanceZonesToForeground(
+  luminance: Record<keyof HeaderContrastZones, number | null>,
+  current: HeaderContrastZones,
+): HeaderContrastZones {
+  return {
+    menu: luminance.menu === null
+      ? current.menu
+      : luminanceToForeground(luminance.menu, current.menu),
+    logo: luminance.logo === null
+      ? current.logo
+      : luminanceToForeground(luminance.logo, current.logo),
+    bag: luminance.bag === null
+      ? current.bag
+      : luminanceToForeground(luminance.bag, current.bag),
+  };
+}
+
+function luminanceToForeground(
   luminance: number,
   current: HeaderForeground,
 ): HeaderForeground {

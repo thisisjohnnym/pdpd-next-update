@@ -116,11 +116,11 @@ function AgingCareHelp({
         aria-expanded={open}
         aria-controls="aging-care-help-tooltip"
         className={cn(
-          "inline-flex items-center gap-1.5 text-left text-neutral-500 transition-colors active:text-neutral-700",
+          "inline-flex items-center gap-1.5 text-left text-black transition-colors active:text-black/70",
           pdpPressableClass,
         )}
       >
-        <MaterialIcon name="help_outline" size={18} className="shrink-0 text-neutral-500" />
+        <MaterialIcon name="help_outline" size={18} className="shrink-0 text-black" />
         <span className={pdpType.micro}>{label}</span>
       </button>
 

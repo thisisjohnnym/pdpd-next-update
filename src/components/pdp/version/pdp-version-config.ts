@@ -10,6 +10,8 @@ import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
 import {
   PDP_GALLERY_SLIDES_V2,
   PDP_GALLERY_SLIDES_V4,
+  buildHeroGallerySlidesFromUgcTestimonials,
+  HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
   type PdpGallerySlideV2,
 } from "./pdp-data-v2";
 import { PDP_CHAPTERS_V2 } from "./pdp-section-chapters-v2";
@@ -73,8 +75,7 @@ export type PdpVersionConfig = {
   /** Use the v2 More like this layout (158px fixed-width cards) */
   useSimplifiedMoreLikeThis: boolean;
   /**
-   * Bump More like this product cards ~10% (174×218px vs 158×198px) and tighten
-   * the rail gap so the 3rd card still peeks. v5 only — v4 keeps Paper B6C-0.
+   * v5 More like this — viewport-based ~1.5-card peek rail (vs 158px fixed baseline).
    */
   moreLikeThisLargeCards: boolean;
   /** Use the v2 leather aging card layout (warm header/image/controls — Paper AP5-0) */
@@ -157,7 +158,17 @@ export type PdpVersionConfig = {
    */
   heroGalleryPrependLeadSlide?: PdpHeroGallerySlide;
   /**
-   * Pin demo stock states (Sold out + Notify me) onto distinct Popular Colors in
+   * UGC testimonial slides woven into the hero carousel after the lead pair.
+   * Built from `PDP_UGC_TESTIMONIALS` via `buildHeroGallerySlidesFromUgcTestimonials`.
+   * v5 only.
+   */
+  heroGalleryUgcSlides?: PdpHeroGallerySlide[];
+  /**
+   * Index after which `heroGalleryUgcSlides` are inserted. v5 defaults to 1
+   * (after the unboxing + lifestyle lead videos).
+   */
+  heroGalleryUgcInsertAfterIndex?: number;
+  /**
    * the progressive color drawer so it always demos the sold-out affordance
    * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
    */
@@ -335,6 +346,11 @@ export type PdpVersionConfig = {
    */
   hideReviewCountRecommend: boolean;
   /**
+   * Hide the aggregate star rating row under the reviews module headline.
+   * v5 only — v4 keeps stars + summary line.
+   */
+  hideReviewSummaryRating: boolean;
+  /**
    * Bump the reviews AI-summary tray text up one step (compact 14px body vs the
    * xs 11px). v5 only; v4 keeps the extra-small tray.
    */
@@ -345,6 +361,10 @@ export type PdpVersionConfig = {
    * the caption.
    */
   hideReviewUgcMomentCaption: boolean;
+  /**
+   * Bump quote + handle type one step in the reviews UGC moments rail. v5 only.
+   */
+  enlargeReviewUgcMomentText: boolean;
   /**
    * Unify module H1s to `pdpType.headline` (20px) — matches The Details and
    * Out in the wild instead of the legacy 24px r5 override. v5 only.
@@ -478,8 +498,10 @@ const V1_CONFIG: PdpVersionConfig = {
   leatherAgingHeaderAboveImage: false,
   useRailLeatherAgingSlider: false,
   hideReviewCountRecommend: false,
+  hideReviewSummaryRating: false,
   enlargeReviewAiSummary: false,
   hideReviewUgcMomentCaption: false,
+  enlargeReviewUgcMomentText: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -572,8 +594,10 @@ const V2_CONFIG: PdpVersionConfig = {
   leatherAgingHeaderAboveImage: false,
   useRailLeatherAgingSlider: false,
   hideReviewCountRecommend: false,
+  hideReviewSummaryRating: false,
   enlargeReviewAiSummary: false,
   hideReviewUgcMomentCaption: false,
+  enlargeReviewUgcMomentText: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -595,7 +619,7 @@ const V2_CONFIG: PdpVersionConfig = {
 };
 
 /**
- * v3 — Paper r4 pivot.
+ * v3 — Paper r4 pivot. Inherits the v2 module order, then layers the r4 hero
  * (docked buy bar in document flow), the floating-on-scroll CTA, and the
  * progressive in-context color drawer. See docs/pdp-versions.md.
  */
@@ -680,16 +704,25 @@ const V5_CONFIG: PdpVersionConfig = {
   heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
   // v5 hero land leads with the creator unboxing clip ahead of the base slides.
   heroGalleryPrependLeadSlide: HERO_GALLERY_V5_UGC_LEAD_SLIDE,
+  // v5 weaves Out in the wild UGC into the hero carousel after the lead pair.
+  heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
+    HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
+  ),
+  heroGalleryUgcInsertAfterIndex: 1,
   heroMaterialSubtitleLine: true,
   leatherAgingHeaderAboveImage: true,
   // v5 leather-aging gets the continuous Apple-style rail slider.
   useRailLeatherAgingSlider: true,
+  // v5 reviews summary drops the aggregate star row (photos + AI summary carry trust).
+  hideReviewSummaryRating: true,
   // v5 reviews summary shows stars + average only (no count / recommend tail).
   hideReviewCountRecommend: true,
   // v5 bumps the reviews AI-summary tray text up a step.
   enlargeReviewAiSummary: true,
   // v5 drops the topic caption above each reviews UGC quote.
   hideReviewUgcMomentCaption: true,
+  // v5 bumps quote + handle type in the reviews UGC moments rail.
+  enlargeReviewUgcMomentText: true,
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,

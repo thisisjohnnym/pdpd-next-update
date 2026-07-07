@@ -9,9 +9,7 @@ import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
 import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
-  applyV4HeroGallery,
-  prependHeroGalleryLeadSlide,
-  promoteHeroGallerySlideToLead,
+  orderHeroGallerySlides,
   type PdpHeroGallerySlide,
 } from "./pdp-hero-gallery-data";
 import {
@@ -102,6 +100,8 @@ export function PdpHeroGalleryVertical({
     heroGalleryPrependLeadSlide,
     hero360IntroEnabled,
     hero360IntroVideoSrc,
+    heroGalleryUgcSlides,
+    heroGalleryUgcInsertAfterIndex,
   } = getPdpVersionConfig(usePdpVersion());
   const { isGalleryScrollReady } = useHero360Intro();
   const reducedMotion = useReducedMotion();
@@ -109,31 +109,26 @@ export function PdpHeroGalleryVertical({
   const useIntroLeadSlide =
     hero360IntroEnabled && Boolean(hero360IntroVideoSrc) && !reducedMotion;
 
-  const orderedSlides = useMemo(() => {
-    let result =
-      leadGalleryWithProductStill || heroGalleryStudioDragZoom
-        ? applyV4HeroGallery(slides, {
-            leadGalleryWithProductStill,
-            heroGalleryStudioDragZoom,
-          })
-        : slides;
-
-    if (heroGalleryLeadSlideSrc) {
-      result = promoteHeroGallerySlideToLead(result, heroGalleryLeadSlideSrc);
-    }
-
-    if (heroGalleryPrependLeadSlide) {
-      result = prependHeroGalleryLeadSlide(result, heroGalleryPrependLeadSlide);
-    }
-
-    return result;
-  }, [
-    slides,
-    leadGalleryWithProductStill,
-    heroGalleryStudioDragZoom,
-    heroGalleryLeadSlideSrc,
-    heroGalleryPrependLeadSlide,
-  ]);
+  const orderedSlides = useMemo(
+    () =>
+      orderHeroGallerySlides(slides, {
+        leadGalleryWithProductStill,
+        heroGalleryStudioDragZoom,
+        heroGalleryLeadSlideSrc,
+        heroGalleryPrependLeadSlide,
+        heroGalleryUgcSlides,
+        heroGalleryUgcInsertAfterIndex,
+      }),
+    [
+      slides,
+      leadGalleryWithProductStill,
+      heroGalleryStudioDragZoom,
+      heroGalleryLeadSlideSrc,
+      heroGalleryPrependLeadSlide,
+      heroGalleryUgcSlides,
+      heroGalleryUgcInsertAfterIndex,
+    ],
+  );
 
   const { activeIndex } = useVerticalHeroGallery(trackRef, orderedSlides.length);
   const setHeroChromeSurface = useSetHeroChromeSurface();

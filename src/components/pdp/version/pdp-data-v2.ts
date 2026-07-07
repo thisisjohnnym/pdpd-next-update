@@ -1,15 +1,5 @@
-import {
-  PDP_GALLERY_SLIDES,
-  type PdpGalleryImmersiveSlide,
-  type PdpGallerySlide,
-  type PdpUgcVideo,
-} from "../pdp-data";
-
-/** v4/v5 immersive slides may carry optional copy above the frame. */
-export type PdpGalleryImmersiveSlideV2 = PdpGalleryImmersiveSlide & {
-  headline?: string;
-  subtext?: string;
-};
+import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
+import type { PdpHeroGallerySlide } from "../pdp-hero-gallery-data";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -35,8 +25,7 @@ export type PdpGalleryWaysToWearSlide = {
 
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
-  | Exclude<PdpGallerySlide, PdpGalleryImmersiveSlide>
-  | PdpGalleryImmersiveSlideV2
+  | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
   | PdpGalleryWaysToWearSlide;
@@ -283,6 +272,12 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
   },
 ] satisfies PdpUgcCommunityPhoto[];
 
+/** v5 testimonials band — headline + intro above topic tabs (Figma 409:460). */
+export const PDP_UGC_TESTIMONIALS_SECTION = {
+  headline: "Out in the wild",
+  subtext: "Real people, real context — not random snaps.",
+} as const;
+
 /** Editorial testimonial card — quote, attribution, social, and review CTA (v5). */
 export type PdpUgcTestimonial = {
   id: string;
@@ -305,7 +300,7 @@ export const PDP_UGC_TESTIMONIALS = [
     src: "/images/reviews/ugc-coffee-run.png",
     alt: "Customer in a brown track jacket and plaid skirt with Tabby Shoulder Bag 26 outside a coffee shop",
     quote:
-      "My go-to for slow weekend mornings — comfortable, effortless, and goes with everything.",
+      "My go-to for slow weekend mornings — comfortable, effortless, and goes with everything from coffee runs to brunch. I throw it on crossbody and never think twice about it.",
     authorName: "Jordan L.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -318,7 +313,7 @@ export const PDP_UGC_TESTIMONIALS = [
     src: "/images/reviews/ugc-on-street.png",
     alt: "Customer at Spring St subway station with Tabby Shoulder Bag 26 and coffee in hand",
     quote:
-      "Reads polished without feeling precious — I carry it every day on my commute.",
+      "Reads polished without feeling precious — I carry it every day on my commute, through the subway and straight to my desk. The strap sits right and the leather still looks crisp by evening.",
     authorName: "Alex R.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -331,7 +326,7 @@ export const PDP_UGC_TESTIMONIALS = [
     src: "/images/reviews/ugc-mirror-selfie.png",
     alt: "Customer mirror selfie with Tabby Shoulder Bag 26",
     quote:
-      "Higher on the hip — exactly where I want it for going out. The quilting hits different in person.",
+      "Higher on the hip — exactly where I want it for going out. The quilting hits different in person, and it holds my phone, lip gloss, and keys without losing its shape all night.",
     authorName: "Mia T.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "tiktok",
@@ -343,7 +338,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-lolalilylang",
     src: "/images/reviews/ugc-lolalilylang.png",
     alt: "TikTok creator @lolalilylang styling Tabby Shoulder Bag 26",
-    quote: "This front pocket fits more than you'd think — my everyday grab-and-go bag.",
+    quote:
+      "This front pocket fits more than you'd think — my everyday grab-and-go bag. I style it with everything from jeans to dresses, and the hardware makes even a simple outfit feel pulled together.",
     authorName: "Lola L.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "tiktok",
@@ -356,7 +352,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-outfit-flat",
     src: "/images/reviews/ugc-outfit-flat.png",
     alt: "Customer outfit flat lay with Tabby Shoulder Bag 26",
-    quote: "Anchors the whole look without trying too hard.",
+    quote:
+      "Anchors the whole look without trying too hard. Whether I'm flat-laying an OOTD or running errands, it's the one bag that always makes the outfit feel intentional.",
     authorName: "Sam K.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -368,7 +365,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-rachblaire",
     src: "/images/reviews/ugc-rachblaire.png",
     alt: "TikTok creator @rachblaire styling Tabby Shoulder Bag 26",
-    quote: "Weekend trip tested. Crossbody all day, zero issues.",
+    quote:
+      "Weekend trip tested. Crossbody all day, zero issues — airport, walking around town, dinner out. It carried everything I needed and the strap never dug in.",
     authorName: "Rachel B.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "tiktok",
@@ -381,7 +379,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-white-tabby-home",
     src: "/images/reviews/ugc-white-tabby-home.png",
     alt: "Customer at home with Tabby Shoulder Bag 26 in chalk leather on a sofa",
-    quote: "The chalk leather looks even better in natural light — my lazy Sunday staple.",
+    quote:
+      "The chalk leather looks even better in natural light — my lazy Sunday staple. I keep it by the door for farmers market runs and it still feels elevated without any effort.",
     authorName: "Emma W.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -393,7 +392,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-katiemcev0y",
     src: "/images/reviews/ugc-katiemcev0y.png",
     alt: "TikTok creator @katiemcev0y holding multiple Tabby Shoulder Bag 26 colorways in store",
-    quote: "Hard to choose just one — the Tabby 26 works in every finish for the office.",
+    quote:
+      "Hard to choose just one — the Tabby 26 works in every finish for the office. Structured enough for meetings, but I still take it straight to happy hour without swapping bags.",
     authorName: "Katie M.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "tiktok",
@@ -406,7 +406,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-itsnani333",
     src: "/images/reviews/ugc-itsnani333.png",
     alt: "TikTok creator @itsnani333 comparing Tabby Shoulder Bag 26 and Pillow Tabby",
-    quote: "Structured for work days, but I reach for this one on nights out too.",
+    quote:
+      "Structured for work days, but I reach for this one on nights out too. It photographs well, fits the essentials, and the C clasp always gets compliments at the table.",
     authorName: "Nani T.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "tiktok",
@@ -419,7 +420,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-pink-tabby-stanley",
     src: "/images/reviews/ugc-pink-tabby-stanley.png",
     alt: "Customer styling a pink quilted Tabby Shoulder Bag 26 with a Stanley tumbler",
-    quote: "The pink quilted Tabby is my everyday desk-to-dinner bag.",
+    quote:
+      "The pink quilted Tabby is my everyday desk-to-dinner bag. It carries my tumbler, wallet, and laptop charger without looking bulky — and the color pops in every mirror selfie.",
     authorName: "Priya N.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -431,7 +433,8 @@ export const PDP_UGC_TESTIMONIALS = [
     id: "testimonial-silver-quilted-charm",
     src: "/images/reviews/ugc-silver-quilted-charm.png",
     alt: "Customer with silver quilted Tabby Shoulder Bag 26 and cherry bag charm",
-    quote: "Added a cherry charm and it instantly felt dressier for date night.",
+    quote:
+      "Added a cherry charm and it instantly felt dressier for date night. The silver quilting catches the light, and it's compact enough to wear all evening without switching to a clutch.",
     authorName: "Leah S.",
     productLabel: "Tabby Shoulder Bag 26 in Quilted Leather",
     socialPlatform: "instagram",
@@ -440,6 +443,47 @@ export const PDP_UGC_TESTIMONIALS = [
     topicId: "going-out",
   },
 ] satisfies PdpUgcTestimonial[];
+
+/** UGC testimonials from "Out in the wild" promoted into the v5 hero carousel. */
+export const HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS = [
+  "testimonial-rachblaire",
+  "testimonial-coffee-run",
+  "testimonial-katiemcev0y",
+] as const;
+
+function ugcTestimonialToHeroSlide(
+  testimonial: PdpUgcTestimonial,
+): PdpHeroGallerySlide {
+  if (testimonial.videoSrc) {
+    return {
+      kind: "video",
+      src: testimonial.videoSrc,
+      poster: testimonial.src,
+      alt: testimonial.alt,
+      shotType: "lifestyle",
+      headerSurface: "light",
+    };
+  }
+
+  return {
+    kind: "image",
+    src: testimonial.src,
+    alt: testimonial.alt,
+    shotType: "on-model",
+    headerSurface: "light",
+  };
+}
+
+export function buildHeroGallerySlidesFromUgcTestimonials(
+  ids: readonly string[],
+): PdpHeroGallerySlide[] {
+  const byId = new Map(PDP_UGC_TESTIMONIALS.map((item) => [item.id, item]));
+
+  return ids.flatMap((id) => {
+    const testimonial = byId.get(id);
+    return testimonial ? [ugcTestimonialToHeroSlide(testimonial)] : [];
+  });
+}
 
 export function listUgcTestimonialsForTopic(
   topicId: PdpUgcWildTopicId,
@@ -647,14 +691,14 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
     id: "shoulder",
     label: "Shoulder carry",
     caption: "Relaxed, elevated styling for everyday wear.",
-    src: "/images/gallery/tabby-leather-on-model-tee.png",
-    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a Coach tee and suede skirt",
+    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
+    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a beige top and tailored trousers",
   },
   {
     id: "crossbody",
     label: "Crossbody",
-    caption: "Hands-free comfort for commuting, travel, and everyday movement.",
-    src: "/images/gallery/tabby-on-model-trench.jpg",
+    caption: "Hands-free comfort for commuting and travel.",
+    src: "/images/gallery/tabby-crossbody-trench.jpg",
     alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
   },
 ] satisfies PdpWaysToWearStyle[];

@@ -87,10 +87,9 @@ body {
   top: 2px;
 }
 
-/* Inline with Material add icon — cancel extended face nudge */
+/* Inline with Material add icon — match extended face optical nudge */
 .pdp-add-icon-label {
-  top: 0;
-  transform: translateY(0.5px);
+  top: 2px;
   line-height: 1;
 }
 
@@ -1158,12 +1157,55 @@ html.pdp-panel-scroll {
   animation: pdp-msg-enter 280ms var(--pdp-ease-emphasized) both;
 }
 
+/* Hero video pill — corner rise on slide change, staggered icon reveal */
+.pdp-video-controls-pop {
+  transition:
+    opacity 280ms var(--pdp-ease-emphasized),
+    transform 280ms var(--pdp-ease-emphasized);
+}
+.pdp-video-controls-pop[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.pdp-video-controls-pop[data-state="open"] {
+  opacity: 1;
+  transform: none;
+}
+
+.pdp-video-controls-stagger > button {
+  transition:
+    opacity 260ms var(--pdp-ease-emphasized),
+    transform 260ms var(--pdp-ease-emphasized),
+    filter 260ms var(--pdp-ease-emphasized);
+}
+.pdp-video-controls-stagger[data-state="closed"] > button {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+  transition-delay: 0ms;
+}
+.pdp-video-controls-stagger[data-state="open"] > button {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+.pdp-video-controls-stagger[data-state="open"] > button:nth-child(2) {
+  transition-delay: 90ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pdp-fade,
   .pdp-pop,
   .pdp-pop-up,
-  .pdp-icon-swap__layer {
+  .pdp-icon-swap__layer,
+  .pdp-video-controls-pop,
+  .pdp-video-controls-stagger > button {
     transition: none;
+  }
+  .pdp-video-controls-pop[data-state="closed"],
+  .pdp-video-controls-stagger[data-state="closed"] > button {
+    transform: none;
+    filter: none;
   }
   .pdp-pop[data-state="closed"],
   .pdp-pop-up[data-state="closed"] {

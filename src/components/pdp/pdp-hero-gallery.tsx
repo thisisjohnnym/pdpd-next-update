@@ -11,9 +11,8 @@ import { PdpHeroActionRail } from "./pdp-hero-action-rail";
 import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
-  applyV4HeroGallery,
-  prependHeroGalleryLeadSlide,
-  promoteHeroGallerySlideToLead,
+  getHeroGallerySlideKey,
+  orderHeroGallerySlides,
   type PdpHeroGallerySlide,
 } from "./pdp-hero-gallery-data";
 import {
@@ -60,11 +59,11 @@ function HeroSlideMedia({
         preload={isActive ? "auto" : "metadata"}
         priorityAutoplay={Boolean(slide.priority)}
         skeletonTone={slide.shotType === "lifestyle" ? "dark" : "light"}
-        showControls={false}
-        showMuteControl={false}
+        showMuteControl
         passThroughTouch
         allowHorizontalPan
-        tapToTogglePlayback
+        controlsPosition="bottom-right"
+        controlsElevated
         className={cn("size-full object-center", fitClass)}
         style={{ objectPosition }}
       />
@@ -128,32 +127,29 @@ export function PdpHeroGallery({
     heroGalleryStudioDragZoom,
     heroGalleryLeadSlideSrc,
     heroGalleryPrependLeadSlide,
+    heroGalleryUgcSlides,
+    heroGalleryUgcInsertAfterIndex,
   } = versionConfig;
-  const orderedSlides = useMemo(() => {
-    let result =
-      leadGalleryWithProductStill || heroGalleryStudioDragZoom
-        ? applyV4HeroGallery(slides, {
-            leadGalleryWithProductStill,
-            heroGalleryStudioDragZoom,
-          })
-        : slides;
-
-    if (heroGalleryLeadSlideSrc) {
-      result = promoteHeroGallerySlideToLead(result, heroGalleryLeadSlideSrc);
-    }
-
-    if (heroGalleryPrependLeadSlide) {
-      result = prependHeroGalleryLeadSlide(result, heroGalleryPrependLeadSlide);
-    }
-
-    return result;
-  }, [
-    slides,
-    leadGalleryWithProductStill,
-    heroGalleryStudioDragZoom,
-    heroGalleryLeadSlideSrc,
-    heroGalleryPrependLeadSlide,
-  ]);
+  const orderedSlides = useMemo(
+    () =>
+      orderHeroGallerySlides(slides, {
+        leadGalleryWithProductStill,
+        heroGalleryStudioDragZoom,
+        heroGalleryLeadSlideSrc,
+        heroGalleryPrependLeadSlide,
+        heroGalleryUgcSlides,
+        heroGalleryUgcInsertAfterIndex,
+      }),
+    [
+      slides,
+      leadGalleryWithProductStill,
+      heroGalleryStudioDragZoom,
+      heroGalleryLeadSlideSrc,
+      heroGalleryPrependLeadSlide,
+      heroGalleryUgcSlides,
+      heroGalleryUgcInsertAfterIndex,
+    ],
+  );
   const loopedSlides = useMemo(
     () => loopCarouselItems(orderedSlides),
     [orderedSlides],
@@ -207,7 +203,7 @@ export function PdpHeroGallery({
             const slideScrimVisible = slide.headerSurface === "dark";
             return (
               <div
-                key={`${slide.kind}-${slide.src}-${index}`}
+                key={`${getHeroGallerySlideKey(slide)}-${index}`}
                 className="relative h-full w-full shrink-0 snap-center snap-always"
                 style={{ backgroundColor: heroSlideBackground(slide.shotType) }}
               >

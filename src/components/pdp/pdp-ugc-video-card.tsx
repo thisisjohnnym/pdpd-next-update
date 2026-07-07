@@ -98,7 +98,6 @@ export function PdpUgcVideoCard({
             preload={isActive ? "auto" : "metadata"}
             skeletonTone="dark"
             allowHorizontalPan
-            tapToTogglePlayback
             showMuteControl
             className="size-full object-cover object-center"
           />

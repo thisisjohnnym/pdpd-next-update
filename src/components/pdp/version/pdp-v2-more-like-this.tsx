@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import {
   pdpCarouselScrollClass,
   pdpCarouselScrollWrapClass,
+  pdpMoreLikeThisLargeCardClass,
 } from "../pdp-carousel";
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
 import { PdpRevealItem } from "../pdp-reveal-item";
@@ -19,10 +20,10 @@ import { useDragToScroll } from "../use-infinite-centered-carousel";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
-/** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` bumps image; ATB stays compact. */
+/** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` uses viewport peek rail. */
 const MORE_LIKE_THIS_CARD = {
   default: { width: 158, imageHeight: 198, buttonHeight: 38 },
-  large: { width: 174, imageHeight: 218, buttonHeight: 32 },
+  large: { buttonHeight: 36 },
 } as const;
 
 /**
@@ -43,9 +44,9 @@ export function PdpV2MoreLikeThis({
     moreLikeThisLargeCards,
     squareButtonCorners,
   } = getPdpVersionConfig(usePdpVersion());
-  const card = moreLikeThisLargeCards
-    ? MORE_LIKE_THIS_CARD.large
-    : MORE_LIKE_THIS_CARD.default;
+  const defaultCard = MORE_LIKE_THIS_CARD.default;
+  const largeCard = MORE_LIKE_THIS_CARD.large;
+  const card = moreLikeThisLargeCards ? largeCard : defaultCard;
   const { eyebrow, items } = PDP_MORE_LIKE_THIS;
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -89,22 +90,35 @@ export function PdpV2MoreLikeThis({
             <PdpRevealItem
               key={item.id}
               delay={revealStaggerDelay(index)}
-              className="flex shrink-0 snap-start snap-always flex-col gap-2"
-              style={{ width: card.width }}
+              className={cn(
+                "flex flex-col gap-2",
+                moreLikeThisLargeCards
+                  ? pdpMoreLikeThisLargeCardClass
+                  : "w-[158px] shrink-0 snap-start snap-always",
+              )}
             >
               <div
                 className={cn(
-                  "relative overflow-hidden",
+                  "relative w-full overflow-hidden",
+                  moreLikeThisLargeCards ? "aspect-[4/5]" : "",
                   squareProductCardCorners ? "rounded-none" : "rounded-xl",
                 )}
-                style={{ width: card.width, height: card.imageHeight }}
+                style={
+                  moreLikeThisLargeCards
+                    ? undefined
+                    : { width: defaultCard.width, height: defaultCard.imageHeight }
+                }
               >
                 <Image
                   src={item.imageSrc}
                   alt={item.imageAlt}
                   fill
                   className="object-cover object-center"
-                  sizes={`${card.width}px`}
+                  sizes={
+                    moreLikeThisLargeCards
+                      ? "(min-width: 1024px) 33vw, 70vw"
+                      : `${defaultCard.width}px`
+                  }
                 />
               </div>
 

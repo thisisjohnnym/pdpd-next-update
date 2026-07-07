@@ -610,14 +610,6 @@ export function useHeroVideoPlayback({
     }
   }, [showBlurReveal, isReady, isPlaying]);
 
-  const isRevealed =
-    !showBlurReveal || reducedMotion
-      ? isReady
-      : hasRevealed || (isPlaying && isReady);
-
-  /** The video element is actually painting a frame on screen */
-  const videoFrameVisible = showBlurReveal ? previewVisible : isReady;
-
   const showFrozenPlayOverlay =
     isActive &&
     !isPlaying &&
@@ -628,6 +620,14 @@ export function useHeroVideoPlayback({
         firstFrameTimedOut ||
         !canAutoplayPriorityHero
       : manualPlaybackRequired && (isReady || Boolean(poster) || firstFrameTimedOut));
+
+  const isRevealed =
+    !showBlurReveal || reducedMotion
+      ? isReady
+      : hasRevealed || (isPlaying && isReady) || showFrozenPlayOverlay;
+
+  /** The video element is actually painting a frame on screen */
+  const videoFrameVisible = showBlurReveal ? previewVisible : isReady;
 
   const showTapPausedOverlay =
     tapToTogglePlayback &&

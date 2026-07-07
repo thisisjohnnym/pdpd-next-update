@@ -110,7 +110,7 @@ export function PdpHeroBagGlyph({
       style={{ width: size, height: size }}
     >
       <GlyphSvg size={size}>
-        <GlyphPath d={PATHS.bagFilled} fill="#272727" />
+        <GlyphPath d={PATHS.bagFilled} />
       </GlyphSvg>
       <span
         aria-hidden

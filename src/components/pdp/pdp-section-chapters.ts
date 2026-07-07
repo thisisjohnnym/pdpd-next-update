@@ -7,7 +7,7 @@ export type PdpChapter = {
   sub: string;
 };
 
-export const PDP_CHAPTER_ANCHOR_PREFIX = "pdp-chapter-";
+const PDP_CHAPTER_ANCHOR_PREFIX = "pdp-chapter-";
 
 export function pdpChapterAnchorId(id: string) {
   return `${PDP_CHAPTER_ANCHOR_PREFIX}${id}`;
