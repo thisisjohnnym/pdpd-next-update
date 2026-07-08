@@ -1,7 +1,7 @@
 import { PDP_GALLERY_SLIDES } from "../pdp-data";
 import { HERO_360_INTRO_VIDEO_SRC } from "../pdp-video-sources";
 import {
-  HERO_GALLERY_V5_LEAD_SRC,
+  HERO_ON_MODEL_BLACK_DRESS_SRC,
   type PdpHeroGallerySlide,
 } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
@@ -168,6 +168,11 @@ export type PdpVersionConfig = {
    */
   heroGalleryUgcInsertAfterIndex?: number;
   /**
+   * Group hero slides by story category — on-model land, hero video, product
+   * stills, fits inside, 360°, community last. v5 only.
+   */
+  heroGalleryLogicalBlockOrder: boolean;
+  /**
    * the progressive color drawer so it always demos the sold-out affordance
    * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
    */
@@ -302,9 +307,13 @@ export type PdpVersionConfig = {
    */
   useV5UgcTestimonialCarousel: boolean;
   /**
-   * 9:16 blush editorial quote card after What customers are saying. v5 only.
+   * 9:16 warm beige editorial quote card after Up close / craftsmanship. v5 only.
    */
   showEditorialQuoteCard: boolean;
+  /**
+   * Warm design-sketch scroll break after the quote card, before Ways to wear. v5 only.
+   */
+  showDesignSketchInterrupt: boolean;
   /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
@@ -401,6 +410,11 @@ export type PdpVersionConfig = {
    */
   showCraftedToLastVideo: boolean;
   /**
+   * Apple-style "Get the highlights" horizontal card rail (replaces the
+   * "Feel the leather" lifestyle slide). v5 only.
+   */
+  showGetTheHighlights: boolean;
+  /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
    */
@@ -460,6 +474,13 @@ export type PdpVersionConfig = {
    */
   showHeroGalleryCategoryRail: boolean;
   /**
+   * Play the one-shot hero land intro on first load — the video settles
+   * full-bleed, then the overlay header, gallery chrome, and docked product
+   * footer fall into place with a slow, subtle stagger. v5 only; v1-v4 keep
+   * the calm instant land. Timing/keyframes live in `pdp-v5.css`.
+   */
+  playHeroLandIntro: boolean;
+  /**
    * Mobile hero gallery scrolls vertically (snap stack) instead of horizontal
    * carousel. v6 UXR variant only.
    */
@@ -509,6 +530,7 @@ const V1_CONFIG: PdpVersionConfig = {
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
   heroGalleryLeadSlideSrc: "",
+  heroGalleryLogicalBlockOrder: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
@@ -550,9 +572,11 @@ const V1_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
+  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
+  showGetTheHighlights: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -564,6 +588,7 @@ const V1_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
   showHeroGalleryCategoryRail: false,
+  playHeroLandIntro: false,
   heroVerticalGallery: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
@@ -614,6 +639,7 @@ const V2_CONFIG: PdpVersionConfig = {
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
   heroGalleryLeadSlideSrc: "",
+  heroGalleryLogicalBlockOrder: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
@@ -655,10 +681,12 @@ const V2_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
+  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
+  showGetTheHighlights: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -670,6 +698,7 @@ const V2_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
   showHeroGalleryCategoryRail: false,
+  playHeroLandIntro: false,
   heroVerticalGallery: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
@@ -742,7 +771,7 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 polish — docked hero ATB only; no sticky floating bar for now.
   showFloatingBuyBar: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Feel the leather → Details → What customers are saying → Up close → Aging.
+  // v5 story: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideHeroColorSwatchLabel: false,
@@ -761,12 +790,14 @@ const V5_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
   showEditorialQuoteCard: true,
+  showDesignSketchInterrupt: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
-  heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
-  // v5 weaves Out in the wild UGC into the hero carousel after the lead pair.
+  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
+  heroGalleryLogicalBlockOrder: true,
+  // v5 weaves Out in the wild UGC into the hero carousel after product content.
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
     HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
   ),
@@ -791,6 +822,7 @@ const V5_CONFIG: PdpVersionConfig = {
   squareButtonCorners: true,
   showWaysToWearModule: true,
   showCraftedToLastVideo: true,
+  showGetTheHighlights: true,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -808,6 +840,8 @@ const V5_CONFIG: PdpVersionConfig = {
   // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
+  // v5 lands with a slow, subtle staggered chrome intro over the settled video.
+  playHeroLandIntro: true,
 };
 
 /**
@@ -820,6 +854,8 @@ const V6_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: false,
   // The v5 category rail replaces the tick indicator — keep the v6 vertical rail.
   showHeroGalleryCategoryRail: false,
+  // v6 has its own 360° intro choreography — skip the v5 land-intro stagger.
+  playHeroLandIntro: false,
   heroVerticalGallery: true,
   // v6 hero land — one-shot 360° intro, then settle on a0 product still.
   hero360IntroEnabled: true,

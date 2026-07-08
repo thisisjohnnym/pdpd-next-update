@@ -44,8 +44,16 @@ const HERO_FRAMING: Record<PdpHeroShotType, PdpHeroFraming> = {
   studio: { objectFit: "contain", objectPosition: "center" },
 };
 
-export function resolveHeroFraming(shotType: PdpHeroShotType): PdpHeroFraming {
+function resolveHeroFraming(shotType: PdpHeroShotType): PdpHeroFraming {
   return HERO_FRAMING[shotType];
+}
+
+/** Merge shot-type defaults with optional per-slide overrides. */
+export function resolveHeroSlideFraming(
+  shotType: PdpHeroShotType,
+  override?: Partial<PdpHeroFraming>,
+): PdpHeroFraming {
+  return { ...resolveHeroFraming(shotType), ...override };
 }
 
 /** Stills/spins/spec frames sit on the studio ground; lifestyle video draws on black */

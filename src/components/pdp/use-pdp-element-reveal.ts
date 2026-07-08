@@ -33,12 +33,14 @@ function isPastRevealEnd(node: HTMLElement): boolean {
 function snapToRevealed(
   node: HTMLElement,
   blur: boolean,
+  scaleFrom: number | undefined,
   tween: gsap.core.Tween | null,
 ) {
   gsap.killTweensOf(node);
   gsap.set(node, {
     opacity: 1,
     y: 0,
+    ...(scaleFrom !== undefined ? { scale: 1 } : {}),
     ...(blur ? { filter: "blur(0px)" } : {}),
   });
   tween?.scrollTrigger?.kill();
@@ -48,12 +50,15 @@ function snapToRevealed(
 type UsePdpElementRevealOptions = {
   blur?: boolean;
   delay?: number;
+  /** Initial scale — card grows into place when set (e.g. 0.88). */
+  scaleFrom?: number;
   enabled: boolean;
 };
 
 export function usePdpElementReveal<T extends HTMLElement>({
   blur = false,
   delay = 0,
+  scaleFrom,
   enabled,
 }: UsePdpElementRevealOptions) {
   const ref = useRef<T>(null);
@@ -69,11 +74,13 @@ export function usePdpElementReveal<T extends HTMLElement>({
       const hiddenState = {
         opacity: 0,
         y: REVEAL_LIFT_PX,
+        ...(scaleFrom !== undefined ? { scale: scaleFrom } : {}),
         ...(blur ? { filter: `blur(${REVEAL_BLUR_PX}px)` } : {}),
       };
       const revealedState = {
         opacity: 1,
         y: 0,
+        ...(scaleFrom !== undefined ? { scale: 1 } : {}),
         ...(blur ? { filter: "blur(0px)" } : {}),
       };
 
@@ -93,7 +100,7 @@ export function usePdpElementReveal<T extends HTMLElement>({
         }
         if (isPastRevealEnd(node)) {
           markSettled();
-          snapToRevealed(node, blur, tween);
+          snapToRevealed(node, blur, scaleFrom, tween);
           tween = null;
         }
       };
@@ -141,7 +148,7 @@ export function usePdpElementReveal<T extends HTMLElement>({
     },
     {
       scope: ref,
-      dependencies: [enabled, reducedMotion, blur, delay],
+      dependencies: [enabled, reducedMotion, blur, delay, scaleFrom],
       revertOnUpdate: true,
     },
   );

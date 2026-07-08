@@ -31,13 +31,19 @@ export type PdpGalleryCraftedToLastVideoSlide = {
   type: "crafted-to-last-video";
 };
 
+/** v5-only Apple-style "Get the highlights" horizontal card rail */
+export type PdpGalleryGetTheHighlightsSlide = {
+  type: "get-the-highlights";
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
   | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
   | PdpGalleryWaysToWearSlide
-  | PdpGalleryCraftedToLastVideoSlide;
+  | PdpGalleryCraftedToLastVideoSlide
+  | PdpGalleryGetTheHighlightsSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
 export type PdpEditorialV2Card = {
@@ -459,7 +465,6 @@ export const PDP_UGC_TESTIMONIALS = [
 /** UGC testimonials from "Out in the wild" promoted into the v5 hero carousel. */
 export const HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS = [
   "testimonial-rachblaire",
-  "testimonial-coffee-run",
   "testimonial-katiemcev0y",
 ] as const;
 
@@ -699,7 +704,7 @@ export const PDP_CRAFTED_TO_LAST_VIDEO = {
   alt: "Crafted to last — Coach glovetanned leather craftsmanship",
 } as const;
 
-/** v5 editorial quote card — 9:16 photo + blush pull quote */
+/** v5 editorial quote card — 9:16 photo + warm beige pull quote */
 export const PDP_V5_EDITORIAL_QUOTE = {
   eyebrow: "Why PinkPantheress loves\u00a0it",
   quote:
@@ -707,6 +712,15 @@ export const PDP_V5_EDITORIAL_QUOTE = {
   attribution: "PinkPantheress",
   src: "/images/editorial/pinkpantheress-tabby.png",
   alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
+} as const;
+
+/** v5 design sketch scroll break — warm studio spread before Ways to wear. */
+export const PDP_DESIGN_SKETCH_INTERRUPT = {
+  headline: "Designed with intention",
+  intro:
+    "Every line of the Tabby silhouette is measured for balance — proportion, carry, and the signature C clasp in perfect harmony.",
+  src: "/images/gallery/tabby-design-sketch-scroll-break.jpg",
+  alt: "Design sketch of Tabby Shoulder Bag 26 showing front elevation and strap dimensions",
 } as const;
 
 export const PDP_WAYS_TO_WEAR_SECTION = {
@@ -742,16 +756,64 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
 ] satisfies PdpWaysToWearStyle[];
 
 /**
- * v5 swaps the "Feel the leather" studio drag-zoom frame for a sunlit lifestyle
- * beat. v4 keeps the studio product still — this override lives in the v5-only
- * patch so the frozen v4 baseline is untouched.
+ * v5 "Get the highlights" — Apple-style highlight rail that replaces the
+ * "Feel the leather" lifestyle beat. Section heading + "Watch the film" link
+ * sit above a horizontal rail of tall black cards (top caption, image below).
  */
-const FEEL_THE_LEATHER_V5_SRC =
-  "/images/gallery/tabby-feel-the-leather-lifestyle.jpg";
+export const PDP_GET_THE_HIGHLIGHTS_SECTION = {
+  headline: "Get the highlights",
+  watchLabel: "Watch the film",
+} as const;
+
+export type PdpGetTheHighlightsCard = {
+  id: string;
+  caption: string;
+  src: string;
+  alt: string;
+  /** Focal point for the card image (default center). */
+  objectPosition?: string;
+};
+
+/** v5 — floating essentials still, used in the highlights rail interior card. */
+const WHAT_FITS_INSIDE_V5_STILL_SRC =
+  "/images/gallery/tabby-what-fits-inside-still.jpg";
+
+/** Tabby highlight cards — one signature product truth per card. */
+export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
+  {
+    id: "leather",
+    caption: "Glovetanned full-grain leather that only gets richer with age.",
+    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
+    alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
+    objectPosition: "center",
+  },
+  {
+    id: "hardware",
+    caption: "Signature C turnlock clasp with a secure, satisfying close.",
+    src: "/images/gallery/tabby-c-clasp-closeup.jpg",
+    alt: "Close-up of the polished gold C turnlock clasp on the Tabby bag",
+    objectPosition: "center",
+  },
+  {
+    id: "interior",
+    caption: "A roomy interior sized for everything you carry each day.",
+    src: WHAT_FITS_INSIDE_V5_STILL_SRC,
+    alt: "Tabby Shoulder Bag 26 beside phone, wallet, sunglasses and everyday essentials",
+    objectPosition: "center 45%",
+  },
+  {
+    id: "wear",
+    caption: "Three ways to wear — shoulder, crossbody, or carried in hand.",
+    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
+    alt: "Model wearing the Tabby Shoulder Bag 26 on the shoulder in a beige look",
+    objectPosition: "center 30%",
+  },
+];
 
 /**
  * Insert the v5 Ways to wear module immediately after Up close / editorial
- * carousel, and swap the Feel the leather studio slide for the lifestyle image.
+ * carousel, and swap the Feel the leather studio slide for the Apple-style
+ * "Get the highlights" rail.
  */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
@@ -760,12 +822,7 @@ export function applyV5GallerySlidePatches(
 
   for (const slide of slides) {
     if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
-      result.push({
-        ...slide,
-        src: FEEL_THE_LEATHER_V5_SRC,
-        alt: "Model holding the black Tabby Shoulder Bag 26 in quilted leather on sunlit stone steps",
-        objectPosition: "center 48%",
-      });
+      result.push({ type: "get-the-highlights" });
       continue;
     }
 

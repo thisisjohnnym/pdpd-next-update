@@ -10,6 +10,7 @@ import { PdpBuyBarCompactColor } from "../pdp-buy-bar-compact-color";
 import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swatches";
 import { PdpHeroShell } from "../pdp-hero-shell";
+import { useHeroEnterOnce } from "../use-hero-enter-once";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { pdpDisplayTracking, pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
 
@@ -58,10 +59,12 @@ function PdpV3HeroLayoutDefault({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots } =
+  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots, playHeroLandIntro } =
     getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
+  const heroEnterOnce = useHeroEnterOnce();
+  const playLandIntro = playHeroLandIntro && heroEnterOnce;
 
   return (
     <>
@@ -78,11 +81,12 @@ function PdpV3HeroLayoutDefault({
             useV4ModuleSpacing ? "gap-4 px-4 pt-4" : "gap-2 px-2 pt-2",
             useV4ModuleSpacing ? "pb-4" : "pb-2",
             inlineBuyBarColorSwatches && "border-0",
+            playLandIntro && "pdp-v5-hero-footer-enter",
           )}
         >
           <div className="flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between gap-4">
-              <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate text-base leading-none")}>
+              <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none")}>
                 {summary.name}
               </p>
               <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
@@ -94,7 +98,7 @@ function PdpV3HeroLayoutDefault({
               <p
                 className={cn(
                   pdpProductTitleClass,
-                  "min-w-0 flex-1 truncate leading-none",
+                  "min-w-0 flex-1 truncate py-1 -my-1 leading-none",
                   heroMaterialSubtitleLine
                     ? cn(pdpType.label, "text-neutral-500")
                     : "text-xs text-neutral-900",

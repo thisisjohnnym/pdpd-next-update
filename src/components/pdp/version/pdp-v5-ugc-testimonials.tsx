@@ -110,13 +110,11 @@ function SocialPlatformIcon({
 function useTestimonialSlideMotion({
   slideRef,
   mediaRef,
-  quoteRef,
   socialRef,
   reducedMotion,
 }: {
   slideRef: RefObject<HTMLDivElement | null>;
   mediaRef: RefObject<HTMLDivElement | null>;
-  quoteRef: RefObject<HTMLQuoteElement | null>;
   socialRef: RefObject<HTMLAnchorElement | null>;
   reducedMotion: boolean;
 }) {
@@ -130,24 +128,24 @@ function useTestimonialSlideMotion({
     if (slideRef.current) {
       gsap.killTweensOf(slideRef.current);
     }
-    for (const node of [mediaRef.current, quoteRef.current, socialRef.current]) {
+    for (const node of [mediaRef.current, socialRef.current]) {
       if (node) {
         gsap.killTweensOf(node);
       }
     }
     isAnimatingRef.current = false;
-  }, [mediaRef, quoteRef, slideRef, socialRef]);
+  }, [mediaRef, slideRef, socialRef]);
 
   const clearSlideStyles = useCallback(() => {
     if (slideRef.current) {
       gsap.set(slideRef.current, { clearProps: "transform,opacity,filter" });
     }
-    for (const node of [mediaRef.current, quoteRef.current, socialRef.current]) {
+    for (const node of [mediaRef.current, socialRef.current]) {
       if (node) {
         gsap.set(node, { clearProps: "transform,opacity,filter" });
       }
     }
-  }, [mediaRef, quoteRef, slideRef, socialRef]);
+  }, [mediaRef, slideRef, socialRef]);
 
   const applyDragOffset = useCallback(
     (offset: number) => {
@@ -199,7 +197,7 @@ function useTestimonialSlideMotion({
       }
 
       const enterFrom = direction === "next" ? SLIDE_OFFSET_PX : -SLIDE_OFFSET_PX;
-      const targets = [mediaRef.current, quoteRef.current, socialRef.current].filter(
+      const targets = [mediaRef.current, socialRef.current].filter(
         Boolean,
       ) as HTMLElement[];
 
@@ -241,7 +239,7 @@ function useTestimonialSlideMotion({
 
       activeTweenRef.current = timeline;
     },
-    [clearSlideStyles, mediaRef, quoteRef, reducedMotion, slideRef, socialRef],
+    [clearSlideStyles, mediaRef, reducedMotion, slideRef, socialRef],
   );
 
   const transitionTo = useCallback(
@@ -318,7 +316,7 @@ function useTestimonialSlideMotion({
  * v5 — "What customers are saying" band (Figma node 409:460).
  *
  * Left-aligned single testimonial per topic: title, topic tabs, one large
- * media card, pull quote, and social attribution. Warm beige band.
+ * media card and social attribution. Warm beige band.
  */
 export function PdpV5UgcTestimonials() {
   const { useConsistentModuleHeadings } = getPdpVersionConfig(usePdpVersion());
@@ -328,7 +326,6 @@ export function PdpV5UgcTestimonials() {
 
   const slideRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
-  const quoteRef = useRef<HTMLQuoteElement>(null);
   const socialRef = useRef<HTMLAnchorElement>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const dragOffsetRef = useRef(0);
@@ -338,7 +335,6 @@ export function PdpV5UgcTestimonials() {
     useTestimonialSlideMotion({
       slideRef,
       mediaRef,
-      quoteRef,
       socialRef,
       reducedMotion,
     });
@@ -553,17 +549,6 @@ export function PdpV5UgcTestimonials() {
             </div>
 
             <div className="flex w-full flex-col items-center gap-3">
-              <blockquote
-                ref={quoteRef}
-                key={`${item.id}-quote`}
-                className={cn(
-                  pdpType.caption,
-                  "m-0 min-h-[5.5em] text-balance text-center text-black",
-                )}
-              >
-                &ldquo;{item.quote}&rdquo;
-              </blockquote>
-
               <a
                 ref={socialRef}
                 key={`${item.id}-social`}

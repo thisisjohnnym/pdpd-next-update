@@ -268,14 +268,16 @@ function DetailsSketchCarousel({
         activeIndex={activeIndex}
         count={slides.length}
         ariaLabel="Dimension drawing view"
+        align="start"
       />
     </div>
   );
 }
 
 /**
- * v5 Details sheet (Paper node 407:399) — 28px heading, 16px intro, and a
- * two-column fact list with a hairline under every fact and no vertical rule.
+ * v5 Details sheet (Paper node 407:399) — 28px heading, 16px intro, dimension
+ * sketches, then a two-column fact list with a hairline under every fact and
+ * no vertical rule.
  *
  * Rendered as a row-aligned grid (row-major placement) so a wrapped value —
  * e.g. "Phone - Wallet - Keys" on a narrow screen — never offsets the opposite
@@ -291,7 +293,7 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
   ]);
 
   let staggerIndex = 0;
-  const sketchDelay = revealStaggerDelay(staggerIndex);
+  const carouselDelay = revealStaggerDelay(staggerIndex);
   staggerIndex += 1;
 
   return (
@@ -308,28 +310,28 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
           {PDP_V5_DETAILS_INTRO}
         </PdpTextReveal>
       </div>
-      <PdpRevealItem delay={sketchDelay}>
+      <PdpRevealItem delay={carouselDelay}>
         <DetailsSketchCarousel slides={PDP_V5_DETAILS_SKETCHES} />
       </PdpRevealItem>
       <div className="grid grid-cols-2 gap-x-5 gap-y-5">
-          {rows.map((row, rowIndex) =>
-            row.map((spec, columnIndex) => {
-              if (!spec) {
-                return <div key={`empty-${rowIndex}-${columnIndex}`} />;
-              }
-              const delay = revealStaggerDelay(staggerIndex);
-              staggerIndex += 1;
-              return (
-                <SpecSheetV5Cell
-                  key={spec.id}
-                  spec={spec}
-                  delay={delay}
-                  showDivider={rowIndex < rowCount - 1}
-                />
-              );
-            }),
-          )}
-        </div>
+        {rows.map((row, rowIndex) =>
+          row.map((spec, columnIndex) => {
+            if (!spec) {
+              return <div key={`empty-${rowIndex}-${columnIndex}`} />;
+            }
+            const delay = revealStaggerDelay(staggerIndex);
+            staggerIndex += 1;
+            return (
+              <SpecSheetV5Cell
+                key={spec.id}
+                spec={spec}
+                delay={delay}
+                showDivider={rowIndex < rowCount - 1}
+              />
+            );
+          }),
+        )}
+      </div>
     </div>
   );
 }

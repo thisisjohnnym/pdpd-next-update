@@ -7,11 +7,50 @@
  */
 
 [data-pdp-version="v5"] {
-  /* v5 design tokens land here as the round evolves. */
+  --pdp-v5-editorial-beige: #efeae7;
 }
 
-/* Match the v2/v3/v4 calm land — suppress hero-land enter animations. */
-[data-pdp-version="v5"] .pdp-hero-header-enter,
+/* ── Hero land intro ─────────────────────────────────────────────────────────
+ * The video settles full-bleed first (its own blur→sharp reveal, ~900ms), then
+ * the chrome "falls into place" with a slow, subtle, staggered entrance:
+ *   1. overlay header drops in from the top
+ *   2. the over-video category rail eases up
+ *   3. the docked product footer content rises row by row
+ * Long eases + small offsets keep it calm. v5 only; v1-v4 keep the instant land.
+ * Gated once per session via `useHeroEnterOnce()` on the components.
+ *
+ * Reuses the shared `pdp-hero-chrome-enter` (drop) and `pdp-hero-hud-enter`
+ * (rise) keyframes from globals.css — only the v5 timing/stagger changes here. */
+
+/* Overlay header drops from the top once the video is in focus. */
+[data-pdp-version="v5"] .pdp-hero-header-enter {
+  animation: pdp-hero-chrome-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 820ms both;
+}
+
+/* Over-video category rail (UGC · 360 · AR · Fits) eases up + fades in. */
+[data-pdp-version="v5"] .pdp-v5-hero-overlay-enter {
+  animation: pdp-hero-hud-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 1040ms both;
+}
+
+/* Docked product footer — title/price, material/swatch, then Add to bag
+ * fall into place one after another. */
+[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > * {
+  animation: pdp-hero-hud-enter 1050ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(1) {
+  animation-delay: 960ms;
+}
+
+[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(2) {
+  animation-delay: 1120ms;
+}
+
+[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(3) {
+  animation-delay: 1280ms;
+}
+
+/* v5 does not use the legacy product HUD / floating bottom bar / social rail. */
 [data-pdp-version="v5"] .pdp-hero-hud-enter,
 [data-pdp-version="v5"] .pdp-hero-bottom-enter {
   animation: none;
@@ -20,6 +59,16 @@
 [data-pdp-version="v5"] .pdp-social-rail-item {
   opacity: 1;
   animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-pdp-version="v5"] .pdp-hero-header-enter,
+  [data-pdp-version="v5"] .pdp-v5-hero-overlay-enter,
+  [data-pdp-version="v5"] .pdp-v5-hero-footer-enter > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Gallery → docked buy bar — no hairline between studio ground and white tray. */
@@ -81,12 +130,20 @@
 
 /* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */
 [data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
-  background-color: #efeae7;
+  background-color: var(--pdp-v5-editorial-beige);
 }
 
-/* 9:16 editorial quote card — photo + blush pull quote. */
+/* 9:16 editorial quote card — photo + warm beige pull quote. */
+[data-pdp-version="v5"] .pdp-v5-quote-card-section {
+  background-color: var(--pdp-v5-editorial-beige);
+}
+
+[data-pdp-version="v5"] .pdp-v5-quote-card {
+  transform-origin: center center;
+}
+
 [data-pdp-version="v5"] .pdp-v5-quote-card__body {
-  background-color: #f0c8c4;
+  background-color: var(--pdp-v5-editorial-beige);
   gap: clamp(1rem, 3vw, 1.5rem);
   padding-inline: clamp(2rem, 9vw, 3rem);
   padding-block: clamp(1.5rem, 5vw, 2.25rem);
@@ -99,7 +156,7 @@
   font-weight: 400;
   letter-spacing: clamp(0.14em, 0.4vw, 0.24em);
   line-height: 1.35;
-  color: #6b3340;
+  color: #0a0a0a;
   max-width: 100%;
   margin-inline: auto;
   padding-inline: 0.25rem;
@@ -113,7 +170,7 @@
   font-weight: 400;
   letter-spacing: clamp(0.18em, 0.5vw, 0.28em);
   line-height: 1.35;
-  color: #6b3340;
+  color: #0a0a0a;
   max-width: min(15rem, 100%);
   margin-inline: auto;
   padding-inline: 0.25rem;
@@ -147,6 +204,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-pdp-version="v5"] .pdp-v5-quote-card {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
   [data-pdp-version="v5"] .pdp-v5-ugc-testimonial-slide {
     transform: none !important;
     filter: none !important;

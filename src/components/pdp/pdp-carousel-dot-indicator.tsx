@@ -14,6 +14,8 @@ type PdpCarouselDotIndicatorProps = {
   count: number;
   /** Accessible name for the tablist (e.g. "Detail tile position"). */
   ariaLabel: string;
+  /** Horizontal alignment of the tick row within its container. */
+  align?: "start" | "center";
   className?: string;
 };
 
@@ -22,6 +24,7 @@ export function PdpCarouselDotIndicator({
   activeIndex,
   count,
   ariaLabel,
+  align = "center",
   className,
 }: PdpCarouselDotIndicatorProps) {
   const reducedMotion = useReducedMotion();
@@ -34,7 +37,11 @@ export function PdpCarouselDotIndicator({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={cn("flex justify-center", className)}
+      className={cn(
+        "flex",
+        align === "start" ? "justify-start" : "justify-center",
+        className,
+      )}
     >
       <div
         aria-hidden

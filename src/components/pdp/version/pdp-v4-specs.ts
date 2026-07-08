@@ -15,7 +15,7 @@ export const PDP_V4_DETAILS_SECTION = {
 } as const;
 
 /** v5 Details module headline — Paper node 407:399. */
-export const PDP_V5_DETAILS_HEADLINE = "Signature Details";
+export const PDP_V5_DETAILS_HEADLINE = "Discover the Craft";
 
 /** v5 Signature Details — technical dimension sketches (swipeable front / side / strap). */
 export type PdpV5DetailsSketchSlide = {

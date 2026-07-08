@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import { PdpHeroGalleryIndicator } from "../pdp-hero-gallery-indicator";
 import { usePdpHeroGallery } from "../pdp-hero-gallery-context";
 import { PdpHeroGalleryProgressBar } from "../pdp-hero-gallery-progress-bar";
+import { useHeroEnterOnce } from "../use-hero-enter-once";
 import { useMountTransition } from "../use-mount-transition";
 import { isHeroUiChromeVisible, useHeroUiChrome } from "../use-hero-ui-chrome";
 import { getPdpVersionConfig } from "./pdp-version-config";
@@ -35,8 +36,10 @@ export function PdpV3GalleryOverlay({
   const { opacity } = useHeroUiChrome();
   const visible = isHeroUiChromeVisible(opacity);
   const { overlayCta } = usePdpHeroGallery();
-  const { useV4ModuleSpacing, showHeroFitsInsideCta, useHeroGalleryProgressBar, showHeroGalleryCategoryRail, showArTryOn } =
+  const { useV4ModuleSpacing, showHeroFitsInsideCta, useHeroGalleryProgressBar, showHeroGalleryCategoryRail, showArTryOn, playHeroLandIntro } =
     getPdpVersionConfig(usePdpVersion());
+  const heroEnterOnce = useHeroEnterOnce();
+  const playLandIntro = playHeroLandIntro && heroEnterOnce;
   const showFitsInside =
     showHeroFitsInsideCta &&
     !showHeroGalleryCategoryRail &&
@@ -63,10 +66,12 @@ export function PdpV3GalleryOverlay({
             visibility: visible ? "visible" : "hidden",
           }}
         >
-          <PdpHeroGalleryCategoryRail
-            onOpenArTryOn={onOpenArTryOn}
-            chromeVisible={visible}
-          />
+          <div className={cn(playLandIntro && "pdp-v5-hero-overlay-enter")}>
+            <PdpHeroGalleryCategoryRail
+              onOpenArTryOn={onOpenArTryOn}
+              chromeVisible={visible}
+            />
+          </div>
         </div>
       ) : null}
       <div
