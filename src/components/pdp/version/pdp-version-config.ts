@@ -236,6 +236,11 @@ export type PdpVersionConfig = {
    */
   flatColorSheet: boolean;
   /**
+   * Retitle the color drawer's "Bag Size" section to "Explore the Family"
+   * (r7 feedback). v5/v6 only — v3/v4 keep the frozen "Bag Size" label.
+   */
+  exploreFamilyColorSheetLabel: boolean;
+  /**
    * Hide the "In stock" subtitle on color rows — only show callouts for low
    * stock or sold out. v5 only.
    */
@@ -548,6 +553,7 @@ const V1_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  exploreFamilyColorSheetLabel: false,
   hideInStockColorLabel: false,
   lockHeroGalleryTemplate: false,
   heroMaterialSubtitleLine: false,
@@ -657,6 +663,7 @@ const V2_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
+  exploreFamilyColorSheetLabel: false,
   hideInStockColorLabel: false,
   lockHeroGalleryTemplate: false,
   heroMaterialSubtitleLine: false,
@@ -801,6 +808,8 @@ const V5_CONFIG: PdpVersionConfig = {
   showLeatherCareUpsell: true,
   // r7 feedback: grouped Popular Colors / Explore Materials / Bag Size drawer, not the flat list.
   flatColorSheet: false,
+  // r7 feedback: the size rail is titled "Explore the Family".
+  exploreFamilyColorSheetLabel: true,
   hideInStockColorLabel: false,
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,

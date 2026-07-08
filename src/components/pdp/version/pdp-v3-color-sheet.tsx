@@ -303,6 +303,7 @@ export function PdpV3ColorSheet({
     hideColorSheetSizePrice,
     flatColorSheet,
     hideInStockColorLabel,
+    exploreFamilyColorSheetLabel,
   } = getPdpVersionConfig(version);
   const mounted = useOverlayDismiss(open, onClose);
   const ignoreBackdropCloseRef = useRef(false);
@@ -534,10 +535,19 @@ export function PdpV3ColorSheet({
               </section>
 
               <section
-                aria-label="Bag size"
+                aria-label={
+                  exploreFamilyColorSheetLabel ? "Explore the Family" : "Bag size"
+                }
                 className="mt-4 border-t border-neutral-100 pb-2 pt-4"
               >
-                <p className={cn("mb-3", SECTION_LABEL_CLASS)}>Bag Size</p>
+                {exploreFamilyColorSheetLabel ? (
+                  /* No `capitalize` — keeps the lowercase "the" in the label. */
+                  <p className="mb-3 font-extended text-xs leading-none text-neutral-500">
+                    Explore the Family
+                  </p>
+                ) : (
+                  <p className={cn("mb-3", SECTION_LABEL_CLASS)}>Bag Size</p>
+                )}
                 <ul className="-mx-3 flex list-none gap-2 overflow-x-auto px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {sizes.map((size) => {
                     const isCurrent = size.option.size === tabby.size;
