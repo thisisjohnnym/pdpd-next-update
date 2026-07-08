@@ -46,9 +46,9 @@ export function PdpV2EditorialCarousel() {
           <PdpTextReveal
             as="h2"
             className={cn(
-              "font-extended m-0 font-normal tracking-tight text-black",
-              leftAlignModuleHeadings ? "text-left" : "text-center",
               pdpType.headline,
+              "m-0",
+              leftAlignModuleHeadings ? "text-left" : "text-center",
             )}
           >
             {headline}

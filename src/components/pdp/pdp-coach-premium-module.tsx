@@ -61,7 +61,7 @@ export function PdpCoachPremiumModule() {
         <GridItem mobile={12} desktop={24}>
           <PdpRevealItem className="flex flex-col gap-8 rounded-2xl bg-[#1C1C1C] px-4 pt-6 pb-4">
             <div className="flex flex-col items-center gap-2 text-center">
-              <h2 className="font-extended m-0 text-[28px] leading-[34px] font-normal tracking-[0.4px] text-balance text-white">
+              <h2 className="font-extended m-0 text-[28px] leading-[34px] font-normal tracking-tight text-balance text-white">
                 {title}
               </h2>
               <p

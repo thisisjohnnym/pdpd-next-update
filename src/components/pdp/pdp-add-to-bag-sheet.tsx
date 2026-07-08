@@ -28,7 +28,7 @@ import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
-import { pdpPillRadiusClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass } from "./pdp-type";
+import { pdpPillRadiusClass, pdpProductPriceClass, pdpProductTitleClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass, pdpType } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
@@ -66,7 +66,7 @@ function BagBundlePricing({
           {formatPrice(bundle.subtotal)}
         </span>
       ) : null}
-      <span className="font-extended text-base tracking-[0.2px] text-black tabular-nums">
+      <span className={cn(pdpProductPriceClass, "text-base text-black")}>
         {formatPrice(bundle.total)}
       </span>
       {hasDiscount ? (
@@ -91,7 +91,7 @@ function BagBundleSummary({
     <div className="flex flex-col gap-3 rounded-lg bg-[#f2f2f2] px-3 py-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-extended text-base tracking-[0.2px] text-black">
+          <p className={cn(pdpProductTitleClass, "text-base text-black")}>
             Your bundle
           </p>
           <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
@@ -122,7 +122,7 @@ function BagBundleSummary({
               />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+              <p className={cn(pdpType.productNameCompact, "truncate text-black")}>
                 {item.name}
               </p>
             </div>
@@ -170,13 +170,13 @@ function BagProductCard({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3.5">
-        <p className="font-extended text-base tracking-[0.2px] text-black">
+        <p className={cn(pdpProductTitleClass, "text-base text-black")}>
           {product.summary.name}
         </p>
         <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600">
           {selectedColor.name} · {product.summary.subtitle}
         </p>
-        <p className="font-extended mt-1.5 text-base tracking-[0.2px] text-black tabular-nums">
+        <p className={cn(pdpProductPriceClass, "mt-1.5 text-base text-black")}>
           {product.summary.price}
         </p>
       </div>
@@ -242,7 +242,7 @@ function BagUpsellItem({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="font-extended truncate text-xs tracking-[0.2px] text-black">
+          <p className={cn(pdpType.productNameCompact, "truncate text-black")}>
             {item.name}
           </p>
           <p className="font-extended mt-1 text-xs tracking-[0.2px] text-neutral-600 tabular-nums">
@@ -267,7 +267,7 @@ function BagUpsellList({
 }) {
   return (
     <section className="flex flex-col gap-1.5 pt-3">
-      <p className="font-extended text-sm tracking-[0.2px] text-black">
+      <p className={cn(pdpType.productName, "text-black")}>
         Complete the look
       </p>
 

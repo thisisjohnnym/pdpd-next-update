@@ -16,12 +16,22 @@ export type PdpHeroSurface = "dark" | "light";
 /** Contextual CTA pinned to the hero gallery overlay on specific slides */
 export type PdpHeroOverlayCta = "fits-inside";
 
+/** Gallery wayfinding category — drives the compact category rail (v5). */
+export type PdpHeroGalleryCategory =
+  | "ugc"
+  | "fits-inside"
+  | "360"
+  | "product-photos"
+  | "on-model";
+
 type PdpHeroGalleryBaseSlide = {
   alt: string;
   shotType: PdpHeroShotType;
   headerSurface: PdpHeroSurface;
   /** When set, the gallery overlay shows a CTA while this slide is active */
   overlayCta?: PdpHeroOverlayCta;
+  /** Jump-to category for the hero gallery category rail */
+  galleryCategory?: PdpHeroGalleryCategory;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -123,21 +133,6 @@ function applyV4HeroGallery(
 
 /** v5 hero land — on-model lifestyle video (white nav, cinematic open). */
 export const HERO_GALLERY_V5_LEAD_SRC = PDP_GALLERY_IMMERSIVE_HERO_VIDEO;
-
-/**
- * v5 hero land — creator unboxing clip promoted to slide 0. Portrait 9:16
- * lifestyle video shot on a soft cream backdrop, so it uses the dark nav
- * (`headerSurface: "light"`) and gets the priority blur-reveal open.
- */
-export const HERO_GALLERY_V5_UGC_LEAD_SLIDE: PdpHeroGalleryVideoSlide = {
-  kind: "video",
-  src: "/videos/tabby26-hero-lead.mp4",
-  poster: "/images/posters/tabby26-hero-lead.jpg",
-  alt: "Creator unboxing Tabby Shoulder Bag 26 from its Coach dust bag against a soft cream backdrop",
-  shotType: "lifestyle",
-  headerSurface: "light",
-  priority: true,
-};
 
 /** Move a slide to index 0 without mutating the frozen source array. */
 function promoteHeroGallerySlideToLead(
@@ -261,6 +256,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "lifestyle",
     headerSurface: "dark",
     priority: true,
+    galleryCategory: "on-model",
   },
   {
     kind: "image",
@@ -268,6 +264,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 in black leather, front view with gold C turnlock and shoulder strap raised",
     shotType: "product",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -290,6 +287,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "detail",
     headerSurface: "light",
     overlayCta: "fits-inside",
+    galleryCategory: "fits-inside",
   },
   {
     kind: "video",
@@ -298,6 +296,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "360-degree spin of Tabby Shoulder Bag 26 in black leather with both straps",
     shotType: "studio",
     headerSurface: "light",
+    galleryCategory: "360",
   },
   {
     kind: "image",
@@ -326,6 +325,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Model in a tan trench coat wearing Tabby Shoulder Bag 26 crossbody",
     shotType: "on-model",
     headerSurface: "light",
+    galleryCategory: "on-model",
   },
   {
     kind: "image",
@@ -333,6 +333,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Model in a Coach tee and suede skirt wearing Tabby Shoulder Bag 26 crossbody",
     shotType: "on-model",
     headerSurface: "light",
+    galleryCategory: "on-model",
   },
   {
     kind: "video",
@@ -355,6 +356,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Model leaning back in a tan trench coat with Tabby Shoulder Bag 26 at the hip",
     shotType: "on-model",
     headerSurface: "light",
+    galleryCategory: "on-model",
   },
   {
     kind: "image",

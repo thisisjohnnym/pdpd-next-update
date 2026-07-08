@@ -523,7 +523,7 @@ export function PdpV5UgcTestimonials() {
             <div
               ref={mediaRef}
               key={`${item.id}-media`}
-              className="relative aspect-[416/434] w-full overflow-hidden bg-neutral-200/60"
+              className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-200/60"
             >
               {isVideoClip ? (
                 <PdpGalleryHeroVideo

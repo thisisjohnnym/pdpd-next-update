@@ -119,7 +119,7 @@ export function PdpComparePickerSheet({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className={`font-extended text-black ${pdpType.body}`}>
+                      <p className={cn(pdpType.productName, "text-black")}>
                         {item.name}
                       </p>
                       <p className={`mt-0.5 font-extended text-black tabular-nums ${pdpType.label}`}>

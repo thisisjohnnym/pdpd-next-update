@@ -17,6 +17,8 @@ type PdpTextLinkCtaBaseProps = {
   iconSize?: 18 | 24 | 26 | 20;
   /** Material Symbols glyph for the trailing arrow */
   icon?: string;
+  /** Hide the trailing arrow icon */
+  hideIcon?: boolean;
 };
 
 type PdpTextLinkCtaButtonProps = PdpTextLinkCtaBaseProps & {
@@ -27,12 +29,14 @@ type PdpTextLinkCtaAnchorProps = PdpTextLinkCtaBaseProps & {
   as: "a";
 } & ComponentPropsWithoutRef<"a">;
 
+// fallow-ignore-next-line complexity
 export function PdpTextLinkCta({
   children,
   variant = "primary",
   className,
   iconSize = 18,
   icon = "arrow_forward",
+  hideIcon = false,
   as = "button",
   ...props
 }: PdpTextLinkCtaButtonProps | PdpTextLinkCtaAnchorProps) {
@@ -47,7 +51,9 @@ export function PdpTextLinkCta({
   const content = (
     <>
       <span className={labelClass}>{children}</span>
-      <MaterialIcon name={icon} size={iconSize} className="shrink-0 text-current" />
+      {!hideIcon ? (
+        <MaterialIcon name={icon} size={iconSize} className="shrink-0 text-current" />
+      ) : null}
     </>
   );
 

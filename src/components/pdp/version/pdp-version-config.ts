@@ -2,7 +2,6 @@ import { PDP_GALLERY_SLIDES } from "../pdp-data";
 import { HERO_360_INTRO_VIDEO_SRC } from "../pdp-video-sources";
 import {
   HERO_GALLERY_V5_LEAD_SRC,
-  HERO_GALLERY_V5_UGC_LEAD_SLIDE,
   type PdpHeroGallerySlide,
 } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
@@ -186,8 +185,12 @@ export type PdpVersionConfig = {
    */
   hideBuyBarColorLabel: boolean;
   /**
+   * Hide the "Color: {shade}" caption above the below-fold swatch row. v5 only.
+   */
+  hideHeroColorSwatchLabel: boolean;
+  /**
    * Drop the shopping_bag icon on the docked + floating buy-bar Add to bag pill.
-   * v5 only — v1/v2/v3/v4 keep the icon beside the label.
+   * v4+ — v1/v2/v3 keep the icon beside the label.
    */
   hideBuyBarAtbIcon: boolean;
   /**
@@ -201,6 +204,16 @@ export type PdpVersionConfig = {
    * Docked hero + floating sticky bar show Add to bag only. v5 only.
    */
   inlineBuyBarColorSwatches: boolean;
+  /**
+   * Replace the below-fold swatch grid with compact color dots below Add to bag.
+   * v5 only.
+   */
+  useCompactBuyBarColorDots: boolean;
+  /**
+   * Solid color dots shown before the +N label in the compact buy-bar row.
+   * v5 only.
+   */
+  compactBuyBarColorDotCount: number;
   /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
@@ -239,7 +252,7 @@ export type PdpVersionConfig = {
    */
   squareProductCardCorners: boolean;
   /**
-   * Square pill CTAs — Add to bag, color selector, reviews, sheets. v5 only.
+   * Square pill CTAs — Add to bag, color selector, reviews, sheets. v4+.
    */
   squareButtonCorners: boolean;
   /**
@@ -288,6 +301,10 @@ export type PdpVersionConfig = {
    * portrait strip when true.
    */
   useV5UgcTestimonialCarousel: boolean;
+  /**
+   * 9:16 blush editorial quote card after What customers are saying. v5 only.
+   */
+  showEditorialQuoteCard: boolean;
   /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
@@ -340,9 +357,8 @@ export type PdpVersionConfig = {
    */
   useRailLeatherAgingSlider: boolean;
   /**
-   * Drop the "· {count} reviews · {percent}% recommend" tail from the reviews
-   * summary line — keep the stars + average only. v5 only; v4 keeps the full
-   * aggregate line.
+   * Drop the "· {count} reviews" tail from the reviews summary line — keep the
+   * stars + average only. v5 only; v4 keeps the full aggregate line.
    */
   hideReviewCountRecommend: boolean;
   /**
@@ -381,10 +397,28 @@ export type PdpVersionConfig = {
    */
   showWaysToWearModule: boolean;
   /**
+   * Full-bleed "Crafted to last" video after leather aging, before reviews. v5 only.
+   */
+  showCraftedToLastVideo: boolean;
+  /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
    */
   demoHeroColorSwatchRow: boolean;
+  /**
+   * Collapse the below-fold hero color row — short preview plus a +N more tile
+   * that opens the full color sheet. v5 only.
+   */
+  collapseHeroColorSwatches: boolean;
+  /**
+   * Swatches shown before the +N more tile (selected color is always included).
+   */
+  heroColorSwatchPreviewCount: number;
+  /**
+   * Fixed +N more label — when > 0, replaces the data-driven hidden count.
+   * 0 = auto.
+   */
+  heroColorSwatchMoreCountOverride: number;
   /**
    * Hide Tabby size cards in the buy-box selector and show editorial
    * "Explore Other Tabby Silhouettes" product navigation below color. v5 only.
@@ -420,6 +454,11 @@ export type PdpVersionConfig = {
    * restore. v1-v4 keep it.
    */
   showArTryOn: boolean;
+  /**
+   * Compact category rail over the hero gallery — UGC · 360 · AR · Fits inside.
+   * Replaces the standalone AR button when active. v5 only.
+   */
+  showHeroGalleryCategoryRail: boolean;
   /**
    * Mobile hero gallery scrolls vertically (snap stack) instead of horizontal
    * carousel. v6 UXR variant only.
@@ -473,9 +512,12 @@ const V1_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
+  useCompactBuyBarColorDots: false,
+  compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -507,15 +549,21 @@ const V1_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: false,
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
+  showEditorialQuoteCard: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
+  showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 0,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
   showHeroFitsInsideCta: false,
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
+  showHeroGalleryCategoryRail: false,
   heroVerticalGallery: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
@@ -569,9 +617,12 @@ const V2_CONFIG: PdpVersionConfig = {
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
   hideBuyBarColorLabel: false,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: false,
   hideDockedBuyBarColor: false,
   inlineBuyBarColorSwatches: false,
+  useCompactBuyBarColorDots: false,
+  compactBuyBarColorDotCount: 0,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -606,13 +657,18 @@ const V2_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,
+  showCraftedToLastVideo: false,
   demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 0,
   showTabbyAlsoAvailableAs: false,
   desktopSplitLayout: false,
   hidePayOverTimeCreditNote: false,
   showHeroFitsInsideCta: false,
   useHeroGalleryProgressBar: false,
   showArTryOn: true,
+  showHeroGalleryCategoryRail: false,
   heroVerticalGallery: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
@@ -669,6 +725,9 @@ const V4_CONFIG: PdpVersionConfig = {
   enableHeroReveal: false,
   // r5 scroll-triggered per-element reveals (headlines blur, blocks lift).
   useV4GranularScrollReveal: true,
+  // r5 feedback: square Add to bag + drop the shopping_bag icon.
+  hideBuyBarAtbIcon: true,
+  squareButtonCorners: true,
 };
 
 /**
@@ -685,9 +744,12 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 story: Feel the leather → Details → What customers are saying → Up close → Aging.
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
+  hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
-  inlineBuyBarColorSwatches: true,
+  useCompactBuyBarColorDots: true,
+  compactBuyBarColorDotCount: 3,
+  inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
@@ -697,13 +759,12 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
+  showEditorialQuoteCard: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_GALLERY_V5_LEAD_SRC,
-  // v5 hero land leads with the creator unboxing clip ahead of the base slides.
-  heroGalleryPrependLeadSlide: HERO_GALLERY_V5_UGC_LEAD_SLIDE,
   // v5 weaves Out in the wild UGC into the hero carousel after the lead pair.
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
     HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
@@ -715,7 +776,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useRailLeatherAgingSlider: true,
   // v5 reviews summary drops the aggregate star row (photos + AI summary carry trust).
   hideReviewSummaryRating: true,
-  // v5 reviews summary shows stars + average only (no count / recommend tail).
+  // v5 reviews summary shows stars + average only (no review count tail).
   hideReviewCountRecommend: true,
   // v5 bumps the reviews AI-summary tray text up a step.
   enlargeReviewAiSummary: true,
@@ -728,8 +789,12 @@ const V5_CONFIG: PdpVersionConfig = {
   moreLikeThisLargeCards: true,
   squareButtonCorners: true,
   showWaysToWearModule: true,
-  demoHeroColorSwatchRow: true,
-  showTabbyAlsoAvailableAs: true,
+  showCraftedToLastVideo: true,
+  demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 6,
+  showTabbyAlsoAvailableAs: false,
   showReviewHighlightTags: false,
   // v5 desktop responsive split — media left, sticky buy panel right at lg+.
   desktopSplitLayout: true,
@@ -739,8 +804,9 @@ const V5_CONFIG: PdpVersionConfig = {
   showHeroFitsInsideCta: true,
   // v5 swaps the tick indicator for a full-bleed progress bar at the gallery seam.
   useHeroGalleryProgressBar: true,
-  // Hide the AR "Try On" affordance for now (easy to restore).
+  // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
+  showHeroGalleryCategoryRail: true,
 };
 
 /**

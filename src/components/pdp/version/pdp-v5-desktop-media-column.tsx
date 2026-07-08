@@ -47,10 +47,14 @@ export function PdpV5DesktopMediaColumn() {
   const slides = usePdpV5DesktopMediaSlides();
 
   return (
-    <div className="pdp-v5-desktop-media grid w-full grid-cols-2 gap-2 bg-[#f0f0f0]">
+    <div
+      data-pdp-desktop-hero-media
+      className="pdp-v5-desktop-media grid w-full grid-cols-2 gap-2 bg-[#f0f0f0]"
+    >
       {slides.map((slide, index) => (
         <figure
           key={`${getHeroGallerySlideKey(slide)}-${index}`}
+          data-header-surface={slide.headerSurface}
           className={cn(
             "relative m-0 w-full overflow-hidden bg-[#f0f0f0]",
             "aspect-[4/5]",

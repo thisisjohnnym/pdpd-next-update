@@ -66,9 +66,9 @@ export function PdpV2RecentlyViewed() {
       <PdpTextReveal
         as="h2"
         className={cn(
-          "font-extended m-0 mb-5 font-normal tracking-tight text-black",
-          leftAlignModuleHeadings ? "text-left" : "text-center",
           pdpType.headline,
+          "m-0 mb-5",
+          leftAlignModuleHeadings ? "text-left" : "text-center",
         )}
       >
         {PDP_RECENTLY_VIEWED_SECTION.eyebrow}
@@ -119,7 +119,7 @@ export function PdpV2RecentlyViewed() {
                     {item.viewedLabel}
                   </span>
                   <span className="flex flex-col gap-0.5">
-                    <span className={`font-extended text-black ${pdpType.body}`}>
+                    <span className={cn("font-extended text-black", pdpType.productName)}>
                       {item.name}
                     </span>
                     <span

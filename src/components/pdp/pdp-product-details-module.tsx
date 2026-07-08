@@ -32,7 +32,9 @@ import {
   PDP_V5_DETAILS_COLUMNS,
   PDP_V5_DETAILS_HEADLINE,
   PDP_V5_DETAILS_INTRO,
+  PDP_V5_DETAILS_SKETCHES,
   type PdpProductDetailSpecV4,
+  type PdpV5DetailsSketchSlide,
 } from "./version/pdp-v4-specs";
 
 /** Paper AHD-0 — column-major tile order (leather/hardware | interior/patina) */
@@ -79,7 +81,7 @@ function MacroHero() {
           <PdpTextReveal
             as="h2"
             delay={revealStaggerDelay(1)}
-            className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-[-0.01em] text-balance text-white"
+            className="font-extended m-0 text-center text-[28px] font-normal leading-[38px] tracking-tight text-balance text-white"
           >
             {eyebrow}
           </PdpTextReveal>
@@ -104,7 +106,7 @@ function SpecCell({
         colClass,
       )}
     >
-      <span className="font-extended text-xl font-normal leading-[22px] tracking-[-0.02em] text-neutral-900 tabular-nums">
+      <span className={cn(pdpType.headline, "tabular-nums text-neutral-900")}>
         {spec.value}
       </span>
       <span className="w-full text-center font-sans text-[11px] capitalize leading-[14px] text-neutral-500">
@@ -224,6 +226,54 @@ function SpecSheetV5Cell({
 }
 
 /**
+ * v5 Signature Details — swipeable front / side dimension sketches.
+ */
+function DetailsSketchCarousel({
+  slides,
+}: {
+  slides: readonly PdpV5DetailsSketchSlide[];
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const activeIndex = useCarouselSnapStartActiveIndex(scrollRef);
+
+  useDragToScroll(scrollRef);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div
+        ref={scrollRef}
+        className={cn(
+          "pdp-carousel-draggable flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain",
+          "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        )}
+        aria-label="Technical dimension drawings"
+      >
+        {slides.map((slide) => (
+          <div
+            key={slide.id}
+            className="relative aspect-[4/5] w-full shrink-0 snap-start snap-always flex-[0_0_100%] bg-white"
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              className="object-contain object-center"
+              sizes="(min-width: 1024px) 45rem, 100vw"
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+      <PdpCarouselDotIndicator
+        activeIndex={activeIndex}
+        count={slides.length}
+        ariaLabel="Dimension drawing view"
+      />
+    </div>
+  );
+}
+
+/**
  * v5 Details sheet (Paper node 407:399) — 28px heading, 16px intro, and a
  * two-column fact list with a hairline under every fact and no vertical rule.
  *
@@ -241,6 +291,8 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
   ]);
 
   let staggerIndex = 0;
+  const sketchDelay = revealStaggerDelay(staggerIndex);
+  staggerIndex += 1;
 
   return (
     <div className="flex flex-col gap-5 px-4 pt-12 pb-16">
@@ -256,6 +308,9 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
           {PDP_V5_DETAILS_INTRO}
         </PdpTextReveal>
       </div>
+      <PdpRevealItem delay={sketchDelay}>
+        <DetailsSketchCarousel slides={PDP_V5_DETAILS_SKETCHES} />
+      </PdpRevealItem>
       <div className="grid grid-cols-2 gap-x-5 gap-y-5">
           {rows.map((row, rowIndex) =>
             row.map((spec, columnIndex) => {
@@ -494,7 +549,7 @@ export function PdpProductDetailsModule({
         {showHeading ? (
           <PdpTextReveal
             as="h3"
-            className="font-extended m-0 text-xl font-normal leading-6 tracking-[-0.01em] text-balance text-neutral-900"
+            className={cn(pdpType.headline, "m-0 leading-6")}
           >
             {closerLook.heading}
           </PdpTextReveal>

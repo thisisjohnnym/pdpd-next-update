@@ -1,5 +1,8 @@
 import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
-import type { PdpHeroGallerySlide } from "../pdp-hero-gallery-data";
+import type {
+  PdpHeroGallerySlide,
+  PdpHeroSurface,
+} from "../pdp-hero-gallery-data";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -23,12 +26,18 @@ export type PdpGalleryWaysToWearSlide = {
   type: "ways-to-wear";
 };
 
+/** v5-only full-bleed video between leather aging and reviews */
+export type PdpGalleryCraftedToLastVideoSlide = {
+  type: "crafted-to-last-video";
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
   | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
-  | PdpGalleryWaysToWearSlide;
+  | PdpGalleryWaysToWearSlide
+  | PdpGalleryCraftedToLastVideoSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
 export type PdpEditorialV2Card = {
@@ -63,29 +72,29 @@ export const PDP_CRAFTSMANSHIP_V4_CARDS = [
     id: "leather",
     title: "Glove-tanned leather",
     body: "Soft, full-grain leather designed to develop character over time.",
-    src: "/images/hero/tabby26/ccx04_b4bk_a99.webp",
-    alt: "Macro detail of full-grain glovetanned leather and gold hardware on Tabby Shoulder Bag 26",
+    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
+    alt: "Close-up of Tabby Shoulder Bag 26 full-grain leather with gold COACH hardware and hangtag",
   },
   {
     id: "hardware",
     title: "Signature hardware",
     body: "The iconic C clasp brings Coach heritage into focus.",
-    src: "/images/gallery/tabby-c-clasp-closeup.png",
-    alt: "Close-up of the polished gold C turn-lock clasp with COACH engraving on black glovetanned leather",
+    src: "/images/gallery/tabby-c-clasp-closeup.jpg",
+    alt: "Close-up of the gold C turn-lock clasp with COACH engraving on black glovetanned leather",
   },
   {
     id: "interior",
     title: "Interior function",
     body: "Room for daily essentials with thoughtful organization.",
-    src: "/images/gallery/tabby-leather-interior-open.png",
-    alt: "Open interior of Tabby Shoulder Bag 26 showing accordion compartments and slip pocket",
+    src: "/images/gallery/tabby-leather-interior-open.jpg",
+    alt: "Open interior of Tabby Shoulder Bag 26 showing accordion compartments and gold hardware",
   },
   {
     id: "carry",
     title: "Carry options",
     body: "Designed to be worn shoulder or crossbody.",
-    src: "/images/hero/tabby26/ccx04_b4bk_a21.webp",
-    alt: "Tabby Shoulder Bag 26 in black leather with the long crossbody strap extended",
+    src: "/images/gallery/tabby-shoulder-crossbody-straps.jpg",
+    alt: "Tabby Shoulder Bag 26 in black leather with shoulder and crossbody straps attached",
   },
 ] satisfies PdpCraftsmanshipV4Card[];
 
@@ -163,7 +172,7 @@ const PDP_UGC_WILD_VIDEO_TOPICS: Record<string, PdpUgcWildTopicId> = {
 
 /** v4 section intro — subtext between headline and TikTok CTA (Paper L5X-0). */
 export const PDP_UGC_COMMUNITY_SECTION = {
-  subtext: "Real people, real context — not random snaps.",
+  subtext: "Real people, real context.",
 } as const;
 
 /** Customer photo in the UGC community carousel — portrait stills with context. */
@@ -275,7 +284,7 @@ export const PDP_UGC_COMMUNITY_PHOTOS = [
 /** v5 testimonials band — headline + intro above topic tabs (Figma 409:460). */
 export const PDP_UGC_TESTIMONIALS_SECTION = {
   headline: "Out in the wild",
-  subtext: "Real people, real context — not random snaps.",
+  subtext: "Real people, real context.",
 } as const;
 
 /** Editorial testimonial card — quote, attribution, social, and review CTA (v5). */
@@ -291,6 +300,8 @@ export type PdpUgcTestimonial = {
   socialHref: string;
   topicId: PdpUgcWildTopicId;
   videoSrc?: string;
+  /** Nav contrast when promoted into the hero carousel (`dark` → white chrome). */
+  heroHeaderSurface?: PdpHeroSurface;
 };
 
 // fallow-ignore-next-line unused-export
@@ -307,6 +318,7 @@ export const PDP_UGC_TESTIMONIALS = [
     socialHandle: "@jordanl.style",
     socialHref: "https://www.instagram.com/coach/",
     topicId: "weekend",
+    heroHeaderSurface: "dark",
   },
   {
     id: "testimonial-city-commute",
@@ -454,6 +466,8 @@ export const HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS = [
 function ugcTestimonialToHeroSlide(
   testimonial: PdpUgcTestimonial,
 ): PdpHeroGallerySlide {
+  const headerSurface = testimonial.heroHeaderSurface ?? "light";
+
   if (testimonial.videoSrc) {
     return {
       kind: "video",
@@ -461,7 +475,8 @@ function ugcTestimonialToHeroSlide(
       poster: testimonial.src,
       alt: testimonial.alt,
       shotType: "lifestyle",
-      headerSurface: "light",
+      headerSurface,
+      galleryCategory: "ugc",
     };
   }
 
@@ -470,7 +485,8 @@ function ugcTestimonialToHeroSlide(
     src: testimonial.src,
     alt: testimonial.alt,
     shotType: "on-model",
-    headerSurface: "light",
+    headerSurface,
+    galleryCategory: "ugc",
   };
 }
 
@@ -635,7 +651,7 @@ export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALL
 const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
   headline: "Feel the leather",
   subtext:
-    "Crafted to be seen—and examined. Hold to explore the leather grain, signature hardware, and the details that make every Tabby unique.",
+    "Crafted to be seen—and felt. Full-grain leather, signature hardware, and the details that make every Tabby unique.",
   aspect: "4/5" as const,
   objectPosition: "center 62%",
 } as const;
@@ -671,8 +687,30 @@ export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePat
   buildV2Slides(PDP_GALLERY_SLIDES),
 );
 
+export const PDP_CRAFTED_TO_LAST_SECTION = {
+  headline: "Crafted to last",
+  body:
+    "Hand-stitched seams and signature hardware on glovetanned full-grain leather — precision you can see and feel up close.",
+} as const;
+
+export const PDP_CRAFTED_TO_LAST_VIDEO = {
+  src: "/videos/crafted-to-last.webm",
+  poster: "/images/posters/crafted-to-last.jpg",
+  alt: "Crafted to last — Coach glovetanned leather craftsmanship",
+} as const;
+
+/** v5 editorial quote card — 9:16 photo + blush pull quote */
+export const PDP_V5_EDITORIAL_QUOTE = {
+  eyebrow: "Why PinkPantheress loves\u00a0it",
+  quote:
+    "I wanted a bag that feels effortless on the street, but still pulls a look together in one grab—Tabby does both.",
+  attribution: "PinkPantheress",
+  src: "/images/editorial/pinkpantheress-tabby.png",
+  alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
+} as const;
+
 export const PDP_WAYS_TO_WEAR_SECTION = {
-  headline: "Ways to wear",
+  headline: "Made to move",
   body:
     "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
 } as const;
@@ -734,6 +772,22 @@ export function applyV5GallerySlidePatches(
     result.push(slide);
     if (slide.type === "editorial-carousel-v2") {
       result.push({ type: "ways-to-wear" });
+    }
+  }
+
+  return result;
+}
+
+/** Insert the v5 crafted-to-last video immediately after leather aging. */
+export function applyV5CraftedToLastVideoPatch(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  const result: PdpGallerySlideV2[] = [];
+
+  for (const slide of slides) {
+    result.push(slide);
+    if (slide.type === "leather-aging") {
+      result.push({ type: "crafted-to-last-video" });
     }
   }
 

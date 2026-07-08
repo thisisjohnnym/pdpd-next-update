@@ -100,7 +100,7 @@ function UgcSectionHeader({
             ? pdpModuleHeadlineDisplayClass(true)
             : useV4UgcHeadingType
               ? pdpModuleHeadlineDisplayClass(false)
-              : cn(pdpType.headline, "m-0 text-black leading-snug tracking-tight"),
+              : cn(pdpType.headline, "m-0 leading-snug"),
           leftAlignModuleHeadings ? "text-left" : "text-center",
         )}
       >

@@ -56,7 +56,7 @@ function CompareProductCard({
         ) : null}
       </div>
       <div className="mb-4 px-0.5 pt-1.5">
-        <p className={`font-extended line-clamp-2 text-black ${pdpType.label}`}>
+        <p className={`font-extended line-clamp-2 text-black ${pdpType.productName}`}>
           {item.name}
         </p>
         <p className={`font-extended text-black tabular-nums ${pdpType.micro}`}>{item.price}</p>

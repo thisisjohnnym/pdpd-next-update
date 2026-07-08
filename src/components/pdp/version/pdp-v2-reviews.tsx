@@ -171,7 +171,7 @@ function V4ReviewSummary({
 }: PdpV2ReviewsProps & {
   leftAlignModuleHeadings: boolean;
 }) {
-  const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
+  const { average, count } = PDP_REVIEWS_SUMMARY;
   const { headline, reviewHighlights } = PDP_V4_REVIEWS_SUMMARY;
   const { body: aiBody, attribution: aiAttribution } = PDP_REVIEWS_AI_SUMMARY;
   const {
@@ -218,7 +218,7 @@ function V4ReviewSummary({
                 >
                   {hideReviewCountRecommend
                     ? average.toFixed(1)
-                    : `${average.toFixed(1)} · ${count} reviews · ${recommendPercent}% recommend`}
+                    : `${average.toFixed(1)} · ${count} reviews`}
                 </span>
               </div>
             </PdpRevealItem>
@@ -357,7 +357,7 @@ export function PdpV2Reviews({
         >
           <PdpTextReveal
             as="h2"
-            className="font-extended m-0 text-xl font-normal tracking-tight text-black"
+            className={cn(pdpType.headline, "m-0")}
           >
             Reviews
           </PdpTextReveal>

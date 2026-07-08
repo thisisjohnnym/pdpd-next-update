@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { useReducedMotion } from "./use-reduced-motion";
 
@@ -662,6 +662,8 @@ type InfiniteFullBleedCarouselState = {
   activeIndex: number;
   /** Index into the tripled DOM rail — only this clone should play video */
   activeLoopedIndex: number;
+  /** Scroll to a logical slide index (smooth when stableLoop is on). */
+  scrollToIndex: (logicalIndex: number) => void;
 };
 
 /**
@@ -683,6 +685,12 @@ export function useInfiniteFullBleedCarousel(
   const activeIndex =
     itemCount > 0 ? activeLoopedIndex % itemCount : 0;
 
+  const scrollToIndexRef = useRef<(logicalIndex: number) => void>(() => {});
+
+  const scrollToIndex = useCallback((logicalIndex: number) => {
+    scrollToIndexRef.current(logicalIndex);
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || itemCount === 0) {
@@ -691,22 +699,36 @@ export function useInfiniteFullBleedCarousel(
 
     const getChild = (index: number) => el.children[index] as HTMLElement | undefined;
 
-    const scrollToChild = (index: number) => {
+    const scrollToChild = (index: number, behavior: ScrollBehavior = "auto") => {
       const child = getChild(index);
       if (!child) {
         return;
       }
-      el.scrollLeft = child.offsetLeft;
+      if (behavior === "smooth") {
+        el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+      } else {
+        el.scrollLeft = child.offsetLeft;
+      }
     };
 
     const startIndex =
       itemCount > 1 ? itemCount + initialIndex : initialIndex;
 
-    const scrollToLogicalIndex = (logicalIndex: number) => {
-      const target =
-        itemCount > 1 ? itemCount + logicalIndex : logicalIndex;
-      scrollToChild(target);
+    const scrollToLogicalIndex = (
+      logicalIndex: number,
+      behavior: ScrollBehavior = "auto",
+    ) => {
+      const clamped = Math.max(0, Math.min(logicalIndex, itemCount - 1));
+      const target = itemCount > 1 ? itemCount + clamped : clamped;
+      scrollToChild(target, behavior);
       setActiveLoopedIndex(target);
+    };
+
+    scrollToIndexRef.current = (logicalIndex: number) => {
+      scrollToLogicalIndex(
+        logicalIndex,
+        stableLoop ? "smooth" : "auto",
+      );
     };
 
     const scrollToStart = () => {
@@ -869,5 +891,5 @@ export function useInfiniteFullBleedCarousel(
     };
   }, [scrollRef, itemCount, initialIndex, stableLoop]);
 
-  return { activeIndex, activeLoopedIndex };
+  return { activeIndex, activeLoopedIndex, scrollToIndex };
 }

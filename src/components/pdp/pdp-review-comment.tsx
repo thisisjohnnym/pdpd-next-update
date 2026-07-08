@@ -177,7 +177,7 @@ export function PdpReviewFeedFilterBar({
       role="tablist"
       aria-label="Filter reviews"
     >
-      <div className="flex w-max min-w-full gap-2 px-1 pb-1">
+      <div className="flex w-max min-w-full gap-4 px-1 pb-1">
         {filters.map((filter) => {
           const active = value === filter.id;
 
@@ -189,12 +189,11 @@ export function PdpReviewFeedFilterBar({
               aria-selected={active}
               onClick={() => onChange(filter.id)}
               className={cn(
-                "shrink-0 rounded-full border px-3 py-1.5 transition-colors",
-                pdpType.micro,
-                pdpPressableClass,
+                "shrink-0 m-0 border-0 bg-transparent p-0 transition-colors",
+                pdpType.label,
                 active
-                  ? "border-black bg-black text-white"
-                  : "border-neutral-200 bg-white text-black active:bg-neutral-50",
+                  ? "text-black underline decoration-black underline-offset-[3px]"
+                  : "text-neutral-400 active:text-neutral-600",
               )}
             >
               {filter.label}

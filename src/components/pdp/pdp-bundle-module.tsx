@@ -48,7 +48,7 @@ function PrimaryBundleCard({ item }: { item: PdpBundleItem }) {
           sizes="132px"
         />
       </span>
-      <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.body}`}>
+      <p className={`font-extended m-0 leading-[1.1] text-black ${pdpType.productName}`}>
         {item.name}
       </p>
       <p className={`font-extended m-0 leading-[1.1] text-black tabular-nums ${pdpType.label}`}>
@@ -82,7 +82,7 @@ function AddonBundleRow({ item, selected, onToggle }: BundleRowProps) {
       </span>
 
       <span className="flex min-w-0 grow flex-col gap-[7px]">
-        <span className={`font-extended leading-[1.1] text-black ${pdpType.label}`}>
+        <span className={`font-extended leading-[1.1] text-black ${pdpType.productNameCompact}`}>
           {item.name}
         </span>
         <span

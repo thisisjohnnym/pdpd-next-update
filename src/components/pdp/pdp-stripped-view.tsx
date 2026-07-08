@@ -23,7 +23,7 @@ import { PDP_STUDIO_BACKDROP_CLASS } from "./pdp-data";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import type { PdpProductConfig, PdpProductHero, PdpProductSummary } from "./pdp-products";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
-import { pdpType } from "./pdp-type";
+import { pdpProductTitleClass, pdpType } from "./pdp-type";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
@@ -106,7 +106,7 @@ export function PdpStaticHero({
 
       <PageGrid fullWidth className="py-4">
         <GridItem mobile={12} desktop={24} className="flex flex-col gap-3">
-          <div className="font-extended tracking-[0.2px] text-neutral-900">
+          <div className={cn(pdpProductTitleClass, "text-neutral-900")}>
             <div className="flex items-center justify-between gap-4 text-base font-normal leading-none">
               <p className="min-w-0 truncate">{summary.name}</p>
               <p className="shrink-0 tabular-nums">{summary.price}</p>

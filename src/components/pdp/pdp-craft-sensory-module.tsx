@@ -142,7 +142,10 @@ export function PdpCraftSensoryModule() {
         <div className={CHAPTER_SCRIM_BOTTOM_CLASS} style={chapterBottomPadWithCta()}>
           <div className={CHAPTER_COPY_GUTTER_CLASS}>
             <h2
-              className={`font-extended m-0 text-lg tracking-[0.2px] text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] ${pdpType.headline}`}
+              className={cn(
+                pdpType.headline,
+                "m-0 text-lg text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]",
+              )}
             >
               {title}
             </h2>

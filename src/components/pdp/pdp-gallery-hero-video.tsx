@@ -9,9 +9,11 @@ import { PDP_GALLERY_HERO_VIDEO } from "./pdp-data";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpPillRadiusClass } from "./pdp-type";
 import { resolveVideoSources } from "./pdp-video-sources";
+import { PDP_HERO_GALLERY_CONTROL_PILL_CLASS, getHeroGalleryControlPositionClass } from "./pdp-hero-gallery-control-shell";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { useHeroVideoPlayback } from "./use-hero-video-playback";
+import { useHeroGalleryIdleVisible } from "./use-hero-gallery-idle-visible";
 import { useMountTransition } from "./use-mount-transition";
 
 type PdpGalleryHeroVideoProps = {
@@ -56,13 +58,14 @@ type PdpGalleryHeroVideoProps = {
   playbackRate?: number;
   /** Skip the opacity fade-in when the first frame appears (intro clips). */
   instantReveal?: boolean;
+  /** Stay mounted when inactive — carousel neighbor warm-up */
+  keepMounted?: boolean;
 };
 
 const CONTROL_BUTTON_CLASS =
   "flex size-8 items-center justify-center text-white transition-opacity active:scale-[0.96] active:opacity-75";
 
-const PILL_CONTROL_SHELL_CLASS =
-  "flex items-center gap-3 px-3.5 py-2 pdp-frost-dark ring-1 ring-inset ring-white/20";
+const PILL_CONTROL_SHELL_CLASS = PDP_HERO_GALLERY_CONTROL_PILL_CLASS;
 
 const CONTROLS_POSITION_CLASS = {
   "bottom-left": "bottom-3 left-3",
@@ -139,8 +142,10 @@ export function PdpGalleryHeroVideo({
   studioGround = false,
   playbackRate = 1,
   instantReveal = false,
+  keepMounted = false,
 }: PdpGalleryHeroVideoProps) {
-  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+  const { squareButtonCorners, useV4ModuleSpacing, useHeroGalleryProgressBar } =
+    getPdpVersionConfig(usePdpVersion());
   const resolvedControlShellClassName =
     controlShellClassName ?? pdpPillRadiusClass(squareButtonCorners);
   const {
@@ -172,6 +177,7 @@ export function PdpGalleryHeroVideo({
     onEnded,
     blurReveal,
     playbackRate,
+    keepMounted,
   });
 
   const videoSources = resolveVideoSources(src);
@@ -196,9 +202,19 @@ export function PdpGalleryHeroVideo({
   const overlayInteractive = showFrozenPlayOverlay || showTapPausedOverlay;
   const showCenterPlaybackOverlay =
     Boolean(playbackOverlayIcon) && !usePillControls;
-  const controlsPositionClass = CONTROLS_POSITION_CLASS[controlsPosition];
+  const controlsPositionClass = controlsElevated
+    ? getHeroGalleryControlPositionClass({
+        useV4ModuleSpacing,
+        useHeroGalleryProgressBar,
+        position: controlsPosition,
+      })
+    : CONTROLS_POSITION_CLASS[controlsPosition];
   const controlsLayerClass = controlsElevated ? "z-[40]" : "z-[4]";
   const controlsTransition = useMountTransition(isActive && showControlChrome, 280);
+  const idleVisible = useHeroGalleryIdleVisible();
+  const controlsAwake =
+    controlsTransition.state === "open" &&
+    (!controlsElevated || idleVisible);
 
   const tapStartRef = useRef<{ x: number; y: number } | null>(null);
   const tapMovedRef = useRef(false);
@@ -318,11 +334,7 @@ export function PdpGalleryHeroVideo({
           poster={poster}
           fitClass={posterFitClass}
           objectPosition={posterObjectPosition}
-          visible={
-            showBlurReveal
-              ? !videoFrameVisible || showFrozenPlayOverlay
-              : !isPlaying
-          }
+          visible={!videoFrameVisible || showFrozenPlayOverlay}
         />
       ) : null}
 
@@ -397,7 +409,7 @@ export function PdpGalleryHeroVideo({
               "absolute",
               controlsPositionClass,
               controlsLayerClass,
-              controlsTransition.state === "open"
+              controlsAwake
                 ? "pointer-events-auto"
                 : "pointer-events-none",
             )}
@@ -408,7 +420,7 @@ export function PdpGalleryHeroVideo({
                 resolvedControlShellClassName,
                 "pdp-video-controls-pop pdp-video-controls-stagger",
               )}
-              data-state={controlsTransition.state}
+              data-state={controlsAwake ? "open" : "closed"}
             >
               {showPlaybackInPill ? (
                 <button
@@ -477,11 +489,11 @@ export function PdpGalleryHeroVideo({
               "absolute flex items-center gap-1.5 pdp-video-controls-pop pdp-video-controls-stagger",
               controlsPositionClass,
               controlsLayerClass,
-              controlsTransition.state === "open"
+              controlsAwake
                 ? "pointer-events-auto"
                 : "pointer-events-none",
             )}
-            data-state={controlsTransition.state}
+            data-state={controlsAwake ? "open" : "closed"}
           >
             {showMuteControl ? (
               <button

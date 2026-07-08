@@ -215,19 +215,46 @@ function sampleAtPoint(clientX: number, clientY: number): number | null {
   return null;
 }
 
+// fallow-ignore-next-line complexity
+function rectsOverlap(a: DOMRect, b: DOMRect): boolean {
+  return (
+    a.height > 0 &&
+    a.width > 0 &&
+    a.top < b.bottom &&
+    a.bottom > b.top &&
+    a.left < b.right &&
+    a.right > b.left
+  );
+}
+
+/** First visible hero region — mobile gallery or v5 desktop media rail. */
+// fallow-ignore-next-line complexity
+function readVisibleHeroRegionRect(): DOMRect | null {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  for (const selector of ["[data-hero-section]", "[data-pdp-desktop-hero-media]"]) {
+    const node = document.querySelector(selector);
+    if (!node) continue;
+
+    const rect = node.getBoundingClientRect();
+    if (rect.height > 0 && rect.width > 0) {
+      return rect;
+    }
+  }
+
+  return null;
+}
+
 /** True when the fixed header band overlaps the hero gallery section. */
 export function headerOverlapsHeroSection(headerRect: DOMRect): boolean {
-  if (typeof document === "undefined") {
+  const heroRect = readVisibleHeroRegionRect();
+  if (!heroRect) {
     return false;
   }
 
-  const heroSection = document.querySelector("[data-hero-section]");
-  if (!heroSection) {
-    return false;
-  }
-
-  const heroRect = heroSection.getBoundingClientRect();
-  return heroRect.top < headerRect.bottom && heroRect.bottom > headerRect.top;
+  return rectsOverlap(headerRect, heroRect);
 }
 
 /** Default probe band when no header element is mounted yet. */

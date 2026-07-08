@@ -135,11 +135,13 @@ function PdpSocialViewInner() {
     showFloatingBuyBar,
     desktopSplitLayout,
     showArTryOn,
+    showHeroGalleryCategoryRail,
   } = versionConfig;
 
-  const handleOpenArTryOn = showArTryOn
-    ? () => setArTryOnOpen(true)
-    : undefined;
+  const handleOpenArTryOn =
+    showArTryOn || showHeroGalleryCategoryRail
+      ? () => setArTryOnOpen(true)
+      : undefined;
 
   const tabbyColorHero =
     !versionConfig.lockHeroGalleryTemplate &&

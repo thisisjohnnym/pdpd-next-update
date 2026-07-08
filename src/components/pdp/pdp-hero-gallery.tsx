@@ -31,6 +31,7 @@ import {
   loopCarouselItems,
   useInfiniteFullBleedCarousel,
 } from "./use-infinite-centered-carousel";
+import { HeroGalleryIdleProvider } from "./use-hero-gallery-idle-visible";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
@@ -39,10 +40,12 @@ import { PdpHeroGalleryVertical } from "./pdp-hero-gallery-vertical";
 function HeroSlideMedia({
   slide,
   isActive,
+  keepMounted = false,
   eager,
 }: {
   slide: PdpHeroGallerySlide;
   isActive: boolean;
+  keepMounted?: boolean;
   /** Decode immediately — first image slides for snappy first swipe */
   eager: boolean;
 }) {
@@ -56,7 +59,8 @@ function HeroSlideMedia({
         poster={slide.poster}
         ariaLabel={slide.alt}
         isActive={isActive}
-        preload={isActive ? "auto" : "metadata"}
+        keepMounted={keepMounted}
+        preload={isActive || keepMounted ? "auto" : "metadata"}
         priorityAutoplay={Boolean(slide.priority)}
         skeletonTone={slide.shotType === "lifestyle" ? "dark" : "light"}
         showMuteControl
@@ -81,6 +85,19 @@ function HeroSlideMedia({
       style={{ objectPosition }}
     />
   );
+}
+
+function circularSlideDistance(
+  fromIndex: number,
+  toIndex: number,
+  count: number,
+): number {
+  if (count <= 1) {
+    return 0;
+  }
+
+  const diff = Math.abs(fromIndex - toIndex);
+  return Math.min(diff, count - diff);
 }
 
 /**
@@ -129,7 +146,11 @@ export function PdpHeroGallery({
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
+    useHeroGalleryProgressBar,
+    showHeroGalleryCategoryRail,
   } = versionConfig;
+  const idleChromeEnabled =
+    useHeroGalleryProgressBar || showHeroGalleryCategoryRail;
   const orderedSlides = useMemo(
     () =>
       orderHeroGallerySlides(slides, {
@@ -154,7 +175,7 @@ export function PdpHeroGallery({
     () => loopCarouselItems(orderedSlides),
     [orderedSlides],
   );
-  const { activeIndex, activeLoopedIndex } = useInfiniteFullBleedCarousel(
+  const { activeIndex, activeLoopedIndex, scrollToIndex } = useInfiniteFullBleedCarousel(
     trackRef,
     orderedSlides.length,
     { stableLoop: useStableInfiniteCarousel },
@@ -173,12 +194,15 @@ export function PdpHeroGallery({
       count: orderedSlides.length,
       surface,
       overlayCta: orderedSlides[activeIndex]?.overlayCta,
+      slides: orderedSlides,
+      scrollToIndex,
     }),
-    [activeIndex, orderedSlides, surface],
+    [activeIndex, orderedSlides, surface, scrollToIndex],
   );
 
   return (
     <PdpHeroGalleryProvider value={galleryState}>
+      <HeroGalleryIdleProvider enabled={idleChromeEnabled}>
       <section
         data-hero-section
         data-header-surface={surface}
@@ -198,9 +222,20 @@ export function PdpHeroGallery({
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x_pan-y]",
           )}
         >
+          {/* fallow-ignore-next-line complexity */}
           {loopedSlides.map((slide, index) => {
             const logicalIndex = index % orderedSlides.length;
             const slideScrimVisible = slide.headerSurface === "dark";
+            const isCentered = index === activeLoopedIndex;
+            const nearActive =
+              circularSlideDistance(logicalIndex, activeIndex, orderedSlides.length) <=
+              1;
+            const isCanonicalClone =
+              orderedSlides.length <= 1 || index === orderedSlides.length + logicalIndex;
+            const warmVideoNeighbor =
+              slide.kind === "video" &&
+              nearActive &&
+              (isCentered || isCanonicalClone);
             return (
               <div
                 key={`${getHeroGallerySlideKey(slide)}-${index}`}
@@ -209,7 +244,8 @@ export function PdpHeroGallery({
               >
                 <HeroSlideMedia
                   slide={slide}
-                  isActive={index === activeLoopedIndex}
+                  isActive={isCentered}
+                  keepMounted={warmVideoNeighbor}
                   eager={logicalIndex <= 1}
                 />
                 {slideScrimVisible ? (
@@ -251,6 +287,7 @@ export function PdpHeroGallery({
           </>
         )}
       </section>
+      </HeroGalleryIdleProvider>
     </PdpHeroGalleryProvider>
   );
 }

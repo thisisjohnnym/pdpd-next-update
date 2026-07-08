@@ -11,6 +11,8 @@ import {
   pdpAddIconLabelClass,
   pdpPillRadiusClass,
   pdpPressableClass,
+  pdpProductPriceClass,
+  pdpProductTitleClass,
   pdpStrokeCtaClass,
   pdpStrokeCtaMutedClass,
   pdpType,
@@ -47,11 +49,11 @@ function AgingCareUpsellRow({
         />
       </div>
 
-      <p className="font-extended min-w-0 flex-1 truncate text-sm tracking-[0.2px] text-black">
+      <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate text-sm text-black")}>
         {product.name}
       </p>
 
-      <p className="font-extended shrink-0 text-sm tracking-[0.2px] text-black tabular-nums">
+      <p className={cn(pdpProductPriceClass, "shrink-0 text-sm text-black")}>
         {formatCarePrice(product.price)}
       </p>
 

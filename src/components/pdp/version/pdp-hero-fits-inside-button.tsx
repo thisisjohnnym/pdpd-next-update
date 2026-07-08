@@ -46,7 +46,7 @@ export function PdpHeroFitsInsideButton() {
       onClick={handleClick}
       aria-label="See what fits inside"
       className={cn(
-        "pointer-events-auto flex items-center gap-1.5 rounded-none py-2.5 pl-3 pr-4",
+        "pointer-events-auto flex h-11 items-center gap-1.5 rounded-none pl-3 pr-4",
         "pdp-v5-fits-inside-glass ring-1 ring-inset ring-white/45",
         "transition-[transform,background-color] duration-200 ease-out",
         "active:scale-[0.96]",

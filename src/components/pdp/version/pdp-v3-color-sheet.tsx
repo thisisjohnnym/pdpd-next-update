@@ -24,7 +24,7 @@ import {
   pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "../pdp-bottom-sheet";
-import { ColorSwatchCircle } from "../pdp-color-swatch";
+import { ColorSwatchCircle, ColorSwatchTile, SQUARE_SWATCH_TILE_FOCAL, SQUARE_SWATCH_TILE_ZOOM } from "../pdp-color-swatch";
 import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
@@ -86,8 +86,37 @@ function SectionToggle({
   );
 }
 
+function ColorRowSwatch({
+  usePhotoSwatch,
+  swatch,
+  fill,
+  selectable,
+}: {
+  usePhotoSwatch: boolean;
+  swatch?: string;
+  fill: string;
+  selectable: boolean;
+}) {
+  if (usePhotoSwatch && swatch) {
+    return (
+      <ColorSwatchTile
+        src={swatch}
+        widthClass="size-12"
+        sizes="48px"
+        zoom={SQUARE_SWATCH_TILE_ZOOM}
+        objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+        dimmed={!selectable}
+      />
+    );
+  }
+
+  return <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />;
+}
+
 function ColorRow({
   fill,
+  swatch,
+  usePhotoSwatch = false,
   name,
   availability,
   isSelected,
@@ -97,6 +126,8 @@ function ColorRow({
   hideInStockLabel = false,
 }: {
   fill: string;
+  swatch?: string;
+  usePhotoSwatch?: boolean;
   name: string;
   availability: Parameters<typeof pdpColorAvailabilityLabel>[0];
   isSelected: boolean;
@@ -130,7 +161,12 @@ function ColorRow({
             selectable ? pdpPressableClass : "opacity-60",
           )}
         >
-          <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />
+          <ColorRowSwatch
+            usePhotoSwatch={usePhotoSwatch}
+            swatch={swatch}
+            fill={fill}
+            selectable={selectable}
+          />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn("text-black", pdpType.label)}>{name}</span>
             {showAvailabilityLabel ? (
@@ -415,6 +451,8 @@ export function PdpV3ColorSheet({
                     <ColorRow
                       key={color.id}
                       fill={color.chromeSample}
+                      swatch={color.swatch}
+                      usePhotoSwatch={flatColorSheet}
                       name={color.name}
                       availability={color.availability}
                       isSelected={
@@ -441,6 +479,8 @@ export function PdpV3ColorSheet({
                     <ColorRow
                       key={color.id}
                       fill={color.chromeSample}
+                      swatch={color.swatch}
+                      usePhotoSwatch={flatColorSheet}
                       name={color.name}
                       availability={color.availability}
                       isSelected={
