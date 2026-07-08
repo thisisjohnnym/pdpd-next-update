@@ -81,7 +81,6 @@ import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
 import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
 import { PdpV5CraftedToLastVideo } from "./version/pdp-v5-crafted-to-last-video";
-import { PdpV5DesignSketchInterrupt } from "./version/pdp-v5-design-sketch-interrupt";
 import { PdpV5GetTheHighlights } from "./version/pdp-v5-get-the-highlights";
 import { PdpV5QuoteCard } from "./version/pdp-v5-quote-card";
 import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
@@ -951,19 +950,6 @@ export function PdpGalleryView({
                   ]
                 : [];
 
-            const designSketchInterrupt: ReactNode[] =
-              versionConfig.showDesignSketchInterrupt
-                ? [
-                    <PdpScrollReveal
-                      key={`design-sketch-interrupt-${index}`}
-                      className={ECOMM_MODULE_CLASS}
-                      surface="light"
-                    >
-                      <PdpV5DesignSketchInterrupt />
-                    </PdpScrollReveal>,
-                  ]
-                : [];
-
             return [
               gallerySection(
                 `editorial-carousel-${index}`,
@@ -975,7 +961,6 @@ export function PdpGalleryView({
                 { surface: "light" },
               ),
               ...editorialQuoteCard,
-              ...designSketchInterrupt,
             ];
           }
 

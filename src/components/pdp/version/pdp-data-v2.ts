@@ -713,16 +713,6 @@ export const PDP_V5_EDITORIAL_QUOTE = {
   src: "/images/editorial/pinkpantheress-tabby.png",
   alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
 } as const;
-
-/** v5 design sketch scroll break — warm studio spread before Ways to wear. */
-export const PDP_DESIGN_SKETCH_INTERRUPT = {
-  headline: "Designed with intention",
-  intro:
-    "Every line of the Tabby silhouette is measured for balance — proportion, carry, and the signature C clasp in perfect harmony.",
-  src: "/images/gallery/tabby-design-sketch-scroll-break.jpg",
-  alt: "Design sketch of Tabby Shoulder Bag 26 showing front elevation and strap dimensions",
-} as const;
-
 export const PDP_WAYS_TO_WEAR_SECTION = {
   headline: "Made to move",
   body:

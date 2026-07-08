@@ -310,10 +310,6 @@ export type PdpVersionConfig = {
    */
   showEditorialQuoteCard: boolean;
   /**
-   * Warm design-sketch scroll break after the quote card, before Ways to wear. v5 only.
-   */
-  showDesignSketchInterrupt: boolean;
-  /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
    */
@@ -559,7 +555,6 @@ const V1_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
-  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showCraftedToLastVideo: false,
@@ -665,7 +660,6 @@ const V2_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
-  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,
@@ -771,7 +765,6 @@ const V5_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
   showEditorialQuoteCard: true,
-  showDesignSketchInterrupt: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   hideInStockColorLabel: true,
