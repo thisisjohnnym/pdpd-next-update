@@ -654,6 +654,7 @@ const V2_CONFIG: PdpVersionConfig = {
   useV4CompactUgcStrip: false,
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
+  showEditorialQuoteCard: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showWaysToWearModule: false,

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -138,14 +138,26 @@ export function PdpHeroGalleryVertical({
     setHeroChromeSurface(surface);
   }, [setHeroChromeSurface, surface]);
 
+  const scrollToIndex = useCallback((index: number) => {
+    const track = trackRef.current;
+    const slide = track?.querySelector<HTMLElement>(
+      `[data-hero-vertical-slide-index="${index}"]`,
+    );
+    if (track && slide) {
+      track.scrollTo({ top: slide.offsetTop, behavior: "smooth" });
+    }
+  }, []);
+
   const galleryState = useMemo(
     () => ({
       activeIndex,
       count: orderedSlides.length,
       surface,
       overlayCta: orderedSlides[activeIndex]?.overlayCta,
+      slides: orderedSlides,
+      scrollToIndex,
     }),
-    [activeIndex, orderedSlides, surface],
+    [activeIndex, orderedSlides, surface, scrollToIndex],
   );
 
   return (
