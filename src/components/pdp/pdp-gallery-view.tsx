@@ -81,6 +81,8 @@ import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
 import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
 import { PdpV5CraftedToLastVideo } from "./version/pdp-v5-crafted-to-last-video";
+import { PdpV5DesignSketchInterrupt } from "./version/pdp-v5-design-sketch-interrupt";
+import { PdpV5GetTheHighlights } from "./version/pdp-v5-get-the-highlights";
 import { PdpV5QuoteCard } from "./version/pdp-v5-quote-card";
 import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
 import { PdpReviewInterstitial } from "./version/pdp-review-interstitial";
@@ -712,7 +714,7 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: Feel → Details → What customers are saying → Up close → Aging.
+          // v5: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
           // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
@@ -755,22 +757,9 @@ export function PdpGalleryView({
                     </PdpScrollReveal>,
                   ];
 
-                  const editorialQuoteCard: ReactNode[] =
-                    versionConfig.showEditorialQuoteCard
-                      ? [
-                          <PdpScrollReveal
-                            key={`editorial-quote-card-${index}`}
-                            className={ECOMM_MODULE_CLASS}
-                            surface="light"
-                          >
-                            <PdpV5QuoteCard />
-                          </PdpScrollReveal>,
-                        ]
-                      : [];
-
                   return versionConfig.useV5UgcTestimonialCarousel
-                    ? [...detailsModule, ...ugcWildStrip, ...editorialQuoteCard]
-                    : [...ugcWildStrip, ...detailsModule, ...editorialQuoteCard];
+                    ? [...detailsModule, ...ugcWildStrip]
+                    : [...ugcWildStrip, ...detailsModule];
                 })()
               : [];
 
@@ -949,6 +938,32 @@ export function PdpGalleryView({
           }
 
           if (slide.type === "editorial-carousel-v2") {
+            const editorialQuoteCard: ReactNode[] =
+              versionConfig.showEditorialQuoteCard
+                ? [
+                    <PdpScrollReveal
+                      key={`editorial-quote-card-${index}`}
+                      className={ECOMM_MODULE_CLASS}
+                      surface="light"
+                    >
+                      <PdpV5QuoteCard />
+                    </PdpScrollReveal>,
+                  ]
+                : [];
+
+            const designSketchInterrupt: ReactNode[] =
+              versionConfig.showDesignSketchInterrupt
+                ? [
+                    <PdpScrollReveal
+                      key={`design-sketch-interrupt-${index}`}
+                      className={ECOMM_MODULE_CLASS}
+                      surface="light"
+                    >
+                      <PdpV5DesignSketchInterrupt />
+                    </PdpScrollReveal>,
+                  ]
+                : [];
+
             return [
               gallerySection(
                 `editorial-carousel-${index}`,
@@ -959,6 +974,8 @@ export function PdpGalleryView({
                 ),
                 { surface: "light" },
               ),
+              ...editorialQuoteCard,
+              ...designSketchInterrupt,
             ];
           }
 
@@ -985,6 +1002,21 @@ export function PdpGalleryView({
               gallerySection(
                 `ways-to-wear-${index}`,
                 <PdpV5WaysToWear />,
+                { surface: "light" },
+              ),
+            ];
+          }
+
+          if (slide.type === "get-the-highlights") {
+            if (!versionConfig.showGetTheHighlights) {
+              return [];
+            }
+
+            return [
+              <ChapterAnchor key={`anchor-the-feel-${index}`} id="the-feel" />,
+              gallerySection(
+                `get-the-highlights-${index}`,
+                <PdpV5GetTheHighlights />,
                 { surface: "light" },
               ),
             ];

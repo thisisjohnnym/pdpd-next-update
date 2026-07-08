@@ -17,7 +17,7 @@ import {
 } from "./pdp-hero-gallery-data";
 import {
   heroSlideBackground,
-  resolveHeroFraming,
+  resolveHeroSlideFraming,
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
 import { useSetHeroChromeSurface } from "./pdp-hero-chrome-surface";
@@ -48,7 +48,10 @@ function HeroSlideMedia({
   /** Decode immediately — first image slides for snappy first swipe */
   eager: boolean;
 }) {
-  const { objectFit, objectPosition } = resolveHeroFraming(slide.shotType);
+  const { objectFit, objectPosition } = resolveHeroSlideFraming(
+    slide.shotType,
+    slide.framing,
+  );
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
 
   if (slide.kind === "video") {
@@ -132,6 +135,7 @@ export function PdpHeroGallery({
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
+    heroGalleryLogicalBlockOrder,
     useHeroGalleryProgressBar,
     showHeroGalleryCategoryRail,
   } = getPdpVersionConfig(usePdpVersion());
@@ -146,6 +150,7 @@ export function PdpHeroGallery({
         heroGalleryPrependLeadSlide,
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
+        heroGalleryLogicalBlockOrder,
       }),
     [
       slides,
@@ -155,6 +160,7 @@ export function PdpHeroGallery({
       heroGalleryPrependLeadSlide,
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
+      heroGalleryLogicalBlockOrder,
     ],
   );
   const loopedSlides = useMemo(

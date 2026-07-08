@@ -2,7 +2,7 @@ import {
   PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
 } from "./pdp-data";
-import type { PdpHeroShotType } from "./pdp-hero-framing";
+import type { PdpHeroFraming, PdpHeroShotType } from "./pdp-hero-framing";
 
 /**
  * Header chrome contrast per slide.
@@ -22,6 +22,7 @@ export type PdpHeroGalleryCategory =
   | "fits-inside"
   | "360"
   | "product-photos"
+  | "video"
   | "on-model";
 
 type PdpHeroGalleryBaseSlide = {
@@ -32,6 +33,8 @@ type PdpHeroGalleryBaseSlide = {
   overlayCta?: PdpHeroOverlayCta;
   /** Jump-to category for the hero gallery category rail */
   galleryCategory?: PdpHeroGalleryCategory;
+  /** Per-slide crop override — e.g. contain on-model on the studio grey ground */
+  framing?: Partial<PdpHeroFraming>;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -131,8 +134,13 @@ function applyV4HeroGallery(
   ];
 }
 
-/** v5 hero land — on-model lifestyle video (white nav, cinematic open). */
-export const HERO_GALLERY_V5_LEAD_SRC = PDP_GALLERY_IMMERSIVE_HERO_VIDEO;
+/** On-model still (black slip dress) — promoted to lead in v5 on the studio ground. */
+export const HERO_ON_MODEL_BLACK_DRESS_SRC =
+  "/images/gallery/tabby-on-model-black-dress.png";
+
+/** On-model still — utility jacket, plaid skirt, crossbody carry. */
+const HERO_ON_MODEL_BOMBER_PLAID_SRC =
+  "/images/gallery/tabby-on-model-bomber-plaid.jpg";
 
 /** Move a slide to index 0 without mutating the frozen source array. */
 function promoteHeroGallerySlideToLead(
@@ -198,6 +206,86 @@ function insertHeroGallerySlidesAfter(
   ];
 }
 
+/** Story order for v5 category blocks — on-model land → hero video → product → … */
+const HERO_GALLERY_CATEGORY_BLOCK_ORDER: PdpHeroGalleryCategory[] = [
+  "on-model",
+  "video",
+  "product-photos",
+  "fits-inside",
+  "360",
+  "ugc",
+];
+
+function resolveSlideGalleryCategory(
+  slide: PdpHeroGallerySlide,
+): PdpHeroGalleryCategory {
+  if (slide.galleryCategory) {
+    return slide.galleryCategory;
+  }
+
+  if (slide.overlayCta === "fits-inside") {
+    return "fits-inside";
+  }
+
+  if (slide.kind === "video") {
+    return slide.src.includes("spin") ? "360" : "video";
+  }
+
+  if (slide.shotType === "on-model" || slide.shotType === "lifestyle") {
+    return "on-model";
+  }
+
+  return "product-photos";
+}
+
+/** Stable category-block sort — model still land, hero video, product, UGC last. */
+function sortHeroGallerySlidesByCategoryBlocks(
+  slides: PdpHeroGallerySlide[],
+  leadSlideSrc?: string,
+): PdpHeroGallerySlide[] {
+  const blockRank = new Map(
+    HERO_GALLERY_CATEGORY_BLOCK_ORDER.map((category, index) => [
+      category,
+      index,
+    ]),
+  );
+  const onModelRank = blockRank.get("on-model") ?? 0;
+  const videoRank = blockRank.get("video") ?? 1;
+
+  const indexed = slides.map((slide, index) => ({ slide, index }));
+
+  indexed.sort((a, b) => {
+    const rankA = blockRank.get(resolveSlideGalleryCategory(a.slide)) ?? 99;
+    const rankB = blockRank.get(resolveSlideGalleryCategory(b.slide)) ?? 99;
+
+    if (rankA !== rankB) {
+      return rankA - rankB;
+    }
+
+    if (rankA === onModelRank && leadSlideSrc) {
+      if (a.slide.src === leadSlideSrc) {
+        return -1;
+      }
+      if (b.slide.src === leadSlideSrc) {
+        return 1;
+      }
+    }
+
+    if (rankA === videoRank) {
+      if (a.slide.src === PDP_GALLERY_IMMERSIVE_HERO_VIDEO) {
+        return -1;
+      }
+      if (b.slide.src === PDP_GALLERY_IMMERSIVE_HERO_VIDEO) {
+        return 1;
+      }
+    }
+
+    return a.index - b.index;
+  });
+
+  return indexed.map(({ slide }) => slide);
+}
+
 export type HeroGalleryOrderingOptions = {
   leadGalleryWithProductStill?: boolean;
   heroGalleryStudioDragZoom?: boolean;
@@ -206,6 +294,11 @@ export type HeroGalleryOrderingOptions = {
   heroGalleryUgcSlides?: PdpHeroGallerySlide[];
   /** Index after which UGC slides are inserted — defaults to 1 (after lead pair). */
   heroGalleryUgcInsertAfterIndex?: number;
+  /**
+   * v5 story order — on-model land, hero video, product stills, fits inside,
+   * 360°, then community UGC appended last.
+   */
+  heroGalleryLogicalBlockOrder?: boolean;
 };
 
 /** Version-aware hero slide ordering — shared by mobile carousel + desktop rail. */
@@ -213,28 +306,55 @@ export function orderHeroGallerySlides(
   slides: PdpHeroGallerySlide[],
   options: HeroGalleryOrderingOptions = {},
 ): PdpHeroGallerySlide[] {
+  const useLogicalBlocks = options.heroGalleryLogicalBlockOrder === true;
+
   let result =
-    options.leadGalleryWithProductStill || options.heroGalleryStudioDragZoom
+    options.leadGalleryWithProductStill ||
+    options.heroGalleryStudioDragZoom ||
+    useLogicalBlocks
       ? applyV4HeroGallery(slides, {
-          leadGalleryWithProductStill: options.leadGalleryWithProductStill,
+          leadGalleryWithProductStill: useLogicalBlocks
+            ? false
+            : options.leadGalleryWithProductStill,
           heroGalleryStudioDragZoom: options.heroGalleryStudioDragZoom,
         })
       : slides;
 
-  if (options.heroGalleryLeadSlideSrc) {
-    result = promoteHeroGallerySlideToLead(result, options.heroGalleryLeadSlideSrc);
+  if (!useLogicalBlocks && options.heroGalleryLeadSlideSrc) {
+    result = promoteHeroGallerySlideToLead(
+      result,
+      options.heroGalleryLeadSlideSrc,
+    );
   }
 
   if (options.heroGalleryPrependLeadSlide) {
-    result = prependHeroGalleryLeadSlide(result, options.heroGalleryPrependLeadSlide);
+    result = prependHeroGalleryLeadSlide(
+      result,
+      options.heroGalleryPrependLeadSlide,
+    );
+  }
+
+  if (useLogicalBlocks) {
+    result = sortHeroGallerySlidesByCategoryBlocks(
+      result,
+      options.heroGalleryLeadSlideSrc,
+    );
   }
 
   if (options.heroGalleryUgcSlides?.length) {
-    result = insertHeroGallerySlidesAfter(
-      result,
-      options.heroGalleryUgcSlides,
-      options.heroGalleryUgcInsertAfterIndex ?? 1,
-    );
+    if (useLogicalBlocks) {
+      result = insertHeroGallerySlidesAfter(
+        result,
+        options.heroGalleryUgcSlides,
+        result.length - 1,
+      );
+    } else {
+      result = insertHeroGallerySlidesAfter(
+        result,
+        options.heroGalleryUgcSlides,
+        options.heroGalleryUgcInsertAfterIndex ?? 1,
+      );
+    }
   }
 
   return result;
@@ -256,7 +376,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "lifestyle",
     headerSurface: "dark",
     priority: true,
-    galleryCategory: "on-model",
+    galleryCategory: "video",
   },
   {
     kind: "image",
@@ -272,6 +392,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 in black leather, three-quarter angle showing the side zip pocket",
     shotType: "product",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -279,6 +400,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 in black leather, back view with the exterior zip pocket",
     shotType: "product",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -304,6 +426,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 open from above showing the empty leather-lined interior",
     shotType: "detail",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -311,6 +434,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Close-up of the gusseted base and structured panels of Tabby Shoulder Bag 26",
     shotType: "detail",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -318,22 +442,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 in black leather with the long crossbody strap extended",
     shotType: "product",
     headerSurface: "light",
-  },
-  {
-    kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a61.webp`,
-    alt: "Model in a tan trench coat wearing Tabby Shoulder Bag 26 crossbody",
-    shotType: "on-model",
-    headerSurface: "light",
-    galleryCategory: "on-model",
-  },
-  {
-    kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a62.webp`,
-    alt: "Model in a Coach tee and suede skirt wearing Tabby Shoulder Bag 26 crossbody",
-    shotType: "on-model",
-    headerSurface: "light",
-    galleryCategory: "on-model",
+    galleryCategory: "product-photos",
   },
   {
     kind: "video",
@@ -342,6 +451,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Everyday essentials being packed into Tabby Shoulder Bag 26 in full-grain leather",
     shotType: "studio",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -349,11 +459,28 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Tabby Shoulder Bag 26 in black leather styled with a cherry bag charm",
     shotType: "product",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a92.webp`,
-    alt: "Model leaning back in a tan trench coat with Tabby Shoulder Bag 26 at the hip",
+    src: "/images/gallery/tabby-hand-reach.png",
+    alt: "Hand reaching for the strap of Tabby Shoulder Bag 26 in black full-grain leather with gold C turnlock clasp",
+    shotType: "product",
+    headerSurface: "light",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: HERO_ON_MODEL_BLACK_DRESS_SRC,
+    alt: "Model in a black slip dress and sunglasses carrying Tabby Shoulder Bag 26 in black leather on the shoulder",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+  },
+  {
+    kind: "image",
+    src: HERO_ON_MODEL_BOMBER_PLAID_SRC,
+    alt: "Model in a tan utility jacket and brown plaid mini skirt with Tabby Shoulder Bag 26 in black leather worn crossbody",
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",
@@ -364,6 +491,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Macro detail of the full-grain leather and gold snap on Tabby Shoulder Bag 26",
     shotType: "detail",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
   {
     kind: "image",
@@ -371,5 +499,6 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     alt: "Feature callouts for Tabby Shoulder Bag 26: detachable straps, snap closure, zip pocket, and leather lining",
     shotType: "studio",
     headerSurface: "light",
+    galleryCategory: "product-photos",
   },
 ];

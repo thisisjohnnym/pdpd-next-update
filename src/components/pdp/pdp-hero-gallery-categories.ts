@@ -13,8 +13,9 @@ export type PdpHeroGalleryCategoryDef = {
 };
 
 export const PDP_HERO_GALLERY_CATEGORIES: PdpHeroGalleryCategoryDef[] = [
-  { id: "product-photos", label: "Product Photos", action: "scroll" },
   { id: "on-model", label: "On Model", action: "scroll" },
+  { id: "video", label: "Video", action: "scroll" },
+  { id: "product-photos", label: "Product Photos", action: "scroll" },
   { id: "fits-inside", label: "What's Inside", action: "scroll" },
   { id: "360", label: "360°", action: "scroll" },
   { id: "ar", label: "AR", action: "ar" },
@@ -86,12 +87,20 @@ export function readHeroGalleryActiveCategory(
     return "ugc";
   }
 
+  if (isActiveInCategoryBlock(slides, activeIndex, "video")) {
+    return "video";
+  }
+
   if (isActiveInCategoryBlock(slides, activeIndex, "on-model")) {
     return "on-model";
   }
 
   if (isActiveInCategoryBlock(slides, activeIndex, "product-photos")) {
     return "product-photos";
+  }
+
+  if (slide && slide.kind === "video" && slide.galleryCategory === "video") {
+    return "video";
   }
 
   if (slide && (slide.shotType === "on-model" || slide.shotType === "lifestyle")) {

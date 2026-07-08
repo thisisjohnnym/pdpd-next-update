@@ -54,9 +54,10 @@ export function PdpV5CraftedToLastVideo() {
 
   return (
     <section
+      id="crafted-to-last-video"
       data-header-surface="light"
       aria-label={headline}
-      className="w-full shrink-0 bg-white"
+      className="w-full shrink-0 scroll-mt-24 bg-white"
     >
       <div
         className={cn(
