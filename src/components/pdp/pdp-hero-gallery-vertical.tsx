@@ -14,7 +14,7 @@ import {
 } from "./pdp-hero-gallery-data";
 import {
   heroSlideBackground,
-  resolveHeroFraming,
+  resolveHeroSlideFraming,
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
 import { useSetHeroChromeSurface } from "./pdp-hero-chrome-surface";
@@ -41,7 +41,10 @@ function VerticalHeroSlideMedia({
   isActive: boolean;
   eager: boolean;
 }) {
-  const { objectFit, objectPosition } = resolveHeroFraming(slide.shotType);
+  const { objectFit, objectPosition } = resolveHeroSlideFraming(
+    slide.shotType,
+    slide.framing,
+  );
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
 
   if (slide.kind === "video") {

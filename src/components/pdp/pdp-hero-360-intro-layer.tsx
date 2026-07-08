@@ -3,13 +3,13 @@
 import { cn } from "@/lib/cn";
 
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
-import { resolveHeroFraming } from "./pdp-hero-framing";
+import { resolveHeroSlideFraming } from "./pdp-hero-framing";
 import { useHero360Intro } from "./pdp-hero-360-intro-context";
 
 const INTRO_PLAYBACK_RATE = 2;
 
 /** Match slide 0 (a0 product still) — contain on the studio ground. */
-const INTRO_FRAMING = resolveHeroFraming("product");
+const INTRO_FRAMING = resolveHeroSlideFraming("product");
 
 /**
  * v6 — one-shot 360° intro on slide 0. The clip's last frame stays as slide 0
