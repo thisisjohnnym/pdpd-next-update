@@ -818,6 +818,8 @@ const V6_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
   // v6 UXR — vertical mobile gallery + tick indicator (not full-bleed progress bar).
   useHeroGalleryProgressBar: false,
+  // The v5 category rail replaces the tick indicator — keep the v6 vertical rail.
+  showHeroGalleryCategoryRail: false,
   heroVerticalGallery: true,
   // v6 hero land — one-shot 360° intro, then settle on a0 product still.
   hero360IntroEnabled: true,
