@@ -6,12 +6,12 @@ import { cn } from "@/lib/cn";
 
 import { PdpHero360IntroProvider } from "../pdp-hero-360-intro-context";
 import { useActiveProduct } from "../pdp-active-product-context";
+import { PdpBuyBarCompactColor } from "../pdp-buy-bar-compact-color";
 import { PdpBuyBarRow } from "../pdp-buy-bar-row";
 import { PdpGalleryHero } from "../pdp-gallery-view";
 import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swatches";
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpType } from "../pdp-type";
 import { useHero360IntroReveal } from "../use-hero-360-intro-reveal";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
@@ -56,7 +56,6 @@ function PdpV6MobileHeroLayoutInner({
   const {
     useV4ModuleSpacing,
     hideBuyBarColorLabel,
-    heroMaterialSubtitleLine,
     hideDockedBuyBarColor,
     inlineBuyBarColorSwatches,
   } = getPdpVersionConfig(usePdpVersion());
@@ -83,27 +82,22 @@ function PdpV6MobileHeroLayoutInner({
             inlineBuyBarColorSwatches && "border-0",
           )}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="font-extended flex min-w-0 flex-col text-neutral-900">
-              <p className="min-w-0 truncate text-base leading-[115%] tracking-[0.4px]">
+          <div className="flex items-center justify-between gap-4">
+            <div className="font-extended flex min-w-0 flex-col gap-1.5 text-neutral-900">
+              <p className="min-w-0 text-base leading-[125%] tracking-[0.4px]">
                 {summary.name}
               </p>
-              <p
-                className={cn(
-                  "min-w-0 truncate leading-[115%] tracking-[0.4px]",
-                  heroMaterialSubtitleLine
-                    ? cn(pdpType.label, "mt-1 text-neutral-500")
-                    : "text-xs text-neutral-900",
-                )}
-              >
-                {heroMaterialSubtitleLine
-                  ? summary.subtitle
-                  : `in ${summary.subtitle}`}
+              <p className="text-base leading-none tabular-nums">
+                {summary.price}
               </p>
             </div>
-            <p className="font-extended shrink-0 text-base leading-none tabular-nums text-neutral-900">
-              {summary.price}
-            </p>
+            <PdpBuyBarCompactColor
+              selectedColorId={selectedColorId}
+              onColorSelect={onColorSelect}
+              onColorSheetOpenChange={onColorSheetOpenChange}
+              variant="swatch"
+              className="shrink-0"
+            />
           </div>
 
           <PdpBuyBarRow

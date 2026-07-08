@@ -47,6 +47,11 @@ type PdpCompactColorDotsProps = {
   previewCount?: number;
   moreCountOverride?: number;
   onOpenSheet: () => void;
+  /**
+   * "dot" — tiny availability cue (default). "swatch" — large tappable
+   * swatches with a halo ring on the selected color (v6 docked hero footer).
+   */
+  variant?: "dot" | "swatch";
   className?: string;
 };
 
@@ -57,6 +62,7 @@ export function PdpCompactColorDots({
   previewCount = 3,
   moreCountOverride = 0,
   onOpenSheet,
+  variant = "dot",
   className,
 }: PdpCompactColorDotsProps) {
   const { previewColors, hiddenCount } = buildCompactColorDotPreview(
@@ -70,6 +76,53 @@ export function PdpCompactColorDots({
 
   if (colors.length <= 1) {
     return null;
+  }
+
+  if (variant === "swatch") {
+    return (
+      <button
+        type="button"
+        onClick={onOpenSheet}
+        aria-haspopup="dialog"
+        aria-label={
+          moreCount > 0
+            ? `${selectedColor.name}. ${colors.length} colors available. View all colors.`
+            : `${selectedColor.name}. View all colors.`
+        }
+        className={cn(
+          "inline-flex items-center gap-1.5",
+          pdpPressableIconClass,
+          className,
+        )}
+      >
+        <span aria-hidden className="flex items-center gap-1.5">
+          {previewColors.map((color) =>
+            color.id === selectedId ? (
+              <span
+                key={color.id}
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-neutral-200"
+              >
+                <span
+                  className="size-5 rounded-full"
+                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+                />
+              </span>
+            ) : (
+              <span
+                key={color.id}
+                className="size-[30px] shrink-0 rounded-full"
+                style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+              />
+            ),
+          )}
+        </span>
+        {moreCount > 0 ? (
+          <span className="font-extended text-sm tracking-[0.2px] text-neutral-900">
+            +{moreCount}
+          </span>
+        ) : null}
+      </button>
+    );
   }
 
   return (

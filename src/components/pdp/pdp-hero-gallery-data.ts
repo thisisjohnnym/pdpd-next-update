@@ -61,6 +61,12 @@ const HERO_STILL_BASE = "/images/hero/tabby26";
 /** The A0 product still promoted to slide 0 in v4 (Paper r5). */
 const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
 
+/**
+ * Legacy grey-ground three-quarter back view — superseded by the r7 beige
+ * back-view still (a5), so v5/v6 drop it via `heroGalleryExcludeSlideSrcs`.
+ */
+export const HERO_THREE_QUARTER_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a3.webp`;
+
 /** Stable key for deduping and React keys. */
 export function getHeroGallerySlideKey(slide: PdpHeroGallerySlide): string {
   return slide.src;
@@ -299,6 +305,8 @@ export type HeroGalleryOrderingOptions = {
    * 360°, then community UGC appended last.
    */
   heroGalleryLogicalBlockOrder?: boolean;
+  /** Slide srcs dropped from the gallery — e.g. stills superseded by a reshoot. */
+  heroGalleryExcludeSlideSrcs?: string[];
 };
 
 /** Version-aware hero slide ordering — shared by mobile carousel + desktop rail. */
@@ -307,6 +315,11 @@ export function orderHeroGallerySlides(
   options: HeroGalleryOrderingOptions = {},
 ): PdpHeroGallerySlide[] {
   const useLogicalBlocks = options.heroGalleryLogicalBlockOrder === true;
+
+  const excludeSrcs = options.heroGalleryExcludeSlideSrcs;
+  if (excludeSrcs?.length) {
+    slides = slides.filter((slide) => !excludeSrcs.includes(slide.src));
+  }
 
   let result =
     options.leadGalleryWithProductStill ||

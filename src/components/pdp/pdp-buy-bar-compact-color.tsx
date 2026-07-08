@@ -17,6 +17,8 @@ type PdpBuyBarCompactColorProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
+  /** Dot row style — "swatch" renders the large v6 hero footer swatches. */
+  variant?: "dot" | "swatch";
   className?: string;
 };
 
@@ -25,6 +27,7 @@ export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
   onColorSheetOpenChange,
+  variant = "dot",
   className,
 }: PdpBuyBarCompactColorProps) {
   const tabby = useOptionalTabbyVariant();
@@ -98,6 +101,7 @@ export function PdpBuyBarCompactColor({
         previewCount={compactBuyBarColorDotCount}
         moreCountOverride={heroColorSwatchMoreCountOverride}
         onOpenSheet={() => setSheetOpen(true)}
+        variant={variant}
         className={className}
       />
     </>

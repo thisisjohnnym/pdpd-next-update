@@ -118,14 +118,7 @@ export function PdpHeroGallery({
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
-}: {
-  slides?: PdpHeroGallerySlide[];
-  onOpenReviews?: () => void;
-  onOpenArTryOn?: () => void;
-  isLastPanel?: boolean;
-  /** Size to the parent media frame (PdpHeroShell) instead of 100svh */
-  fillFrame?: boolean;
-}) {
+}: PdpHeroGalleryProps) {
   const versionConfig = getPdpVersionConfig(usePdpVersion());
 
   if (versionConfig.heroVerticalGallery) {
@@ -139,6 +132,38 @@ export function PdpHeroGallery({
     );
   }
 
+  return (
+    <PdpHeroGalleryHorizontal
+      slides={slides}
+      onOpenReviews={onOpenReviews}
+      onOpenArTryOn={onOpenArTryOn}
+      isLastPanel={isLastPanel}
+      fillFrame={fillFrame}
+      versionConfig={versionConfig}
+    />
+  );
+}
+
+type PdpHeroGalleryProps = {
+  slides?: PdpHeroGallerySlide[];
+  onOpenReviews?: () => void;
+  onOpenArTryOn?: () => void;
+  isLastPanel?: boolean;
+  /** Size to the parent media frame (PdpHeroShell) instead of 100svh */
+  fillFrame?: boolean;
+};
+
+/** Horizontal snap carousel — split out so hooks stay unconditional above the v6 vertical branch. */
+function PdpHeroGalleryHorizontal({
+  slides = PDP_HERO_GALLERY_SLIDES,
+  onOpenReviews,
+  onOpenArTryOn,
+  isLastPanel = false,
+  fillFrame = false,
+  versionConfig,
+}: PdpHeroGalleryProps & {
+  versionConfig: ReturnType<typeof getPdpVersionConfig>;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const {
     useStableInfiniteCarousel,
@@ -150,6 +175,7 @@ export function PdpHeroGallery({
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
+    heroGalleryExcludeSlideSrcs,
     useHeroGalleryProgressBar,
     showHeroGalleryCategoryRail,
   } = versionConfig;
@@ -165,6 +191,7 @@ export function PdpHeroGallery({
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
         heroGalleryLogicalBlockOrder,
+        heroGalleryExcludeSlideSrcs,
       }),
     [
       slides,
@@ -175,6 +202,7 @@ export function PdpHeroGallery({
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
       heroGalleryLogicalBlockOrder,
+      heroGalleryExcludeSlideSrcs,
     ],
   );
   const loopedSlides = useMemo(

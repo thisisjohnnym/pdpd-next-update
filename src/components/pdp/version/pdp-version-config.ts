@@ -2,6 +2,7 @@ import { PDP_GALLERY_SLIDES } from "../pdp-data";
 import { HERO_360_INTRO_VIDEO_SRC } from "../pdp-video-sources";
 import {
   HERO_ON_MODEL_BLACK_DRESS_SRC,
+  HERO_THREE_QUARTER_STILL_SRC,
   type PdpHeroGallerySlide,
 } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
@@ -172,6 +173,11 @@ export type PdpVersionConfig = {
    * stills, fits inside, 360°, community last. v5 only.
    */
   heroGalleryLogicalBlockOrder: boolean;
+  /**
+   * Hero slide srcs dropped from the gallery — stills superseded by the r7
+   * reshoot (e.g. the grey-ground a3 three-quarter). v5/v6 only.
+   */
+  heroGalleryExcludeSlideSrcs?: string[];
   /**
    * the progressive color drawer so it always demos the sold-out affordance
    * (Paper r5 `J2K-0`). v4 only — mirrors the existing Explore Materials demo.
@@ -797,6 +803,8 @@ const V5_CONFIG: PdpVersionConfig = {
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
   heroGalleryLogicalBlockOrder: true,
+  // r7 reshoot drops the legacy grey-ground a3 three-quarter (dupes the new a5 back view).
+  heroGalleryExcludeSlideSrcs: [HERO_THREE_QUARTER_STILL_SRC],
   // v5 weaves Out in the wild UGC into the hero carousel after product content.
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
     HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
@@ -863,6 +871,8 @@ const V6_CONFIG: PdpVersionConfig = {
   heroGalleryPrependLeadSlide: undefined,
   heroGalleryLeadSlideSrc: "",
   leadGalleryWithProductStill: true,
+  // v6 docked footer swatch row — selected halo + three more colors before +N.
+  compactBuyBarColorDotCount: 4,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

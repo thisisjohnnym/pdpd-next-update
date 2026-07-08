@@ -1,4 +1,9 @@
-import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
+import {
+  PDP_GALLERY_SLIDES,
+  type PdpGalleryImmersiveSlide,
+  type PdpGallerySlide,
+  type PdpUgcVideo,
+} from "../pdp-data";
 import type {
   PdpHeroGallerySlide,
   PdpHeroSurface,
@@ -36,9 +41,16 @@ export type PdpGalleryGetTheHighlightsSlide = {
   type: "get-the-highlights";
 };
 
+/** v4 immersive slide — optional headline/subtext copy above the frame (Paper KJY-0). */
+export type PdpGalleryImmersiveSlideV2 = PdpGalleryImmersiveSlide & {
+  headline?: string;
+  subtext?: string;
+};
+
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
-  | PdpGallerySlide
+  | Exclude<PdpGallerySlide, PdpGalleryImmersiveSlide>
+  | PdpGalleryImmersiveSlideV2
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
   | PdpGalleryWaysToWearSlide

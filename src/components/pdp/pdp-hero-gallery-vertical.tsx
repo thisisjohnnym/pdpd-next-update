@@ -105,6 +105,7 @@ export function PdpHeroGalleryVertical({
     hero360IntroVideoSrc,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
+    heroGalleryExcludeSlideSrcs,
   } = getPdpVersionConfig(usePdpVersion());
   const { isGalleryScrollReady } = useHero360Intro();
   const reducedMotion = useReducedMotion();
@@ -121,6 +122,7 @@ export function PdpHeroGalleryVertical({
         heroGalleryPrependLeadSlide,
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
+        heroGalleryExcludeSlideSrcs,
       }),
     [
       slides,
@@ -130,6 +132,7 @@ export function PdpHeroGalleryVertical({
       heroGalleryPrependLeadSlide,
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
+      heroGalleryExcludeSlideSrcs,
     ],
   );
 

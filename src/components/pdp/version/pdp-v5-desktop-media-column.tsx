@@ -23,6 +23,7 @@ function usePdpV5DesktopMediaSlides() {
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
+    heroGalleryExcludeSlideSrcs,
   } = getPdpVersionConfig(version);
 
   return orderHeroGallerySlides(PDP_HERO_GALLERY_SLIDES, {
@@ -31,6 +32,7 @@ function usePdpV5DesktopMediaSlides() {
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
+    heroGalleryExcludeSlideSrcs,
   });
 }
 
