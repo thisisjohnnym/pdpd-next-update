@@ -786,7 +786,8 @@ const V5_CONFIG: PdpVersionConfig = {
   useCompactBuyBarColorDots: true,
   compactBuyBarColorDotCount: 3,
   inlineBuyBarColorSwatches: false,
-  hideColorSheetSizePrice: true,
+  // r7 feedback: v5/v6 return to the v4 grouped color drawer (size/price caption kept).
+  hideColorSheetSizePrice: false,
   useV4DetailsTileCarousel: true,
   // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
   useV5DetailsSheet: true,
@@ -798,8 +799,9 @@ const V5_CONFIG: PdpVersionConfig = {
   showEditorialQuoteCard: true,
   showDesignSketchInterrupt: true,
   showLeatherCareUpsell: true,
-  flatColorSheet: true,
-  hideInStockColorLabel: true,
+  // r7 feedback: grouped Popular Colors / Explore Materials / Bag Size drawer, not the flat list.
+  flatColorSheet: false,
+  hideInStockColorLabel: false,
   lockHeroGalleryTemplate: true,
   heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
   heroGalleryLogicalBlockOrder: true,
