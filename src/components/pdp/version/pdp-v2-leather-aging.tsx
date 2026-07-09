@@ -520,10 +520,8 @@ function PdpLeatherAgingV4({
     return (
       <section
         data-header-surface="light"
-        className="w-full shrink-0 bg-[#F2EDEA] px-4 pt-10 pb-6"
+        className="w-full shrink-0 bg-white px-4 pt-10 pb-6"
       >
-        {/* Full-bleed warm block — cream ground (#F2EDEA) matches the product shot
-            so the image melts into the section instead of floating on white. */}
         <div className="flex flex-col">
           <PdpRevealItem>
             <div className="mb-3 flex flex-col gap-2">
@@ -535,7 +533,7 @@ function PdpLeatherAgingV4({
           </PdpRevealItem>
 
           <PdpRevealItem delay={revealStaggerDelay(1)}>
-            <div className="relative h-[430px] w-full overflow-hidden bg-[#F2EDEA]">
+            <div className="relative h-[430px] w-full overflow-hidden bg-white">
               <LeatherAgingStages stageIndex={stageIndex} />
             </div>
           </PdpRevealItem>

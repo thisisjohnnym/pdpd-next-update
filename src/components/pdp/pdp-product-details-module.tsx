@@ -264,12 +264,14 @@ function DetailsSketchCarousel({
           </div>
         ))}
       </div>
-      <PdpCarouselDotIndicator
-        activeIndex={activeIndex}
-        count={slides.length}
-        ariaLabel="Dimension drawing view"
-        align="start"
-      />
+      {slides.length > 1 ? (
+        <p
+          aria-live="polite"
+          className={cn(pdpType.label, "m-0 tabular-nums text-neutral-500")}
+        >
+          {activeIndex + 1} / {slides.length}
+        </p>
+      ) : null}
     </div>
   );
 }

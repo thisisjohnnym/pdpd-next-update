@@ -76,6 +76,11 @@ export type PdpVersionConfig = {
    * v5 More like this — viewport-based ~1.5-card peek rail (vs 158px fixed baseline).
    */
   moreLikeThisLargeCards: boolean;
+  /**
+   * Compare icon left of Add to bag on More like this cards — opens a tray
+   * comparing the current PDP bag with the tapped recommendation. v5 only.
+   */
+  showMoreLikeThisCompare: boolean;
   /** Use the v2 leather aging card layout (warm header/image/controls — Paper AP5-0) */
   useSimplifiedLeatherAging: boolean;
   /** Use the v2 recently viewed vertical list (white bg — Paper BC6-0) */
@@ -285,9 +290,15 @@ export type PdpVersionConfig = {
   showDetailsCloserLook: boolean;
   /**
    * Replace the horizontal editorial carousel with a craftsmanship carousel
-   * editorial stack (Paper r5). v4 only.
+   * editorial stack (Paper r5). v4 only — v5 swaps this for closer look when
+   * `showCloserLookStage` is on.
    */
   useV4CraftsmanshipLayout: boolean;
+  /**
+   * Apple-style "Take a closer look" product stage in place of the
+   * craftsmanship carousel. v5 only.
+   */
+  showCloserLookStage: boolean;
   /**
    * Compact UGC strip before The Details — "Out in the wild" header row,
    * small rounded portrait tiles, and a +N more card. v4 only; removes the
@@ -401,11 +412,7 @@ export type PdpVersionConfig = {
    */
   showWaysToWearModule: boolean;
   /**
-   * Full-bleed "Crafted to last" video after leather aging, before reviews. v5 only.
-   */
-  showCraftedToLastVideo: boolean;
-  /**
-   * Apple-style "Get the highlights" horizontal card rail (replaces the
+   * Apple-style "Take a closer look" dark product stage (replaces the
    * "Feel the leather" lifestyle slide). v5 only.
    */
   showGetTheHighlights: boolean;
@@ -497,6 +504,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showDetailsHeading: true,
   useSimplifiedMoreLikeThis: false,
   moreLikeThisLargeCards: false,
+  showMoreLikeThisCompare: false,
   useSimplifiedLeatherAging: false,
   useSimplifiedRecentlyViewed: false,
   fixedHeaderSurface: "auto",
@@ -537,6 +545,7 @@ const V1_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
@@ -557,7 +566,6 @@ const V1_CONFIG: PdpVersionConfig = {
   showEditorialQuoteCard: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
-  showCraftedToLastVideo: false,
   showGetTheHighlights: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
@@ -642,6 +650,7 @@ const V2_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
@@ -662,8 +671,8 @@ const V2_CONFIG: PdpVersionConfig = {
   showEditorialQuoteCard: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
+  showMoreLikeThisCompare: false,
   showWaysToWearModule: false,
-  showCraftedToLastVideo: false,
   showGetTheHighlights: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
@@ -746,7 +755,7 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 polish — docked hero ATB only; no sticky floating bar for now.
   showFloatingBuyBar: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
+  // v5 story: Highlights → Details → Out in the wild → Closer look → Quote → Ways to wear → Aging.
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideHeroColorSwatchLabel: false,
@@ -761,6 +770,8 @@ const V5_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: true,
   showDetailsCloserLook: false,
   useV4CraftsmanshipLayout: true,
+  // v5 replaces "Get up close and personal" with the Apple closer-look stage.
+  showCloserLookStage: true,
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
@@ -793,9 +804,9 @@ const V5_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,
+  showMoreLikeThisCompare: true,
   squareButtonCorners: true,
   showWaysToWearModule: true,
-  showCraftedToLastVideo: true,
   showGetTheHighlights: true,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,

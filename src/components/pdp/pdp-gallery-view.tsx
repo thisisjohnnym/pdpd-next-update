@@ -80,7 +80,7 @@ import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
 import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
-import { PdpV5CraftedToLastVideo } from "./version/pdp-v5-crafted-to-last-video";
+import { PdpV5CloserLook } from "./version/pdp-v5-closer-look";
 import { PdpV5GetTheHighlights } from "./version/pdp-v5-get-the-highlights";
 import { PdpV5QuoteCard } from "./version/pdp-v5-quote-card";
 import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
@@ -713,7 +713,7 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
+          // v5: Highlights → Details → Out in the wild → Closer look → Quote → Ways to wear → Aging.
           // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
@@ -953,7 +953,9 @@ export function PdpGalleryView({
             return [
               gallerySection(
                 `editorial-carousel-${index}`,
-                versionConfig.useV4CraftsmanshipLayout ? (
+                versionConfig.showCloserLookStage ? (
+                  <PdpV5CloserLook />
+                ) : versionConfig.useV4CraftsmanshipLayout ? (
                   <PdpV4Craftsmanship />
                 ) : (
                   <PdpV2EditorialCarousel />
@@ -961,20 +963,6 @@ export function PdpGalleryView({
                 { surface: "light" },
               ),
               ...editorialQuoteCard,
-            ];
-          }
-
-          if (slide.type === "crafted-to-last-video") {
-            if (!versionConfig.showCraftedToLastVideo) {
-              return [];
-            }
-
-            return [
-              gallerySection(
-                `crafted-to-last-video-${index}`,
-                <PdpV5CraftedToLastVideo />,
-                { surface: "light" },
-              ),
             ];
           }
 
