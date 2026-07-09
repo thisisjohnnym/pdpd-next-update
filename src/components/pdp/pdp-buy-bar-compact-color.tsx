@@ -20,7 +20,7 @@ type PdpBuyBarCompactColorProps = {
   className?: string;
 };
 
-/** Compact dot row below Add to bag — opens the full color sheet on tap. */
+/** Compact swatch row — tap a color to select; tap +N to open the full tray. */
 export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
@@ -97,6 +97,7 @@ export function PdpBuyBarCompactColor({
         selectedId={activeColorId}
         previewCount={compactBuyBarColorDotCount}
         moreCountOverride={heroColorSwatchMoreCountOverride}
+        onSelect={handleColorSelect}
         onOpenSheet={() => setSheetOpen(true)}
         className={className}
       />

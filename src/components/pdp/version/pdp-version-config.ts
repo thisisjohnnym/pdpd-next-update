@@ -762,7 +762,7 @@ const V5_CONFIG: PdpVersionConfig = {
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
   useCompactBuyBarColorDots: true,
-  compactBuyBarColorDotCount: 3,
+  compactBuyBarColorDotCount: 4,
   inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,

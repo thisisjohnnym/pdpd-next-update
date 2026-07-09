@@ -12,7 +12,7 @@ import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swat
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useHeroEnterOnce } from "../use-hero-enter-once";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpDisplayTracking, pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
+import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -73,38 +73,67 @@ export function PdpV3HeroLayout({
             playLandIntro && "pdp-v5-hero-footer-enter",
           )}
         >
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-4">
-              <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none")}>
-                {summary.name}
-              </p>
-              <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
-                {summary.price}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between gap-4">
-              <p
-                className={cn(
-                  pdpProductTitleClass,
-                  "min-w-0 flex-1 truncate py-1 -my-1 leading-none",
-                  heroMaterialSubtitleLine
-                    ? cn(pdpType.label, "text-neutral-500")
-                    : "text-xs text-neutral-900",
-                )}
-              >
-                {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
-              </p>
-              {useCompactBuyBarColorDots ? (
+          {useCompactBuyBarColorDots ? (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-baseline justify-between gap-3">
+                <p
+                  className={cn(
+                    pdpProductTitleClass,
+                    "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none",
+                  )}
+                >
+                  {summary.name}
+                </p>
+                <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
+                  {summary.price}
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <p
+                  className={cn(
+                    pdpProductTitleClass,
+                    "min-w-0 flex-1 truncate py-1 -my-1 leading-none",
+                    heroMaterialSubtitleLine
+                      ? cn(pdpType.label, "text-neutral-500")
+                      : "text-xs text-neutral-900",
+                  )}
+                >
+                  {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
+                </p>
                 <PdpBuyBarCompactColor
                   selectedColorId={selectedColorId}
                   onColorSelect={onColorSelect}
                   onColorSheetOpenChange={onColorSheetOpenChange}
                   className="shrink-0"
                 />
-              ) : null}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-baseline justify-between gap-4">
+                <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none")}>
+                  {summary.name}
+                </p>
+                <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
+                  {summary.price}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <p
+                  className={cn(
+                    pdpProductTitleClass,
+                    "min-w-0 flex-1 truncate py-1 -my-1 leading-none",
+                    heroMaterialSubtitleLine
+                      ? cn(pdpType.label, "text-neutral-500")
+                      : "text-xs text-neutral-900",
+                  )}
+                >
+                  {heroMaterialSubtitleLine ? summary.subtitle : `in ${summary.subtitle}`}
+                </p>
+              </div>
+            </div>
+          )}
 
           <PdpBuyBarRow
             selectedColorId={selectedColorId}
