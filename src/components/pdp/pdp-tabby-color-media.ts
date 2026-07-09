@@ -4,7 +4,7 @@ import {
   type PdpGalleryPhoto,
   type PdpGallerySlide,
 } from "./pdp-data";
-import { buildV2Slides, applyV4GallerySlidePatches, applyV5GallerySlidePatches, applyV5CraftedToLastVideoPatch, type PdpGallerySlideV2 } from "./version/pdp-data-v2";
+import { buildV2Slides, applyV4GallerySlidePatches, applyV5GallerySlidePatches, type PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpVersion } from "./version/pdp-version-context";
 
@@ -112,10 +112,6 @@ export function getTabbyGallerySlidesForColor(
 
   if (config.showWaysToWearModule) {
     slides = applyV5GallerySlidePatches(slides);
-  }
-
-  if (config.showCraftedToLastVideo) {
-    slides = applyV5CraftedToLastVideoPatch(slides);
   }
 
   return slides;

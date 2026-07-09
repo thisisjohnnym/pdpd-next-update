@@ -66,12 +66,11 @@ export function PdpV3GalleryOverlay({
             visibility: visible ? "visible" : "hidden",
           }}
         >
-          <div className={cn(playLandIntro && "pdp-v5-hero-overlay-enter")}>
-            <PdpHeroGalleryCategoryRail
-              onOpenArTryOn={onOpenArTryOn}
-              chromeVisible={visible}
-            />
-          </div>
+          <PdpHeroGalleryCategoryRail
+            onOpenArTryOn={onOpenArTryOn}
+            chromeVisible={visible}
+            enterClassName={playLandIntro ? "pdp-v5-hero-overlay-enter" : undefined}
+          />
         </div>
       ) : null}
       <div

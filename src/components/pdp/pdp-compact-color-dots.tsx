@@ -3,7 +3,7 @@
 import { cn } from "@/lib/cn";
 
 import type { PdpColor } from "./pdp-data";
-import { pdpColorIsSelectable } from "./pdp-data";
+import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { pdpPressableIconClass, pdpType } from "./pdp-type";
 
@@ -46,6 +46,9 @@ type PdpCompactColorDotsProps = {
   selectedId: string;
   previewCount?: number;
   moreCountOverride?: number;
+  /** Tap a preview swatch to select that color */
+  onSelect: (id: string) => void;
+  /** Tap +N to open the full color tray */
   onOpenSheet: () => void;
   /**
    * "dot" — tiny availability cue (default). "swatch" — large tappable
@@ -55,12 +58,15 @@ type PdpCompactColorDotsProps = {
   className?: string;
 };
 
-/** Minimal color availability cue — solid dots plus a +N overflow label. */
+/**
+ * Compact color preview — each swatch selects a color; +N opens the full tray.
+ */
 export function PdpCompactColorDots({
   colors,
   selectedId,
   previewCount = 3,
   moreCountOverride = 0,
+  onSelect,
   onOpenSheet,
   variant = "dot",
   className,
@@ -71,8 +77,6 @@ export function PdpCompactColorDots({
     previewCount,
   );
   const moreCount = moreCountOverride > 0 ? moreCountOverride : hiddenCount;
-  const selectedColor =
-    colors.find((color) => color.id === selectedId) ?? colors[0];
 
   if (colors.length <= 1) {
     return null;
@@ -126,38 +130,63 @@ export function PdpCompactColorDots({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onOpenSheet}
-      aria-haspopup="dialog"
-      aria-label={
-        moreCount > 0
-          ? `${selectedColor.name}. ${colors.length} colors available. View all colors.`
-          : `${selectedColor.name}. View all colors.`
-      }
-      className={cn(
-        "inline-flex min-h-[28px] items-center gap-2",
-        pdpPressableIconClass,
-        className,
-      )}
+    <div
+      role="listbox"
+      aria-label="Choose color"
+      className={cn("inline-flex min-h-[28px] items-center gap-1.5", className)}
     >
-      <span aria-hidden className="flex items-center gap-1.5">
-        {previewColors.map((color) => (
-          <span
-            key={color.id}
-            className={cn(
-              "size-2 shrink-0 rounded-full ring-1 ring-black/10",
-              color.id === selectedId && "ring-2 ring-black ring-offset-1",
-            )}
-            style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-          />
-        ))}
+      <span className="flex items-center gap-1.5">
+        {previewColors.map((color) => {
+          const isSelected = color.id === selectedId;
+          const isSelectable = isInStockForPreview(color);
+
+          return (
+            <button
+              key={color.id}
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              aria-disabled={!isSelectable}
+              disabled={!isSelectable}
+              onClick={() => {
+                if (isSelectable) {
+                  onSelect(color.id);
+                }
+              }}
+              aria-label={
+                isSelectable
+                  ? `Select ${color.name}`
+                  : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+              }
+              className={cn(
+                "relative size-3.5 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "before:absolute before:inset-[-10px] before:content-['']",
+                isSelected
+                  ? "ring-1 ring-neutral-400 ring-offset-1 ring-offset-white"
+                  : "ring-1 ring-black/10",
+                isSelectable && pdpPressableIconClass,
+                !isSelectable && "cursor-not-allowed opacity-40",
+              )}
+              style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+            />
+          );
+        })}
       </span>
       {moreCount > 0 ? (
-        <span className={cn("font-extended text-neutral-900", pdpType.micro)}>
-          + {moreCount}
-        </span>
+        <button
+          type="button"
+          onClick={onOpenSheet}
+          aria-haspopup="dialog"
+          aria-label={`View ${moreCount} more colors`}
+          className={cn(
+            "shrink-0 text-neutral-900",
+            pdpType.micro,
+            pdpPressableIconClass,
+          )}
+        >
+          +{moreCount}
+        </button>
       ) : null}
-    </button>
+    </div>
   );
 }

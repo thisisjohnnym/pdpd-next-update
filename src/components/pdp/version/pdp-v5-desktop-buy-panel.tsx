@@ -38,17 +38,21 @@ export function PdpV5DesktopBuyPanel({
   return (
     <div className="pdp-v5-desktop-buy-panel flex w-full flex-col gap-6 bg-white">
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-baseline justify-between gap-4">
-          <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 text-lg leading-none text-neutral-900")}>
+        <div className="flex items-baseline justify-between gap-3">
+          <p
+            className={cn(
+              pdpProductTitleClass,
+              "min-w-0 flex-1 truncate text-lg leading-none text-neutral-900",
+            )}
+          >
             {summary.name}
           </p>
           <p className={cn(pdpProductPriceClass, "shrink-0 text-lg leading-none text-neutral-900")}>
             {summary.price}
           </p>
         </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <p className={cn(pdpType.label, "min-w-0 flex-1 text-neutral-500")}>
+        <div className="flex items-center justify-between gap-3">
+          <p className={cn(pdpType.label, "min-w-0 flex-1 truncate text-neutral-500")}>
             {summary.subtitle}
           </p>
           {useCompactBuyBarColorDots ? (
