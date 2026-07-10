@@ -38,18 +38,11 @@ type PdpV5MoreLikeThisCompareSheetProps = {
 /** Product thumb + name + price — one column header in the compare tray. */
 function CompareColumnHeader({
   product,
-  align = "left",
 }: {
   product: PdpMoreLikeThisCompareProduct;
-  align?: "left" | "right";
 }) {
   return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-col gap-2",
-        align === "right" ? "items-end text-right" : "items-start text-left",
-      )}
-    >
+    <div className="flex min-w-0 flex-col items-start gap-2 text-left">
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-100">
         <Image
           src={product.imageSrc}
@@ -141,7 +134,7 @@ export function PdpV5MoreLikeThisCompareSheet({
 
             <div className="mb-6 grid grid-cols-2 gap-x-5">
               <CompareColumnHeader product={current} />
-              <CompareColumnHeader product={displayComparison} align="right" />
+              <CompareColumnHeader product={displayComparison} />
             </div>
 
             {/* Details-pattern fact rows — gray label over value; hairlines per column so the gutter stays open */}
@@ -175,7 +168,7 @@ export function PdpV5MoreLikeThisCompareSheet({
                     </div>
                     <div
                       className={cn(
-                        "flex min-w-0 flex-col items-end gap-2 py-5 text-right",
+                        "flex min-w-0 flex-col gap-2 py-5",
                         cellRule,
                       )}
                     >

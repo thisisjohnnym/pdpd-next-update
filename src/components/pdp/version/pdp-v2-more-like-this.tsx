@@ -16,7 +16,6 @@ import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import {
   pdpPillRadiusClass,
-  pdpPressableIconClass,
   pdpType,
 } from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
@@ -41,7 +40,7 @@ const MORE_LIKE_THIS_CARD = {
  *
  * Horizontal scroll rail with fixed-width product cards and a pill "Add to bag"
  * button. v5 optionally renders larger cards via `moreLikeThisLargeCards`, and
- * a compare icon that opens a side-by-side details tray.
+ * a primary Compare control that opens a side-by-side details tray.
  */
 export function PdpV2MoreLikeThis({
   onAddToBag,
@@ -175,23 +174,21 @@ export function PdpV2MoreLikeThis({
                     onClick={() => openCompare(item.id)}
                     aria-label={`Compare with ${item.name}`}
                     className={cn(
-                      "relative top-[2px] box-border m-0 flex shrink-0 items-center justify-center border border-[#D4D4D4] p-0 leading-none text-black transition-colors active:bg-neutral-50",
+                      "box-border m-0 flex min-h-0 min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden border border-[#D4D4D4] px-2 py-0 text-[11px] leading-none tracking-[0.2px] text-black transition-colors active:bg-neutral-50 lg:text-[10px]",
+                      "font-extended",
                       pdpPillRadiusClass(squareButtonCorners),
-                      pdpPressableIconClass,
                     )}
-                    style={{
-                      width: card.buttonHeight,
-                      height: card.buttonHeight,
-                    }}
+                    style={{ height: card.buttonHeight }}
                   >
-                    <MaterialIcon name="compare_arrows" size={18} />
+                    <MaterialIcon name="compare_arrows" size={16} />
+                    <span className="translate-y-0.5">Compare</span>
                   </button>
                 ) : null}
                 <button
                   type="button"
                   onClick={() => onAddToBag?.(item.id)}
                   className={cn(
-                    "box-border m-0 flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden border border-[#D4D4D4] px-2 py-0 text-[11px] leading-none tracking-[0.2px] text-black transition-colors active:bg-neutral-50 lg:text-[10px]",
+                    "box-border m-0 flex shrink-0 items-center justify-center overflow-hidden border border-[#D4D4D4] px-2.5 py-0 text-[11px] leading-none tracking-[0.2px] text-black transition-colors active:bg-neutral-50 lg:text-[10px]",
                     "font-extended",
                     pdpPillRadiusClass(squareButtonCorners),
                   )}

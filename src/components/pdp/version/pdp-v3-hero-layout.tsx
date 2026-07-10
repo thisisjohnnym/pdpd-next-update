@@ -16,6 +16,8 @@ import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpV5ReviewTeaser } from "./pdp-v5-review-teaser";
+import { PdpV5StorePickupLink } from "./pdp-v5-store-pickup-link";
 
 type PdpV3HeroLayoutProps = {
   selectedColorId: string;
@@ -48,7 +50,7 @@ export function PdpV3HeroLayout({
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots, playHeroLandIntro } =
+  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots, playHeroLandIntro, showStorePickupLink, showSubtleReviewTeaser } =
     getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
@@ -95,7 +97,7 @@ export function PdpV3HeroLayout({
                 >
                   {summary.price}
                 </p>
-                <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-400")}>
+                <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
                   in {summary.subtitle}
                 </p>
               </div>
@@ -157,6 +159,21 @@ export function PdpV3HeroLayout({
 
         <div ref={sentinelRef} aria-hidden className="h-0 w-full shrink-0 overflow-hidden" />
       </PdpHeroShell>
+
+      {showStorePickupLink || showSubtleReviewTeaser ? (
+        <div className="flex flex-col gap-3 bg-white px-3 pb-5 pt-4 lg:px-5">
+          {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
+          {showSubtleReviewTeaser ? (
+            <PdpV5ReviewTeaser
+              className={
+                showStorePickupLink
+                  ? "border-t border-neutral-100 pt-3"
+                  : undefined
+              }
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       {inlineBuyBarColorSwatches && !useCompactBuyBarColorDots ? (
         <PdpHeroBelowFoldColorSwatches

@@ -325,3 +325,62 @@
     width: auto;
   }
 }
+
+[data-pdp-version="v5"] .pdp-fy-copy-in {
+  animation: pdp-fy-copy-in 300ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* Find your Tabby — hero bag fills the frame (crop product-shot dead space) */
+[data-pdp-version="v5"] .pdp-fy-hero {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
+
+[data-pdp-version="v5"] .pdp-fy-bag-scale {
+  transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+[data-pdp-version="v5"] .pdp-fy-bag-image {
+  /* Product thumbnails include generous transparent padding — zoom in so the
+   * bag reads premium rather than floating in a gray void. */
+  transform: scale(1.48);
+  transform-origin: center center;
+}
+
+[data-pdp-version="v5"] .pdp-fy-size-image {
+  /* Classic size photos are already framed — mild crop only. */
+  transform: scale(1.12);
+  transform-origin: center center;
+}
+
+/* Family silhouette rail — last slide fully scrolls into view */
+[data-pdp-version="v5"] .pdp-fy-family-carousel {
+  padding-right: max(
+    0.75rem,
+    calc(100% - ((100vw - 1.25rem) / 1.08))
+  );
+  scroll-padding-inline: 0.75rem;
+  overscroll-behavior-x: contain;
+}
+
+@media (min-width: 1024px) {
+  [data-pdp-version="v5"] .pdp-fy-family-carousel {
+    padding-right: max(
+      1.25rem,
+      calc(100% - ((100vw - 2.25rem) / 2.35))
+    );
+    scroll-padding-inline: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-pdp-version="v5"] .pdp-fy-copy-in {
+    animation: none;
+  }
+
+  [data-pdp-version="v5"] .pdp-fy-bag-scale {
+    transition: none;
+  }
+}

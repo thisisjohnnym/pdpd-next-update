@@ -224,6 +224,16 @@ export type PdpVersionConfig = {
    */
   compactBuyBarColorDotCount: number;
   /**
+   * Quiet "Pick up in store" text link below the hero land (not above the fold).
+   * v5 only.
+   */
+  showStorePickupLink: boolean;
+  /**
+   * Compact ratings summary under the hero land — full star row, score/count,
+   * and recommend line. Metadata module (not a muted text-link CTA). v5 only.
+   */
+  showSubtleReviewTeaser: boolean;
+  /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
    */
@@ -290,13 +300,17 @@ export type PdpVersionConfig = {
   showDetailsCloserLook: boolean;
   /**
    * Replace the horizontal editorial carousel with a craftsmanship carousel
-   * editorial stack (Paper r5). v4 only — v5 swaps this for closer look when
-   * `showCloserLookStage` is on.
+   * editorial stack (Paper r5). v4+ when enabled.
    */
   useV4CraftsmanshipLayout: boolean;
   /**
-   * Apple-style "Take a closer look" product stage in place of the
-   * craftsmanship carousel. v5 only.
+   * Mid-gallery "Get up close and personal" / editorial carousel slot.
+   * When false, the slide is skipped (quote card may still render). v5 off.
+   */
+  showUpCloseModule: boolean;
+  /**
+   * v5 "Find your Tabby" family explorer — rendered above More like this in
+   * the ecommerce stack (not in the mid-gallery craftsmanship slot).
    */
   showCloserLookStage: boolean;
   /**
@@ -531,6 +545,8 @@ const V1_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  showStorePickupLink: false,
+  showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -545,6 +561,7 @@ const V1_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showUpCloseModule: true,
   showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
@@ -636,6 +653,8 @@ const V2_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  showStorePickupLink: false,
+  showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   hideInStockColorLabel: false,
@@ -650,6 +669,7 @@ const V2_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showUpCloseModule: true,
   showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
@@ -746,16 +766,16 @@ const V4_CONFIG: PdpVersionConfig = {
 
 /**
  * v5 — Sean r5 polish round (Jul 2026). Inherits the frozen v4 baseline and
- * layers compact UGC, craftsmanship carousel, reviews preview, details rail,
- * buy-bar/color-sheet tweaks, and gallery slide reshuffle. Share as
- * `/v5` while `/v4` stays comparable to Johnny's last prod deploy.
+ * layers compact UGC, reviews preview, details rail, buy-bar/color-sheet
+ * tweaks, and gallery slide reshuffle. Share as `/v5` while `/v4` stays
+ * comparable to Johnny's last prod deploy.
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
   // v5 polish — docked hero ATB only; no sticky floating bar for now.
   showFloatingBuyBar: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Highlights → Details → Out in the wild → Closer look → Quote → Ways to wear → Aging.
+  // v5 story: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging → Find your Tabby (above More like this).
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideHeroColorSwatchLabel: false,
@@ -763,14 +783,18 @@ const V5_CONFIG: PdpVersionConfig = {
   hideDockedBuyBarColor: true,
   useCompactBuyBarColorDots: true,
   compactBuyBarColorDotCount: 4,
+  showStorePickupLink: true,
+  showSubtleReviewTeaser: true,
   inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
   useV5DetailsSheet: true,
   showDetailsCloserLook: false,
-  useV4CraftsmanshipLayout: true,
-  // v5 replaces "Get up close and personal" with the Apple closer-look stage.
+  useV4CraftsmanshipLayout: false,
+  // Drop "Get up close and personal" — quote card still follows this slide slot.
+  showUpCloseModule: false,
+  // Find your Tabby sits above More like this (ecommerce stack), not mid-gallery.
   showCloserLookStage: true,
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
@@ -791,9 +815,10 @@ const V5_CONFIG: PdpVersionConfig = {
   leatherAgingHeaderAboveImage: true,
   // v5 leather-aging gets the continuous Apple-style rail slider.
   useRailLeatherAgingSlider: true,
-  // v5 reviews summary drops the aggregate star row (photos + AI summary carry trust).
-  hideReviewSummaryRating: true,
-  // v5 reviews summary shows stars + average only (no review count tail).
+  // v5 keeps a quiet aggregate under the headline (stars + average only).
+  hideReviewSummaryRating: false,
+  // v5 reviews summary shows stars + average only (no review count tail —
+  // "View all N reviews" CTA already carries the count).
   hideReviewCountRecommend: true,
   // v5 bumps the reviews AI-summary tray text up a step.
   enlargeReviewAiSummary: true,
