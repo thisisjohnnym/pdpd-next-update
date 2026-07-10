@@ -106,12 +106,16 @@ export function PdpHeroGalleryVertical({
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryExcludeSlideSrcs,
+    heroProductSlidesFillFrame,
   } = getPdpVersionConfig(usePdpVersion());
-  const { isGalleryScrollReady } = useHero360Intro();
+  const { enabled: introActive, isGalleryScrollReady } = useHero360Intro();
   const reducedMotion = useReducedMotion();
   /** Slide 0 is the intro clip's end frame — not the separate a0 still. */
   const useIntroLeadSlide =
-    hero360IntroEnabled && Boolean(hero360IntroVideoSrc) && !reducedMotion;
+    introActive &&
+    hero360IntroEnabled &&
+    Boolean(hero360IntroVideoSrc) &&
+    !reducedMotion;
 
   const orderedSlides = useMemo(
     () =>
@@ -123,6 +127,7 @@ export function PdpHeroGalleryVertical({
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
         heroGalleryExcludeSlideSrcs,
+        heroProductSlidesFillFrame,
       }),
     [
       slides,
@@ -133,6 +138,7 @@ export function PdpHeroGalleryVertical({
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
       heroGalleryExcludeSlideSrcs,
+      heroProductSlidesFillFrame,
     ],
   );
 

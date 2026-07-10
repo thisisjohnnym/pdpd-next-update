@@ -304,7 +304,7 @@ For the full r5 (v4) module map, node-verify workflow, and Definition of Done, s
 
 ## 8.6. v5 — Sean r5 polish (skelly import)
 
-v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the frozen v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, flat color sheet, desktop split layout, UGC testimonials, and module spacing polish. **v1–v4 are unchanged.** **`/v5` is frozen** — new work goes to **`/v6`**.
+v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the frozen v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, desktop split layout, UGC testimonials, closer-look trays, and module spacing polish. Mobile also plays the shared fall-in hero intro (horizontal gallery — vertical gallery stays v6-only). **v1–v4 are unchanged.**
 
 ### v5-only files
 
@@ -326,6 +326,8 @@ v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/
 | `showWaysToWearModule` | Styling compare slider module |
 | `showFloatingBuyBar: false` | Docked hero ATB only (no sticky floating bar) |
 | `lockHeroGalleryTemplate` | Preserve gallery slide order on colorway switch |
+| `hero360IntroEnabled` | Mobile fall-in intro (horizontal gallery) |
+| `showCloserLookStage` | Apple-style closer-look trays (replaces craftsmanship carousel) |
 
 Full flag list: `V5_CONFIG` in `pdp-version-config.ts`. Deploy links: [deploy-and-links.md](deploy-and-links.md).
 
@@ -333,7 +335,7 @@ Full flag list: `V5_CONFIG` in `pdp-version-config.ts`. Deploy links: [deploy-an
 
 ## 8.7. v6 — post-v5 feedback round
 
-v6 is the active feedback round after freezing `/v5`. It **inherits the frozen v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`). Add new flags to `V6_CONFIG` — never edit `V5_CONFIG` in place. **v1–v5 are unchanged.**
+v6 is the active feedback round. It **inherits the v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and layers the vertical mobile gallery on top of the shared fall-in intro. Add new flags to `V6_CONFIG` — prefer not rewriting v5 defaults in place unless the change is intentionally shared.
 
 ### v6-only files
 
@@ -344,7 +346,11 @@ v6 is the active feedback round after freezing `/v5`. It **inherits the frozen v
 
 ### Key v6 flags (`V6_CONFIG` in `pdp-version-config.ts`)
 
-Currently mirrors `V5_CONFIG` with no overrides. Add flags here as feedback lands.
+| Flag | Purpose |
+|------|---------|
+| `heroVerticalGallery` | Vertical snap gallery (v6-only) |
+| `hero360IntroEnabled` | Fall-in intro (shared with v5; v6 pairs it with vertical gallery) |
+| `useHeroGalleryProgressBar: false` | Tick indicator instead of progress bar |
 
 Full changelog: [rounds/r7-v6.md](rounds/r7-v6.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
 

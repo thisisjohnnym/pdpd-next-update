@@ -15,14 +15,6 @@ type InfiniteCenteredCarouselOptions = {
   stableLoop?: boolean;
 };
 
-function readLoopedSlideIndex(el: HTMLElement): number {
-  const width = el.clientWidth;
-  if (width <= 0) {
-    return 0;
-  }
-  return Math.round(el.scrollLeft / width);
-}
-
 function readLogicalSlideIndex(loopedIndex: number, itemCount: number): number {
   if (itemCount <= 0) {
     return 0;
@@ -714,6 +706,18 @@ export function useInfiniteFullBleedCarousel(
     const startIndex =
       itemCount > 1 ? itemCount + initialIndex : initialIndex;
 
+    // Commit the active looped index in the effect — never re-derive it from
+    // scrollLeft/width during resize. Width changes before scrollLeft settles,
+    // so Math.round(scrollLeft / width) jumps to a neighboring slide.
+    let committedLoopedIndex = startIndex;
+    let resizeGuardRaf = 0;
+    let ignoreScrollDerivedIndex = false;
+
+    const commitLoopedIndex = (next: number) => {
+      committedLoopedIndex = next;
+      setActiveLoopedIndex((prev) => (prev === next ? prev : next));
+    };
+
     const scrollToLogicalIndex = (
       logicalIndex: number,
       behavior: ScrollBehavior = "auto",
@@ -721,7 +725,7 @@ export function useInfiniteFullBleedCarousel(
       const clamped = Math.max(0, Math.min(logicalIndex, itemCount - 1));
       const target = itemCount > 1 ? itemCount + clamped : clamped;
       scrollToChild(target, behavior);
-      setActiveLoopedIndex(target);
+      commitLoopedIndex(target);
     };
 
     scrollToIndexRef.current = (logicalIndex: number) => {
@@ -733,7 +737,7 @@ export function useInfiniteFullBleedCarousel(
 
     const scrollToStart = () => {
       scrollToChild(startIndex);
-      setActiveLoopedIndex(startIndex);
+      commitLoopedIndex(startIndex);
     };
 
     requestAnimationFrame(() => {
@@ -745,18 +749,21 @@ export function useInfiniteFullBleedCarousel(
     if (itemCount < 2) {
       const onResize = () => {
         if (stableLoop) {
-          const logical = readLogicalSlideIndex(
-            readLoopedSlideIndex(el),
-            itemCount,
+          scrollToLogicalIndex(
+            readLogicalSlideIndex(committedLoopedIndex, itemCount),
           );
-          scrollToLogicalIndex(logical);
         } else {
           scrollToChild(startIndex);
         }
       };
       const ro = new ResizeObserver(onResize);
       ro.observe(el);
-      return () => ro.disconnect();
+      return () => {
+        if (resizeGuardRaf) {
+          window.cancelAnimationFrame(resizeGuardRaf);
+        }
+        ro.disconnect();
+      };
     }
 
     const edgeBuffer = 12;
@@ -775,12 +782,15 @@ export function useInfiniteFullBleedCarousel(
     };
 
     const updateActiveLoopedIndex = () => {
+      if (ignoreScrollDerivedIndex) {
+        return;
+      }
       const width = el.clientWidth;
       if (width <= 0) {
         return;
       }
       const next = Math.round(el.scrollLeft / width);
-      setActiveLoopedIndex((prev) => (prev === next ? prev : next));
+      commitLoopedIndex(next);
     };
 
     let pointerDown = false;
@@ -835,16 +845,25 @@ export function useInfiniteFullBleedCarousel(
     };
 
     const onResize = () => {
+      // Preserve the committed slide — do not trust scrollLeft/width mid-resize.
       const logicalIndex = stableLoop
-        ? readLogicalSlideIndex(readLoopedSlideIndex(el), itemCount)
+        ? readLogicalSlideIndex(committedLoopedIndex, itemCount)
         : initialIndex;
+      ignoreScrollDerivedIndex = true;
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
+      }
       measure();
       if (stableLoop) {
         scrollToLogicalIndex(logicalIndex);
       } else {
         scrollToChild(itemCount + initialIndex);
-        setActiveLoopedIndex(itemCount + initialIndex);
+        commitLoopedIndex(itemCount + initialIndex);
       }
+      resizeGuardRaf = window.requestAnimationFrame(() => {
+        ignoreScrollDerivedIndex = false;
+        resizeGuardRaf = 0;
+      });
     };
 
     const ro = new ResizeObserver(onResize);
@@ -871,6 +890,9 @@ export function useInfiniteFullBleedCarousel(
     return () => {
       if (idleTimer) {
         window.clearTimeout(idleTimer);
+      }
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
       }
       if (scrollEndSupported) {
         el.removeEventListener("scrollend", onScrollEnd);

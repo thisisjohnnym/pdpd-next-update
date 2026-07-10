@@ -307,6 +307,11 @@ export type HeroGalleryOrderingOptions = {
   heroGalleryLogicalBlockOrder?: boolean;
   /** Slide srcs dropped from the gallery — e.g. stills superseded by a reshoot. */
   heroGalleryExcludeSlideSrcs?: string[];
+  /**
+   * Fill product stills (`shotType: "product"`) with `object-fit: cover` so
+   * tall mobile frames do not letterbox. Studio spins / callouts stay contain.
+   */
+  heroProductSlidesFillFrame?: boolean;
 };
 
 /** Version-aware hero slide ordering — shared by mobile carousel + desktop rail. */
@@ -368,6 +373,21 @@ export function orderHeroGallerySlides(
         options.heroGalleryUgcInsertAfterIndex ?? 1,
       );
     }
+  }
+
+  if (options.heroProductSlidesFillFrame) {
+    result = result.map((slide) =>
+      slide.shotType === "product"
+        ? {
+            ...slide,
+            framing: {
+              ...slide.framing,
+              objectFit: "cover" as const,
+              objectPosition: slide.framing?.objectPosition ?? "center",
+            },
+          }
+        : slide,
+    );
   }
 
   return result;

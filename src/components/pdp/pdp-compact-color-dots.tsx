@@ -77,6 +77,8 @@ export function PdpCompactColorDots({
     previewCount,
   );
   const moreCount = moreCountOverride > 0 ? moreCountOverride : hiddenCount;
+  const selectedColor =
+    colors.find((color) => color.id === selectedId) ?? colors[0];
 
   if (colors.length <= 1) {
     return null;

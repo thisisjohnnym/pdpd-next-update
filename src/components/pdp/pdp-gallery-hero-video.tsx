@@ -48,6 +48,8 @@ type PdpGalleryHeroVideoProps = {
   /** Loop playback — false for one-shot intro clips. Defaults to true. */
   loop?: boolean;
   onEnded?: () => void;
+  /** Fires on `timeupdate` while the clip plays — intro cue / scrub hooks. */
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
   /** When false, skip the hero blur-reveal path (object-cover). Defaults to priorityAutoplay. */
   blurReveal?: boolean;
   /** Match gallery Image slides — absolute inset-0 within a relative slide cell. */
@@ -137,6 +139,7 @@ export function PdpGalleryHeroVideo({
   controlsPosition = "bottom-right",
   loop = true,
   onEnded,
+  onTimeUpdate,
   blurReveal,
   fill = false,
   studioGround = false,
@@ -175,6 +178,7 @@ export function PdpGalleryHeroVideo({
     tapToTogglePlayback,
     loop,
     onEnded,
+    onTimeUpdate,
     blurReveal,
     playbackRate,
     keepMounted,
@@ -201,7 +205,7 @@ export function PdpGalleryHeroVideo({
     playbackHint ?? (isPlaying ? "pause" : "play_arrow");
   const overlayInteractive = showFrozenPlayOverlay || showTapPausedOverlay;
   const showCenterPlaybackOverlay =
-    Boolean(playbackOverlayIcon) && !usePillControls;
+    Boolean(playbackOverlayIcon) && !usePillControls && !isHeroGalleryChrome;
   const controlsPositionClass = controlsElevated
     ? getHeroGalleryControlPositionClass({
         useV4ModuleSpacing,
@@ -275,6 +279,11 @@ export function PdpGalleryHeroVideo({
     allowHorizontalPan && !canTapVideo && "[touch-action:pan-x_pan-y]",
   );
 
+  // Single-source MP4: put `src` on <video>. WebKit often leaves
+  // React-inserted <source> children at NETWORK_NO_SOURCE / empty currentSrc.
+  const primarySrc =
+    videoSources.length === 1 ? videoSources[0]?.src : undefined;
+
   const videoElement = (
     <video
       ref={videoRef}
@@ -283,15 +292,18 @@ export function PdpGalleryHeroVideo({
       muted
       playsInline
       preload={effectivePreload}
-      poster={priorityAutoplay ? undefined : poster}
+      src={primarySrc}
+      poster={priorityAutoplay && !poster ? undefined : poster}
       aria-label={ariaLabel}
       onClick={canTapVideo ? togglePlayback : undefined}
       style={style}
       className={videoClassName}
     >
-      {videoSources.map((source) => (
-        <source key={source.src} src={source.src} type={source.type} />
-      ))}
+      {primarySrc
+        ? null
+        : videoSources.map((source) => (
+            <source key={source.src} src={source.src} type={source.type} />
+          ))}
     </video>
   );
 

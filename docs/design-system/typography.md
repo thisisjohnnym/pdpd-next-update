@@ -68,3 +68,13 @@ Extended variants: `font-extended` utility class.
 1. Do not import Google Fonts for UI text.
 2. Use semantic weights (`font-normal`, `font-bold`) — not arbitrary font-family.
 3. Garamond / Helvetica Now are separate Coachtopia fonts — not used on standard Coach Outlet PDP unless specified.
+
+## Paper MCP (agents — load only when needed)
+
+When creating or fixing **Coach UI text in Paper**, Extended often fails to stick if set via `write_html` / `update_styles` (falls back to Roman or `system-ui`). Duplicate known-good Ex text nodes instead.
+
+Full note: [`paper-helvetica-extended.md`](paper-helvetica-extended.md).
+
+## One-line Helvetica next to icons (load only when needed)
+
+When a **one-line** label beside a Material icon looks optically high/low inside a button or chip (even with `align-items: center`), load [`helvetica-icon-optical-align.md`](helvetica-icon-optical-align.md). Do not apply that pattern to paragraphs.

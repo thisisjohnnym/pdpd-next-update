@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 /**
  * Marks `<html>` with data-pdp-version="v5" so v5-scoped CSS also reaches
  * portaled chrome (floating CTA) that mounts on document.body.
+ * useLayoutEffect — before paint, so intro chrome hide rules apply immediately.
  */
 export function PdpV5RootMarker() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.setAttribute("data-pdp-version", "v5");
     return () => {
+      // Keep attr on Strict Mode remount — clearing it flashes intro chrome.
+      if (typeof location !== "undefined" && /^\/v5(\/|$)/.test(location.pathname)) {
+        return;
+      }
       document.documentElement.removeAttribute("data-pdp-version");
     };
   }, []);

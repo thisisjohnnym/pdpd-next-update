@@ -97,7 +97,7 @@ export function PdpV5HighlightDetailSheet({
         <div
           className={cn(
             "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))] pt-0.5",
-            children && "flex min-h-0 flex-1 flex-col overflow-y-auto",
+            Boolean(children) && "flex min-h-0 flex-1 flex-col overflow-y-auto",
           )}
         >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-2")}>

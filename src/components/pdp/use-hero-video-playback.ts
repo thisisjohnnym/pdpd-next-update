@@ -31,6 +31,8 @@ type UseHeroVideoPlaybackInput = {
   /** When false the clip plays once and fires `onEnded`. Defaults to true. */
   loop?: boolean;
   onEnded?: () => void;
+  /** Fires on `timeupdate` while the clip plays — intro cue / scrub hooks. */
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
   /** When false, skip the hero blur-reveal path (object-cover). Defaults to priorityAutoplay. */
   blurReveal?: boolean;
   /** Playback speed multiplier. Defaults to 1. */
@@ -74,6 +76,7 @@ export function useHeroVideoPlayback({
   tapToTogglePlayback,
   loop = true,
   onEnded,
+  onTimeUpdate,
   blurReveal,
   playbackRate = 1,
   keepMounted = false,
@@ -223,17 +226,38 @@ export function useHeroVideoPlayback({
   useEffect(() => {
     return () => {
       const video = videoRef.current;
-      if (video) {
+      // Don't cache one-shot intro end frames — remounts must replay from start.
+      if (video && loop) {
         writeVideoPlaybackCache(src, video);
       }
       videoDecoderRegistry.release(resolvedDecoderId);
     };
-  }, [resolvedDecoderId, src]);
+  }, [resolvedDecoderId, src, loop]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isMounted || !isClientReady) {
       return;
+    }
+
+    // One-shot intros must always start at 0 — never resume a cached end frame.
+    // `load()` clears an already-ended element so autoplay can replay.
+    if (!loop) {
+      const resetIntro = () => {
+        if (video.ended || video.currentTime > 0.05) {
+          video.pause();
+          video.currentTime = 0;
+        }
+      };
+      if (video.ended) {
+        video.load();
+      } else {
+        resetIntro();
+      }
+      video.addEventListener("loadedmetadata", resetIntro);
+      return () => {
+        video.removeEventListener("loadedmetadata", resetIntro);
+      };
     }
 
     const cached = readVideoPlaybackCache(src);
@@ -264,7 +288,7 @@ export function useHeroVideoPlayback({
     return () => {
       video.removeEventListener("loadedmetadata", restoreTime);
     };
-  }, [isMounted, isClientReady, src]);
+  }, [isMounted, isClientReady, src, loop]);
 
   useEffect(() => {
     if (!lowPowerMode && network.autoplayAllowed) {
@@ -303,20 +327,32 @@ export function useHeroVideoPlayback({
       onEnded?.();
     };
 
+    const handleTimeUpdate = onTimeUpdate
+      ? () => {
+          onTimeUpdate(video.currentTime, video.duration);
+        }
+      : null;
+
     syncPlaying();
 
     for (const type of ["play", "playing", "pause"] as const) {
       video.addEventListener(type, syncPlaying);
     }
     video.addEventListener("ended", handleEnded);
+    if (handleTimeUpdate) {
+      video.addEventListener("timeupdate", handleTimeUpdate);
+    }
 
     return () => {
       for (const type of ["play", "playing", "pause"] as const) {
         video.removeEventListener(type, syncPlaying);
       }
       video.removeEventListener("ended", handleEnded);
+      if (handleTimeUpdate) {
+        video.removeEventListener("timeupdate", handleTimeUpdate);
+      }
     };
-  }, [isMounted, isClientReady, src, onEnded]);
+  }, [isMounted, isClientReady, src, onEnded, onTimeUpdate]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -499,7 +535,36 @@ export function useHeroVideoPlayback({
   }, [isActive, isPlaying, autoplayRestricted, firstFrameTimedOut, src]);
 
   const attemptPlay = (video: HTMLVideoElement) => {
-    if (video.ended && !loop) {
+    // Safari: play() before the first frame can hang the promise forever and
+    // stall resource selection. Wait for loadeddata/canplay listeners instead.
+    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      if (
+        !video.currentSrc &&
+        video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+      ) {
+        video.load();
+      }
+      return;
+    }
+
+    // One-shot intros can remount already at the end (media memory / prior seek).
+    // Seek to 0, then play once the seek lands — otherwise play() no-ops on ended.
+    if (!loop && (video.ended || video.currentTime > 0.05)) {
+      const playFromStart = () => {
+        void video.play().catch(onPlayRejected);
+      };
+      const onSeeked = () => {
+        video.removeEventListener("seeked", onSeeked);
+        playFromStart();
+      };
+      video.addEventListener("seeked", onSeeked);
+      try {
+        video.pause();
+        video.currentTime = 0;
+      } catch {
+        video.removeEventListener("seeked", onSeeked);
+        playFromStart();
+      }
       return;
     }
 
@@ -533,6 +598,12 @@ export function useHeroVideoPlayback({
     const video = videoRef.current;
     if (!video) {
       return;
+    }
+
+    // WebKit: React-inserted <source> children can leave currentSrc empty
+    // (NETWORK_NO_SOURCE). Force resource selection, then play.
+    if (!video.currentSrc && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      video.load();
     }
 
     const tryPlay = () => {

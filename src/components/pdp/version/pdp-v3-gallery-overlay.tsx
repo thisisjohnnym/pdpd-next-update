@@ -57,7 +57,7 @@ export function PdpV3GalleryOverlay({
       {showHeroGalleryCategoryRail ? (
         <div
           className={cn(
-            "pointer-events-none absolute bottom-0 left-0 z-[38] pt-10",
+            "pdp-hero-intro-chrome pointer-events-none absolute bottom-0 left-0 z-[38] pt-10",
             bottomInsetClass,
             !useV4ModuleSpacing && "pl-4",
           )}
@@ -75,7 +75,7 @@ export function PdpV3GalleryOverlay({
       ) : null}
       <div
         className={cn(
-          "pdp-hero-ui-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[38]",
+          "pdp-hero-ui-chrome pdp-hero-intro-chrome pointer-events-none absolute inset-x-0 bottom-0 z-[38]",
           "flex items-end justify-between pt-10",
           bottomInsetClass,
           showHeroGalleryCategoryRail && "justify-end",

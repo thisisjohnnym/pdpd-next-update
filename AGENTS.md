@@ -53,6 +53,12 @@ Tabby video hero land (inset shell, floating CTA): `docs/pdp-hero-chrome.md`.
 
 All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/design-system/typography.md`.
 
+Paper MCP only: if Extended remaps to Roman/`system-ui`, load `docs/design-system/paper-helvetica-extended.md`.
+
+One-line Helvetica + icon in buttons/chips looking optically off: load `docs/design-system/helvetica-icon-optical-align.md` (not for paragraphs).
+
+Paper annotations: do not put notes inside artboards — use a sibling `note` frame above the design (`docs/design-system/paper-annotations.md`).
+
 ## Icons
 
 All icons use **Google Material Symbols** via `MaterialIcon`. See `docs/design-system/icons.md`.

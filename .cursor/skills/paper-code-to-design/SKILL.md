@@ -76,6 +76,12 @@ Then build incrementally:
 | Find layers | `find_nodes` | When targeting existing nodes |
 | Reposition | `move_nodes` | Preserve IDs when rearranging |
 
+### Annotations (labels for variants)
+
+Do **not** put captions inside the design artboard.
+
+For each labeled artboard, add a page-level sibling Frame named **`note`** above it (same width; eyebrow + one-line instruction). Pattern: `docs/design-system/paper-annotations.md`. Prefer `duplicate_nodes` from an existing `note`, then `set_text_content`.
+
 ### Typography
 
 Before first typographic styling in a session:
@@ -83,6 +89,10 @@ Before first typographic styling in a session:
 - `get_font_family_info` for each family you plan to use.
 - Prefer families already listed in `get_basic_info`.
 - Use **px** for font size and line-height; **em** for letter-spacing.
+
+**Coach Helvetica Extended in Paper:** `write_html` / `update_styles` often remaps Extended to Roman or `system-ui`. When this project requires Extended, load `docs/design-system/paper-helvetica-extended.md` and prefer `duplicate_nodes` from known-good Ex text + `set_text_content` only.
+
+**One-line Helvetica + icon CTAs:** if the label looks optically high/low vs the Material icon, load `docs/design-system/helvetica-icon-optical-align.md` (fixed-height label shell + ~2px top padding — not for paragraphs).
 
 ### Layout quality
 

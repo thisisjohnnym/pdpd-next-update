@@ -186,30 +186,59 @@
   }
 }
 
-/* ── v6 360° intro — hide chrome until choreographed reveal ─────────────── */
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-intro-chrome,
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] [data-header-chrome],
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] [data-header-chrome] {
-  opacity: 0;
-  pointer-events: none;
+/*
+ * v6 fall-in intro chrome — hide while phase is `playing`.
+ * Gate on html[data-pdp-version] (boot stamps both attrs) so chrome that
+ * streams outside the layout wrapper still matches. Lift on `revealing`
+ * so GSAP can tween. !important beats `.pdp-hero-ui-chrome` opacity var.
+ * Root layout also injects a phase-only copy early in <body> for first paint.
+ */
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] [data-header-chrome] {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Seamless studio ground — footer tray + shell match gallery #f0f0f0 during intro. */
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-shell,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-shell,
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-media-frame--docked,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-media-frame--docked,
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-docked-footer,
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-below-fold-colors {
+/* Header can stream outside the layout wrapper — kill land enter while intro plays. */
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-header-enter,
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-hud-enter,
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-bottom-enter {
+  animation: none !important;
+}
+
+/*
+ * Studio ground while intro plays. Phase attr is on <html>.
+ *
+ * Buy tray (footer / below-fold) is studio-forced only during `playing` —
+ * otherwise opacity:0 still shows a white band. On `revealing`, restore
+ * natural `bg-white` so GSAP fades the white tray in with the CTA (not a
+ * late snap when phase hits `ready`).
+ */
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]),
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]) body {
   background-color: #f0f0f0;
 }
 
-[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before,
-[data-pdp-version="v6"][data-hero-intro-phase="settling"] .pdp-hero-docked-footer::before {
-  background: #f0f0f0;
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]) .pdp-hero-shell,
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]) .pdp-hero-media-frame--docked,
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]) .pdp-v5-page-root,
+html[data-pdp-version="v6"]:not([data-hero-intro-phase="ready"]) [data-pdp-page-root],
+html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v6"] .pdp-hero-shell,
+html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v6"] .pdp-hero-media-frame--docked {
+  background-color: #f0f0f0 !important;
+}
+
+/* Buy tray — studio only while hidden; white during GSAP reveal. */
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors,
+html[data-hero-intro-phase="playing"] [data-pdp-version="v6"] .pdp-hero-docked-footer,
+html[data-hero-intro-phase="playing"] [data-pdp-version="v6"] .pdp-hero-below-fold-colors {
+  background-color: #f0f0f0 !important;
+}
+
+html[data-pdp-version="v6"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before,
+html[data-hero-intro-phase="playing"] [data-pdp-version="v6"] .pdp-hero-docked-footer::before {
+  background: #f0f0f0 !important;
 }
 
 [data-pdp-version="v6"] .pdp-hero-360-intro-layer {

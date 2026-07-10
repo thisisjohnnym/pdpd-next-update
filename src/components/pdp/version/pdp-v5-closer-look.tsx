@@ -238,7 +238,7 @@ function CloserLookPhotoPlaceholder({ label }: { label: string }) {
       aria-label={`Photo placeholder for ${label}`}
       className="mt-4 flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 border border-dashed border-neutral-300 bg-neutral-50 px-4 text-center"
     >
-      <MaterialIcon name="image" size={28} className="text-neutral-400" />
+      <MaterialIcon name="image" size={26} className="text-neutral-400" />
       <p className={cn(pdpType.label, "m-0 text-neutral-500")}>
         Photo placeholder
       </p>

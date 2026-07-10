@@ -325,3 +325,47 @@
     width: auto;
   }
 }
+
+/*
+ * v5 fall-in intro chrome — hide while phase is `playing` (mobile only; boot
+ * stamps ready on lg+). Lift on `revealing` so GSAP can tween. Buy tray stays
+ * studio only during `playing`, then white during reveal with the CTA.
+ */
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] [data-header-chrome] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-header-enter,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-hud-enter,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-bottom-enter,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-v5-hero-overlay-enter,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-v5-hero-footer-enter > * {
+  animation: none !important;
+}
+
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]),
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]) body {
+  background-color: #f0f0f0;
+}
+
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]) .pdp-hero-shell,
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]) .pdp-hero-media-frame--docked,
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]) .pdp-v5-page-root,
+html[data-pdp-version="v5"]:not([data-hero-intro-phase="ready"]) [data-pdp-page-root] {
+  background-color: #f0f0f0 !important;
+}
+
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors {
+  background-color: #f0f0f0 !important;
+}
+
+html[data-pdp-version="v5"][data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before {
+  background: #f0f0f0 !important;
+}
+
+[data-pdp-version="v5"] .pdp-hero-360-intro-layer {
+  background-color: #f0f0f0;
+}

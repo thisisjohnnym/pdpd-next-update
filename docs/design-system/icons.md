@@ -37,6 +37,10 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 | Bag | `shopping_bag` |
 | Shop the Look | `checkroom` |
 
+## One-line label + icon (load only when needed)
+
+Helvetica next to Material icons often looks optically off in compact CTAs even when flex-centered. For the one-line label nudge pattern (Paper + code), see [`helvetica-icon-optical-align.md`](helvetica-icon-optical-align.md).
+
 ## Rules
 
 1. Never add inline SVG icons — use `MaterialIcon`.

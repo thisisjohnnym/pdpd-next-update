@@ -500,11 +500,16 @@ export type PdpVersionConfig = {
    */
   heroVerticalGallery: boolean;
   /**
-   * Play a one-shot 360° intro clip before the hero gallery (UI hidden until
-   * settle + stagger reveal). v6 mobile only.
+   * Fill the frame with product stills (`object-fit: cover`) instead of the
+   * default `contain` letterbox. Studio spins / callouts stay contain. v6 only.
+   */
+  heroProductSlidesFillFrame: boolean;
+  /**
+   * Play a one-shot fall-in intro on the hero land (soft UI cue mid-clip,
+   * then gallery unlocks when the clip ends). v6 mobile only.
    */
   hero360IntroEnabled: boolean;
-  /** Source for `hero360IntroEnabled` — empty when disabled. v6 only. */
+  /** Source for `hero360IntroEnabled` — empty when disabled. v5/v6. */
   hero360IntroVideoSrc: string;
 };
 
@@ -605,6 +610,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showHeroGalleryCategoryRail: false,
   playHeroLandIntro: false,
   heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
 };
@@ -716,6 +722,7 @@ const V2_CONFIG: PdpVersionConfig = {
   showHeroGalleryCategoryRail: false,
   playHeroLandIntro: false,
   heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
 };
@@ -816,7 +823,6 @@ const V5_CONFIG: PdpVersionConfig = {
   exploreFamilyColorSheetLabel: true,
   hideInStockColorLabel: false,
   lockHeroGalleryTemplate: true,
-  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
   heroGalleryLogicalBlockOrder: true,
   // r7 reshoot drops the legacy grey-ground a3 three-quarter (dupes the new a5 back view).
   heroGalleryExcludeSlideSrcs: [HERO_THREE_QUARTER_STILL_SRC],
@@ -863,8 +869,14 @@ const V5_CONFIG: PdpVersionConfig = {
   // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
-  // v5 lands with a slow, subtle staggered chrome intro over the settled video.
-  playHeroLandIntro: true,
+  // Fall-in owns the land — skip the staggered CSS land intro.
+  playHeroLandIntro: false,
+  // Mobile fall-in intro; horizontal gallery stays (vertical is v6-only).
+  hero360IntroEnabled: true,
+  hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
+  // Intro end frame is slide 0 — clear the on-model lead so index 0 settles cleanly.
+  heroGalleryLeadSlideSrc: "",
+  heroGalleryPrependLeadSlide: undefined,
 };
 
 /**
@@ -877,10 +889,12 @@ const V6_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: false,
   // The v5 category rail replaces the tick indicator — keep the v6 vertical rail.
   showHeroGalleryCategoryRail: false,
-  // v6 has its own 360° intro choreography — skip the v5 land-intro stagger.
+  // v6 has its own fall-in intro choreography — skip the v5 land-intro stagger.
   playHeroLandIntro: false,
   heroVerticalGallery: true,
-  // v6 hero land — one-shot 360° intro, then settle on a0 product still.
+  // Product stills fill the tall mobile frame — no side letterbox from contain.
+  heroProductSlidesFillFrame: true,
+  // v6 hero land — Tabby fall-in; soft UI at ~1.2s; end frame stays as slide 0.
   hero360IntroEnabled: true,
   hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
   heroGalleryPrependLeadSlide: undefined,
