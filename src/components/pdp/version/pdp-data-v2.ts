@@ -8,6 +8,11 @@ import type {
   PdpHeroGallerySlide,
   PdpHeroSurface,
 } from "../pdp-hero-gallery-data";
+import {
+  getTabbyStyle,
+  type TabbySize,
+  type TabbyStyleId,
+} from "../pdp-tabby-variants";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -768,6 +773,9 @@ export type PdpGetTheHighlightsCard = {
   traySections?: readonly {
     label: string;
     detail: string;
+    src: string;
+    alt: string;
+    objectPosition?: string;
   }[];
   /** Optional care / footnote under the sections. */
   trayNote?: string;
@@ -789,20 +797,24 @@ const CRAFTED_TO_AGE_TRAY = {
       label: "Day one",
       detail:
         "Crisp grain and a structured hand — deep black finish with a subtle factory sheen, clean edges, and no creasing yet.",
+      src: "/images/gallery/tabby-leather-aging-new-day-one.jpg",
+      alt: "Tabby Shoulder Bag 26 on day one — crisp grain and structured shape",
     },
     {
       label: "Six months in",
       detail:
         "Warm undertones along strap paths and corners. The leather begins to relax with a softer hand and light creasing at high-contact points.",
+      src: "/images/gallery/tabby-leather-aging-six-months.jpg",
+      alt: "Tabby Shoulder Bag 26 after six months — softened leather with warm patina",
     },
     {
       label: "Two years of carry",
       detail:
         "Rich charcoal depth with bronze undertones, a broken-in drape, and an honest crease map that tells your story — character, not damage.",
+      src: "/images/gallery/tabby-leather-aging-two-years.jpg",
+      alt: "Tabby Shoulder Bag 26 after two years — rich patina and honest wear",
     },
   ],
-  trayNote:
-    "A light clean and condition keeps leather supple as patina develops. Conditioner restores moisture; cleaner lifts everyday grime without stripping natural oils.",
 } as const;
 
 /** v5 — floating essentials still, used in highlights + closer-look interior. */
@@ -826,6 +838,29 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     caption: "A modern Coach icon inspired by our archives.",
     trayBody:
       "Inspired by a Coach design from the 1970s, the Tabby blends heritage craftsmanship with a contemporary silhouette.",
+    traySections: [
+      {
+        label: "Archive roots",
+        detail:
+          "Drawn from a 1970s Coach original — the turn-lock C clasp and soft structure that made the house famous.",
+        src: "/images/gallery/tabby-c-clasp-closeup.jpg",
+        alt: "Close-up of the gold C turn-lock clasp with COACH engraving",
+      },
+      {
+        label: "Modern silhouette",
+        detail:
+          "Updated proportions for today: a compact 26 that sits clean on the shoulder without feeling precious.",
+        src: "/images/gallery/tabby-product-front-916.jpg",
+        alt: "Tabby Shoulder Bag 26 front studio view in black leather",
+      },
+      {
+        label: "Made to last",
+        detail:
+          "Full-grain leather, solid hardware, and construction built for daily carry — not a one-season piece.",
+        src: "/images/gallery/tabby-leather-detail-hardware.png",
+        alt: "Detail of Tabby leather and signature hardware",
+      },
+    ],
     src: PDP_CRAFTED_TO_LAST_VIDEO.poster,
     alt: PDP_CRAFTED_TO_LAST_VIDEO.alt,
     objectPosition: "center",
@@ -838,6 +873,32 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     caption: "Discover how the community wears the Tabby.",
     trayBody:
       "Explore styling inspiration from creators and the Coach community, from casual everyday looks to elevated evenings out.",
+    traySections: [
+      {
+        label: "Day to night",
+        detail:
+          "Pair it with denim and a tee, then take the same bag to dinner — the silhouette holds up either way.",
+        src: "/images/gallery/tabby-leather-on-model-tee.png",
+        alt: "Model wearing the Tabby with a casual tee look",
+        objectPosition: "center 20%",
+      },
+      {
+        label: "Community looks",
+        detail:
+          "See how creators style the Tabby crossbody, on the shoulder, or tucked under an arm for a cleaner line.",
+        src: "/images/gallery/tabby-on-model-black-dress.png",
+        alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
+        objectPosition: "center 20%",
+      },
+      {
+        label: "Your way",
+        detail:
+          "Swap straps, change the carry, and let the leather take on your rhythm — no two Tabby looks are the same.",
+        src: "/images/gallery/tabby-crossbody-trench.jpg",
+        alt: "Model wearing the Tabby crossbody with a trench coat",
+        objectPosition: "center 25%",
+      },
+    ],
     src: "/images/gallery/tabby-on-model-black-dress.png",
     alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
     objectPosition: "center 20%",
@@ -848,6 +909,30 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     caption: "Everything you need, thoughtfully organized.",
     trayBody:
       "See what fits inside the Tabby, including your phone, wallet, keys, sunglasses, and other everyday essentials.",
+    traySections: [
+      {
+        label: "Everyday essentials",
+        detail:
+          "Phone, compact wallet, keys, and sunglasses sit comfortably without overstuffing the silhouette.",
+        src: "/images/gallery/tabby-what-fits-inside-still.jpg",
+        alt: "Tabby beside phone, wallet, sunglasses and everyday essentials",
+        objectPosition: "center 45%",
+      },
+      {
+        label: "Organized interior",
+        detail:
+          "Interior pockets keep small items findable — cards, lip balm, and AirPods stay put while you move.",
+        src: "/images/gallery/tabby-leather-interior-open.jpg",
+        alt: "Open Tabby interior showing pockets and organization",
+      },
+      {
+        label: "Room to breathe",
+        detail:
+          "Structured enough to hold shape when full, soft enough that it still drapes when you travel light.",
+        src: "/images/gallery/tabby-leather-interior-packed.png",
+        alt: "Tabby interior packed with everyday items",
+      },
+    ],
     src: WHAT_FITS_INSIDE_V5_STILL_SRC,
     alt: "Tabby Shoulder Bag 26 beside phone, wallet, sunglasses and everyday essentials",
     objectPosition: "center 45%",
@@ -858,6 +943,30 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     caption: "See how it moves from day to night.",
     trayBody:
       "Watch the Tabby in motion to experience scale, movement, and the different ways to wear it.",
+    traySections: [
+      {
+        label: "True-to-life scale",
+        detail:
+          "See how the 26 sits on the body — compact against the hip, balanced on the shoulder, never oversized.",
+        src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
+        alt: "Model wearing the Tabby on the shoulder to show true-to-life scale",
+        objectPosition: "center 30%",
+      },
+      {
+        label: "How it moves",
+        detail:
+          "Soft leather and a secure clasp keep the bag steady while you walk, turn, and switch carries.",
+        src: "/images/gallery/tabby-hand-reach.png",
+        alt: "Hand reaching for the Tabby bag in motion",
+      },
+      {
+        label: "Wear it your way",
+        detail:
+          "Shoulder, crossbody, or hand-held — detachable straps make it easy to change the look mid-day.",
+        src: "/images/gallery/tabby-shoulder-crossbody-straps.jpg",
+        alt: "Tabby with shoulder and crossbody straps attached",
+      },
+    ],
     src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
     alt: "Model wearing the Tabby Shoulder Bag 26 on the shoulder in a beige look",
     objectPosition: "center 30%",
@@ -865,109 +974,120 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
 ];
 
 /**
- * v5 "Take a closer look" — Apple-style product stage that replaces the
- * "Get up close and personal" craftsmanship carousel. One hero image + bottom
- * feature pills (no card carousel). Feature pills open a compact detail tray.
+ * v5 "Find your Tabby" — carousel-first family explorer.
+ * Swipe silhouettes on-page; size chips update the active slide only.
  */
 export const PDP_CLOSER_LOOK_SECTION = {
-  headline: "Every detail, up close.",
-  intro:
-    "A closer look at the color, materials, hardware, and construction that define the Tabby.",
+  headline: "Find your Tabby",
+  intro: "Meet the silhouettes, sizes, and details that fit your day.",
 } as const;
 
-export type PdpCloserLookFeature = {
-  id: string;
-  /** Pill label in the bottom chip row. */
-  label: string;
-  /** Tray heading — shown when the feature + expands. */
-  title: string;
-  /** Longer copy in the expanded detail tray. */
-  trayBody: string;
-  /** Optional structured rows under the body (timeline, traits, etc.). */
-  traySections?: readonly {
-    label: string;
-    detail: string;
-  }[];
-  /** Optional care / footnote under the sections. */
-  trayNote?: string;
-  src: string;
-  alt: string;
-  /** Focal point for the stage image (default center). */
-  objectPosition?: string;
-  /**
-   * `colors` — swatch chip that stages the product hero.
-   * `feature` — + chip that stages a detail and can open the tray.
-   */
-  kind: "colors" | "feature";
-  /** Swatch fill for the colors pill (CSS color). */
-  swatchColor?: string;
-  /** Stage object-fit — product hero uses contain; macros use cover. */
-  objectFit?: "contain" | "cover";
+/**
+ * Relative footprint vs Tabby 36 — used to animate bag scale on size change.
+ * Floored so even the mini still fills the hero frame (premium presence),
+ * while larger sizes remain visibly bigger.
+ */
+export const PDP_FIND_YOUR_TABBY_SIZE_SCALE: Record<TabbySize, number> = {
+  20: 0.78,
+  26: 0.88,
+  33: 0.95,
+  36: 1,
 };
 
-/** Tabby closer-look features — one stage view per bottom pill. */
-export const PDP_CLOSER_LOOK_FEATURES: PdpCloserLookFeature[] = [
+/**
+ * Family styles in Find your Tabby — Classic → Soft → Quilted → Chain → Twisted.
+ * Times Square is not in the live catalog, so it is omitted.
+ */
+const PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS = [
+  "classic",
+  "soft",
+  "quilted",
+  "chain",
+  "twisted",
+] as const satisfies readonly TabbyStyleId[];
+
+export type FindYourTabbyFamilyStyleId =
+  (typeof PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS)[number];
+
+export type FindYourTabbyFamilyMember = {
+  styleId: FindYourTabbyFamilyStyleId;
+  label: string;
+  title: string;
+  /** Hero editorial under "{Style} Tabby {size}". */
+  editorial: string;
+  /** 2–4 word descriptor on the family card rail. */
+  personality: string;
+  /** Legacy tray metadata — Best For. */
+  bestFor: string;
+  /** Legacy tray metadata — Feel. */
+  feel: string;
+  src: string;
+  alt: string;
+};
+
+const FIND_YOUR_TABBY_FAMILY_COPY: Record<
+  FindYourTabbyFamilyStyleId,
   {
-    id: "colors",
-    kind: "colors",
-    label: "Colors",
-    title: "Find your hue",
-    trayBody:
-      "Browse every shade side by side — tap a color to see the Tabby update in real time.",
-    src: "/images/gallery/tabby-product-front-916.jpg",
-    alt: "Tabby Shoulder Bag 26 in black full-grain leather, front studio view",
-    objectPosition: "center",
-    objectFit: "cover",
-    swatchColor: "#1a1a1a",
+    editorial: string;
+    /** 2–4 word family-card descriptor. */
+    personality: string;
+    bestFor: string;
+    feel: string;
+  }
+> = {
+  classic: {
+    editorial:
+      "The signature silhouette — structured, timeless, ready for every day.",
+    personality: "Structured icon",
+    bestFor: "Everyday",
+    feel: "Structured",
   },
-  {
-    id: "crafted-to-age",
-    kind: "feature",
-    label: "Glovetanned leather",
-    title: "Crafted to Age Beautifully",
-    ...CRAFTED_TO_AGE_TRAY,
-    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
-    alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
-    objectPosition: "center",
-    objectFit: "cover",
+  soft: {
+    editorial:
+      "A relaxed shape with effortless drape and everyday ease.",
+    personality: "Relaxed shape",
+    bestFor: "Daily wear",
+    feel: "Relaxed",
   },
-  {
-    id: "signature-hardware",
-    kind: "feature",
-    label: "Signature hardware",
-    title: "Signature Hardware",
-    trayBody:
-      "The iconic C clasp brings Coach heritage into focus — polished gold-tone hardware designed to catch the light with every turn.",
-    src: "/images/gallery/tabby-c-clasp-closeup.jpg",
-    alt: "Close-up of the gold C turn-lock clasp with COACH engraving on black glovetanned leather",
-    objectPosition: "center",
-    objectFit: "cover",
+  quilted: {
+    editorial:
+      "Diamond quilting adds plush texture and a quiet shine.",
+    personality: "Plush texture",
+    bestFor: "Statement",
+    feel: "Plush",
   },
-  {
-    id: "whats-inside",
-    kind: "feature",
-    label: "Interior function",
-    title: "What's Inside",
-    trayBody:
-      "See what fits inside the Tabby, including your phone, wallet, keys, sunglasses, and other everyday essentials.",
-    src: WHAT_FITS_INSIDE_V5_STILL_SRC,
-    alt: "Tabby Shoulder Bag 26 beside phone, wallet, sunglasses and everyday essentials",
-    objectPosition: "center 45%",
-    objectFit: "cover",
+  chain: {
+    editorial: "Polished hardware brings a dressed-up feel.",
+    personality: "Polished hardware",
+    bestFor: "Evening",
+    feel: "Polished",
   },
-  {
-    id: "carry",
-    kind: "feature",
-    label: "Carry options",
-    title: "Carry Your Way",
-    trayBody:
-      "Designed to be worn shoulder or crossbody — detachable straps let you switch carries as the day changes.",
-    src: "/images/gallery/tabby-shoulder-crossbody-straps.jpg",
-    alt: "Tabby Shoulder Bag 26 in black leather with shoulder and crossbody straps attached",
-    objectPosition: "center",
-    objectFit: "cover",
+  twisted: {
+    editorial:
+      "A sculptural twist that reads bold without losing the iconic C clasp.",
+    personality: "Sculptural statement",
+    bestFor: "Fashion",
+    feel: "Bold",
   },
-];
+};
+
+export const PDP_FIND_YOUR_TABBY_FAMILY: FindYourTabbyFamilyMember[] =
+  PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS.map((styleId) => {
+    const style = getTabbyStyle(styleId);
+    const copy = FIND_YOUR_TABBY_FAMILY_COPY[styleId];
+
+    return {
+      styleId,
+      label: style.label,
+      title: `${style.label} Tabby`,
+      editorial: copy.editorial,
+      personality: copy.personality,
+      bestFor: copy.bestFor,
+      feel: copy.feel,
+      src: style.thumbnail,
+      alt: style.thumbnailAlt,
+    };
+  });
 
 /**
  * Insert the v5 Ways to wear module immediately after Up close / editorial

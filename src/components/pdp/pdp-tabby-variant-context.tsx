@@ -63,6 +63,8 @@ export type TabbyVariantContextValue = {
   selectColorAtSize: (colorId: string, size: TabbySize) => void;
   navigateToStyle: (styleId: TabbyStyleId) => void;
   navigateToSize: (size: TabbySize) => void;
+  /** Jump to a style + size in one selection (Find your Tabby Shop CTA). */
+  navigateToStyleSize: (styleId: TabbyStyleId, size: TabbySize) => void;
   summary: {
     name: string;
     subtitle: string;
@@ -250,6 +252,17 @@ export function TabbyVariantProvider({
     [applySelection, selectedColorId, size, sizeOptions, styleId],
   );
 
+  const navigateToStyleSize = useCallback(
+    (nextStyleId: TabbyStyleId, nextSize: TabbySize) => {
+      if (nextStyleId === styleId && nextSize === size) {
+        return;
+      }
+
+      applySelection(nextStyleId, nextSize, selectedColorId);
+    },
+    [applySelection, selectedColorId, size, styleId],
+  );
+
   const value = useMemo<TabbyVariantContextValue>(
     () => ({
       slug,
@@ -265,6 +278,7 @@ export function TabbyVariantProvider({
       selectColorAtSize,
       navigateToStyle,
       navigateToSize,
+      navigateToStyleSize,
       summary: {
         name: getTabbyProductTitle(size, styleId),
         subtitle: style.materialLabel,
@@ -277,6 +291,7 @@ export function TabbyVariantProvider({
       colors,
       navigateToSize,
       navigateToStyle,
+      navigateToStyleSize,
       selectColorAtSize,
       selectedColorId,
       setSelectedColorId,

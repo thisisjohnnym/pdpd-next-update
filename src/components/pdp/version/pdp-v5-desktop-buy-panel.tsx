@@ -18,7 +18,8 @@ type PdpV5DesktopBuyPanelProps = {
 
 /**
  * v5 desktop buy panel (lg+ only) — sticky right rail of the desktop split.
- * Mirrors mobile: name/price, material, scrollable color rail, Add to bag.
+ * Mirrors mobile land: name/price, material, scrollable color rail, Add to bag.
+ * Store pickup sits below the fold on mobile, not in this sticky panel.
  */
 export function PdpV5DesktopBuyPanel({
   selectedColorId,
@@ -51,7 +52,7 @@ export function PdpV5DesktopBuyPanel({
           >
             {summary.price}
           </p>
-          <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-400")}>
+          <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
             in {summary.subtitle}
           </p>
         </div>
@@ -72,7 +73,6 @@ export function PdpV5DesktopBuyPanel({
         hideColor
         inlineColorSwatches={false}
         landCta={useCompactBuyBarColorDots}
-        className={useCompactBuyBarColorDots ? "pb-1" : undefined}
       />
     </div>
   );

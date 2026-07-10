@@ -19,6 +19,8 @@ import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 import { PdpV6MobileHeroLayout } from "./pdp-v6-mobile-hero-layout";
+import { PdpV5ReviewTeaser } from "./pdp-v5-review-teaser";
+import { PdpV5StorePickupLink } from "./pdp-v5-store-pickup-link";
 
 type PdpV3HeroLayoutProps = {
   selectedColorId: string;
@@ -83,6 +85,8 @@ function PdpV3HeroLayoutDefault({
     inlineBuyBarColorSwatches,
     useCompactBuyBarColorDots,
     playHeroLandIntro,
+    showStorePickupLink,
+    showSubtleReviewTeaser,
   } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
@@ -212,6 +216,21 @@ function PdpV3HeroLayoutDefault({
           />
         </PdpHeroShell>
       </div>
+
+      {showStorePickupLink || showSubtleReviewTeaser ? (
+        <div className="flex flex-col gap-3 bg-white px-3 pb-5 pt-4 lg:px-5">
+          {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
+          {showSubtleReviewTeaser ? (
+            <PdpV5ReviewTeaser
+              className={
+                showStorePickupLink
+                  ? "border-t border-neutral-100 pt-3"
+                  : undefined
+              }
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       {inlineBuyBarColorSwatches && !useCompactBuyBarColorDots ? (
         <div className={cn(introReveal && "pdp-hero-intro-chrome")}>

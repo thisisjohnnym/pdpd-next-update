@@ -26,6 +26,9 @@ type PdpV5HighlightDetailSheetCard = {
   traySections?: readonly {
     label: string;
     detail: string;
+    src: string;
+    alt: string;
+    objectPosition?: string;
   }[];
   trayNote?: string;
 };
@@ -88,7 +91,7 @@ export function PdpV5HighlightDetailSheet({
         aria-labelledby={titleId}
         className={pdpBottomSheetPanelClass({
           open,
-          maxHeight: maxHeight ?? (hasExtraContent ? "85dvh" : undefined),
+          maxHeight: maxHeight ?? (hasExtraContent ? "88dvh" : undefined),
         })}
       >
         <div className={pdpBottomSheetHeaderClass}>
@@ -106,7 +109,7 @@ export function PdpV5HighlightDetailSheet({
         <div
           className={cn(
             "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))] pt-0.5",
-            hasExtraContent && "flex min-h-0 flex-1 flex-col overflow-y-auto",
+            hasExtraContent && "min-h-0 flex-1 overflow-y-auto",
           )}
         >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-2")}>
@@ -117,15 +120,31 @@ export function PdpV5HighlightDetailSheet({
           </p>
 
           {displayCard.traySections?.length ? (
-            <ul className="mt-5 flex list-none flex-col gap-4 border-t border-neutral-100 p-0 pt-5">
+            <ul className="mt-5 flex list-none flex-col gap-6 border-t border-neutral-100 p-0 pt-5">
               {displayCard.traySections.map((section) => (
-                <li key={section.label} className="flex flex-col gap-1">
-                  <p className={cn(pdpType.label, "m-0 font-medium text-black")}>
-                    {section.label}
-                  </p>
-                  <p className={cn(pdpType.body, "m-0 text-pretty text-neutral-600")}>
-                    {section.detail}
-                  </p>
+                <li key={section.label} className="block">
+                  <div
+                    className="relative mb-2.5 w-full overflow-hidden bg-neutral-100"
+                    style={{ aspectRatio: "16 / 10" }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- tray section stills; avoid fill/aspect collapse in sheet scroll */}
+                    <img
+                      src={section.src}
+                      alt={section.alt}
+                      className="absolute inset-0 size-full object-cover"
+                      style={{
+                        objectPosition: section.objectPosition ?? "center",
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className={cn(pdpType.label, "m-0 font-medium text-black")}>
+                      {section.label}
+                    </p>
+                    <p className={cn(pdpType.body, "m-0 text-pretty text-neutral-600")}>
+                      {section.detail}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>

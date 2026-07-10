@@ -205,14 +205,30 @@ function V4ReviewSummary({
             <PdpRevealItem delay={revealStaggerDelay(1)}>
               <div
                 className={cn(
-                  "flex flex-wrap items-center gap-x-2 gap-y-1",
+                  "flex flex-wrap items-center gap-x-1.5 gap-y-1",
                   leftAlignModuleHeadings ? "justify-start" : "justify-center",
                 )}
+                aria-label={`${average.toFixed(1)} out of 5 stars${
+                  hideReviewCountRecommend ? "" : `, ${count} reviews`
+                }`}
               >
-                <PdpStarRating rating={average} size={18} />
+                {hideReviewCountRecommend ? (
+                  <MaterialIcon
+                    name="star"
+                    size={14}
+                    filled
+                    className="shrink-0 text-black"
+                    aria-hidden
+                  />
+                ) : (
+                  <PdpStarRating rating={average} size={18} />
+                )}
                 <span
                   className={cn(
-                    "font-extended tabular-nums text-neutral-500",
+                    "font-extended tabular-nums",
+                    hideReviewCountRecommend
+                      ? "text-black"
+                      : "text-neutral-500",
                     pdpType.micro,
                   )}
                 >

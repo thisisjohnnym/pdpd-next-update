@@ -714,7 +714,7 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: Highlights → Details → Out in the wild → Closer look → Quote → Ways to wear → Aging.
+          // v5: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging.
           // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
@@ -951,12 +951,14 @@ export function PdpGalleryView({
                   ]
                 : [];
 
+            if (!versionConfig.showUpCloseModule) {
+              return editorialQuoteCard;
+            }
+
             return [
               gallerySection(
                 `editorial-carousel-${index}`,
-                versionConfig.showCloserLookStage ? (
-                  <PdpV5CloserLook />
-                ) : versionConfig.useV4CraftsmanshipLayout ? (
+                versionConfig.useV4CraftsmanshipLayout ? (
                   <PdpV4Craftsmanship />
                 ) : (
                   <PdpV2EditorialCarousel />
@@ -1105,6 +1107,11 @@ export function PdpGalleryView({
             alt={versionConfig.trenchPortraitSlide.alt}
             objectPosition={versionConfig.trenchPortraitSlide.objectPosition}
           />
+        </PdpScrollReveal>
+      ) : null}
+      {versionConfig.showCloserLookStage ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="60dvh">
+          <PdpV5CloserLook />
         </PdpScrollReveal>
       ) : null}
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">

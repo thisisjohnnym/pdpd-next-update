@@ -23,6 +23,7 @@ import {
   PDP_GET_THE_HIGHLIGHTS_SECTION,
   type PdpGetTheHighlightsCard,
 } from "./pdp-data-v2";
+import { PDP_HERO_FITS_INSIDE_TARGET_ID } from "./pdp-hero-fits-inside-button";
 import { PdpV5HighlightDetailSheet } from "./pdp-v5-highlight-detail-sheet";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -159,7 +160,11 @@ function PdpV5HighlightCard({
   return (
     <PdpRevealItem
       as="article"
-      id={`highlight-${card.id}`}
+      id={
+        card.id === "whats-inside"
+          ? PDP_HERO_FITS_INSIDE_TARGET_ID
+          : `highlight-${card.id}`
+      }
       delay={revealStaggerDelay(index)}
       className={cn(
         "flex h-[70svh] max-h-[620px] min-h-[460px] w-[calc((100vw-1.25rem)/1.15)]",
