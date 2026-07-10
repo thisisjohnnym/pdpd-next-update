@@ -1,11 +1,14 @@
 "use client";
 
+import { useRef } from "react";
+
 import { cn } from "@/lib/cn";
 
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { pdpPressableIconClass, pdpType } from "./pdp-type";
+import { useDragToScroll } from "./use-infinite-centered-carousel";
 
 type CompactColorDot = PdpColor | TabbyColorOption;
 
@@ -48,18 +51,19 @@ type PdpCompactColorDotsProps = {
   moreCountOverride?: number;
   /** Tap a preview swatch to select that color */
   onSelect: (id: string) => void;
-  /** Tap +N to open the full color tray */
+  /** Tap +N to open the full color tray (dot/swatch only) */
   onOpenSheet: () => void;
   /**
-   * "dot" — tiny availability cue (default). "swatch" — large tappable
-   * swatches with a halo ring on the selected color (v6 docked hero footer).
+   * "dot" — tiny availability cue with +N chips (default). "swatch" — large
+   * tappable swatches with a halo ring on the selected color (v6 docked hero
+   * footer). "rail" — full-width scrollable 32px color rail (docked land CTA).
    */
-  variant?: "dot" | "swatch";
+  variant?: "dot" | "swatch" | "rail";
   className?: string;
 };
 
 /**
- * Compact color preview — each swatch selects a color; +N opens the full tray.
+ * Color preview — compact +N chips, large swatch row, or a scrollable rail.
  */
 export function PdpCompactColorDots({
   colors,
@@ -71,6 +75,65 @@ export function PdpCompactColorDots({
   variant = "dot",
   className,
 }: PdpCompactColorDotsProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useDragToScroll(scrollRef);
+
+  if (colors.length <= 1) {
+    return null;
+  }
+
+  if (variant === "rail") {
+    return (
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full max-w-full items-center gap-2 overflow-x-auto overscroll-x-contain",
+          "px-1 py-1.5",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
+      >
+        {colors.map((color) => {
+          const isSelected = color.id === selectedId;
+          const isSelectable = isInStockForPreview(color);
+
+          return (
+            <button
+              key={color.id}
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              aria-disabled={!isSelectable}
+              disabled={!isSelectable}
+              onClick={() => {
+                if (isSelectable) {
+                  onSelect(color.id);
+                }
+              }}
+              aria-label={
+                isSelectable
+                  ? `Select ${color.name}`
+                  : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+              }
+              className={cn(
+                "relative size-8 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "before:absolute before:inset-[-8px] before:content-['']",
+                isSelected
+                  ? "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
+                  : "ring-1 ring-black/10",
+                isSelectable && pdpPressableIconClass,
+                !isSelectable && "cursor-not-allowed opacity-40",
+              )}
+              style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   const { previewColors, hiddenCount } = buildCompactColorDotPreview(
     colors,
     selectedId,
@@ -79,10 +142,6 @@ export function PdpCompactColorDots({
   const moreCount = moreCountOverride > 0 ? moreCountOverride : hiddenCount;
   const selectedColor =
     colors.find((color) => color.id === selectedId) ?? colors[0];
-
-  if (colors.length <= 1) {
-    return null;
-  }
 
   if (variant === "swatch") {
     return (
@@ -135,9 +194,9 @@ export function PdpCompactColorDots({
     <div
       role="listbox"
       aria-label="Choose color"
-      className={cn("inline-flex min-h-[28px] items-center gap-1.5", className)}
+      className={cn("inline-flex min-h-[28px] items-center gap-2", className)}
     >
-      <span className="flex items-center gap-1.5">
+      <span className="flex items-center gap-2">
         {previewColors.map((color) => {
           const isSelected = color.id === selectedId;
           const isSelectable = isInStockForPreview(color);
@@ -161,10 +220,10 @@ export function PdpCompactColorDots({
                   : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
               }
               className={cn(
-                "relative size-3.5 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
-                "before:absolute before:inset-[-10px] before:content-['']",
+                "relative size-6 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "before:absolute before:inset-[-8px] before:content-['']",
                 isSelected
-                  ? "ring-1 ring-neutral-400 ring-offset-1 ring-offset-white"
+                  ? "ring-1 ring-neutral-900 ring-offset-2 ring-offset-white"
                   : "ring-1 ring-black/10",
                 isSelectable && pdpPressableIconClass,
                 !isSelectable && "cursor-not-allowed opacity-40",

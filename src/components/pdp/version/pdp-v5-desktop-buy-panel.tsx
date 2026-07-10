@@ -17,12 +17,8 @@ type PdpV5DesktopBuyPanelProps = {
 };
 
 /**
- * v5 desktop buy panel (lg+ only) — the sticky right rail of the desktop split.
- *
- * Mirrors the v5 mobile flow (docked name/price + Add to bag, then the grouped
- * color swatches and "Explore Other Tabby Silhouettes" nav) so all selection
- * state and behavior stay shared with mobile. Placed inside a sticky wrapper by
- * the split layout so it holds while the media column scrolls.
+ * v5 desktop buy panel (lg+ only) — sticky right rail of the desktop split.
+ * Mirrors mobile: name/price, material, scrollable color rail, Add to bag.
  */
 export function PdpV5DesktopBuyPanel({
   selectedColorId,
@@ -36,33 +32,37 @@ export function PdpV5DesktopBuyPanel({
     productId === "tabby" && tabby ? tabby.summary : product.summary;
 
   return (
-    <div className="pdp-v5-desktop-buy-panel flex w-full flex-col gap-6 bg-white">
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-baseline justify-between gap-3">
+    <div className="pdp-v5-desktop-buy-panel flex w-full min-w-0 flex-col gap-0 bg-white">
+      <div className="flex min-w-0 flex-col gap-3 pb-4 lg:gap-4">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5">
           <p
             className={cn(
               pdpProductTitleClass,
-              "min-w-0 flex-1 truncate text-lg leading-none text-neutral-900",
+              "min-w-0 text-pretty text-lg leading-snug text-black",
             )}
           >
             {summary.name}
           </p>
-          <p className={cn(pdpProductPriceClass, "shrink-0 text-lg leading-none text-neutral-900")}>
+          <p
+            className={cn(
+              pdpProductPriceClass,
+              "shrink-0 justify-self-end pt-0.5 text-lg leading-snug text-black",
+            )}
+          >
             {summary.price}
           </p>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <p className={cn(pdpType.label, "min-w-0 flex-1 truncate text-neutral-500")}>
-            {summary.subtitle}
+          <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-400")}>
+            in {summary.subtitle}
           </p>
-          {useCompactBuyBarColorDots ? (
-            <PdpBuyBarCompactColor
-              selectedColorId={selectedColorId}
-              onColorSelect={onColorSelect}
-              className="shrink-0"
-            />
-          ) : null}
         </div>
+        {useCompactBuyBarColorDots ? (
+          <PdpBuyBarCompactColor
+            selectedColorId={selectedColorId}
+            onColorSelect={onColorSelect}
+            variant="rail"
+            className="min-w-0"
+          />
+        ) : null}
       </div>
 
       <PdpBuyBarRow
@@ -71,6 +71,8 @@ export function PdpV5DesktopBuyPanel({
         onAddToBag={onAddToBag}
         hideColor
         inlineColorSwatches={false}
+        landCta={useCompactBuyBarColorDots}
+        className={useCompactBuyBarColorDots ? "pb-1" : undefined}
       />
     </div>
   );

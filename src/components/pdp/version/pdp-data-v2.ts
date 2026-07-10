@@ -764,6 +764,13 @@ export type PdpGetTheHighlightsCard = {
   caption: string;
   /** Longer copy in the expanded detail tray. */
   trayBody: string;
+  /** Optional structured rows under the body (timeline, traits, etc.). */
+  traySections?: readonly {
+    label: string;
+    detail: string;
+  }[];
+  /** Optional care / footnote under the sections. */
+  trayNote?: string;
   src: string;
   alt: string;
   /** Focal point for the card image (default center). */
@@ -772,6 +779,31 @@ export type PdpGetTheHighlightsCard = {
   videoSrc?: string;
   videoPoster?: string;
 };
+
+/** Shared aging tray content — highlights + closer look. */
+const CRAFTED_TO_AGE_TRAY = {
+  trayBody:
+    "Crafted from premium glovetanned full-grain leather, the Tabby develops a unique patina over time, making every bag one of a kind.",
+  traySections: [
+    {
+      label: "Day one",
+      detail:
+        "Crisp grain and a structured hand — deep black finish with a subtle factory sheen, clean edges, and no creasing yet.",
+    },
+    {
+      label: "Six months in",
+      detail:
+        "Warm undertones along strap paths and corners. The leather begins to relax with a softer hand and light creasing at high-contact points.",
+    },
+    {
+      label: "Two years of carry",
+      detail:
+        "Rich charcoal depth with bronze undertones, a broken-in drape, and an honest crease map that tells your story — character, not damage.",
+    },
+  ],
+  trayNote:
+    "A light clean and condition keeps leather supple as patina develops. Conditioner restores moisture; cleaner lifts everyday grime without stripping natural oils.",
+} as const;
 
 /** v5 — floating essentials still, used in highlights + closer-look interior. */
 const WHAT_FITS_INSIDE_V5_STILL_SRC =
@@ -783,8 +815,7 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     id: "crafted-to-age",
     title: "Crafted to Age Beautifully",
     caption: "Glovetanned full-grain leather that gets richer with every wear.",
-    trayBody:
-      "Crafted from premium glovetanned full-grain leather, the Tabby develops a unique patina over time, making every bag one of a kind.",
+    ...CRAFTED_TO_AGE_TRAY,
     src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
     alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
     objectPosition: "center",
@@ -852,6 +883,13 @@ export type PdpCloserLookFeature = {
   title: string;
   /** Longer copy in the expanded detail tray. */
   trayBody: string;
+  /** Optional structured rows under the body (timeline, traits, etc.). */
+  traySections?: readonly {
+    label: string;
+    detail: string;
+  }[];
+  /** Optional care / footnote under the sections. */
+  trayNote?: string;
   src: string;
   alt: string;
   /** Focal point for the stage image (default center). */
@@ -887,8 +925,7 @@ export const PDP_CLOSER_LOOK_FEATURES: PdpCloserLookFeature[] = [
     kind: "feature",
     label: "Glovetanned leather",
     title: "Crafted to Age Beautifully",
-    trayBody:
-      "Crafted from premium glovetanned full-grain leather, the Tabby develops a unique patina over time, making every bag one of a kind.",
+    ...CRAFTED_TO_AGE_TRAY,
     src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
     alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
     objectPosition: "center",

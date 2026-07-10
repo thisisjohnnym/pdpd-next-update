@@ -23,6 +23,11 @@ import { useOverlayDismiss } from "../use-overlay-dismiss";
 type PdpV5HighlightDetailSheetCard = {
   title: string;
   trayBody: string;
+  traySections?: readonly {
+    label: string;
+    detail: string;
+  }[];
+  trayNote?: string;
 };
 
 type PdpV5HighlightDetailSheetProps = {
@@ -54,6 +59,10 @@ export function PdpV5HighlightDetailSheet({
     lastCardRef.current = card;
   }
   const displayCard = card ?? lastCardRef.current;
+  const hasExtraContent =
+    Boolean(children) ||
+    Boolean(displayCard?.traySections?.length) ||
+    Boolean(displayCard?.trayNote);
 
   if (!overlayReady || !transition.mounted || !displayCard) {
     return null;
@@ -79,7 +88,7 @@ export function PdpV5HighlightDetailSheet({
         aria-labelledby={titleId}
         className={pdpBottomSheetPanelClass({
           open,
-          ...(maxHeight ? { maxHeight } : {}),
+          maxHeight: maxHeight ?? (hasExtraContent ? "85dvh" : undefined),
         })}
       >
         <div className={pdpBottomSheetHeaderClass}>
@@ -97,7 +106,7 @@ export function PdpV5HighlightDetailSheet({
         <div
           className={cn(
             "px-3 pb-[max(24px,var(--pdp-safe-area-bottom))] pt-0.5",
-            Boolean(children) && "flex min-h-0 flex-1 flex-col overflow-y-auto",
+            hasExtraContent && "flex min-h-0 flex-1 flex-col overflow-y-auto",
           )}
         >
           <h2 id={titleId} className={cn(pdpSheetHeadingClass(), "mb-2")}>
@@ -106,6 +115,33 @@ export function PdpV5HighlightDetailSheet({
           <p className={cn(pdpType.body, "m-0 text-pretty text-neutral-600")}>
             {displayCard.trayBody}
           </p>
+
+          {displayCard.traySections?.length ? (
+            <ul className="mt-5 flex list-none flex-col gap-4 border-t border-neutral-100 p-0 pt-5">
+              {displayCard.traySections.map((section) => (
+                <li key={section.label} className="flex flex-col gap-1">
+                  <p className={cn(pdpType.label, "m-0 font-medium text-black")}>
+                    {section.label}
+                  </p>
+                  <p className={cn(pdpType.body, "m-0 text-pretty text-neutral-600")}>
+                    {section.detail}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {displayCard.trayNote ? (
+            <p
+              className={cn(
+                pdpType.label,
+                "m-0 mt-5 border-t border-neutral-100 pt-4 text-pretty text-neutral-500",
+              )}
+            >
+              {displayCard.trayNote}
+            </p>
+          ) : null}
+
           {children}
         </div>
       </div>

@@ -103,21 +103,24 @@ function PdpV3HeroLayoutDefault({
 
           <footer
             className={cn(
-              "pdp-hero-docked-footer flex shrink-0 flex-col bg-white",
+              "pdp-hero-docked-footer flex min-w-0 w-full shrink-0 flex-col bg-white",
               introReveal && "pdp-hero-intro-chrome",
-              useV4ModuleSpacing ? "gap-4 px-4 pt-4" : "gap-2 px-2 pt-2",
-              useV4ModuleSpacing ? "pb-4" : "pb-2",
+              useCompactBuyBarColorDots
+                ? "gap-0 px-0 pb-0 pt-0"
+                : useV4ModuleSpacing
+                  ? "gap-4 px-4 pt-4 pb-4"
+                  : "gap-2 px-2 pt-2 pb-2",
               inlineBuyBarColorSwatches && "border-0",
               playLandIntro && "pdp-v5-hero-footer-enter",
             )}
           >
             {useCompactBuyBarColorDots ? (
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-baseline justify-between gap-3">
+              <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
+                <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5">
                   <p
                     className={cn(
                       pdpProductTitleClass,
-                      "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none",
+                      "min-w-0 text-pretty text-base leading-snug text-black lg:text-lg",
                     )}
                   >
                     {summary.name}
@@ -125,31 +128,22 @@ function PdpV3HeroLayoutDefault({
                   <p
                     className={cn(
                       pdpProductPriceClass,
-                      "shrink-0 text-base leading-none text-neutral-900",
+                      "shrink-0 justify-self-end pt-0.5 text-base leading-snug text-black lg:text-lg",
                     )}
                   >
                     {summary.price}
                   </p>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <p
-                    className={cn(
-                      pdpProductTitleClass,
-                      "min-w-0 flex-1 truncate py-1 -my-1 leading-none",
-                      heroMaterialSubtitleLine
-                        ? cn(pdpType.label, "text-neutral-500")
-                        : "text-xs text-neutral-900",
-                    )}
-                  >
-                    {heroMaterialSubtitleLine
-                      ? summary.subtitle
-                      : `in ${summary.subtitle}`}
+                  <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-400")}>
+                    in {summary.subtitle}
                   </p>
+                </div>
+                <div className="min-w-0 -mx-3 px-3 lg:-mx-5 lg:px-5">
                   <PdpBuyBarCompactColor
                     selectedColorId={selectedColorId}
                     onColorSelect={onColorSelect}
                     onColorSheetOpenChange={onColorSheetOpenChange}
-                    className="shrink-0"
+                    variant="rail"
+                    className="min-w-0"
                   />
                 </div>
               </div>
@@ -200,7 +194,14 @@ function PdpV3HeroLayoutDefault({
               hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
               hideColorLabel={hideBuyBarColorLabel}
               inlineColorSwatches={false}
-              className={cn(useV4ModuleSpacing ? "gap-3" : "gap-2")}
+              landCta={useCompactBuyBarColorDots}
+              className={cn(
+                useCompactBuyBarColorDots
+                  ? "px-3 pb-3 lg:px-5 lg:pb-4"
+                  : useV4ModuleSpacing
+                    ? "gap-3"
+                    : "gap-2",
+              )}
             />
           </footer>
 
