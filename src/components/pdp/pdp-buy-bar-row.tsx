@@ -27,6 +27,8 @@ type PdpBuyBarRowProps = {
   swatchCarouselBleed?: boolean;
   /** When false, color pill opens the sheet tray (sticky buy bar). Defaults to version config. */
   inlineColorSwatches?: boolean;
+  /** Full-bleed 56px docked land CTA (Figma footer) */
+  landCta?: boolean;
   className?: string;
 };
 
@@ -41,6 +43,7 @@ export function PdpBuyBarRow({
   stackColorBelow = false,
   swatchCarouselBleed = false,
   inlineColorSwatches,
+  landCta = false,
   className,
 }: PdpBuyBarRowProps) {
   const tabby = useOptionalTabbyVariant();
@@ -91,15 +94,16 @@ export function PdpBuyBarRow({
       type="button"
       onClick={onAddToBag}
       className={cn(
-        "font-extended relative isolate flex h-[50px] min-w-0 w-full items-center justify-center gap-2 overflow-hidden px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
-        pdpPillRadiusClass(squareButtonCorners),
+        "font-extended relative isolate flex min-w-0 w-full items-center justify-center gap-2 overflow-hidden px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
+        landCta ? "h-12" : "h-[50px]",
+        landCta ? "rounded-none" : pdpPillRadiusClass(squareButtonCorners),
         pdpPressableSolidClass,
         "active:brightness-90",
       )}
       style={{
         backgroundColor: atbChrome.background,
         color: atbChrome.foreground,
-        boxShadow: flattenBuyBarCta ? "none" : atbChrome.glow,
+        boxShadow: flattenBuyBarCta || landCta ? "none" : atbChrome.glow,
       }}
     >
       <span
@@ -117,7 +121,9 @@ export function PdpBuyBarRow({
             aria-hidden
           />
         ) : null}
-        <span className="translate-y-0.5 text-[14px]">Add to bag</span>
+        <span className={cn("translate-y-0.5", landCta ? "text-sm" : "text-[14px]")}>
+          Add to bag
+        </span>
       </span>
     </button>
   );

@@ -981,6 +981,7 @@ html.pdp-panel-scroll {
 }
 
 .pdp-hero-media-frame--docked > .pdp-hero-docked-footer {
+  min-width: 0;
   min-height: max-content;
 }
 

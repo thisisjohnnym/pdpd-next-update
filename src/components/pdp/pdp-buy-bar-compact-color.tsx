@@ -17,6 +17,8 @@ type PdpBuyBarCompactColorProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
+  /** Full scrollable 42px rail vs compact +N chips */
+  variant?: "compact" | "rail";
   className?: string;
 };
 
@@ -25,6 +27,7 @@ export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
   onColorSheetOpenChange,
+  variant = "compact",
   className,
 }: PdpBuyBarCompactColorProps) {
   const tabby = useOptionalTabbyVariant();
@@ -97,6 +100,7 @@ export function PdpBuyBarCompactColor({
         selectedId={activeColorId}
         previewCount={compactBuyBarColorDotCount}
         moreCountOverride={heroColorSwatchMoreCountOverride}
+        variant={variant}
         onSelect={handleColorSelect}
         onOpenSheet={() => setSheetOpen(true)}
         className={className}
