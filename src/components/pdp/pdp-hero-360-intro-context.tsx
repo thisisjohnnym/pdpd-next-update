@@ -21,7 +21,7 @@ type Hero360IntroContextValue = {
   phase: Hero360IntroPhase;
   isUiVisible: boolean;
   isGalleryScrollReady: boolean;
-  /** Soft UI cue mid-clip (~1.2s) — ad-vibe land while the fall continues. */
+  /** Soft UI cue mid-clip (media ~1.2s / ~0.8s wall at 1.5×) — ad-vibe land. */
   onUiCue: () => void;
   onVideoEnded: () => void;
   onRevealComplete: () => void;
@@ -142,7 +142,7 @@ export function PdpHero360IntroProvider({
     }
     videoEndedRef.current = true;
 
-    // Late cue — clip ended before 1.2s (seek / short asset / fail-open).
+    // Late cue — clip ended before the media cue (seek / short asset / fail-open).
     if (!uiCuedRef.current) {
       uiCuedRef.current = true;
       setPhase("revealing");

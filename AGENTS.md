@@ -10,7 +10,7 @@ In **Plan mode**, load `.cursor/rules/agent-planning.mdc` (or `@agent-planning`)
 
 ## PDP versions (read before any PDP edit)
 
-The PDP ships **four comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, and **v4** (latest round). Be version-aware before touching PDP code.
+The PDP ships **seven comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, **v4**, **v5**, **v6** (frozen UXR variants), and **v7** (active Skelly parity round). Be version-aware before touching PDP code.
 
 - Architecture & flags: `docs/pdp-versions.md`
 - Deploy & stakeholder links: `docs/deploy-and-links.md`
@@ -20,6 +20,7 @@ The PDP ships **four comparison routes** from one codebase: **v1** (frozen basel
 - Never edit `pdp-data.ts`, `pdp-section-chapters.ts`, or `globals.css` for version-only needs (prefer `pdp-vN.css`).
 - After changes, confirm older routes unchanged and run `pnpm check:versions`.
 - Cursor rule: `.cursor/rules/pdp-versions.mdc` (always on).
+- **Doc Gate** (soft): before PDP/doc work, resolve Active vs Frozen and Paper authority; ask on conflicts — `.cursor/rules/doc-gate.mdc` · skill `.cursor/skills/doc-gate/SKILL.md`.
 
 ### Pre-ship checklist
 

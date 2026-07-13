@@ -122,6 +122,9 @@ function checkCssScoping() {
   checkVersionCssScoping("v4");
   checkVersionCssScoping("v5");
   checkVersionCssScoping("v6");
+  checkVersionCssScoping("v7");
+  checkVersionCssScoping("fc01");
+  checkVersionCssScoping("fc01v");
 }
 
 // ── Guard 3: lower versions must not import higher-version modules ───────────
@@ -135,11 +138,14 @@ function importsVersionModule(src, version) {
 function checkVersionImports() {
   // A route folder must never reach forward into a higher version's modules.
   const forbiddenByRoute = [
-    { dir: "src/app/v1", forbidden: ["v2", "v3", "v4", "v5", "v6"], note: "v1 routes must stay on the frozen baseline" },
-    { dir: "src/app/v2", forbidden: ["v3", "v4", "v5", "v6"], note: "v2 routes must not depend on a later pivot" },
-    { dir: "src/app/v3", forbidden: ["v4", "v5", "v6"], note: "v3 routes must not depend on a later pivot" },
-    { dir: "src/app/v4", forbidden: ["v5", "v6"], note: "v4 routes must not depend on a later pivot" },
-    { dir: "src/app/v5", forbidden: ["v6"], note: "v5 routes must not depend on the v6 pivot" },
+    { dir: "src/app/v1", forbidden: ["v2", "v3", "v4", "v5", "v6", "v7"], note: "v1 routes must stay on the frozen baseline" },
+    { dir: "src/app/v2", forbidden: ["v3", "v4", "v5", "v6", "v7"], note: "v2 routes must not depend on a later pivot" },
+    { dir: "src/app/v3", forbidden: ["v4", "v5", "v6", "v7"], note: "v3 routes must not depend on a later pivot" },
+    { dir: "src/app/v4", forbidden: ["v5", "v6", "v7"], note: "v4 routes must not depend on a later pivot" },
+    { dir: "src/app/v5", forbidden: ["v6", "v7"], note: "v5 routes must not depend on a later pivot" },
+    { dir: "src/app/v6", forbidden: ["v7"], note: "v6 routes must not depend on the v7 pivot" },
+    // fc01 / fc01v are the final-candidate UXR pair — they may share v5/v6
+    // modules, so no forward-import restrictions apply to them.
   ];
 
   for (const { dir, forbidden, note } of forbiddenByRoute) {
@@ -162,12 +168,15 @@ function checkVersionImports() {
 // ── Guard 4: route version props ─────────────────────────────────────────────
 function checkRouteVersionProps() {
   const checks = [
-    { dir: "src/app/v1", expected: 'version="v1"', forbidden: ['version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"'] },
-    { dir: "src/app/v2", expected: 'version="v2"', forbidden: ['version="v1"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"'] },
-    { dir: "src/app/v3", expected: 'version="v3"', forbidden: ['version="v1"', 'version="v2"', 'version="v4"', 'version="v5"', 'version="v6"'] },
-    { dir: "src/app/v4", expected: 'version="v4"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v5"', 'version="v6"'] },
-    { dir: "src/app/v5", expected: 'version="v5"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v6"'] },
-    { dir: "src/app/v6", expected: 'version="v6"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"'] },
+    { dir: "src/app/v1", expected: 'version="v1"', forbidden: ['version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"'] },
+    { dir: "src/app/v2", expected: 'version="v2"', forbidden: ['version="v1"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"'] },
+    { dir: "src/app/v3", expected: 'version="v3"', forbidden: ['version="v1"', 'version="v2"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"'] },
+    { dir: "src/app/v4", expected: 'version="v4"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v5"', 'version="v6"', 'version="v7"'] },
+    { dir: "src/app/v5", expected: 'version="v5"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v6"', 'version="v7"'] },
+    { dir: "src/app/v6", expected: 'version="v6"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v7"'] },
+    { dir: "src/app/v7", expected: 'version="v7"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="fc01"', 'version="fc01v"'] },
+    { dir: "src/app/fc01", expected: 'version="fc01"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="fc01v"'] },
+    { dir: "src/app/fc01v", expected: 'version="fc01v"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="fc01"'] },
   ];
   for (const { dir, expected, forbidden } of checks) {
     for (const file of walk(join(ROOT, dir))) {
@@ -231,6 +240,11 @@ function checkTabbyBrowserUrls() {
 
   const slug = "tabby-shoulder-bag-26-quilted";
   const cases = [
+    [tabbyBrowserUrl("v7", slug, "brass-black", "/v7"), "/v7?color=brass-black"],
+    [
+      tabbyBrowserUrl("v7", slug, "brass-black", "/v7/products/tabby-shoulder-bag-26-quilted"),
+      "/v7/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
     [tabbyBrowserUrl("v6", slug, "brass-black", "/v6"), "/v6?color=brass-black"],
     [
       tabbyBrowserUrl("v6", slug, "brass-black", "/v6/products/tabby-shoulder-bag-26-quilted"),
@@ -245,6 +259,16 @@ function checkTabbyBrowserUrls() {
     [
       tabbyBrowserUrl("v1", slug, "brass-black", "/products/tabby-shoulder-bag-26-quilted"),
       "/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+    [tabbyBrowserUrl("fc01", slug, "brass-black", "/fc01"), "/fc01?color=brass-black"],
+    [
+      tabbyBrowserUrl("fc01", slug, "brass-black", "/fc01/products/tabby-shoulder-bag-26-quilted"),
+      "/fc01/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+    [tabbyBrowserUrl("fc01v", slug, "brass-black", "/fc01v"), "/fc01v?color=brass-black"],
+    [
+      tabbyBrowserUrl("fc01v", slug, "brass-black", "/fc01v/products/tabby-shoulder-bag-26-quilted"),
+      "/fc01v/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
   ];
 

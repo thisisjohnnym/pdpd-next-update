@@ -9,6 +9,8 @@ export type PdpVersion =
   | "v4"
   | "v5"
   | "v6"
+  | "v7"
+  // FC (final candidate) UXR study pair — fc01 horizontal, fc01v vertical.
   | "fc01"
   | "fc01v";
 

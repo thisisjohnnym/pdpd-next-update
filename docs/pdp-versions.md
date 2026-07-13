@@ -1,4 +1,4 @@
-# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6)
+# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6 / v7)
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
@@ -6,8 +6,8 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round (frozen). **v6** is the active feedback round.
-- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, and **`/v6`** on the same deploy.
+- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round (frozen). **v6** is the fall-in + vertical gallery UXR variant (frozen). **v7** is the active Skelly parity round.
+- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, **`/v6`**, and **`/v7`** on the same deploy.
 - v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
@@ -44,7 +44,8 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
 | v4 (r5 feedback) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
 | v5 (Sean polish — frozen) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) |
-| v6 (feedback — active) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
+| v6 (fall-in + vertical — frozen) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
+| v7 (Skelly parity — active) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
 
 Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
 
@@ -56,10 +57,10 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v6`) from one codebase.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v7`) from one codebase.
 
 1. All prototype work lands on **`main`**.
-2. Route versions (`/v1`–`/v6`) are frozen comparison URLs — not separate git branches.
+2. Route versions (`/v1`–`/v7`) are frozen comparison URLs — not separate git branches.
 3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
 
 When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
@@ -333,9 +334,9 @@ Full flag list: `V5_CONFIG` in `pdp-version-config.ts`. Deploy links: [deploy-an
 
 ---
 
-## 8.7. v6 — post-v5 feedback round
+## 8.7. v6 — fall-in + vertical gallery (frozen)
 
-v6 is the active feedback round. It **inherits the v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and layers the vertical mobile gallery on top of the shared fall-in intro. Add new flags to `V6_CONFIG` — prefer not rewriting v5 defaults in place unless the change is intentionally shared.
+v6 is a frozen UXR variant. It **inherits the v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and layers the vertical mobile gallery on top of the shared fall-in intro.
 
 ### v6-only files
 
@@ -353,6 +354,61 @@ v6 is the active feedback round. It **inherits the v5 baseline** (`V6_CONFIG` sp
 | `useHeroGalleryProgressBar: false` | Tick indicator instead of progress bar |
 
 Full changelog: [rounds/r7-v6.md](rounds/r7-v6.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+
+---
+
+## 8.8. v7 — Skelly parity (active)
+
+v7 is the **active** round. Visual / merchandising source of truth is Skelly's fork (`skelly363/pdp-next` @ `90e2295`), manually ported — **not** merged. Motion / interaction stays on our stack (iOS drawers, carousel snap, motion tokens).
+
+`V7_CONFIG` spreads **`V4_CONFIG`** (not our r7-mutated `V5_CONFIG`) and applies Skelly's v5 flag snapshot: flat color sheet, sale pricing, full-bag swatches, emphasized reviews, land intro (no fall-in), mirror-selfie gallery slide.
+
+### v7-only files
+
+| File | Role |
+|------|------|
+| `src/app/v7/` | Route folder — imports `pdp-v5.css` + thin `pdp-v7.css` |
+| `pdp-tabby-colors-v7.ts`, `pdp-tabby-catalog-v7.ts` | Skelly color/catalog forks |
+| `docs/rounds/r8-v7.md` | Round changelog |
+
+### Key v7 flags (`V7_CONFIG` in `pdp-version-config.ts`)
+
+| Flag | Purpose |
+|------|---------|
+| `showSalePricing` | Strikethrough + sale price in hero / buy panel |
+| `emphasizeReviewsModule` | Warm band + solid reviews CTA |
+| `useFullBagColorSwatches` | Full-bag PNG swatches + v7 color/catalog resolver |
+| `useLeatherAgingWaysToWear` | Ways-to-wear → leather aging wipe module |
+| `heroGalleryExtraSlides` | Mirror-selfie slide (v7 only) |
+| `playHeroLandIntro: true` | Land scroll reveal — no fall-in |
+| `flatColorSheet` | Flat color drawer (not grouped family explorer) |
+
+Full changelog: [rounds/r8-v7.md](rounds/r8-v7.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+
+---
+
+## 8.9. fc01 / fc01v — final-candidate UXR study pair
+
+Brand approved the Skelly template, so the study ships as an **FC (final candidate) pair** rather than another numbered round:
+
+- **`/fc01`** — horizontal gallery (Skelly v5 template + FC round tweaks). `FC01_CONFIG` spreads `V5_CONFIG`.
+- **`/fc01v`** — vertical gallery variant for the UXR comparison. `FC01V_CONFIG` spreads `FC01_CONFIG` and layers the v6 gallery overrides (`heroVerticalGallery`, tick indicator, fill-frame stills).
+
+Both play the shared mobile fall-in intro (the boot script in `pdp-v6-intro-boot-script.ts` stamps `/fc01` and `/fc01v` alongside `/v5`–`/v6`).
+
+### FC-only files
+
+| File | Role |
+|------|------|
+| `src/app/fc01/` | Route folder — `layout.tsx`, thin `pdp-fc01.css`, `pdp-fc01-root-marker.tsx` |
+| `src/app/fc01v/` | Route folder — `layout.tsx`, thin `pdp-fc01v.css`, `pdp-fc01v-root-marker.tsx` |
+| `docs/rounds/fc01.md` | Round note |
+
+### CSS sharing
+
+FC routes do **not** copy the v5/v6 stylesheets. Instead `pdp-v5.css` and `pdp-v6.css` use dual scopes — `:is([data-pdp-version="v5"], [data-pdp-version="fc01"])` and `:is([data-pdp-version="v6"], [data-pdp-version="fc01v"])` — and each FC layout imports the paired baseline CSS plus a thin FC overlay for study-only tweaks.
+
+Unlike `/v1`–`/v5`, the FC pair is **not frozen** — it tracks the active FC round. Note that the Skelly sync also updates shared components used by `/v5`/`/v6` (e.g. the docked color rail), so those routes are no longer pixel-frozen to their original ship.
 
 ---
 

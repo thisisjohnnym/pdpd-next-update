@@ -307,6 +307,8 @@ export type HeroGalleryOrderingOptions = {
   heroGalleryLogicalBlockOrder?: boolean;
   /** Slide srcs dropped from the gallery — e.g. stills superseded by a reshoot. */
   heroGalleryExcludeSlideSrcs?: string[];
+  /** Extra slides merged before ordering (v7 mirror selfie, etc.). */
+  heroGalleryExtraSlides?: PdpHeroGallerySlide[];
   /**
    * Fill product stills (`shotType: "product"`) with `object-fit: cover` so
    * tall mobile frames do not letterbox. Studio spins / callouts stay contain.
@@ -324,6 +326,14 @@ export function orderHeroGallerySlides(
   const excludeSrcs = options.heroGalleryExcludeSlideSrcs;
   if (excludeSrcs?.length) {
     slides = slides.filter((slide) => !excludeSrcs.includes(slide.src));
+  }
+
+  if (options.heroGalleryExtraSlides?.length) {
+    const existing = new Set(slides.map((slide) => slide.src));
+    const extras = options.heroGalleryExtraSlides.filter(
+      (slide) => !existing.has(slide.src),
+    );
+    slides = [...slides, ...extras];
   }
 
   let result =

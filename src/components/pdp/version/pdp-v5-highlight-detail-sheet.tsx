@@ -16,6 +16,7 @@ import {
   pdpBottomSheetPanelClass,
 } from "../pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "../pdp-module-section";
+import { PDP_SHEET_PRESENCE_MS } from "../pdp-motion";
 import { pdpType } from "../pdp-type";
 import { useMountTransition } from "../use-mount-transition";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
@@ -56,7 +57,10 @@ export function PdpV5HighlightDetailSheet({
 }: PdpV5HighlightDetailSheetProps) {
   const titleId = useId();
   const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, 300);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  // Drive CSS from transition.state (not the open prop) so the sheet mounts in
+  // the closed pose, then flips open after two frames — otherwise enter pops.
+  const sheetOpen = transition.state === "open";
   const lastCardRef = useRef(card);
   if (card) {
     lastCardRef.current = card;
@@ -73,15 +77,15 @@ export function PdpV5HighlightDetailSheet({
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
-      aria-hidden={!open}
+      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+      aria-hidden={!sheetOpen}
     >
       <button
         type="button"
         aria-label="Close details"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
@@ -90,7 +94,7 @@ export function PdpV5HighlightDetailSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         className={pdpBottomSheetPanelClass({
-          open,
+          open: sheetOpen,
           maxHeight: maxHeight ?? (hasExtraContent ? "88dvh" : undefined),
         })}
       >

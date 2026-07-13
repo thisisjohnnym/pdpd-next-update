@@ -17,7 +17,9 @@ import {
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { PDP_GALLERY_MORE_PHOTOS, type PdpGalleryPhoto } from "./pdp-data";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpGalleryPhotosSheetProps = {
@@ -33,30 +35,32 @@ export function PdpGalleryPhotosSheet({
   onClose,
 }: PdpGalleryPhotosSheetProps) {
   const titleId = useId();
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
 
-  if (!mounted) {
+  if (!overlayReady || !transition.mounted) {
     return null;
   }
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
-      aria-hidden={!open}
+      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+      aria-hidden={!sheetOpen}
     >
       <button
         type="button"
         aria-label="Close media gallery"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open, maxHeight: "88dvh" })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen, maxHeight: "88dvh" })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

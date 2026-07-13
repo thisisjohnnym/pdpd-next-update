@@ -17,6 +17,7 @@ import {
 } from "./pdp-bottom-sheet";
 import type { PdpShopTheLookLook } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpType } from "./pdp-type";
 import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
@@ -31,7 +32,8 @@ type PdpShopTheLookSheetProps = {
 export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheetProps) {
   const titleId = useId();
   const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, 300);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
   const lastLookRef = useRef(look);
   if (look) {
     lastLookRef.current = look;
@@ -44,22 +46,22 @@ export function PdpShopTheLookSheet({ look, open, onClose }: PdpShopTheLookSheet
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
-      aria-hidden={!open}
+      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+      aria-hidden={!sheetOpen}
     >
       <button
         type="button"
         aria-label="Close shop the look"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

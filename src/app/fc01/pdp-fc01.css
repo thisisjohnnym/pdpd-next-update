@@ -1,0 +1,6 @@
+/*
+ * fc01 — final-candidate UXR study, horizontal gallery.
+ * Shares the v5 baseline styles via dual selectors in src/app/v5/pdp-v5.css
+ * (`:is([data-pdp-version="v5"], [data-pdp-version="fc01"])`).
+ * Add fc01-only overrides here, scoped under [data-pdp-version="fc01"].
+ */

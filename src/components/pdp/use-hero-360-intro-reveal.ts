@@ -11,8 +11,9 @@ gsap.registerPlugin(useGSAP);
 
 /** Softer than the old post-spin land — ad-vibe fade while the fall continues. */
 const REVEAL_LIFT_PX = 8;
-const REVEAL_STAGGER_S = 0.12;
-const REVEAL_DURATION_S = 0.7;
+/** Scaled with intro `playbackRate` 1.5 so chrome keeps pace with the faster fall. */
+const REVEAL_STAGGER_S = 0.08;
+const REVEAL_DURATION_S = 0.5;
 
 function collectIntroChrome(root: HTMLElement): HTMLElement[] {
   return [
@@ -23,7 +24,7 @@ function collectIntroChrome(root: HTMLElement): HTMLElement[] {
 }
 
 /**
- * GSAP stagger for v6 hero chrome — soft mid-clip cue (~1.2s), not end-of-video.
+ * GSAP stagger for v6 hero chrome — soft mid-clip cue (media ~1.2s), not end-of-video.
  * Opacity + translateY only — no `filter: blur` (that forces paint layers over the
  * playing video and tanks decode FPS on mobile).
  */

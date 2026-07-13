@@ -179,6 +179,7 @@ function PdpHeroGalleryHorizontal({
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
     heroGalleryExcludeSlideSrcs,
+    heroGalleryExtraSlides,
     heroProductSlidesFillFrame,
     useHeroGalleryProgressBar,
     showHeroGalleryCategoryRail,
@@ -207,6 +208,7 @@ function PdpHeroGalleryHorizontal({
         heroGalleryUgcInsertAfterIndex,
         heroGalleryLogicalBlockOrder,
         heroGalleryExcludeSlideSrcs,
+        heroGalleryExtraSlides,
         heroProductSlidesFillFrame,
       }),
     [
@@ -219,6 +221,7 @@ function PdpHeroGalleryHorizontal({
       heroGalleryUgcInsertAfterIndex,
       heroGalleryLogicalBlockOrder,
       heroGalleryExcludeSlideSrcs,
+      heroGalleryExtraSlides,
       heroProductSlidesFillFrame,
     ],
   );

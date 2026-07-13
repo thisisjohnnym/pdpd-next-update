@@ -284,17 +284,15 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
         }
 
         clearSettleTimer();
+        // Recover from a stuck dragging class (e.g. `scrollend` never fired).
+        el.classList.remove(CAROUSEL_DRAGGING_CLASS);
         dragging = true;
         moved = 0;
         startX = event.clientX;
         startScrollLeft = el.scrollLeft;
-        el.classList.add(CAROUSEL_DRAGGING_CLASS);
-
-        try {
-          el.setPointerCapture(event.pointerId);
-        } catch {
-          /* capture unsupported — drag still works via document-level fallback */
-        }
+        // Do NOT capture the pointer here — capture retargets the eventual
+        // `click` to the rail, which makes buttons inside (Compare / Add to
+        // bag) unclickable with a mouse. Capture starts on real movement only.
       };
 
       const onPointerMove = (event: PointerEvent) => {
@@ -303,7 +301,24 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
         }
 
         const dx = event.clientX - startX;
-        moved = Math.max(moved, Math.abs(dx));
+        const distance = Math.abs(dx);
+
+        // Engage the drag only past the click-suppress threshold so plain
+        // clicks never suspend snap or capture the pointer.
+        if (moved <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+          if (distance <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+            moved = Math.max(moved, distance);
+            return;
+          }
+          el.classList.add(CAROUSEL_DRAGGING_CLASS);
+          try {
+            el.setPointerCapture(event.pointerId);
+          } catch {
+            /* capture unsupported — drag still works via element listeners */
+          }
+        }
+
+        moved = Math.max(moved, distance);
         el.scrollLeft = startScrollLeft - dx;
       };
 
@@ -314,6 +329,15 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
 
         dragging = false;
 
+        if (el.hasPointerCapture(event.pointerId)) {
+          el.releasePointerCapture(event.pointerId);
+        }
+
+        // Plain click (no real drag) — snap was never suspended, nothing to settle.
+        if (moved <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+          return;
+        }
+
         el.scrollTo({
           left: nearestChildScrollLeft(el),
           behavior: reducedMotionRef.current ? "auto" : "smooth",
@@ -323,10 +347,6 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
           el.addEventListener("scrollend", finishSettle, { once: true });
         } else {
           settleTimer = window.setTimeout(finishSettle, DRAG_SETTLE_FALLBACK_MS);
-        }
-
-        if (el.hasPointerCapture(event.pointerId)) {
-          el.releasePointerCapture(event.pointerId);
         }
       };
 

@@ -80,6 +80,22 @@ Install `gsap` + `@gsap/react` when a task first needs GSAP APIs. Much motion to
 | `useReducedMotion` | `src/components/pdp/use-reduced-motion.ts` | Snap/disable motion when OS requests reduced motion |
 | `useRafLerp` | `src/components/pdp/use-raf-lerp.ts` | Frame-smoothed chase toward a numeric target |
 | `useScrollSnapshot` | `src/components/pdp/use-coalesced-scroll.ts` | Coalesced scroll reads for chrome/indicator logic |
+| Motion tokens | `src/components/pdp/pdp-motion.ts` + CSS vars in `globals.css` | Shared ease/duration for sheets, fades, pops |
+
+### Motion tokens (sheets & overlays)
+
+CSS vars live on `:root` in `globals.css`. JS mirror: `pdp-motion.ts`.
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--pdp-ease-emphasized` | `cubic-bezier(0.2, 0, 0, 1)` | Small UI (fade, pop, icons) |
+| `--pdp-ease-settle` | `cubic-bezier(0.16, 1, 0.3, 1)` | Sheets + hero settle |
+| `--pdp-duration-sheet-enter` | `380ms` | Drawer / bottom sheet enter |
+| `--pdp-duration-sheet-exit` | `280ms` | Sheet exit (shorter than enter) |
+| `--pdp-duration-backdrop` | `320ms` | Dim layer behind sheets |
+| `PDP_SHEET_PRESENCE_MS` | max of sheet/backdrop | `useMountTransition` unmount delay |
+
+**Sheet rule:** panel = `transform` only (`.pdp-sheet-panel`); backdrop = `opacity` only (`.pdp-sheet-backdrop`); never fade the white tray.
 
 ## Domain specs (read when touching these areas)
 

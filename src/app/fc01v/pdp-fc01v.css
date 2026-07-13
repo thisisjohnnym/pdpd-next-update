@@ -1,0 +1,6 @@
+/*
+ * fc01v — final-candidate UXR study, vertical gallery variant.
+ * Shares the v6 baseline styles via dual selectors in src/app/v6/pdp-v6.css
+ * (`:is([data-pdp-version="v6"], [data-pdp-version="fc01v"])`).
+ * Add fc01v-only overrides here, scoped under [data-pdp-version="fc01v"].
+ */

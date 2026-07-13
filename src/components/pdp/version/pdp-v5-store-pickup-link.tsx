@@ -23,6 +23,7 @@ import {
   pdpTextLinkCtaLabelClass,
   pdpType,
 } from "../pdp-type";
+import { PDP_SHEET_PRESENCE_MS } from "../pdp-motion";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 import { useMountTransition } from "../use-mount-transition";
@@ -62,10 +63,13 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
     usePdpVersion(),
   );
   const [open, setOpen] = useState(false);
-  const [selectedStoreId, setSelectedStoreId] = useState(NEARBY_STORES[0].id);
+  const [selectedStoreId, setSelectedStoreId] = useState<
+    (typeof NEARBY_STORES)[number]["id"]
+  >(NEARBY_STORES[0].id);
   const titleId = useId();
   const overlayReady = useOverlayDismiss(open, () => setOpen(false));
-  const transition = useMountTransition(open, 300);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
 
   if (!showStorePickupLink) {
     return null;
@@ -97,15 +101,15 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
       {overlayReady && transition.mounted ? (
         createPortal(
           <div
-            className={pdpBottomSheetOverlayClass({ open })}
-            aria-hidden={!open}
+            className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+            aria-hidden={!sheetOpen}
           >
             <button
               type="button"
               aria-label="Close store pickup"
-              className={pdpBottomSheetBackdropClass()}
+              className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
               onClick={() => setOpen(false)}
-              tabIndex={open ? 0 : -1}
+              tabIndex={sheetOpen ? 0 : -1}
             />
 
             <div
@@ -113,7 +117,10 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
-              className={pdpBottomSheetPanelClass({ open, maxHeight: "85dvh" })}
+              className={pdpBottomSheetPanelClass({
+                open: sheetOpen,
+                maxHeight: "85dvh",
+              })}
             >
               <div className={pdpBottomSheetHeaderClass}>
                 <div className={pdpBottomSheetGrabHandleClass} />

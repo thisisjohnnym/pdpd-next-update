@@ -725,6 +725,13 @@ export const PDP_WAYS_TO_WEAR_SECTION = {
     "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
 } as const;
 
+/** Skelly v7 — leather aging wipe copy */
+export const PDP_WAYS_TO_WEAR_SECTION_AGING = {
+  headline: "Where wear becomes beauty",
+  body:
+    "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
+} as const;
+
 export type PdpWaysToWearStyle = {
   id: string;
   label: string;
@@ -750,6 +757,36 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
     alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
   },
 ] satisfies PdpWaysToWearStyle[];
+
+/** v7 leather-aging wipe endpoints — New vs 2 years */
+export const PDP_WAYS_TO_WEAR_STYLES_AGING = [
+  {
+    id: "new",
+    label: "New",
+    caption: "Crisp grain, structured shape. No special care needed yet.",
+    src: "/images/gallery/tabby-leather-aging-new-day-one.jpg",
+    alt: "Tabby Shoulder Bag 26 in black leather with gold C clasp hardware — new, day one",
+  },
+  {
+    id: "two-years",
+    label: "2 years",
+    caption:
+      "Rich depth, soft drape, honest creasing. Condition regularly.",
+    src: "/images/gallery/tabby-leather-aging-two-years.jpg",
+    alt: "Tabby Shoulder Bag 26 after two years of daily carry — rich patina and honest wear",
+  },
+] satisfies [PdpWaysToWearStyle, PdpWaysToWearStyle];
+
+/**
+ * v7 demo sale prices — compare-at remains the coach.com list price from
+ * `summary.price`. ~20% off for prototype merchandising.
+ */
+export const PDP_V5_SALE_PRICES: Record<20 | 26 | 33 | 36, string> = {
+  20: "$300",
+  26: "$380",
+  33: "$580",
+  36: "$556",
+};
 
 /**
  * v5 "Get the highlights" — Apple-style highlight rail that replaces the
@@ -1096,10 +1133,15 @@ export const PDP_FIND_YOUR_TABBY_FAMILY: FindYourTabbyFamilyMember[] =
  */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
+  options: { dropLeatherAgingSlide?: boolean } = {},
 ): PdpGallerySlideV2[] {
   const result: PdpGallerySlideV2[] = [];
 
   for (const slide of slides) {
+    if (options.dropLeatherAgingSlide && slide.type === "leather-aging") {
+      continue;
+    }
+
     if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
       result.push({ type: "get-the-highlights" });
       continue;
@@ -1158,7 +1200,7 @@ export const PDP_MORE_LIKE_THIS_COMPARE_CURRENT: PdpMoreLikeThisCompareProduct =
       { id: "material", label: "Material", value: "Full-grain leather" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1184,7 +1226,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Crochet yarn" },
       { id: "strap", label: "Strap", value: '20" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.7 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1204,7 +1246,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Suede" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.8 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1224,7 +1266,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Pebbled leather" },
       { id: "strap", label: "Strap", value: '21" chain', tabular: true },
       { id: "weight", label: "Weight", value: "0.6 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone - Cards - Keys" },
+      { id: "fits", label: "Fits", value: "Phone, Cards, Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1245,7 +1287,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Full-grain leather" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
       {
         id: "dimensions",
         label: "Dimensions",

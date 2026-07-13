@@ -15,7 +15,6 @@ import {
   pdpBottomSheetPanelClass,
   pdpBottomSheetScrollRegionClass,
 } from "./pdp-bottom-sheet";
-
 import {
   PDP_BUNDLE_DISCOUNT,
   PDP_PRODUCT,
@@ -26,11 +25,13 @@ import {
 import { useActiveProduct } from "./pdp-active-product-context";
 import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
 import { pdpPillRadiusClass, pdpProductPriceClass, pdpProductTitleClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass, pdpType } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
@@ -298,7 +299,9 @@ export function PdpAddToBagSheet({
   const { isAdded: isQuickAdded, confirmAdd: confirmQuickAdd } =
     useTransientAddedSet();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
   const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
 
   const colors = getPdpColors(productId);
@@ -324,28 +327,28 @@ export function PdpAddToBagSheet({
     confirmQuickAdd(id);
   };
 
-  if (!mounted) {
+  if (!overlayReady || !transition.mounted) {
     return null;
   }
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
-      aria-hidden={!open}
+      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+      aria-hidden={!sheetOpen}
     >
       <button
         type="button"
         aria-label="Close add to bag"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

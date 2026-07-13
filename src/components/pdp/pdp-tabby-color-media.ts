@@ -111,7 +111,9 @@ export function getTabbyGallerySlidesForColor(
   let slides = applyV4Patches ? applyV4GallerySlidePatches(v2Slides) : v2Slides;
 
   if (config.showWaysToWearModule) {
-    slides = applyV5GallerySlidePatches(slides);
+    slides = applyV5GallerySlidePatches(slides, {
+      dropLeatherAgingSlide: config.useLeatherAgingWaysToWear,
+    });
   }
 
   return slides;

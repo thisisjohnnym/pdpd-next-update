@@ -39,11 +39,22 @@ const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
  */
 export function PdpV5GetTheHighlights() {
   const { headline, watchLabel } = PDP_GET_THE_HIGHLIGHTS_SECTION;
-  const { leftAlignModuleHeadings, useV4ModuleSpacing } =
+  const { leftAlignModuleHeadings, useV4ModuleSpacing, useLeatherAgingWaysToWear } =
     getPdpVersionConfig(usePdpVersion());
+  const highlightCards = useLeatherAgingWaysToWear
+    ? PDP_GET_THE_HIGHLIGHTS_CARDS.map((card) =>
+        card.id === "crafted-to-age"
+          ? {
+              ...card,
+              src: "/images/gallery/tabby-leather-full-grain-back.jpg",
+              alt: "Back of the Tabby bag in full-grain leather with THE TABBY BAG stamp and gold Coach snap",
+            }
+          : card,
+      )
+    : PDP_GET_THE_HIGHLIGHTS_CARDS;
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const activeCard =
-    PDP_GET_THE_HIGHLIGHTS_CARDS.find((card) => card.id === activeCardId) ??
+    highlightCards.find((card) => card.id === activeCardId) ??
     null;
 
   return (
@@ -52,7 +63,7 @@ export function PdpV5GetTheHighlights() {
       aria-label={headline}
       className={cn(
         "w-full shrink-0 bg-white",
-        useV4ModuleSpacing ? "pt-14 pb-12" : "pt-12 pb-8",
+        useV4ModuleSpacing ? "pt-14 pb-10" : "pt-12 pb-8",
       )}
     >
       <div
@@ -93,7 +104,7 @@ export function PdpV5GetTheHighlights() {
           className={cn(pdpCarouselScrollClass, "flex items-stretch gap-3")}
           aria-label={headline}
         >
-          {PDP_GET_THE_HIGHLIGHTS_CARDS.map((card, index) => (
+          {highlightCards.map((card, index) => (
             <PdpV5HighlightCard
               key={card.id}
               card={card}

@@ -2,30 +2,49 @@
 
 import { cn } from "@/lib/cn";
 
+import { PdpLeatherAgingCareUpsell } from "../pdp-leather-aging-care-upsell";
 import { PdpModuleHeading } from "../pdp-module-heading";
 import { pdpModuleIntroClass } from "../pdp-module-section";
+import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import {
   PDP_WAYS_TO_WEAR_SECTION,
+  PDP_WAYS_TO_WEAR_SECTION_AGING,
   PDP_WAYS_TO_WEAR_STYLES,
+  PDP_WAYS_TO_WEAR_STYLES_AGING,
 } from "./pdp-data-v2";
 import { PdpV5WaysToWearCompareSlider } from "./pdp-v5-ways-to-wear-compare-slider";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
 /**
- * v5 "Ways to wear" — before/after drag slider between shoulder and crossbody.
+ * v5 "Ways to wear" — shoulder/crossbody on v5; leather aging wipe on v7 (Skelly).
  */
-export function PdpV5WaysToWear() {
-  const { leftAlignModuleHeadings, useV4ModuleSpacing } =
-    getPdpVersionConfig(usePdpVersion());
-  const { headline, body } = PDP_WAYS_TO_WEAR_SECTION;
+export function PdpV5WaysToWear({
+  onQuickAdd,
+}: {
+  onQuickAdd?: () => void;
+} = {}) {
+  const {
+    leftAlignModuleHeadings,
+    useV4ModuleSpacing,
+    useLeatherAgingWaysToWear,
+    showLeatherCareUpsell,
+  } = getPdpVersionConfig(usePdpVersion());
+  const section = useLeatherAgingWaysToWear
+    ? PDP_WAYS_TO_WEAR_SECTION_AGING
+    : PDP_WAYS_TO_WEAR_SECTION;
+  const styles = useLeatherAgingWaysToWear
+    ? PDP_WAYS_TO_WEAR_STYLES_AGING
+    : PDP_WAYS_TO_WEAR_STYLES;
+  const { headline, body } = section;
   const alignClass = leftAlignModuleHeadings
     ? "items-start text-left"
     : "items-center text-center";
 
-  const [shoulder, crossbody] = PDP_WAYS_TO_WEAR_STYLES;
+  const [leftStyle, rightStyle] = styles;
 
   return (
     <section
@@ -60,9 +79,27 @@ export function PdpV5WaysToWear() {
         </div>
 
         <PdpV5WaysToWearCompareSlider
-          styles={[shoulder, crossbody]}
+          styles={[leftStyle, rightStyle]}
           leftAlign={leftAlignModuleHeadings}
+          tablistLabel={
+            useLeatherAgingWaysToWear ? "Leather aging" : "Compare options"
+          }
+          sliderLabel={
+            useLeatherAgingWaysToWear
+              ? "Compare new leather and two years of wear"
+              : "Compare left and right views"
+          }
         />
+
+        {useLeatherAgingWaysToWear && showLeatherCareUpsell ? (
+          <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
+            <PdpLeatherAgingCareUpsell
+              stageIndex={1}
+              alwaysVisible
+              onQuickAdd={onQuickAdd}
+            />
+          </PdpRevealItem>
+        ) : null}
       </div>
     </section>
   );

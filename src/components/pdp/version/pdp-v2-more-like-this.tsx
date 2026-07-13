@@ -207,6 +207,7 @@ export function PdpV2MoreLikeThis({
           comparison={compareProduct}
           open={compareOpen}
           onClose={() => setCompareOpen(false)}
+          onAddToBag={onAddToBag}
         />
       ) : null}
     </section>

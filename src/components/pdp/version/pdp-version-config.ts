@@ -443,6 +443,26 @@ export type PdpVersionConfig = {
    */
   showGetTheHighlights: boolean;
   /**
+   * Reviews module gets a warm band + solid black CTA (Skelly v7 merchandising).
+   */
+  emphasizeReviewsModule: boolean;
+  /**
+   * Show sale price with compare-at strikeout in hero / buy panel.
+   */
+  showSalePricing: boolean;
+  /**
+   * Full-bag studio swatch photos + Skelly color catalog (v7 only).
+   */
+  useFullBagColorSwatches: boolean;
+  /**
+   * Ways-to-wear module shows leather aging New vs 2 years (Skelly v7).
+   */
+  useLeatherAgingWaysToWear: boolean;
+  /**
+   * Extra hero gallery slides appended for version-specific story beats.
+   */
+  heroGalleryExtraSlides?: PdpHeroGallerySlide[];
+  /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
    */
@@ -614,6 +634,10 @@ const V1_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  emphasizeReviewsModule: false,
+  showSalePricing: false,
+  useFullBagColorSwatches: false,
+  useLeatherAgingWaysToWear: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -729,6 +753,10 @@ const V2_CONFIG: PdpVersionConfig = {
   showMoreLikeThisCompare: false,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  emphasizeReviewsModule: false,
+  showSalePricing: false,
+  useFullBagColorSwatches: false,
+  useLeatherAgingWaysToWear: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -919,7 +947,7 @@ const V6_CONFIG: PdpVersionConfig = {
   heroVerticalGallery: true,
   // Product stills fill the tall mobile frame — no side letterbox from contain.
   heroProductSlidesFillFrame: true,
-  // v6 hero land — Tabby fall-in; soft UI at ~1.2s; end frame stays as slide 0.
+  // v6 hero land — Tabby fall-in at 1.5×; soft UI at media ~1.2s; end frame = slide 0.
   hero360IntroEnabled: true,
   hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
   heroGalleryPrependLeadSlide: undefined,
@@ -929,12 +957,108 @@ const V6_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 4,
 };
 
+/**
+ * fc01 — final-candidate UXR study, horizontal gallery. Brand-approved Skelly
+ * template (v5 baseline) with the FC round tweaks. Shares the fall-in intro.
+ */
 const FC01_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
 };
 
+/**
+ * fc01v — final-candidate UXR study, vertical gallery variant. Same FC body
+ * with the v6 vertical-gallery overrides (snap stack, tick rail, fill-frame).
+ */
 const FC01V_CONFIG: PdpVersionConfig = {
   ...V6_CONFIG,
+};
+
+const HERO_MIRROR_SELFIE_SLIDE: PdpHeroGallerySlide = {
+  kind: "image",
+  src: "/images/gallery/tabby-on-model-mirror-selfie.jpg",
+  alt: "Tabby Shoulder Bag 26 worn crossbody — mirror selfie styling",
+  shotType: "on-model",
+  headerSurface: "light",
+  galleryCategory: "on-model",
+};
+
+/**
+ * v7 — Skelly parity round (Jul 2026). Visual SoT from skelly/main @ 90e2295.
+ * Spreads v4 baseline (not our r7-mutated v5) and applies Skelly's v5 flag snapshot.
+ */
+const V7_CONFIG: PdpVersionConfig = {
+  ...V4_CONFIG,
+  showFloatingBuyBar: false,
+  gallerySlides: PDP_GALLERY_SLIDES_V4,
+  detailsAfterSlideIndex: 1,
+  hideBuyBarColorLabel: true,
+  hideHeroColorSwatchLabel: false,
+  hideBuyBarAtbIcon: true,
+  hideDockedBuyBarColor: true,
+  useCompactBuyBarColorDots: true,
+  compactBuyBarColorDotCount: 4,
+  showStorePickupLink: true,
+  showSubtleReviewTeaser: true,
+  inlineBuyBarColorSwatches: false,
+  hideColorSheetSizePrice: true,
+  useV4DetailsTileCarousel: true,
+  useV5DetailsSheet: true,
+  showDetailsCloserLook: false,
+  useV4CraftsmanshipLayout: false,
+  showUpCloseModule: false,
+  showCloserLookStage: true,
+  useV4CompactUgcStrip: true,
+  useUgcTopicThemes: true,
+  useV5UgcTestimonialCarousel: true,
+  showEditorialQuoteCard: true,
+  showLeatherCareUpsell: true,
+  flatColorSheet: true,
+  exploreFamilyColorSheetLabel: false,
+  hideInStockColorLabel: true,
+  lockHeroGalleryTemplate: true,
+  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
+  heroGalleryLogicalBlockOrder: true,
+  heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
+    HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
+  ),
+  heroGalleryUgcInsertAfterIndex: 1,
+  heroGalleryExtraSlides: [HERO_MIRROR_SELFIE_SLIDE],
+  heroMaterialSubtitleLine: true,
+  leatherAgingHeaderAboveImage: true,
+  useRailLeatherAgingSlider: true,
+  hideReviewSummaryRating: false,
+  hideReviewCountRecommend: true,
+  enlargeReviewAiSummary: true,
+  hideReviewUgcMomentCaption: true,
+  enlargeReviewUgcMomentText: true,
+  emphasizeReviewsModule: true,
+  compactUgcMoreCountOverride: 6,
+  useConsistentModuleHeadings: true,
+  moreLikeThisLargeCards: true,
+  showMoreLikeThisCompare: true,
+  squareButtonCorners: true,
+  showWaysToWearModule: true,
+  showGetTheHighlights: true,
+  showSalePricing: true,
+  useFullBagColorSwatches: true,
+  useLeatherAgingWaysToWear: true,
+  demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 6,
+  showTabbyAlsoAvailableAs: false,
+  showReviewHighlightTags: false,
+  desktopSplitLayout: true,
+  hidePayOverTimeCreditNote: true,
+  showHeroFitsInsideCta: true,
+  useHeroGalleryProgressBar: true,
+  showArTryOn: false,
+  showHeroGalleryCategoryRail: true,
+  playHeroLandIntro: true,
+  hero360IntroEnabled: false,
+  hero360IntroVideoSrc: "",
+  heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
@@ -944,6 +1068,7 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v4: V4_CONFIG,
   v5: V5_CONFIG,
   v6: V6_CONFIG,
+  v7: V7_CONFIG,
   fc01: FC01_CONFIG,
   fc01v: FC01V_CONFIG,
 };

@@ -14,7 +14,9 @@ import { PdpHeroShell } from "../pdp-hero-shell";
 import { useHeroEnterOnce } from "../use-hero-enter-once";
 import { useHero360IntroReveal } from "../use-hero-360-intro-reveal";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
+import { PdpProductPrice } from "../pdp-product-price";
+import { usePdpDisplayPrice } from "../use-pdp-display-price";
+import { pdpProductTitleClass, pdpProductPriceClass, pdpType } from "../pdp-type";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -90,6 +92,7 @@ function PdpV3HeroLayoutDefault({
   } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
+  const displayPrice = usePdpDisplayPrice(summary.price);
   const heroEnterOnce = useHeroEnterOnce();
   const playLandIntro = playHeroLandIntro && heroEnterOnce && !introReveal;
 
@@ -120,24 +123,26 @@ function PdpV3HeroLayoutDefault({
           >
             {useCompactBuyBarColorDots ? (
               <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
-                <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5">
+                <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
                   <p
                     className={cn(
                       pdpProductTitleClass,
-                      "min-w-0 text-pretty text-base leading-snug text-black lg:text-lg",
+                      "min-w-0 text-pretty text-base leading-tight text-black lg:text-lg",
                     )}
                   >
                     {summary.name}
                   </p>
+                  <PdpProductPrice
+                    price={displayPrice.price}
+                    compareAtPrice={displayPrice.compareAtPrice}
+                    className="shrink-0 justify-self-end text-base leading-tight lg:text-lg"
+                  />
                   <p
                     className={cn(
-                      pdpProductPriceClass,
-                      "shrink-0 justify-self-end pt-0.5 text-base leading-snug text-black lg:text-lg",
+                      pdpType.label,
+                      "col-start-1 min-w-0 leading-none text-neutral-400",
                     )}
                   >
-                    {summary.price}
-                  </p>
-                  <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-400")}>
                     in {summary.subtitle}
                   </p>
                 </div>

@@ -37,18 +37,22 @@ html[data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before{
 
 /**
  * Stamp version + intro phase on <html> before chrome paints.
- * /v5 and /v6 both use the desktop split (lg:hidden mobile hero) — only stamp
+ * /v5, /v6, and the /fc01 + /fc01v UXR pair all use the desktop split
+ * (lg:hidden mobile hero) — only stamp
  * playing below the lg breakpoint so desktop never hides chrome for a 0x0 video.
  * Keep this string free of bare backticks — it is embedded in a template literal.
  */
 export const PDP_V6_INTRO_BOOT_SCRIPT = `
 (function () {
   var path = location.pathname;
-  var isV5 = /^\\/v5(\\/|$)/.test(path);
-  var isV6 = /^\\/v6(\\/|$)/.test(path);
-  if (!isV5 && !isV6) return;
+  var version = null;
+  if (/^\\/v5(\\/|$)/.test(path)) version = "v5";
+  else if (/^\\/v6(\\/|$)/.test(path)) version = "v6";
+  else if (/^\\/fc01v(\\/|$)/.test(path)) version = "fc01v";
+  else if (/^\\/fc01(\\/|$)/.test(path)) version = "fc01";
+  if (!version) return;
   var root = document.documentElement;
-  root.setAttribute("data-pdp-version", isV5 ? "v5" : "v6");
+  root.setAttribute("data-pdp-version", version);
   var reduce = false;
   var isMobile = true;
   try {

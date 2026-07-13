@@ -4,11 +4,14 @@ import { useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
+import { ColorSwatchTile, resolveSquareSwatchFraming } from "./pdp-color-swatch";
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { pdpPressableIconClass, pdpType } from "./pdp-type";
 import { useDragToScroll } from "./use-infinite-centered-carousel";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
 
 type CompactColorDot = PdpColor | TabbyColorOption;
 
@@ -77,6 +80,7 @@ export function PdpCompactColorDots({
 }: PdpCompactColorDotsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useDragToScroll(scrollRef);
+  const { useFullBagColorSwatches } = getPdpVersionConfig(usePdpVersion());
 
   if (colors.length <= 1) {
     return null;
@@ -118,16 +122,35 @@ export function PdpCompactColorDots({
                   : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
               }
               className={cn(
-                "relative size-8 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "relative shrink-0 transition-[box-shadow,opacity] duration-200 ease-out",
                 "before:absolute before:inset-[-8px] before:content-['']",
+                useFullBagColorSwatches ? "size-9 rounded-sm" : "size-8 rounded-full",
                 isSelected
-                  ? "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
+                  ? useFullBagColorSwatches
+                    ? "border-2 border-black"
+                    : "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
                   : "ring-1 ring-black/10",
                 isSelectable && pdpPressableIconClass,
                 !isSelectable && "cursor-not-allowed opacity-40",
               )}
-              style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-            />
+            >
+              {useFullBagColorSwatches ? (
+                <ColorSwatchTile
+                  src={color.swatch || undefined}
+                  fill={color.swatch ? undefined : (color.chromeSample ?? "#d4d4d4")}
+                  widthClass="size-full"
+                  sizes="36px"
+                  fillParent
+                  {...(color.swatch ? resolveSquareSwatchFraming(color.swatch) : {})}
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full"
+                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+                />
+              )}
+            </button>
           );
         })}
       </div>

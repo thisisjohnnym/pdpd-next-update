@@ -2,7 +2,7 @@
  * v5-only styles — Sean r5 polish round.
  *
  * RULES (enforced by scripts/check-pdp-version-boundaries.mjs):
- * - Every selector here MUST be scoped under v5/fc01 data-pdp-version roots.
+ * - Every selector here MUST be scoped under :is([data-pdp-version="v5"], [data-pdp-version="fc01"]).
  * - Never edit shared .pdp-* rules in globals.css for v5-only needs.
  */
 
