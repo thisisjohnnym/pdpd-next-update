@@ -1,4 +1,4 @@
-# PDP Versions (v1 / v2 / v3 / v4)
+# PDP Versions (v1 / v2 / v3 / v4 / v5)
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
@@ -6,11 +6,13 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round.
-- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, and **`/v4`** on the same deploy.
-- v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
+- **Active work is v5 only** (`/v5`). **v1–v4 are frozen** comparison baselines — do not change them unless explicitly fixing a cross-version bug.
+- **v1** frozen brand baseline · **v2** first stakeholder pivot · **v3** Paper r4 · **v4** Paper r5 · **v5** Sean polish (active).
+- Brand team compares them at **`/v1`** … **`/v5`** on the same deploy. Share **`/v5`** for the latest round.
+- Newer-version differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting older defaults.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
+- v5 inherits the v4 baseline and layers Sean’s polish round (buy box merchandising, Tabby family nav, module polish). See [rounds/README.md](rounds/README.md).
 
 ---
 
@@ -42,9 +44,10 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
 | v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
 | v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
-| v4 (latest) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
+| v4 (r5 — frozen) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
+| v5 (active) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) (r6) |
 
-Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
+Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v5/products/tabby-shoulder-bag-26-black`.
 
 Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break.
 
@@ -54,10 +57,10 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v4`) from one codebase.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v5`) from one codebase.
 
-1. All prototype work lands on **`main`**.
-2. Route versions (`/v1`–`/v4`) are frozen comparison URLs — not separate git branches.
+1. All prototype work lands on **`main`** and targets **`/v5`** only.
+2. Route versions `/v1`–`/v4` are frozen comparison URLs; `/v5` is the active round — not separate git branches.
 3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
 
 When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
