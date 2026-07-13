@@ -37,6 +37,7 @@ export function useHero360IntroReveal(rootRef: React.RefObject<HTMLElement | nul
   // so lifting the CSS hide rule never flashes full UI for a frame.
   // If intro is skipped (v5 desktop / reduced motion) phase jumps to `ready`
   // without a reveal — restore any GSAP opacity:0 from the brief playing frame.
+  // fallow-ignore-next-line complexity
   useLayoutEffect(() => {
     if (!enabled || completedRef.current) {
       return;

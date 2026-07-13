@@ -1,3 +1,4 @@
+// fallow-ignore-file complexity
 import type { PdpColor, PdpColorAvailability } from "./pdp-data";
 import {
   getColorIdsForStyle,

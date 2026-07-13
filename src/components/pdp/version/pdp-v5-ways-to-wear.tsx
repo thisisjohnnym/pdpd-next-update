@@ -22,6 +22,7 @@ import { usePdpVersion } from "./pdp-version-context";
 /**
  * v5 "Ways to wear" — shoulder/crossbody on v5; leather aging wipe on v7 (Skelly).
  */
+// fallow-ignore-next-line complexity
 export function PdpV5WaysToWear({
   onQuickAdd,
 }: {

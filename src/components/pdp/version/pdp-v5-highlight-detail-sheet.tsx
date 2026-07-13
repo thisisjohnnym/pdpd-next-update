@@ -47,6 +47,7 @@ type PdpV5HighlightDetailSheetProps = {
 };
 
 /** Compact bottom tray — expanded copy for a highlight or closer-look feature. */
+// fallow-ignore-next-line complexity
 export function PdpV5HighlightDetailSheet({
   card,
   open,

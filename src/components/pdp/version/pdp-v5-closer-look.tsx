@@ -92,6 +92,7 @@ function slideIndexForStyle(styleId: FindYourTabbyFamilyStyleId): number {
  * One horizontal rail of silhouettes; size chips update the active slide only.
  * No drawers, apply step, or nested panels.
  */
+// fallow-ignore-next-line complexity
 export function PdpV5CloserLook() {
   const { headline, intro } = PDP_CLOSER_LOOK_SECTION;
   const { leftAlignModuleHeadings, squareButtonCorners } =

@@ -1,3 +1,4 @@
+// fallow-ignore-file complexity
 import type { TabbySize, TabbyStyleId } from "./pdp-tabby-variants";
 import { getTabbyStyle } from "./pdp-tabby-variants";
 

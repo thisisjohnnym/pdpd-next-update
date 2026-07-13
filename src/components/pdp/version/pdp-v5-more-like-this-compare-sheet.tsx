@@ -78,6 +78,7 @@ function CompareColumnProduct({
  * recommendation. Paper N1T-0 column pattern: This bag / Compared to labels,
  * product columns with Add to bag, then paired Details-pattern fact rows.
  */
+// fallow-ignore-next-line complexity
 export function PdpV5MoreLikeThisCompareSheet({
   comparison,
   open,

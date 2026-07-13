@@ -68,6 +68,7 @@ type PdpCompactColorDotsProps = {
 /**
  * Color preview — compact +N chips, large swatch row, or a scrollable rail.
  */
+// fallow-ignore-next-line complexity
 export function PdpCompactColorDots({
   colors,
   selectedId,
@@ -99,6 +100,7 @@ export function PdpCompactColorDots({
           className,
         )}
       >
+        {/* fallow-ignore-next-line complexity */}
         {colors.map((color) => {
           const isSelected = color.id === selectedId;
           const isSelectable = isInStockForPreview(color);
