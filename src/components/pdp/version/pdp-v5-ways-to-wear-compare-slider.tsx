@@ -20,21 +20,25 @@ function clamp(value: number, min: number, max: number) {
 const SHOULDER_POSITION = 72;
 const CROSSBODY_POSITION = 28;
 
-/** Drag-to-reveal carry styles — shoulder (left) vs crossbody (right). */
+/** Drag-to-reveal compare — left vs right still (aging New / 2 years on v7). */
 export function PdpV5WaysToWearCompareSlider({
   styles,
   leftAlign,
+  tablistLabel = "Compare options",
+  sliderLabel = "Compare left and right views",
 }: {
   styles: [PdpWaysToWearStyle, PdpWaysToWearStyle];
   leftAlign: boolean;
+  tablistLabel?: string;
+  sliderLabel?: string;
 }) {
-  const [shoulder, crossbody] = styles;
+  const [leftStyle, rightStyle] = styles;
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
 
-  const activeStyle = position >= 50 ? shoulder : crossbody;
+  const activeStyle = position >= 50 ? leftStyle : rightStyle;
 
   const updatePosition = useCallback((clientX: number) => {
     const container = containerRef.current;
@@ -52,14 +56,14 @@ export function PdpV5WaysToWearCompareSlider({
   }, []);
 
   const snapToStyle = (styleId: string) => {
-    setPosition(styleId === shoulder.id ? SHOULDER_POSITION : CROSSBODY_POSITION);
+    setPosition(styleId === leftStyle.id ? SHOULDER_POSITION : CROSSBODY_POSITION);
   };
 
   return (
     <PdpRevealItem delay={revealStaggerDelay(2)} className="flex w-full flex-col gap-3">
       <div
         role="tablist"
-        aria-label="Carry styles"
+        aria-label={tablistLabel}
         className={cn(
           "flex flex-wrap gap-x-4 gap-y-2",
           leftAlign ? "justify-start" : "justify-center",
@@ -98,7 +102,7 @@ export function PdpV5WaysToWearCompareSlider({
         aria-valuemax={100}
         aria-valuenow={Math.round(position)}
         aria-valuetext={activeStyle.label}
-        aria-label="Compare shoulder carry and crossbody styling"
+        aria-label={sliderLabel}
         className={cn(
           "relative aspect-[4/5] w-full touch-none select-none overflow-hidden bg-neutral-100",
           dragging ? "cursor-ew-resize" : "cursor-col-resize",
@@ -141,18 +145,18 @@ export function PdpV5WaysToWearCompareSlider({
 
           if (event.key === "Home") {
             event.preventDefault();
-            snapToStyle(shoulder.id);
+            snapToStyle(leftStyle.id);
           }
 
           if (event.key === "End") {
             event.preventDefault();
-            snapToStyle(crossbody.id);
+            snapToStyle(rightStyle.id);
           }
         }}
       >
         <Image
-          src={crossbody.src}
-          alt={crossbody.alt}
+          src={rightStyle.src}
+          alt={rightStyle.alt}
           fill
           className="object-cover object-center"
           sizes="(min-width: 1024px) 960px, 100vw"
@@ -169,8 +173,8 @@ export function PdpV5WaysToWearCompareSlider({
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
           <Image
-            src={shoulder.src}
-            alt={shoulder.alt}
+            src={leftStyle.src}
+            alt={leftStyle.alt}
             fill
             className="object-cover object-center"
             sizes="(min-width: 1024px) 960px, 100vw"
@@ -195,7 +199,7 @@ export function PdpV5WaysToWearCompareSlider({
 
       <p
         className={cn(
-          "font-extended m-0 text-neutral-500",
+          "font-extended m-0 whitespace-nowrap text-neutral-500",
           pdpType.micro,
           leftAlign ? "text-left" : "text-center",
           !dragging && !reducedMotion && "transition-opacity duration-200",

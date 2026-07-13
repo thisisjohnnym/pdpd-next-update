@@ -42,6 +42,28 @@ For Paper workflows, load and follow:
 
 Use the Paper MCP servers configured in this environment and their current tool descriptors as the source of truth for valid operations and parameters.
 
+## Annotations (required for labeled variants)
+
+Do **not** put captions, eyebrows, or agent notes inside design artboards.
+
+Use a page-level sibling Frame named **`note`** above the artboard (same width, two-line eyebrow + instruction). Full pattern:
+
+- `docs/design-system/paper-annotations.md`
+
+## Coach typography in Paper (load only when needed)
+
+If this project uses **Helvetica Neue LT Pro Extended** and new Paper text looks regular-width / Roman / `system-ui`, load:
+
+- `docs/design-system/paper-helvetica-extended.md`
+
+Do **not** load that doc for ordinary code typography — only for Paper MCP text that must match Extended.
+
+If a **one-line** Helvetica label next to an icon in a button/chip looks optically high or low, load:
+
+- `docs/design-system/helvetica-icon-optical-align.md`
+
+Do **not** load that doc for paragraphs or multi-line copy.
+
 ## Consistency And Handoff Quality
 
 - Maintain content parity across desktop/tablet/phone unless the user explicitly requests breakpoint-specific differences.

@@ -124,7 +124,12 @@ export function PdpOverlayHeader({
               key={bagCount}
               className="motion-safe:animate-bag-badge-pop inline-flex size-6 items-center justify-center"
             >
-              <PdpHeroBagGlyph count={bagCount} size={HEADER_ICON_SIZE} />
+              <PdpHeroBagGlyph
+                count={bagCount}
+                size={HEADER_ICON_SIZE}
+                // Light chrome → white bag fill → dark count; dark chrome → white count.
+                countTone={contrastZones.bag === "light" ? "dark" : "light"}
+              />
             </span>
           }
           inactiveIcon={<PdpHeroBagGlyph count={0} size={HEADER_ICON_SIZE} />}

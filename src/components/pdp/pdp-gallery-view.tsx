@@ -80,8 +80,7 @@ import { getPdpVersionConfig } from "./version/pdp-version-config";
 import type { PdpGallerySlideV2 } from "./version/pdp-data-v2";
 import { PdpV2EditorialCarousel } from "./version/pdp-v2-editorial-carousel";
 import { PdpV4Craftsmanship } from "./version/pdp-v4-craftsmanship";
-import { PdpV5CraftedToLastVideo } from "./version/pdp-v5-crafted-to-last-video";
-import { PdpV5DesignSketchInterrupt } from "./version/pdp-v5-design-sketch-interrupt";
+import { PdpV5CloserLook } from "./version/pdp-v5-closer-look";
 import { PdpV5GetTheHighlights } from "./version/pdp-v5-get-the-highlights";
 import { PdpV5QuoteCard } from "./version/pdp-v5-quote-card";
 import { PdpV5WaysToWear } from "./version/pdp-v5-ways-to-wear";
@@ -715,7 +714,7 @@ export function PdpGalleryView({
         {gallerySlides.flatMap((slide, index) => {
           const isLastPanel = index === lastPanelSlideIndex;
 
-          // v5: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
+          // v5: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging.
           // v4: Out in the wild → Details. v2/v3: Details only at slide 0.
           const detailsBlock: ReactNode[] =
             index === versionConfig.detailsAfterSlideIndex
@@ -952,18 +951,9 @@ export function PdpGalleryView({
                   ]
                 : [];
 
-            const designSketchInterrupt: ReactNode[] =
-              versionConfig.showDesignSketchInterrupt
-                ? [
-                    <PdpScrollReveal
-                      key={`design-sketch-interrupt-${index}`}
-                      className={ECOMM_MODULE_CLASS}
-                      surface="light"
-                    >
-                      <PdpV5DesignSketchInterrupt />
-                    </PdpScrollReveal>,
-                  ]
-                : [];
+            if (!versionConfig.showUpCloseModule) {
+              return editorialQuoteCard;
+            }
 
             return [
               gallerySection(
@@ -976,21 +966,6 @@ export function PdpGalleryView({
                 { surface: "light" },
               ),
               ...editorialQuoteCard,
-              ...designSketchInterrupt,
-            ];
-          }
-
-          if (slide.type === "crafted-to-last-video") {
-            if (!versionConfig.showCraftedToLastVideo) {
-              return [];
-            }
-
-            return [
-              gallerySection(
-                `crafted-to-last-video-${index}`,
-                <PdpV5CraftedToLastVideo />,
-                { surface: "light" },
-              ),
             ];
           }
 
@@ -1132,6 +1107,11 @@ export function PdpGalleryView({
             alt={versionConfig.trenchPortraitSlide.alt}
             objectPosition={versionConfig.trenchPortraitSlide.objectPosition}
           />
+        </PdpScrollReveal>
+      ) : null}
+      {versionConfig.showCloserLookStage ? (
+        <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="light" lazyMount reserveMinHeight="60dvh">
+          <PdpV5CloserLook />
         </PdpScrollReveal>
       ) : null}
       <PdpScrollReveal className={ECOMM_MODULE_CLASS} surface="muted" lazyMount reserveMinHeight="40dvh">

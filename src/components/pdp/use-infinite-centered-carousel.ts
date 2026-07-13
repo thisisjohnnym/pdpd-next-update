@@ -15,14 +15,6 @@ type InfiniteCenteredCarouselOptions = {
   stableLoop?: boolean;
 };
 
-function readLoopedSlideIndex(el: HTMLElement): number {
-  const width = el.clientWidth;
-  if (width <= 0) {
-    return 0;
-  }
-  return Math.round(el.scrollLeft / width);
-}
-
 function readLogicalSlideIndex(loopedIndex: number, itemCount: number): number {
   if (itemCount <= 0) {
     return 0;
@@ -292,17 +284,15 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
         }
 
         clearSettleTimer();
+        // Recover from a stuck dragging class (e.g. `scrollend` never fired).
+        el.classList.remove(CAROUSEL_DRAGGING_CLASS);
         dragging = true;
         moved = 0;
         startX = event.clientX;
         startScrollLeft = el.scrollLeft;
-        el.classList.add(CAROUSEL_DRAGGING_CLASS);
-
-        try {
-          el.setPointerCapture(event.pointerId);
-        } catch {
-          /* capture unsupported — drag still works via document-level fallback */
-        }
+        // Do NOT capture the pointer here — capture retargets the eventual
+        // `click` to the rail, which makes buttons inside (Compare / Add to
+        // bag) unclickable with a mouse. Capture starts on real movement only.
       };
 
       const onPointerMove = (event: PointerEvent) => {
@@ -311,7 +301,24 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
         }
 
         const dx = event.clientX - startX;
-        moved = Math.max(moved, Math.abs(dx));
+        const distance = Math.abs(dx);
+
+        // Engage the drag only past the click-suppress threshold so plain
+        // clicks never suspend snap or capture the pointer.
+        if (moved <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+          if (distance <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+            moved = Math.max(moved, distance);
+            return;
+          }
+          el.classList.add(CAROUSEL_DRAGGING_CLASS);
+          try {
+            el.setPointerCapture(event.pointerId);
+          } catch {
+            /* capture unsupported — drag still works via element listeners */
+          }
+        }
+
+        moved = Math.max(moved, distance);
         el.scrollLeft = startScrollLeft - dx;
       };
 
@@ -322,6 +329,15 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
 
         dragging = false;
 
+        if (el.hasPointerCapture(event.pointerId)) {
+          el.releasePointerCapture(event.pointerId);
+        }
+
+        // Plain click (no real drag) — snap was never suspended, nothing to settle.
+        if (moved <= DRAG_CLICK_SUPPRESS_THRESHOLD_PX) {
+          return;
+        }
+
         el.scrollTo({
           left: nearestChildScrollLeft(el),
           behavior: reducedMotionRef.current ? "auto" : "smooth",
@@ -331,10 +347,6 @@ export function useDragToScroll(scrollRef: RefObject<HTMLDivElement | null>) {
           el.addEventListener("scrollend", finishSettle, { once: true });
         } else {
           settleTimer = window.setTimeout(finishSettle, DRAG_SETTLE_FALLBACK_MS);
-        }
-
-        if (el.hasPointerCapture(event.pointerId)) {
-          el.releasePointerCapture(event.pointerId);
         }
       };
 
@@ -714,6 +726,18 @@ export function useInfiniteFullBleedCarousel(
     const startIndex =
       itemCount > 1 ? itemCount + initialIndex : initialIndex;
 
+    // Commit the active looped index in the effect — never re-derive it from
+    // scrollLeft/width during resize. Width changes before scrollLeft settles,
+    // so Math.round(scrollLeft / width) jumps to a neighboring slide.
+    let committedLoopedIndex = startIndex;
+    let resizeGuardRaf = 0;
+    let ignoreScrollDerivedIndex = false;
+
+    const commitLoopedIndex = (next: number) => {
+      committedLoopedIndex = next;
+      setActiveLoopedIndex((prev) => (prev === next ? prev : next));
+    };
+
     const scrollToLogicalIndex = (
       logicalIndex: number,
       behavior: ScrollBehavior = "auto",
@@ -721,7 +745,7 @@ export function useInfiniteFullBleedCarousel(
       const clamped = Math.max(0, Math.min(logicalIndex, itemCount - 1));
       const target = itemCount > 1 ? itemCount + clamped : clamped;
       scrollToChild(target, behavior);
-      setActiveLoopedIndex(target);
+      commitLoopedIndex(target);
     };
 
     scrollToIndexRef.current = (logicalIndex: number) => {
@@ -733,7 +757,7 @@ export function useInfiniteFullBleedCarousel(
 
     const scrollToStart = () => {
       scrollToChild(startIndex);
-      setActiveLoopedIndex(startIndex);
+      commitLoopedIndex(startIndex);
     };
 
     requestAnimationFrame(() => {
@@ -745,18 +769,21 @@ export function useInfiniteFullBleedCarousel(
     if (itemCount < 2) {
       const onResize = () => {
         if (stableLoop) {
-          const logical = readLogicalSlideIndex(
-            readLoopedSlideIndex(el),
-            itemCount,
+          scrollToLogicalIndex(
+            readLogicalSlideIndex(committedLoopedIndex, itemCount),
           );
-          scrollToLogicalIndex(logical);
         } else {
           scrollToChild(startIndex);
         }
       };
       const ro = new ResizeObserver(onResize);
       ro.observe(el);
-      return () => ro.disconnect();
+      return () => {
+        if (resizeGuardRaf) {
+          window.cancelAnimationFrame(resizeGuardRaf);
+        }
+        ro.disconnect();
+      };
     }
 
     const edgeBuffer = 12;
@@ -775,12 +802,15 @@ export function useInfiniteFullBleedCarousel(
     };
 
     const updateActiveLoopedIndex = () => {
+      if (ignoreScrollDerivedIndex) {
+        return;
+      }
       const width = el.clientWidth;
       if (width <= 0) {
         return;
       }
       const next = Math.round(el.scrollLeft / width);
-      setActiveLoopedIndex((prev) => (prev === next ? prev : next));
+      commitLoopedIndex(next);
     };
 
     let pointerDown = false;
@@ -835,16 +865,25 @@ export function useInfiniteFullBleedCarousel(
     };
 
     const onResize = () => {
+      // Preserve the committed slide — do not trust scrollLeft/width mid-resize.
       const logicalIndex = stableLoop
-        ? readLogicalSlideIndex(readLoopedSlideIndex(el), itemCount)
+        ? readLogicalSlideIndex(committedLoopedIndex, itemCount)
         : initialIndex;
+      ignoreScrollDerivedIndex = true;
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
+      }
       measure();
       if (stableLoop) {
         scrollToLogicalIndex(logicalIndex);
       } else {
         scrollToChild(itemCount + initialIndex);
-        setActiveLoopedIndex(itemCount + initialIndex);
+        commitLoopedIndex(itemCount + initialIndex);
       }
+      resizeGuardRaf = window.requestAnimationFrame(() => {
+        ignoreScrollDerivedIndex = false;
+        resizeGuardRaf = 0;
+      });
     };
 
     const ro = new ResizeObserver(onResize);
@@ -871,6 +910,9 @@ export function useInfiniteFullBleedCarousel(
     return () => {
       if (idleTimer) {
         window.clearTimeout(idleTimer);
+      }
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
       }
       if (scrollEndSupported) {
         el.removeEventListener("scrollend", onScrollEnd);

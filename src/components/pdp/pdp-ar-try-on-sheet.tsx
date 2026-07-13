@@ -17,7 +17,9 @@ import {
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpPressableSolidClass, pdpType } from "./pdp-type";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpArTryOnSheetProps = {
@@ -84,7 +86,9 @@ function ArSceneDecor() {
 /** UI-only AR try-on bottom sheet with optional live device camera feed. */
 export function PdpArTryOnSheet({ open, onClose, onAddToBag }: PdpArTryOnSheetProps) {
   const titleId = useId();
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
   const [phase, setPhase] = useState<CameraPhase>("idle");
   const [facing, setFacing] = useState<CameraFacing>("environment");
 
@@ -164,7 +168,7 @@ export function PdpArTryOnSheet({ open, onClose, onAddToBag }: PdpArTryOnSheetPr
     };
   }, [open, startCamera, stopStream]);
 
-  if (!mounted) {
+  if (!overlayReady || !transition.mounted) {
     return null;
   }
 
@@ -183,20 +187,20 @@ export function PdpArTryOnSheet({ open, onClose, onAddToBag }: PdpArTryOnSheetPr
             : "";
 
   return createPortal(
-    <div className={pdpBottomSheetOverlayClass({ open })} aria-hidden={!open}>
+    <div className={pdpBottomSheetOverlayClass({ open: sheetOpen })} aria-hidden={!sheetOpen}>
       <button
         type="button"
         aria-label="Close AR try-on preview"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open, maxHeight: "92dvh" })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen, maxHeight: "92dvh" })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

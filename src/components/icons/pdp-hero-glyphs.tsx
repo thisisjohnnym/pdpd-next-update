@@ -89,10 +89,13 @@ export function PdpHeroBagGlyph({
   count = 0,
   size = 24,
   className,
+  /** Count text color. Use `"dark"` when the bag fill is light (inverted chrome). */
+  countTone = "light",
 }: {
   count?: number;
   size?: number;
   className?: string;
+  countTone?: "light" | "dark";
 }) {
   const hasItems = count > 0;
 
@@ -114,7 +117,11 @@ export function PdpHeroBagGlyph({
       </GlyphSvg>
       <span
         aria-hidden
-        className="pdp-bag-badge pointer-events-none absolute text-[10px] leading-none tracking-[0.1px] text-white tabular-nums"
+        className={cn(
+          "pdp-bag-badge pointer-events-none absolute text-[10px] leading-none tracking-[0.1px] tabular-nums",
+          // Filled bag uses currentColor — count must contrast the fill, not inherit it.
+          countTone === "dark" ? "text-neutral-900" : "text-white",
+        )}
       >
         {formatHeroBagCount(count)}
       </span>

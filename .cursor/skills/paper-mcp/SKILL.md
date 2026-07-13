@@ -27,6 +27,8 @@ Load this skill before any Paper MCP work, then load the workflow-specific skill
 - Call `finish_working_on_nodes` after creating or editing.
 - Do **not** expose raw node IDs in user-facing messages.
 - Use `get_screenshot` for visual QA; use `get_computed_styles`, `get_jsx`, and `get_fill_image` for exact implementation values — not screenshots alone.
+- **Annotations:** never put labels or commentary inside design artboards. Use a page-level sibling Frame named `note` above the artboard — see `docs/design-system/paper-annotations.md`.
+- **One-line Helvetica + icon CTAs:** if label vs icon looks optically off, load `docs/design-system/helvetica-icon-optical-align.md` (not for paragraphs).
 
 ## Workflow skills
 

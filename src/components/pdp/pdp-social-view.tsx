@@ -341,6 +341,7 @@ function PdpSocialViewInner() {
 
   return (
     <div
+      data-pdp-page-root
       className={cn(
         "relative min-h-svh w-full overflow-x-clip",
         isStaticHero || isColorHero ? "bg-white" : "bg-black",

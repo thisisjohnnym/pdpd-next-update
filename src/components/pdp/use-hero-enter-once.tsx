@@ -3,23 +3,28 @@
 import {
   createContext,
   useContext,
+  useLayoutEffect,
   useState,
   type ReactNode,
 } from "react";
 
 let heroLandEnterPlayed = false;
 
-const HeroEnterContext = createContext(true);
+const HeroEnterContext = createContext(false);
 
 /** Shares one enter-animation gate across hero chrome (HUD, header, bottom bar, rail). */
 export function PdpHeroEnterProvider({ children }: { children: ReactNode }) {
-  const playEnter = useState(() => {
+  const [playEnter, setPlayEnter] = useState(false);
+
+  // Defer the once-per-session gate to the client so SSR and hydration agree
+  // (no enter class on the server HTML; applied before first paint via layout effect).
+  useLayoutEffect(() => {
     if (heroLandEnterPlayed) {
-      return false;
+      return;
     }
     heroLandEnterPlayed = true;
-    return true;
-  })[0];
+    setPlayEnter(true);
+  }, []);
 
   return (
     <HeroEnterContext.Provider value={playEnter}>

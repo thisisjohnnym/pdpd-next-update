@@ -2,11 +2,11 @@
  * v5-only styles — Sean r5 polish round.
  *
  * RULES (enforced by scripts/check-pdp-version-boundaries.mjs):
- * - Every selector here MUST be scoped under [data-pdp-version="v5"].
+ * - Every selector here MUST be scoped under :is([data-pdp-version="v5"], [data-pdp-version="fc01"]).
  * - Never edit shared .pdp-* rules in globals.css for v5-only needs.
  */
 
-[data-pdp-version="v5"] {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) {
   --pdp-v5-editorial-beige: #efeae7;
 }
 
@@ -23,48 +23,49 @@
  * (rise) keyframes from globals.css — only the v5 timing/stagger changes here. */
 
 /* Overlay header drops from the top once the video is in focus. */
-[data-pdp-version="v5"] .pdp-hero-header-enter {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-header-enter {
   animation: pdp-hero-chrome-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 820ms both;
 }
 
-/* Over-video category rail (UGC · 360 · AR · Fits) eases up + fades in. */
-[data-pdp-version="v5"] .pdp-v5-hero-overlay-enter {
-  animation: pdp-hero-hud-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 1040ms both;
+/* Over-video category rail — `backwards` so fill-mode transform does not stick
+ * and kill backdrop-filter on the frost control. */
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-overlay-enter {
+  animation: pdp-hero-hud-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 1040ms backwards;
 }
 
 /* Docked product footer — title/price, material/swatch, then Add to bag
  * fall into place one after another. */
-[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > * {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-footer-enter > * {
   animation: pdp-hero-hud-enter 1050ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(1) {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-footer-enter > *:nth-child(1) {
   animation-delay: 960ms;
 }
 
-[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(2) {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-footer-enter > *:nth-child(2) {
   animation-delay: 1120ms;
 }
 
-[data-pdp-version="v5"] .pdp-v5-hero-footer-enter > *:nth-child(3) {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-footer-enter > *:nth-child(3) {
   animation-delay: 1280ms;
 }
 
 /* v5 does not use the legacy product HUD / floating bottom bar / social rail. */
-[data-pdp-version="v5"] .pdp-hero-hud-enter,
-[data-pdp-version="v5"] .pdp-hero-bottom-enter {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-hud-enter,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-bottom-enter {
   animation: none;
 }
 
-[data-pdp-version="v5"] .pdp-social-rail-item {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-social-rail-item {
   opacity: 1;
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-pdp-version="v5"] .pdp-hero-header-enter,
-  [data-pdp-version="v5"] .pdp-v5-hero-overlay-enter,
-  [data-pdp-version="v5"] .pdp-v5-hero-footer-enter > * {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-header-enter,
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-overlay-enter,
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-hero-footer-enter > * {
     animation: none;
     opacity: 1;
     transform: none;
@@ -72,19 +73,19 @@
 }
 
 /* Gallery → docked buy bar — no hairline between studio ground and white tray. */
-[data-pdp-version="v5"] .pdp-hero-immersive--fill-frame {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-immersive--fill-frame {
   background-color: #f0f0f0;
   margin-bottom: -1px;
 }
 
-[data-pdp-version="v5"] .pdp-hero-docked-footer {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-docked-footer {
   position: relative;
   z-index: 2;
   border: 0;
   box-shadow: none;
 }
 
-[data-pdp-version="v5"] .pdp-hero-docked-footer::before {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-docked-footer::before {
   content: "";
   position: absolute;
   top: -1px;
@@ -96,53 +97,53 @@
 }
 
 /* Below-fold color rail — no section dividers between ATB, tabs, and swatches. */
-[data-pdp-version="v5"] .pdp-hero-docked-footer .pdp-hero-below-fold-colors,
-[data-pdp-version="v5"] .pdp-hero-below-fold-colors,
-[data-pdp-version="v5"] [aria-label="Color and size"],
-[data-pdp-version="v5"] [aria-label="All colors"],
-[data-pdp-version="v5"] [aria-label="Color"] {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-docked-footer .pdp-hero-below-fold-colors,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-below-fold-colors,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="Color and size"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="All colors"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="Color"] {
   border: 0;
   box-shadow: none;
 }
 
-[data-pdp-version="v5"] .pdp-hero-below-fold-colors [role="tablist"],
-[data-pdp-version="v5"] .pdp-hero-below-fold-colors [role="listbox"],
-[data-pdp-version="v5"] [aria-label="Color and size"] [role="tablist"],
-[data-pdp-version="v5"] [aria-label="Color and size"] [role="listbox"],
-[data-pdp-version="v5"] [aria-label="All colors"] [role="tablist"],
-[data-pdp-version="v5"] [aria-label="All colors"] [role="listbox"] {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-below-fold-colors [role="tablist"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-below-fold-colors [role="listbox"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="Color and size"] [role="tablist"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="Color and size"] [role="listbox"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="All colors"] [role="tablist"],
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [aria-label="All colors"] [role="listbox"] {
   border: 0;
   box-shadow: none;
 }
 
-[data-pdp-version="v5"] .pdp-ugc-compact-card,
-[data-pdp-version="v5"] .pdp-ugc-compact-card img {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-ugc-compact-card,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-ugc-compact-card img {
   border-radius: 0;
 }
 
 /* Explore Other Tabby Silhouettes — editorial product navigation below color + ATB. */
-[data-pdp-version="v5"] .pdp-tabby-family-explorer,
-[data-pdp-version="v5"] .pdp-tabby-family-explorer li,
-[data-pdp-version="v5"] .pdp-tabby-family-explorer button {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-tabby-family-explorer,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-tabby-family-explorer li,
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-tabby-family-explorer button {
   border: 0;
   box-shadow: none;
 }
 
 /* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */
-[data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-ugc-testimonials {
   background-color: var(--pdp-v5-editorial-beige);
 }
 
 /* 9:16 editorial quote card — photo + warm beige pull quote. */
-[data-pdp-version="v5"] .pdp-v5-quote-card-section {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card-section {
   background-color: var(--pdp-v5-editorial-beige);
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card {
   transform-origin: center center;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__body {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__body {
   background-color: var(--pdp-v5-editorial-beige);
   gap: clamp(1rem, 3vw, 1.5rem);
   padding-inline: clamp(2rem, 9vw, 3rem);
@@ -150,7 +151,7 @@
   box-sizing: border-box;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__eyebrow {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__eyebrow {
   font-family: var(--font-extended);
   font-size: clamp(0.625rem, 2.6vw, 0.6875rem);
   font-weight: 400;
@@ -164,7 +165,7 @@
   text-wrap: balance;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__attribution {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__attribution {
   font-family: var(--font-extended);
   font-size: clamp(0.625rem, 2.6vw, 0.6875rem);
   font-weight: 400;
@@ -177,19 +178,19 @@
   text-align: center;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__quote-wrap {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__quote-wrap {
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__body blockquote {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__body blockquote {
   margin-inline: auto;
   max-width: min(17.75rem, 100%);
   width: 100%;
 }
 
-[data-pdp-version="v5"] .pdp-v5-quote-card__quote {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card__quote {
   font-family: Georgia, "Times New Roman", Times, serif;
   font-size: clamp(1.25rem, 4.8vw, 1.625rem);
   font-weight: 400;
@@ -204,12 +205,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-pdp-version="v5"] .pdp-v5-quote-card {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-quote-card {
     transform: none !important;
     opacity: 1 !important;
   }
 
-  [data-pdp-version="v5"] .pdp-v5-ugc-testimonial-slide {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-ugc-testimonial-slide {
     transform: none !important;
     filter: none !important;
     opacity: 1 !important;
@@ -217,7 +218,7 @@
 }
 
 /* Hero "See what fits inside" — Apple light frost, no drop shadow. */
-[data-pdp-version="v5"] .pdp-v5-fits-inside-glass {
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-fits-inside-glass {
   border: none;
   background-color: rgb(255 255 255 / 0.42);
   -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.08);
@@ -229,7 +230,7 @@
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-  [data-pdp-version="v5"] .pdp-v5-fits-inside-glass {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-fits-inside-glass {
     background-color: rgb(255 255 255 / 0.88);
   }
 }
@@ -242,13 +243,13 @@
  * is `lg:hidden`. */
 @media (min-width: 1024px) {
   /* Whiten the page backdrop so the centered below-fold gutters are not black. */
-  [data-pdp-version="v5"] .pdp-v5-page-root {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-page-root {
     background-color: #fff;
   }
 
   /* Desktop 24/20/8 grid (docs/design-system/grid.md): 1440 frame, 20px
    * margins, 8px gutter, 24 columns. Media spans 15 cols, buy rail spans 9. */
-  [data-pdp-version="v5"] .pdp-v5-desktop-split {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-desktop-split {
     max-width: var(--grid-max-width-desktop, 1440px);
     margin-inline: auto;
     padding-inline: var(--grid-margin-desktop, 20px);
@@ -258,29 +259,29 @@
     background-color: #fff;
   }
 
-  [data-pdp-version="v5"] .pdp-v5-desktop-split__media {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-desktop-split__media {
     grid-column: span 15;
   }
 
-  [data-pdp-version="v5"] .pdp-v5-desktop-split__rail {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-desktop-split__rail {
     grid-column: span 9;
     position: relative;
   }
 
   /* Sticky buy panel — offset below the fixed overlay header. */
-  [data-pdp-version="v5"] .pdp-v5-desktop-split__rail-inner {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-desktop-split__rail-inner {
     position: sticky;
     top: calc(var(--pdp-safe-area-top) + 4.5rem);
     padding: 2.75rem 0 3rem 1.75rem;
   }
 
   /* Product media rail — uniform stacked frames on the studio ground. */
-  [data-pdp-version="v5"] .pdp-v5-desktop-media {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-v5-desktop-media {
     gap: var(--grid-gutter-desktop, 8px);
   }
 
   /* Below-fold modules follow the 1440 grid frame — they can expand wide. */
-  [data-pdp-version="v5"] .pdp-safe-area-main {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-safe-area-main {
     max-width: var(--grid-max-width-desktop, 1440px);
     margin-inline: auto;
   }
@@ -288,17 +289,17 @@
   /* The full-width header's bag icon sits over the white buy panel, so its
    * light-chrome (white) treatment would vanish. Force it dark on desktop —
    * the menu + wordmark stay over the media column and keep their contrast. */
-  [data-pdp-version="v5"] [data-header-chrome] [data-pdp-header-action="bag"] {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) [data-header-chrome] [data-pdp-header-action="bag"] {
     color: #171717;
   }
 
   /* "Up close and personal" — drop the horizontal carousel on desktop and lay
    * the four craftsmanship cards out as full-width columns on the grid. */
-  [data-pdp-version="v5"] .pdp-craftsmanship-header {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-craftsmanship-header {
     padding-inline: var(--grid-margin-desktop, 20px);
   }
 
-  [data-pdp-version="v5"] .pdp-craftsmanship-rail {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-craftsmanship-rail {
     position: static;
     left: auto;
     width: auto;
@@ -312,7 +313,7 @@
     --tw-translate-y: 0;
   }
 
-  [data-pdp-version="v5"] .pdp-craftsmanship-track {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-craftsmanship-track {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--grid-gutter-desktop, 8px);
@@ -320,7 +321,110 @@
     overflow: visible;
   }
 
-  [data-pdp-version="v5"] .pdp-craftsmanship-card {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-craftsmanship-card {
     width: auto;
+  }
+}
+
+/*
+ * v5 fall-in intro chrome — hide while phase is `playing` (mobile only; boot
+ * stamps ready on lg+). Lift on `revealing` so GSAP can tween. Buy tray stays
+ * studio only during `playing`, then white during reveal with the CTA.
+ */
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] [data-header-chrome] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-header-enter,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-hud-enter,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-bottom-enter,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-v5-hero-overlay-enter,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-v5-hero-footer-enter > * {
+  animation: none !important;
+}
+
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]),
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]) body {
+  background-color: #f0f0f0;
+}
+
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]) .pdp-hero-shell,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]) .pdp-hero-media-frame--docked,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]) .pdp-v5-page-root,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"]):not([data-hero-intro-phase="ready"]) [data-pdp-page-root] {
+  background-color: #f0f0f0 !important;
+}
+
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors {
+  background-color: #f0f0f0 !important;
+}
+
+html:is([data-pdp-version="v5"], [data-pdp-version="fc01"])[data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before {
+  background: #f0f0f0 !important;
+}
+
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-hero-360-intro-layer {
+  background-color: #f0f0f0;
+}
+
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-copy-in {
+  animation: pdp-fy-copy-in 300ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* Find your Tabby — hero bag fills the frame (crop product-shot dead space) */
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-hero {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
+
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-bag-scale {
+  transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-bag-image {
+  /* Product thumbnails include generous transparent padding — zoom in so the
+   * bag reads premium rather than floating in a gray void. */
+  transform: scale(1.48);
+  transform-origin: center center;
+}
+
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-size-image {
+  /* Classic size photos are already framed — mild crop only. */
+  transform: scale(1.12);
+  transform-origin: center center;
+}
+
+/* Family silhouette rail — last slide fully scrolls into view */
+:is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-family-carousel {
+  padding-right: max(
+    0.75rem,
+    calc(100% - ((100vw - 1.25rem) / 1.08))
+  );
+  scroll-padding-inline: 0.75rem;
+  overscroll-behavior-x: contain;
+}
+
+@media (min-width: 1024px) {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-family-carousel {
+    padding-right: max(
+      1.25rem,
+      calc(100% - ((100vw - 2.25rem) / 2.35))
+    );
+    scroll-padding-inline: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-copy-in {
+    animation: none;
+  }
+
+  :is([data-pdp-version="v5"], [data-pdp-version="fc01"]) .pdp-fy-bag-scale {
+    transition: none;
   }
 }

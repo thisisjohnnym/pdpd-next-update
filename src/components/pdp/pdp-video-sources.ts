@@ -24,5 +24,8 @@ const WEBM_ASSETS = [
   "/videos/what-fits-inside.webm",
 ] as const;
 
-/** v6 one-shot 360° hero intro (MP4 only). */
-export const HERO_360_INTRO_VIDEO_SRC = "/videos/tabby26-360-intro.mp4";
+/** v6 one-shot hero land intro — Tabby fall-in (MP4, 1080×1920). */
+export const HERO_360_INTRO_VIDEO_SRC = "/videos/tabby26-falling-intro.mp4";
+/** First-frame poster while the fall-in decodes (Safari / slow networks). */
+export const HERO_360_INTRO_POSTER_SRC =
+  "/videos/tabby26-falling-intro-poster.jpg";

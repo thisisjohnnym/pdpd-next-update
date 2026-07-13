@@ -22,7 +22,12 @@ import { PdpStarRating } from "../pdp-review-comment";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpModuleHeadlineDisplayClass } from "../pdp-module-section";
-import { pdpPillRadiusClass, pdpPressableClass, pdpType } from "../pdp-type";
+import {
+  pdpPillRadiusClass,
+  pdpPressableClass,
+  pdpPressableSolidClass,
+  pdpType,
+} from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 import { useDragToScroll } from "../use-infinite-centered-carousel";
 
@@ -181,13 +186,19 @@ function V4ReviewSummary({
     hideReviewCountRecommend,
     hideReviewSummaryRating,
     enlargeReviewAiSummary,
+    emphasizeReviewsModule,
   } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
   return (
     <section
       data-header-surface="light"
-      className="flex w-full shrink-0 flex-col bg-white px-4 pb-4 pt-14"
+      className={cn(
+        "flex w-full shrink-0 flex-col px-4",
+        emphasizeReviewsModule
+          ? "bg-[#F3F1EE] py-14"
+          : "bg-white pb-4 pt-14",
+      )}
     >
       <div className={cn("flex w-full flex-col gap-5", alignClass)}>
         {/* Title + aggregate rating */}
@@ -205,20 +216,43 @@ function V4ReviewSummary({
             <PdpRevealItem delay={revealStaggerDelay(1)}>
               <div
                 className={cn(
-                  "flex flex-wrap items-center gap-x-2 gap-y-1",
+                  "flex flex-wrap items-center gap-x-1.5 gap-y-1",
                   leftAlignModuleHeadings ? "justify-start" : "justify-center",
+                  emphasizeReviewsModule && "gap-x-2",
                 )}
+                aria-label={`${average.toFixed(1)} out of 5 stars${
+                  hideReviewCountRecommend ? "" : `, ${count} reviews`
+                }`}
               >
-                <PdpStarRating rating={average} size={18} />
+                {hideReviewCountRecommend && !emphasizeReviewsModule ? (
+                  <MaterialIcon
+                    name="star"
+                    size={14}
+                    filled
+                    className="shrink-0 text-black"
+                    aria-hidden
+                  />
+                ) : (
+                  <PdpStarRating
+                    rating={average}
+                    size={emphasizeReviewsModule ? 20 : 18}
+                  />
+                )}
                 <span
                   className={cn(
-                    "font-extended tabular-nums text-neutral-500",
-                    pdpType.micro,
+                    "font-extended tabular-nums",
+                    emphasizeReviewsModule || !hideReviewCountRecommend
+                      ? "text-black"
+                      : "text-neutral-500",
+                    emphasizeReviewsModule ? pdpType.body : pdpType.micro,
+                    emphasizeReviewsModule && "font-normal",
                   )}
                 >
-                  {hideReviewCountRecommend
-                    ? average.toFixed(1)
-                    : `${average.toFixed(1)} · ${count} reviews`}
+                  {emphasizeReviewsModule
+                    ? `${average.toFixed(1)} · ${count} reviews`
+                    : hideReviewCountRecommend
+                      ? average.toFixed(1)
+                      : `${average.toFixed(1)} · ${count} reviews`}
                 </span>
               </div>
             </PdpRevealItem>
@@ -231,7 +265,7 @@ function V4ReviewSummary({
             variant="minimal"
             size={enlargeReviewAiSummary ? "compact" : "xs"}
             contained
-            containedSurface="flat"
+            containedSurface={emphasizeReviewsModule ? "elevated" : "flat"}
             squareCorners={squareButtonCorners}
             showIcon={false}
             clampBodyLines={2}
@@ -286,7 +320,8 @@ function V4ReviewSummary({
       <PdpRevealItem delay={revealStaggerDelay(5)}>
         <div
           className={cn(
-            "flex w-full flex-col pt-5",
+            "flex w-full flex-col",
+            emphasizeReviewsModule ? "pt-6" : "pt-5",
             leftAlignModuleHeadings ? "items-stretch" : "items-center",
           )}
         >
@@ -297,10 +332,17 @@ function V4ReviewSummary({
               className={cn(
                 "font-extended flex h-[48px] w-full items-center justify-center px-6 text-center transition-colors",
                 pdpPillRadiusClass(squareButtonCorners),
-                pdpPressableClass,
-                useConsistentModuleHeadings
-                  ? "border border-neutral-200 bg-white text-black active:bg-neutral-50"
-                  : "border border-[#D4D4D4] text-black active:bg-neutral-100",
+                emphasizeReviewsModule
+                  ? cn(
+                      "bg-black text-white active:bg-neutral-800",
+                      pdpPressableSolidClass,
+                    )
+                  : cn(
+                      pdpPressableClass,
+                      useConsistentModuleHeadings
+                        ? "border border-neutral-200 bg-white text-black active:bg-neutral-50"
+                        : "border border-[#D4D4D4] text-black active:bg-neutral-100",
+                    ),
                 useConsistentModuleHeadings ? pdpType.body : pdpType.label,
               )}
             >

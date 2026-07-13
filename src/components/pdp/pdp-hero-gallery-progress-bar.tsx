@@ -35,7 +35,8 @@ export function PdpHeroGalleryProgressBar({
     <div
       aria-hidden
       className={cn(
-        "pdp-hero-ui-chrome pdp-video-controls-pop pointer-events-none absolute inset-x-0 bottom-0 z-[39] h-[3px] overflow-hidden",
+        // `pdp-hero-intro-chrome` — include in fall-in soft UI reveal (v5).
+        "pdp-hero-ui-chrome pdp-hero-intro-chrome pdp-video-controls-pop pointer-events-none absolute inset-x-0 bottom-0 z-[39] h-[3px] overflow-hidden",
         "data-[state=closed]:translate-y-0 data-[state=open]:translate-y-0",
         isDark ? "bg-white/25" : "bg-neutral-900/15",
       )}

@@ -28,14 +28,21 @@ type PdpV6MobileHeroLayoutProps = {
 };
 
 /**
- * v6 mobile hero — 360° intro layer + vertical gallery + choreographed UI reveal.
- * v3–v5 never mount this component.
+ * Vertical-gallery mobile hero — fall-in intro + choreographed UI reveal.
+ * Mounted when `hero360IntroEnabled` and `heroVerticalGallery` (v6).
+ * Horizontal fall-in (v5) stays on `PdpV3HeroLayoutDefault`.
  */
 export function PdpV6MobileHeroLayout(props: PdpV6MobileHeroLayoutProps) {
-  const { hero360IntroEnabled } = getPdpVersionConfig(usePdpVersion());
+  const { hero360IntroEnabled, desktopSplitLayout } =
+    getPdpVersionConfig(usePdpVersion());
 
   return (
-    <PdpHero360IntroProvider enabled={hero360IntroEnabled}>
+    <PdpHero360IntroProvider
+      enabled={hero360IntroEnabled}
+      // Desktop split hides this hero with `lg:hidden` — never run fall-in there
+      // or Safari locks on an empty 0×0 video waiting for `ended`.
+      mobileOnly={desktopSplitLayout}
+    >
       <PdpV6MobileHeroLayoutInner {...props} />
     </PdpHero360IntroProvider>
   );

@@ -35,6 +35,17 @@
   --grid-margin-desktop: 20px;
   --grid-gutter-desktop: 8px;
   --grid-max-width-desktop: 1440px;
+
+  /* Motion tokens — JS mirror: src/components/pdp/pdp-motion.ts */
+  --pdp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --pdp-ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --pdp-duration-press: 140ms;
+  --pdp-duration-fade: 220ms;
+  --pdp-duration-pop: 220ms;
+  --pdp-duration-sheet-enter: 380ms;
+  --pdp-duration-sheet-exit: 280ms;
+  --pdp-duration-backdrop: 320ms;
+  --pdp-duration-icon-swap: 300ms;
 }
 
 @theme inline {
@@ -205,12 +216,25 @@ html.font-extended {
   animation: pdp-family-explorer-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Find your Tabby — editorial copy enter on style change */
+@keyframes pdp-fy-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-heart-pop,
   .animate-bag-badge-pop,
   .animate-hotspot-pulse,
   .animate-hotspot-ring-ripple,
-  .animate-pdp-family-explorer-enter {
+  .animate-pdp-family-explorer-enter,
+  .pdp-fy-copy-in {
     animation: none !important;
   }
 }
@@ -987,6 +1011,7 @@ html.pdp-panel-scroll {
 }
 
 .pdp-hero-media-frame--docked > .pdp-hero-docked-footer {
+  min-width: 0;
   min-height: max-content;
 }
 
@@ -1071,23 +1096,24 @@ html.pdp-panel-scroll {
 /* ---------------------------------------------------------------------------
    Interaction polish — interruptible enter/exit + icon cross-fade
    (make-interfaces-feel-better: CSS-only, no motion library)
+
+   Motion tokens live on the top :root. Sheet open/closed state is driven by
+   Tailwind utilities in pdp-bottom-sheet.ts (pointer-events / opacity /
+   translate) so drawers cannot stick if this block fails to HMR.
 --------------------------------------------------------------------------- */
-:root {
-  --pdp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
-}
 
 /* Backdrop / scrim fade behind menus and cards */
 .pdp-fade {
-  transition: opacity 200ms var(--pdp-ease-emphasized);
+  transition: opacity var(--pdp-duration-fade) var(--pdp-ease-emphasized);
 }
 
 /* Pop surface — popovers, detail cards. Enter: fade + scale + unblur.
    State is driven by useMountTransition via [data-state]. */
 .pdp-pop {
   transition:
-    opacity 220ms var(--pdp-ease-emphasized),
-    transform 220ms var(--pdp-ease-emphasized),
-    filter 220ms var(--pdp-ease-emphasized);
+    opacity var(--pdp-duration-pop) var(--pdp-ease-emphasized),
+    transform var(--pdp-duration-pop) var(--pdp-ease-emphasized),
+    filter var(--pdp-duration-pop) var(--pdp-ease-emphasized);
 }
 .pdp-pop[data-state="closed"] {
   opacity: 0;
@@ -1103,8 +1129,8 @@ html.pdp-panel-scroll {
 /* Pop that rises from the bottom (jump menu) — softer, directional */
 .pdp-pop-up {
   transition:
-    opacity 220ms var(--pdp-ease-emphasized),
-    transform 220ms var(--pdp-ease-emphasized);
+    opacity var(--pdp-duration-pop) var(--pdp-ease-emphasized),
+    transform var(--pdp-duration-pop) var(--pdp-ease-emphasized);
 }
 .pdp-pop-up[data-state="closed"] {
   opacity: 0;
@@ -1126,9 +1152,9 @@ html.pdp-panel-scroll {
   align-items: center;
   justify-content: center;
   transition:
-    opacity 300ms var(--pdp-ease-emphasized),
-    transform 300ms var(--pdp-ease-emphasized),
-    filter 300ms var(--pdp-ease-emphasized);
+    opacity var(--pdp-duration-icon-swap) var(--pdp-ease-emphasized),
+    transform var(--pdp-duration-icon-swap) var(--pdp-ease-emphasized),
+    filter var(--pdp-duration-icon-swap) var(--pdp-ease-emphasized);
 }
 .pdp-icon-swap__layer--overlay {
   position: absolute;

@@ -17,12 +17,15 @@ type PdpBuyBarCompactColorProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
-  /** Dot row style — "swatch" renders the large v6 hero footer swatches. */
-  variant?: "dot" | "swatch";
+  /**
+   * "dot" — +N chips (default). "swatch" — large v6 hero footer swatches.
+   * "rail" — full scrollable color rail (docked land CTA).
+   */
+  variant?: "dot" | "swatch" | "rail";
   className?: string;
 };
 
-/** Compact dot row below Add to bag — opens the full color sheet on tap. */
+/** Compact swatch row — tap a color to select; tap +N to open the full tray. */
 export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
@@ -100,6 +103,7 @@ export function PdpBuyBarCompactColor({
         selectedId={activeColorId}
         previewCount={compactBuyBarColorDotCount}
         moreCountOverride={heroColorSwatchMoreCountOverride}
+        onSelect={handleColorSelect}
         onOpenSheet={() => setSheetOpen(true)}
         variant={variant}
         className={className}

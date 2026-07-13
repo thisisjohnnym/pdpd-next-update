@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 
+import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import {
@@ -13,12 +14,20 @@ import {
 import { PDP_MORE_LIKE_THIS } from "../pdp-data";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
-import { pdpPillRadiusClass, pdpType } from "../pdp-type";
+import {
+  pdpPillRadiusClass,
+  pdpType,
+} from "../pdp-type";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 import { useDragToScroll } from "../use-infinite-centered-carousel";
 
+import {
+  getMoreLikeThisCompareProduct,
+  type PdpMoreLikeThisCompareProduct,
+} from "./pdp-data-v2";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpV5MoreLikeThisCompareSheet } from "./pdp-v5-more-like-this-compare-sheet";
 
 /** Paper B6C-0 baseline card — v5 `moreLikeThisLargeCards` uses viewport peek rail. */
 const MORE_LIKE_THIS_CARD = {
@@ -30,7 +39,8 @@ const MORE_LIKE_THIS_CARD = {
  * v2-only simplified "More like this" module (Paper B6C-0).
  *
  * Horizontal scroll rail with fixed-width product cards and a pill "Add to bag"
- * button. v5 optionally renders larger cards via `moreLikeThisLargeCards`.
+ * button. v5 optionally renders larger cards via `moreLikeThisLargeCards`, and
+ * a primary Compare control that opens a side-by-side details tray.
  */
 export function PdpV2MoreLikeThis({
   onAddToBag,
@@ -43,14 +53,25 @@ export function PdpV2MoreLikeThis({
     useV4ModuleSpacing,
     moreLikeThisLargeCards,
     squareButtonCorners,
+    showMoreLikeThisCompare,
   } = getPdpVersionConfig(usePdpVersion());
   const defaultCard = MORE_LIKE_THIS_CARD.default;
   const largeCard = MORE_LIKE_THIS_CARD.large;
   const card = moreLikeThisLargeCards ? largeCard : defaultCard;
   const { eyebrow, items } = PDP_MORE_LIKE_THIS;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [compareProduct, setCompareProduct] =
+    useState<PdpMoreLikeThisCompareProduct | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   useDragToScroll(scrollRef);
+
+  const openCompare = (id: string) => {
+    const product = getMoreLikeThisCompareProduct(id);
+    if (!product) return;
+    setCompareProduct(product);
+    setCompareOpen(true);
+  };
 
   return (
     <section
@@ -123,18 +144,14 @@ export function PdpV2MoreLikeThis({
                 />
               </div>
 
-              <div
-                className={cn(
-                  // Reserve two name lines + price so ATB rows align; slack sits below price
-                  "flex flex-col gap-0.5",
-                  moreLikeThisLargeCards ? "min-h-[3.5rem]" : "min-h-[3.25rem]",
-                )}
-              >
+              <div className="flex flex-col gap-0.5">
                 <p
                   className={cn(
                     "font-extended m-0 line-clamp-2 leading-snug text-black",
                     leftAlignModuleHeadings ? "text-left" : "text-center",
-                    moreLikeThisLargeCards ? cn(pdpType.productName, "text-[13px]") : pdpType.productName,
+                    moreLikeThisLargeCards
+                      ? cn(pdpType.productName, "text-[13px]")
+                      : pdpType.productName,
                   )}
                 >
                   {item.name}
@@ -150,22 +167,49 @@ export function PdpV2MoreLikeThis({
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => onAddToBag?.(item.id)}
-                className={cn(
-                  "font-extended inline-flex w-full items-center justify-center border border-[#D4D4D4] px-2 text-black transition-colors active:bg-neutral-50",
-                  pdpPillRadiusClass(squareButtonCorners),
-                  pdpType.micro,
-                )}
-                style={{ height: card.buttonHeight }}
-              >
-                <span className="translate-y-0.5">Add to bag</span>
-              </button>
+              <div className="flex w-full items-center gap-2">
+                {showMoreLikeThisCompare ? (
+                  <button
+                    type="button"
+                    onClick={() => openCompare(item.id)}
+                    aria-label={`Compare with ${item.name}`}
+                    className={cn(
+                      "box-border m-0 flex min-h-0 min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden border border-[#D4D4D4] px-2 py-0 text-[11px] leading-none tracking-[0.2px] text-black transition-colors active:bg-neutral-50 lg:text-[10px]",
+                      "font-extended",
+                      pdpPillRadiusClass(squareButtonCorners),
+                    )}
+                    style={{ height: card.buttonHeight }}
+                  >
+                    <MaterialIcon name="compare_arrows" size={16} />
+                    <span className="translate-y-0.5">Compare</span>
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => onAddToBag?.(item.id)}
+                  className={cn(
+                    "box-border m-0 flex shrink-0 items-center justify-center overflow-hidden border border-[#D4D4D4] px-2.5 py-0 text-[11px] leading-none tracking-[0.2px] text-black transition-colors active:bg-neutral-50 lg:text-[10px]",
+                    "font-extended",
+                    pdpPillRadiusClass(squareButtonCorners),
+                  )}
+                  style={{ height: card.buttonHeight }}
+                >
+                  <span className="translate-y-0.5">Add to bag</span>
+                </button>
+              </div>
             </PdpRevealItem>
           ))}
         </div>
       </div>
+
+      {showMoreLikeThisCompare ? (
+        <PdpV5MoreLikeThisCompareSheet
+          comparison={compareProduct}
+          open={compareOpen}
+          onClose={() => setCompareOpen(false)}
+          onAddToBag={onAddToBag}
+        />
+      ) : null}
     </section>
   );
 }

@@ -3,16 +3,17 @@ description: PDP v1–v5 version boundaries — read before any PDP edit. Keeps 
 alwaysApply: true
 ---
 
-# PDP Versions (v1 frozen … v6 active)
+# PDP Versions (v1 frozen … v7 active)
 
-The PDP ships six comparison routes on one deploy from **`main`**:
+The PDP ships seven comparison routes on one deploy from **`main`**:
 
 - **v1** (`/v1`, legacy `/`) — frozen brand baseline
 - **v2** (`/v2`) — first stakeholder pivot (frozen)
 - **v3** (`/v3`) — Paper r4 pivot (frozen)
 - **v4** (`/v4`) — Paper r5 feedback round (frozen)
 - **v5** (`/v5`) — Sean r5 polish round (frozen)
-- **v6** (`/v6`) — post-v5 feedback round — **active work**
+- **v6** (`/v6`) — post-v5 feedback round — **frozen**
+- **v7** (`/v7`) — Skelly parity round — **active work**
 
 **Docs (read before edits):**
 
@@ -42,4 +43,5 @@ The PDP ships six comparison routes on one deploy from **`main`**:
 - v4 specs: `src/components/pdp/version/pdp-v4-specs.ts`
 - v5 desktop/UGC: `src/components/pdp/version/pdp-v5-*.tsx`
 - v6 feedback: add flags to `V6_CONFIG` + `src/app/v6/pdp-v6.css`
+- v7 Skelly parity: add flags to `V7_CONFIG` + `src/app/v7/pdp-v7.css`
 - Boundary checks: `scripts/check-pdp-version-boundaries.mjs`

@@ -8,6 +8,11 @@ import type {
   PdpHeroGallerySlide,
   PdpHeroSurface,
 } from "../pdp-hero-gallery-data";
+import {
+  getTabbyStyle,
+  type TabbySize,
+  type TabbyStyleId,
+} from "../pdp-tabby-variants";
 
 /**
  * v2-only editorial carousel marker (Paper AN3-0 / BV4-0).
@@ -31,11 +36,6 @@ export type PdpGalleryWaysToWearSlide = {
   type: "ways-to-wear";
 };
 
-/** v5-only full-bleed video between leather aging and reviews */
-export type PdpGalleryCraftedToLastVideoSlide = {
-  type: "crafted-to-last-video";
-};
-
 /** v5-only Apple-style "Get the highlights" horizontal card rail */
 export type PdpGalleryGetTheHighlightsSlide = {
   type: "get-the-highlights";
@@ -54,7 +54,6 @@ export type PdpGallerySlideV2 =
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
   | PdpGalleryWaysToWearSlide
-  | PdpGalleryCraftedToLastVideoSlide
   | PdpGalleryGetTheHighlightsSlide;
 
 /** One editorial card in the AN3-0 carousel — image + caption, optional CTA on the last card */
@@ -704,13 +703,8 @@ export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePat
   buildV2Slides(PDP_GALLERY_SLIDES),
 );
 
-export const PDP_CRAFTED_TO_LAST_SECTION = {
-  headline: "Crafted to last",
-  body:
-    "Hand-stitched seams and signature hardware on glovetanned full-grain leather — precision you can see and feel up close.",
-} as const;
-
-export const PDP_CRAFTED_TO_LAST_VIDEO = {
+/** Shared poster/video for the “An Icon, Reimagined” highlight card. */
+const PDP_CRAFTED_TO_LAST_VIDEO = {
   src: "/videos/crafted-to-last.webm",
   poster: "/images/posters/crafted-to-last.jpg",
   alt: "Crafted to last — Coach glovetanned leather craftsmanship",
@@ -725,20 +719,17 @@ export const PDP_V5_EDITORIAL_QUOTE = {
   src: "/images/editorial/pinkpantheress-tabby.png",
   alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
 } as const;
-
-/** v5 design sketch scroll break — warm studio spread before Ways to wear. */
-export const PDP_DESIGN_SKETCH_INTERRUPT = {
-  headline: "Designed with intention",
-  intro:
-    "Every line of the Tabby silhouette is measured for balance — proportion, carry, and the signature C clasp in perfect harmony.",
-  src: "/images/gallery/tabby-design-sketch-scroll-break.jpg",
-  alt: "Design sketch of Tabby Shoulder Bag 26 showing front elevation and strap dimensions",
-} as const;
-
 export const PDP_WAYS_TO_WEAR_SECTION = {
   headline: "Made to move",
   body:
     "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
+} as const;
+
+/** Skelly v7 — leather aging wipe copy */
+export const PDP_WAYS_TO_WEAR_SECTION_AGING = {
+  headline: "Where wear becomes beauty",
+  body:
+    "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
 } as const;
 
 export type PdpWaysToWearStyle = {
@@ -767,10 +758,40 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
   },
 ] satisfies PdpWaysToWearStyle[];
 
+/** v7 leather-aging wipe endpoints — New vs 2 years */
+export const PDP_WAYS_TO_WEAR_STYLES_AGING = [
+  {
+    id: "new",
+    label: "New",
+    caption: "Crisp grain, structured shape. No special care needed yet.",
+    src: "/images/gallery/tabby-leather-aging-new-day-one.jpg",
+    alt: "Tabby Shoulder Bag 26 in black leather with gold C clasp hardware — new, day one",
+  },
+  {
+    id: "two-years",
+    label: "2 years",
+    caption:
+      "Rich depth, soft drape, honest creasing. Condition regularly.",
+    src: "/images/gallery/tabby-leather-aging-two-years.jpg",
+    alt: "Tabby Shoulder Bag 26 after two years of daily carry — rich patina and honest wear",
+  },
+] satisfies [PdpWaysToWearStyle, PdpWaysToWearStyle];
+
+/**
+ * v7 demo sale prices — compare-at remains the coach.com list price from
+ * `summary.price`. ~20% off for prototype merchandising.
+ */
+export const PDP_V5_SALE_PRICES: Record<20 | 26 | 33 | 36, string> = {
+  20: "$300",
+  26: "$380",
+  33: "$580",
+  36: "$556",
+};
+
 /**
  * v5 "Get the highlights" — Apple-style highlight rail that replaces the
  * "Feel the leather" lifestyle beat. Section heading + "Watch the film" link
- * sit above a horizontal rail of tall black cards (top caption, image below).
+ * sit above a horizontal rail of tall cards (image above, caption below).
  */
 export const PDP_GET_THE_HIGHLIGHTS_SECTION = {
   headline: "Get the highlights",
@@ -779,48 +800,331 @@ export const PDP_GET_THE_HIGHLIGHTS_SECTION = {
 
 export type PdpGetTheHighlightsCard = {
   id: string;
+  /** Tray heading — shown when the card + expands. */
+  title: string;
+  /** Short caption under the card photo. */
   caption: string;
+  /** Longer copy in the expanded detail tray. */
+  trayBody: string;
+  /** Optional structured rows under the body (timeline, traits, etc.). */
+  traySections?: readonly {
+    label: string;
+    detail: string;
+    src: string;
+    alt: string;
+    objectPosition?: string;
+  }[];
+  /** Optional care / footnote under the sections. */
+  trayNote?: string;
   src: string;
   alt: string;
   /** Focal point for the card image (default center). */
   objectPosition?: string;
+  /** Optional autoplay video — replaces the still when present. */
+  videoSrc?: string;
+  videoPoster?: string;
 };
 
-/** v5 — floating essentials still, used in the highlights rail interior card. */
+/** Shared aging tray content — highlights + closer look. */
+const CRAFTED_TO_AGE_TRAY = {
+  trayBody:
+    "Crafted from premium glovetanned full-grain leather, the Tabby develops a unique patina over time, making every bag one of a kind.",
+  traySections: [
+    {
+      label: "Day one",
+      detail:
+        "Crisp grain and a structured hand — deep black finish with a subtle factory sheen, clean edges, and no creasing yet.",
+      src: "/images/gallery/tabby-leather-aging-new-day-one.jpg",
+      alt: "Tabby Shoulder Bag 26 on day one — crisp grain and structured shape",
+    },
+    {
+      label: "Six months in",
+      detail:
+        "Warm undertones along strap paths and corners. The leather begins to relax with a softer hand and light creasing at high-contact points.",
+      src: "/images/gallery/tabby-leather-aging-six-months.jpg",
+      alt: "Tabby Shoulder Bag 26 after six months — softened leather with warm patina",
+    },
+    {
+      label: "Two years of carry",
+      detail:
+        "Rich charcoal depth with bronze undertones, a broken-in drape, and an honest crease map that tells your story — character, not damage.",
+      src: "/images/gallery/tabby-leather-aging-two-years.jpg",
+      alt: "Tabby Shoulder Bag 26 after two years — rich patina and honest wear",
+    },
+  ],
+} as const;
+
+/** v5 — floating essentials still, used in highlights + closer-look interior. */
 const WHAT_FITS_INSIDE_V5_STILL_SRC =
   "/images/gallery/tabby-what-fits-inside-still.jpg";
 
 /** Tabby highlight cards — one signature product truth per card. */
 export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
   {
-    id: "leather",
-    caption: "Glovetanned full-grain leather that only gets richer with age.",
+    id: "crafted-to-age",
+    title: "Crafted to Age Beautifully",
+    caption: "Glovetanned full-grain leather that gets richer with every wear.",
+    ...CRAFTED_TO_AGE_TRAY,
     src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
     alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
     objectPosition: "center",
   },
   {
-    id: "hardware",
-    caption: "Signature C turnlock clasp with a secure, satisfying close.",
-    src: "/images/gallery/tabby-c-clasp-closeup.jpg",
-    alt: "Close-up of the polished gold C turnlock clasp on the Tabby bag",
+    id: "icon-reimagined",
+    title: "An Icon, Reimagined",
+    caption: "A modern Coach icon inspired by our archives.",
+    trayBody:
+      "Inspired by a Coach design from the 1970s, the Tabby blends heritage craftsmanship with a contemporary silhouette.",
+    traySections: [
+      {
+        label: "Archive roots",
+        detail:
+          "Drawn from a 1970s Coach original — the turn-lock C clasp and soft structure that made the house famous.",
+        src: "/images/gallery/tabby-c-clasp-closeup.jpg",
+        alt: "Close-up of the gold C turn-lock clasp with COACH engraving",
+      },
+      {
+        label: "Modern silhouette",
+        detail:
+          "Updated proportions for today: a compact 26 that sits clean on the shoulder without feeling precious.",
+        src: "/images/gallery/tabby-product-front-916.jpg",
+        alt: "Tabby Shoulder Bag 26 front studio view in black leather",
+      },
+      {
+        label: "Made to last",
+        detail:
+          "Full-grain leather, solid hardware, and construction built for daily carry — not a one-season piece.",
+        src: "/images/gallery/tabby-leather-detail-hardware.png",
+        alt: "Detail of Tabby leather and signature hardware",
+      },
+    ],
+    src: PDP_CRAFTED_TO_LAST_VIDEO.poster,
+    alt: PDP_CRAFTED_TO_LAST_VIDEO.alt,
     objectPosition: "center",
+    videoSrc: PDP_CRAFTED_TO_LAST_VIDEO.src,
+    videoPoster: PDP_CRAFTED_TO_LAST_VIDEO.poster,
   },
   {
-    id: "interior",
-    caption: "A roomy interior sized for everything you carry each day.",
+    id: "see-it-styled",
+    title: "See It Styled",
+    caption: "Discover how the community wears the Tabby.",
+    trayBody:
+      "Explore styling inspiration from creators and the Coach community, from casual everyday looks to elevated evenings out.",
+    traySections: [
+      {
+        label: "Day to night",
+        detail:
+          "Pair it with denim and a tee, then take the same bag to dinner — the silhouette holds up either way.",
+        src: "/images/gallery/tabby-leather-on-model-tee.png",
+        alt: "Model wearing the Tabby with a casual tee look",
+        objectPosition: "center 20%",
+      },
+      {
+        label: "Community looks",
+        detail:
+          "See how creators style the Tabby crossbody, on the shoulder, or tucked under an arm for a cleaner line.",
+        src: "/images/gallery/tabby-on-model-black-dress.png",
+        alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
+        objectPosition: "center 20%",
+      },
+      {
+        label: "Your way",
+        detail:
+          "Swap straps, change the carry, and let the leather take on your rhythm — no two Tabby looks are the same.",
+        src: "/images/gallery/tabby-crossbody-trench.jpg",
+        alt: "Model wearing the Tabby crossbody with a trench coat",
+        objectPosition: "center 25%",
+      },
+    ],
+    src: "/images/gallery/tabby-on-model-black-dress.png",
+    alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
+    objectPosition: "center 20%",
+  },
+  {
+    id: "whats-inside",
+    title: "What's Inside",
+    caption: "Everything you need, thoughtfully organized.",
+    trayBody:
+      "See what fits inside the Tabby, including your phone, wallet, keys, sunglasses, and other everyday essentials.",
+    traySections: [
+      {
+        label: "Everyday essentials",
+        detail:
+          "Phone, compact wallet, keys, and sunglasses sit comfortably without overstuffing the silhouette.",
+        src: "/images/gallery/tabby-what-fits-inside-still.jpg",
+        alt: "Tabby beside phone, wallet, sunglasses and everyday essentials",
+        objectPosition: "center 45%",
+      },
+      {
+        label: "Organized interior",
+        detail:
+          "Interior pockets keep small items findable — cards, lip balm, and AirPods stay put while you move.",
+        src: "/images/gallery/tabby-leather-interior-open.jpg",
+        alt: "Open Tabby interior showing pockets and organization",
+      },
+      {
+        label: "Room to breathe",
+        detail:
+          "Structured enough to hold shape when full, soft enough that it still drapes when you travel light.",
+        src: "/images/gallery/tabby-leather-interior-packed.png",
+        alt: "Tabby interior packed with everyday items",
+      },
+    ],
     src: WHAT_FITS_INSIDE_V5_STILL_SRC,
     alt: "Tabby Shoulder Bag 26 beside phone, wallet, sunglasses and everyday essentials",
     objectPosition: "center 45%",
   },
   {
-    id: "wear",
-    caption: "Three ways to wear — shoulder, crossbody, or carried in hand.",
+    id: "watch-in-motion",
+    title: "Watch It in Motion",
+    caption: "See how it moves from day to night.",
+    trayBody:
+      "Watch the Tabby in motion to experience scale, movement, and the different ways to wear it.",
+    traySections: [
+      {
+        label: "True-to-life scale",
+        detail:
+          "See how the 26 sits on the body — compact against the hip, balanced on the shoulder, never oversized.",
+        src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
+        alt: "Model wearing the Tabby on the shoulder to show true-to-life scale",
+        objectPosition: "center 30%",
+      },
+      {
+        label: "How it moves",
+        detail:
+          "Soft leather and a secure clasp keep the bag steady while you walk, turn, and switch carries.",
+        src: "/images/gallery/tabby-hand-reach.png",
+        alt: "Hand reaching for the Tabby bag in motion",
+      },
+      {
+        label: "Wear it your way",
+        detail:
+          "Shoulder, crossbody, or hand-held — detachable straps make it easy to change the look mid-day.",
+        src: "/images/gallery/tabby-shoulder-crossbody-straps.jpg",
+        alt: "Tabby with shoulder and crossbody straps attached",
+      },
+    ],
     src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
     alt: "Model wearing the Tabby Shoulder Bag 26 on the shoulder in a beige look",
     objectPosition: "center 30%",
   },
 ];
+
+/**
+ * v5 "Find your Tabby" — carousel-first family explorer.
+ * Swipe silhouettes on-page; size chips update the active slide only.
+ */
+export const PDP_CLOSER_LOOK_SECTION = {
+  headline: "Find your Tabby",
+  intro: "Meet the silhouettes, sizes, and details that fit your day.",
+} as const;
+
+/**
+ * Relative footprint vs Tabby 36 — used to animate bag scale on size change.
+ * Floored so even the mini still fills the hero frame (premium presence),
+ * while larger sizes remain visibly bigger.
+ */
+export const PDP_FIND_YOUR_TABBY_SIZE_SCALE: Record<TabbySize, number> = {
+  20: 0.78,
+  26: 0.88,
+  33: 0.95,
+  36: 1,
+};
+
+/**
+ * Family styles in Find your Tabby — Classic → Soft → Quilted → Chain → Twisted.
+ * Times Square is not in the live catalog, so it is omitted.
+ */
+const PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS = [
+  "classic",
+  "soft",
+  "quilted",
+  "chain",
+  "twisted",
+] as const satisfies readonly TabbyStyleId[];
+
+export type FindYourTabbyFamilyStyleId =
+  (typeof PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS)[number];
+
+export type FindYourTabbyFamilyMember = {
+  styleId: FindYourTabbyFamilyStyleId;
+  label: string;
+  title: string;
+  /** Hero editorial under "{Style} Tabby {size}". */
+  editorial: string;
+  /** 2–4 word descriptor on the family card rail. */
+  personality: string;
+  /** Legacy tray metadata — Best For. */
+  bestFor: string;
+  /** Legacy tray metadata — Feel. */
+  feel: string;
+  src: string;
+  alt: string;
+};
+
+const FIND_YOUR_TABBY_FAMILY_COPY: Record<
+  FindYourTabbyFamilyStyleId,
+  {
+    editorial: string;
+    /** 2–4 word family-card descriptor. */
+    personality: string;
+    bestFor: string;
+    feel: string;
+  }
+> = {
+  classic: {
+    editorial:
+      "The signature silhouette — structured, timeless, ready for every day.",
+    personality: "Structured icon",
+    bestFor: "Everyday",
+    feel: "Structured",
+  },
+  soft: {
+    editorial:
+      "A relaxed shape with effortless drape and everyday ease.",
+    personality: "Relaxed shape",
+    bestFor: "Daily wear",
+    feel: "Relaxed",
+  },
+  quilted: {
+    editorial:
+      "Diamond quilting adds plush texture and a quiet shine.",
+    personality: "Plush texture",
+    bestFor: "Statement",
+    feel: "Plush",
+  },
+  chain: {
+    editorial: "Polished hardware brings a dressed-up feel.",
+    personality: "Polished hardware",
+    bestFor: "Evening",
+    feel: "Polished",
+  },
+  twisted: {
+    editorial:
+      "A sculptural twist that reads bold without losing the iconic C clasp.",
+    personality: "Sculptural statement",
+    bestFor: "Fashion",
+    feel: "Bold",
+  },
+};
+
+export const PDP_FIND_YOUR_TABBY_FAMILY: FindYourTabbyFamilyMember[] =
+  PDP_FIND_YOUR_TABBY_FAMILY_STYLE_IDS.map((styleId) => {
+    const style = getTabbyStyle(styleId);
+    const copy = FIND_YOUR_TABBY_FAMILY_COPY[styleId];
+
+    return {
+      styleId,
+      label: style.label,
+      title: `${style.label} Tabby`,
+      editorial: copy.editorial,
+      personality: copy.personality,
+      bestFor: copy.bestFor,
+      feel: copy.feel,
+      src: style.thumbnail,
+      alt: style.thumbnailAlt,
+    };
+  });
 
 /**
  * Insert the v5 Ways to wear module immediately after Up close / editorial
@@ -829,10 +1133,15 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
  */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
+  options: { dropLeatherAgingSlide?: boolean } = {},
 ): PdpGallerySlideV2[] {
   const result: PdpGallerySlideV2[] = [];
 
   for (const slide of slides) {
+    if (options.dropLeatherAgingSlide && slide.type === "leather-aging") {
+      continue;
+    }
+
     if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
       result.push({ type: "get-the-highlights" });
       continue;
@@ -847,18 +1156,184 @@ export function applyV5GallerySlidePatches(
   return result;
 }
 
-/** Insert the v5 crafted-to-last video immediately after leather aging. */
-export function applyV5CraftedToLastVideoPatch(
-  slides: PdpGallerySlideV2[],
-): PdpGallerySlideV2[] {
-  const result: PdpGallerySlideV2[] = [];
+/**
+ * v5 More like this — side-by-side compare tray facts.
+ * Mirrors the Details sheet label set (Material / Strap / Weight / Fits /
+ * Dimensions / Hardware) so the tray reuses the same pattern UI.
+ */
+export type PdpMoreLikeThisCompareFact = {
+  id: string;
+  label: string;
+  value: string;
+  tabular?: boolean;
+};
 
-  for (const slide of slides) {
-    result.push(slide);
-    if (slide.type === "leather-aging") {
-      result.push({ type: "crafted-to-last-video" });
-    }
-  }
+export type PdpMoreLikeThisCompareProduct = {
+  id: string;
+  name: string;
+  price: string;
+  imageSrc: string;
+  imageAlt: string;
+  /** Column-major pairs matching Details: Material·Strap, Weight·Fits, Dimensions·Hardware */
+  facts: readonly PdpMoreLikeThisCompareFact[];
+};
 
-  return result;
+const MORE_LIKE_THIS_COMPARE_FACT_ORDER = [
+  "material",
+  "strap",
+  "weight",
+  "fits",
+  "dimensions",
+  "hardware",
+] as const;
+
+/** Current PDP bag — left column in the More like this compare tray. */
+export const PDP_MORE_LIKE_THIS_COMPARE_CURRENT: PdpMoreLikeThisCompareProduct =
+  {
+    id: "tabby-26",
+    name: "Tabby Shoulder Bag 26",
+    price: "$550",
+    imageSrc: "/images/compare/tabby-26.png",
+    imageAlt:
+      "Tabby Shoulder Bag 26 in black full-grain leather with gold C clasp and detachable straps",
+    facts: [
+      { id: "material", label: "Material", value: "Full-grain leather" },
+      { id: "strap", label: "Strap", value: '22" drop', tabular: true },
+      { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      {
+        id: "dimensions",
+        label: "Dimensions",
+        value: "10 x 6 x 3.25",
+        tabular: true,
+      },
+      { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+    ],
+  };
+
+/** Specs keyed by `PDP_MORE_LIKE_THIS` item id — right column in the compare tray. */
+const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
+  string,
+  PdpMoreLikeThisCompareProduct
+> = {
+  "crochet-fringe-tabby": {
+    id: "crochet-fringe-tabby",
+    name: "Crochet Tabby Shoulder Bag",
+    price: "$650",
+    imageSrc: "/images/similar/tabby-crochet-fringe.png",
+    imageAlt: "Crochet Tabby shoulder bag in black with fringe and gold C clasp",
+    facts: [
+      { id: "material", label: "Material", value: "Crochet yarn" },
+      { id: "strap", label: "Strap", value: '20" drop', tabular: true },
+      { id: "weight", label: "Weight", value: "0.7 lbs", tabular: true },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      {
+        id: "dimensions",
+        label: "Dimensions",
+        value: "10 x 6 x 3",
+        tabular: true,
+      },
+      { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+    ],
+  },
+  "soft-tabby": {
+    id: "soft-tabby",
+    name: "Soft Tabby Shoulder Bag",
+    price: "$550",
+    imageSrc: "/images/similar/tabby-suede.png",
+    imageAlt: "Soft Tabby shoulder bag in brown suede with gold C clasp",
+    facts: [
+      { id: "material", label: "Material", value: "Suede" },
+      { id: "strap", label: "Strap", value: '22" drop', tabular: true },
+      { id: "weight", label: "Weight", value: "0.8 lbs", tabular: true },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      {
+        id: "dimensions",
+        label: "Dimensions",
+        value: "10 x 6 x 3.25",
+        tabular: true,
+      },
+      { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+    ],
+  },
+  "tabby-chain": {
+    id: "tabby-chain",
+    name: "Tabby Chain Crossbody",
+    price: "$425",
+    imageSrc: "/images/similar/tabby-chain-crossbody.png",
+    imageAlt: "Tabby chain crossbody in black leather with gold chain strap",
+    facts: [
+      { id: "material", label: "Material", value: "Pebbled leather" },
+      { id: "strap", label: "Strap", value: '21" chain', tabular: true },
+      { id: "weight", label: "Weight", value: "0.6 lbs", tabular: true },
+      { id: "fits", label: "Fits", value: "Phone, Cards, Keys" },
+      {
+        id: "dimensions",
+        label: "Dimensions",
+        value: "7.5 x 5 x 2",
+        tabular: true,
+      },
+      { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+    ],
+  },
+  "tabby-oxblood": {
+    id: "tabby-oxblood",
+    name: "Tabby Shoulder Bag 26",
+    price: "$550",
+    imageSrc: "/images/similar/tabby-oxblood-leather.png",
+    imageAlt:
+      "Tabby Shoulder Bag 26 in oxblood full-grain leather with gold C clasp",
+    facts: [
+      { id: "material", label: "Material", value: "Full-grain leather" },
+      { id: "strap", label: "Strap", value: '22" drop', tabular: true },
+      { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
+      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      {
+        id: "dimensions",
+        label: "Dimensions",
+        value: "10 x 6 x 3.25",
+        tabular: true,
+      },
+      { id: "hardware", label: "Hardware", value: "Signature C Clasp" },
+    ],
+  },
+};
+
+export function getMoreLikeThisCompareProduct(
+  id: string,
+): PdpMoreLikeThisCompareProduct | null {
+  return PDP_MORE_LIKE_THIS_COMPARE_BY_ID[id] ?? null;
 }
+
+/** Pair facts for the two-column Details-pattern grid (left = current, right = compare). */
+export function buildMoreLikeThisCompareRows(
+  current: PdpMoreLikeThisCompareProduct,
+  comparison: PdpMoreLikeThisCompareProduct,
+): {
+  id: string;
+  label: string;
+  currentValue: string;
+  comparisonValue: string;
+  tabular?: boolean;
+}[] {
+  const currentById = new Map(current.facts.map((fact) => [fact.id, fact]));
+  const comparisonById = new Map(
+    comparison.facts.map((fact) => [fact.id, fact]),
+  );
+
+  return MORE_LIKE_THIS_COMPARE_FACT_ORDER.flatMap((factId) => {
+    const left = currentById.get(factId);
+    const right = comparisonById.get(factId);
+    if (!left || !right) return [];
+    return [
+      {
+        id: factId,
+        label: left.label,
+        currentValue: left.value,
+        comparisonValue: right.value,
+        tabular: left.tabular || right.tabular,
+      },
+    ];
+  });
+}
+

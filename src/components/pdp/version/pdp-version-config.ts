@@ -78,6 +78,11 @@ export type PdpVersionConfig = {
    * v5 More like this — viewport-based ~1.5-card peek rail (vs 158px fixed baseline).
    */
   moreLikeThisLargeCards: boolean;
+  /**
+   * Compare icon left of Add to bag on More like this cards — opens a tray
+   * comparing the current PDP bag with the tapped recommendation. v5 only.
+   */
+  showMoreLikeThisCompare: boolean;
   /** Use the v2 leather aging card layout (warm header/image/controls — Paper AP5-0) */
   useSimplifiedLeatherAging: boolean;
   /** Use the v2 recently viewed vertical list (white bg — Paper BC6-0) */
@@ -226,6 +231,16 @@ export type PdpVersionConfig = {
    */
   compactBuyBarColorDotCount: number;
   /**
+   * Quiet "Pick up in store" text link below the hero land (not above the fold).
+   * v5 only.
+   */
+  showStorePickupLink: boolean;
+  /**
+   * Compact ratings summary under the hero land — full star row, score/count,
+   * and recommend line. Metadata module (not a muted text-link CTA). v5 only.
+   */
+  showSubtleReviewTeaser: boolean;
+  /**
    * Hide the grey "Size {n} · {price}" caption in the progressive color
    * drawer header (Paper r5). v4 only — v3 keeps the size/price meta line.
    */
@@ -297,9 +312,19 @@ export type PdpVersionConfig = {
   showDetailsCloserLook: boolean;
   /**
    * Replace the horizontal editorial carousel with a craftsmanship carousel
-   * editorial stack (Paper r5). v4 only.
+   * editorial stack (Paper r5). v4+ when enabled.
    */
   useV4CraftsmanshipLayout: boolean;
+  /**
+   * Mid-gallery "Get up close and personal" / editorial carousel slot.
+   * When false, the slide is skipped (quote card may still render). v5 off.
+   */
+  showUpCloseModule: boolean;
+  /**
+   * v5 "Find your Tabby" family explorer — rendered above More like this in
+   * the ecommerce stack (not in the mid-gallery craftsmanship slot).
+   */
+  showCloserLookStage: boolean;
   /**
    * Compact UGC strip before The Details — "Out in the wild" header row,
    * small rounded portrait tiles, and a +N more card. v4 only; removes the
@@ -321,10 +346,6 @@ export type PdpVersionConfig = {
    * 9:16 warm beige editorial quote card after Up close / craftsmanship. v5 only.
    */
   showEditorialQuoteCard: boolean;
-  /**
-   * Warm design-sketch scroll break after the quote card, before Ways to wear. v5 only.
-   */
-  showDesignSketchInterrupt: boolean;
   /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
@@ -417,14 +438,30 @@ export type PdpVersionConfig = {
    */
   showWaysToWearModule: boolean;
   /**
-   * Full-bleed "Crafted to last" video after leather aging, before reviews. v5 only.
-   */
-  showCraftedToLastVideo: boolean;
-  /**
-   * Apple-style "Get the highlights" horizontal card rail (replaces the
+   * Apple-style "Take a closer look" dark product stage (replaces the
    * "Feel the leather" lifestyle slide). v5 only.
    */
   showGetTheHighlights: boolean;
+  /**
+   * Reviews module gets a warm band + solid black CTA (Skelly v7 merchandising).
+   */
+  emphasizeReviewsModule: boolean;
+  /**
+   * Show sale price with compare-at strikeout in hero / buy panel.
+   */
+  showSalePricing: boolean;
+  /**
+   * Full-bag studio swatch photos + Skelly color catalog (v7 only).
+   */
+  useFullBagColorSwatches: boolean;
+  /**
+   * Ways-to-wear module shows leather aging New vs 2 years (Skelly v7).
+   */
+  useLeatherAgingWaysToWear: boolean;
+  /**
+   * Extra hero gallery slides appended for version-specific story beats.
+   */
+  heroGalleryExtraSlides?: PdpHeroGallerySlide[];
   /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
@@ -497,11 +534,16 @@ export type PdpVersionConfig = {
    */
   heroVerticalGallery: boolean;
   /**
-   * Play a one-shot 360° intro clip before the hero gallery (UI hidden until
-   * settle + stagger reveal). v6 mobile only.
+   * Fill the frame with product stills (`object-fit: cover`) instead of the
+   * default `contain` letterbox. Studio spins / callouts stay contain. v6 only.
+   */
+  heroProductSlidesFillFrame: boolean;
+  /**
+   * Play a one-shot fall-in intro on the hero land (soft UI cue mid-clip,
+   * then gallery unlocks when the clip ends). v6 mobile only.
    */
   hero360IntroEnabled: boolean;
-  /** Source for `hero360IntroEnabled` — empty when disabled. v6 only. */
+  /** Source for `hero360IntroEnabled` — empty when disabled. v5/v6. */
   hero360IntroVideoSrc: string;
 };
 
@@ -525,6 +567,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showDetailsHeading: true,
   useSimplifiedMoreLikeThis: false,
   moreLikeThisLargeCards: false,
+  showMoreLikeThisCompare: false,
   useSimplifiedLeatherAging: false,
   useSimplifiedRecentlyViewed: false,
   fixedHeaderSurface: "auto",
@@ -551,6 +594,8 @@ const V1_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  showStorePickupLink: false,
+  showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   exploreFamilyColorSheetLabel: false,
@@ -566,6 +611,8 @@ const V1_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showUpCloseModule: true,
+  showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
@@ -584,11 +631,13 @@ const V1_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
-  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
-  showCraftedToLastVideo: false,
   showGetTheHighlights: false,
+  emphasizeReviewsModule: false,
+  showSalePricing: false,
+  useFullBagColorSwatches: false,
+  useLeatherAgingWaysToWear: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -602,6 +651,7 @@ const V1_CONFIG: PdpVersionConfig = {
   showHeroGalleryCategoryRail: false,
   playHeroLandIntro: false,
   heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
 };
@@ -661,6 +711,8 @@ const V2_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  showStorePickupLink: false,
+  showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
   exploreFamilyColorSheetLabel: false,
@@ -676,6 +728,8 @@ const V2_CONFIG: PdpVersionConfig = {
   useV5DetailsSheet: false,
   showDetailsCloserLook: true,
   useV4CraftsmanshipLayout: false,
+  showUpCloseModule: true,
+  showCloserLookStage: false,
   showBrandSwitcher: true,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
@@ -694,12 +748,15 @@ const V2_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
-  showDesignSketchInterrupt: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
+  showMoreLikeThisCompare: false,
   showWaysToWearModule: false,
-  showCraftedToLastVideo: false,
   showGetTheHighlights: false,
+  emphasizeReviewsModule: false,
+  showSalePricing: false,
+  useFullBagColorSwatches: false,
+  useLeatherAgingWaysToWear: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -713,6 +770,7 @@ const V2_CONFIG: PdpVersionConfig = {
   showHeroGalleryCategoryRail: false,
   playHeroLandIntro: false,
   heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
   hero360IntroEnabled: false,
   hero360IntroVideoSrc: "",
 };
@@ -775,23 +833,25 @@ const V4_CONFIG: PdpVersionConfig = {
 
 /**
  * v5 — Sean r5 polish round (Jul 2026). Inherits the frozen v4 baseline and
- * layers compact UGC, craftsmanship carousel, reviews preview, details rail,
- * buy-bar/color-sheet tweaks, and gallery slide reshuffle. Share as
- * `/v5` while `/v4` stays comparable to Johnny's last prod deploy.
+ * layers compact UGC, reviews preview, details rail, buy-bar/color-sheet
+ * tweaks, and gallery slide reshuffle. Share as `/v5` while `/v4` stays
+ * comparable to Johnny's last prod deploy.
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
   // v5 polish — docked hero ATB only; no sticky floating bar for now.
   showFloatingBuyBar: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
-  // v5 story: Get the highlights → Details → Out in the wild → Up close → Quote → Ways to wear → Aging.
+  // v5 story: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging → Find your Tabby (above More like this).
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
   hideHeroColorSwatchLabel: false,
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
   useCompactBuyBarColorDots: true,
-  compactBuyBarColorDotCount: 3,
+  compactBuyBarColorDotCount: 4,
+  showStorePickupLink: true,
+  showSubtleReviewTeaser: true,
   inlineBuyBarColorSwatches: false,
   // r7 feedback: v5/v6 return to the v4 grouped color drawer (size/price caption kept).
   hideColorSheetSizePrice: false,
@@ -799,12 +859,15 @@ const V5_CONFIG: PdpVersionConfig = {
   // v5 Details switches to the editorial two-column sheet (Paper node 407:399).
   useV5DetailsSheet: true,
   showDetailsCloserLook: false,
-  useV4CraftsmanshipLayout: true,
+  useV4CraftsmanshipLayout: false,
+  // Drop "Get up close and personal" — quote card still follows this slide slot.
+  showUpCloseModule: false,
+  // Find your Tabby sits above More like this (ecommerce stack), not mid-gallery.
+  showCloserLookStage: true,
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
   showEditorialQuoteCard: true,
-  showDesignSketchInterrupt: true,
   showLeatherCareUpsell: true,
   // r7 feedback: grouped Popular Colors / Explore Materials / Bag Size drawer, not the flat list.
   flatColorSheet: false,
@@ -812,7 +875,6 @@ const V5_CONFIG: PdpVersionConfig = {
   exploreFamilyColorSheetLabel: true,
   hideInStockColorLabel: false,
   lockHeroGalleryTemplate: true,
-  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
   heroGalleryLogicalBlockOrder: true,
   // r7 reshoot drops the legacy grey-ground a3 three-quarter (dupes the new a5 back view).
   heroGalleryExcludeSlideSrcs: [HERO_THREE_QUARTER_STILL_SRC],
@@ -825,9 +887,10 @@ const V5_CONFIG: PdpVersionConfig = {
   leatherAgingHeaderAboveImage: true,
   // v5 leather-aging gets the continuous Apple-style rail slider.
   useRailLeatherAgingSlider: true,
-  // v5 reviews summary drops the aggregate star row (photos + AI summary carry trust).
-  hideReviewSummaryRating: true,
-  // v5 reviews summary shows stars + average only (no review count tail).
+  // v5 keeps a quiet aggregate under the headline (stars + average only).
+  hideReviewSummaryRating: false,
+  // v5 reviews summary shows stars + average only (no review count tail —
+  // "View all N reviews" CTA already carries the count).
   hideReviewCountRecommend: true,
   // v5 bumps the reviews AI-summary tray text up a step.
   enlargeReviewAiSummary: true,
@@ -838,9 +901,9 @@ const V5_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,
+  showMoreLikeThisCompare: true,
   squareButtonCorners: true,
   showWaysToWearModule: true,
-  showCraftedToLastVideo: true,
   showGetTheHighlights: true,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
@@ -859,8 +922,14 @@ const V5_CONFIG: PdpVersionConfig = {
   // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
-  // v5 lands with a slow, subtle staggered chrome intro over the settled video.
-  playHeroLandIntro: true,
+  // Fall-in owns the land — skip the staggered CSS land intro.
+  playHeroLandIntro: false,
+  // Mobile fall-in intro; horizontal gallery stays (vertical is v6-only).
+  hero360IntroEnabled: true,
+  hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
+  // Intro end frame is slide 0 — clear the on-model lead so index 0 settles cleanly.
+  heroGalleryLeadSlideSrc: "",
+  heroGalleryPrependLeadSlide: undefined,
 };
 
 /**
@@ -873,10 +942,12 @@ const V6_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: false,
   // The v5 category rail replaces the tick indicator — keep the v6 vertical rail.
   showHeroGalleryCategoryRail: false,
-  // v6 has its own 360° intro choreography — skip the v5 land-intro stagger.
+  // v6 has its own fall-in intro choreography — skip the v5 land-intro stagger.
   playHeroLandIntro: false,
   heroVerticalGallery: true,
-  // v6 hero land — one-shot 360° intro, then settle on a0 product still.
+  // Product stills fill the tall mobile frame — no side letterbox from contain.
+  heroProductSlidesFillFrame: true,
+  // v6 hero land — Tabby fall-in at 1.5×; soft UI at media ~1.2s; end frame = slide 0.
   hero360IntroEnabled: true,
   hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
   heroGalleryPrependLeadSlide: undefined,
@@ -886,6 +957,110 @@ const V6_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 4,
 };
 
+/**
+ * fc01 — final-candidate UXR study, horizontal gallery. Brand-approved Skelly
+ * template (v5 baseline) with the FC round tweaks. Shares the fall-in intro.
+ */
+const FC01_CONFIG: PdpVersionConfig = {
+  ...V5_CONFIG,
+};
+
+/**
+ * fc01v — final-candidate UXR study, vertical gallery variant. Same FC body
+ * with the v6 vertical-gallery overrides (snap stack, tick rail, fill-frame).
+ */
+const FC01V_CONFIG: PdpVersionConfig = {
+  ...V6_CONFIG,
+};
+
+const HERO_MIRROR_SELFIE_SLIDE: PdpHeroGallerySlide = {
+  kind: "image",
+  src: "/images/gallery/tabby-on-model-mirror-selfie.jpg",
+  alt: "Tabby Shoulder Bag 26 worn crossbody — mirror selfie styling",
+  shotType: "on-model",
+  headerSurface: "light",
+  galleryCategory: "on-model",
+};
+
+/**
+ * v7 — Skelly parity round (Jul 2026). Visual SoT from skelly/main @ 90e2295.
+ * Spreads v4 baseline (not our r7-mutated v5) and applies Skelly's v5 flag snapshot.
+ */
+const V7_CONFIG: PdpVersionConfig = {
+  ...V4_CONFIG,
+  showFloatingBuyBar: false,
+  gallerySlides: PDP_GALLERY_SLIDES_V4,
+  detailsAfterSlideIndex: 1,
+  hideBuyBarColorLabel: true,
+  hideHeroColorSwatchLabel: false,
+  hideBuyBarAtbIcon: true,
+  hideDockedBuyBarColor: true,
+  useCompactBuyBarColorDots: true,
+  compactBuyBarColorDotCount: 4,
+  showStorePickupLink: true,
+  showSubtleReviewTeaser: true,
+  inlineBuyBarColorSwatches: false,
+  hideColorSheetSizePrice: true,
+  useV4DetailsTileCarousel: true,
+  useV5DetailsSheet: true,
+  showDetailsCloserLook: false,
+  useV4CraftsmanshipLayout: false,
+  showUpCloseModule: false,
+  showCloserLookStage: true,
+  useV4CompactUgcStrip: true,
+  useUgcTopicThemes: true,
+  useV5UgcTestimonialCarousel: true,
+  showEditorialQuoteCard: true,
+  showLeatherCareUpsell: true,
+  flatColorSheet: true,
+  exploreFamilyColorSheetLabel: false,
+  hideInStockColorLabel: true,
+  lockHeroGalleryTemplate: true,
+  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
+  heroGalleryLogicalBlockOrder: true,
+  heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
+    HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
+  ),
+  heroGalleryUgcInsertAfterIndex: 1,
+  heroGalleryExtraSlides: [HERO_MIRROR_SELFIE_SLIDE],
+  heroMaterialSubtitleLine: true,
+  leatherAgingHeaderAboveImage: true,
+  useRailLeatherAgingSlider: true,
+  hideReviewSummaryRating: false,
+  hideReviewCountRecommend: true,
+  enlargeReviewAiSummary: true,
+  hideReviewUgcMomentCaption: true,
+  enlargeReviewUgcMomentText: true,
+  emphasizeReviewsModule: true,
+  compactUgcMoreCountOverride: 6,
+  useConsistentModuleHeadings: true,
+  moreLikeThisLargeCards: true,
+  showMoreLikeThisCompare: true,
+  squareButtonCorners: true,
+  showWaysToWearModule: true,
+  showGetTheHighlights: true,
+  showSalePricing: true,
+  useFullBagColorSwatches: true,
+  useLeatherAgingWaysToWear: true,
+  demoHeroColorSwatchRow: false,
+  collapseHeroColorSwatches: false,
+  heroColorSwatchPreviewCount: 0,
+  heroColorSwatchMoreCountOverride: 6,
+  showTabbyAlsoAvailableAs: false,
+  showReviewHighlightTags: false,
+  desktopSplitLayout: true,
+  hidePayOverTimeCreditNote: true,
+  showHeroFitsInsideCta: true,
+  useHeroGalleryProgressBar: true,
+  showArTryOn: false,
+  showHeroGalleryCategoryRail: true,
+  playHeroLandIntro: true,
+  hero360IntroEnabled: false,
+  hero360IntroVideoSrc: "",
+  heroVerticalGallery: false,
+  heroProductSlidesFillFrame: false,
+};
+
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
@@ -893,6 +1068,9 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v4: V4_CONFIG,
   v5: V5_CONFIG,
   v6: V6_CONFIG,
+  v7: V7_CONFIG,
+  fc01: FC01_CONFIG,
+  fc01v: FC01V_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

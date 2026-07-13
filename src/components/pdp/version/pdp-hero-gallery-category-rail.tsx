@@ -90,10 +90,13 @@ function CategoryRow({
 export function PdpHeroGalleryCategoryRail({
   onOpenArTryOn,
   chromeVisible = true,
+  enterClassName,
 }: {
   onOpenArTryOn?: () => void;
   /** Collapse when hero UI chrome fades on scroll. */
   chromeVisible?: boolean;
+  /** Land-intro class — apply on the frost control, not a wrapper (backdrop-filter). */
+  enterClassName?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -195,10 +198,9 @@ export function PdpHeroGalleryCategoryRail({
     <div
       ref={rootRef}
       className={cn(
-        "pointer-events-auto flex flex-col-reverse items-start gap-2 pdp-video-controls-pop",
+        "pointer-events-auto flex flex-col-reverse items-start gap-2",
         !chromeAwake && "pointer-events-none",
       )}
-      data-state={chromeAwake ? "open" : "closed"}
     >
       <button
         type="button"
@@ -208,13 +210,15 @@ export function PdpHeroGalleryCategoryRail({
         aria-label={expanded ? "Close gallery sections" : "Explore gallery sections"}
         onClick={() => setExpanded((open) => !open)}
         className={cn(
-          "flex size-11 shrink-0 items-center justify-center rounded-none",
+          "flex size-11 shrink-0 items-center justify-center rounded-none pdp-video-controls-pop",
           expanded
             ? "bg-white shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
             : PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS,
+          !expanded && enterClassName,
           chromeTransitionClass,
           pdpPressableClass,
         )}
+        data-state={chromeAwake ? "open" : "closed"}
       >
         <MaterialIcon
           name={expanded ? "close" : "apps"}

@@ -25,6 +25,7 @@ import {
 } from "./pdp-carousel";
 import { PDP_UGC_VIDEO_CAROUSEL, type PdpUgcVideo } from "./pdp-data";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpType } from "./pdp-type";
 import { PdpUgcVideoCard } from "./pdp-ugc-video-card";
 import {
@@ -32,6 +33,7 @@ import {
   useDragToScroll,
   useInfiniteCenteredCarousel,
 } from "./use-infinite-centered-carousel";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { PdpUgcMediaToggle, type UgcMediaMode } from "./pdp-ugc-media-toggle";
 import { PdpUgcTopicToggle } from "./pdp-ugc-topic-toggle";
@@ -137,7 +139,9 @@ export function PdpUgcCommunitySheet({
   organizeByTopic = false,
 }: PdpUgcCommunitySheetProps) {
   const titleId = useId();
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
   const [mediaMode, setMediaMode] = useState<UgcMediaMode>(initialMediaMode);
   const [activeTopic, setActiveTopic] = useState<PdpUgcWildTopicId>(initialTopic);
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
@@ -164,7 +168,7 @@ export function PdpUgcCommunitySheet({
     }
   }, [open, initialMediaMode, initialTopic]);
 
-  if (!mounted) {
+  if (!overlayReady || !transition.mounted) {
     return null;
   }
 
@@ -172,22 +176,22 @@ export function PdpUgcCommunitySheet({
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open })}
-      aria-hidden={!open}
+      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
+      aria-hidden={!sheetOpen}
     >
       <button
         type="button"
         aria-label="Close community media"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open, maxHeight: "92dvh", stableHeight: true })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen, maxHeight: "92dvh", stableHeight: true })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

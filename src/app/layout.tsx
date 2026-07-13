@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { DevCacheBust } from "@/components/dev-cache-bust";
+import {
+  PDP_V6_INTRO_BOOT_SCRIPT,
+  PDP_V6_INTRO_CRITICAL_CSS,
+} from "@/components/pdp/pdp-v6-intro-boot-script";
 import "./globals.css";
 
 const helveticaNeueLTPro = localFont({
@@ -59,8 +63,17 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${helveticaNeueLTPro.variable} ${helveticaNeueLTProExtended.variable} h-full antialiased`}
+      // Boot script stamps intro attrs/style on <html> before hydrate (same pattern as theme scripts).
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-black font-sans text-neutral-900">
+        {/* First in body: stamp html attrs, then hide CSS (streaming paints chrome outside the version wrapper). */}
+        <script
+          dangerouslySetInnerHTML={{ __html: PDP_V6_INTRO_BOOT_SCRIPT }}
+        />
+        <style
+          dangerouslySetInnerHTML={{ __html: PDP_V6_INTRO_CRITICAL_CSS }}
+        />
         {process.env.NODE_ENV === "development" ? <DevCacheBust /> : null}
         {children}
       </body>

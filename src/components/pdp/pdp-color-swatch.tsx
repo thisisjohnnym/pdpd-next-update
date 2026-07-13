@@ -4,6 +4,9 @@ import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
+import { getPdpVersionConfig } from "./version/pdp-version-config";
+import { usePdpVersion } from "./version/pdp-version-context";
+
 /** Coach.com $desktopSwatchImage$ — C clasp centered in the square crop */
 const COACH_SWATCH_FOCAL = "50% 90%";
 const COACH_SWATCH_ZOOM = 3.25;
@@ -13,12 +16,33 @@ export const SQUARE_SWATCH_TILE_ZOOM = 4.5;
 /** Anchor on clasp — centered in the hero square crop */
 export const SQUARE_SWATCH_TILE_FOCAL = "50% 80%";
 
+/** Full-bag studio shots — bag sits low in frame */
+const FULL_BAG_SWATCH_FOCAL = "50% 82%";
+const FULL_BAG_SWATCH_ZOOM = 2.5;
+const FULL_BAG_TILE_ZOOM = 3;
+
 /** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
 const PRODUCT_SWATCH_FOCAL = "50% 58%";
 const PRODUCT_SWATCH_ZOOM = 2.25;
 
 function isCoachSwatchSrc(src: string): boolean {
   return src.includes("/images/colors/tabby/");
+}
+
+/** Square / circular swatch framing — zoomed into the bag on v7 */
+export function resolveSquareSwatchFraming(src?: string): {
+  zoom: number;
+  objectPosition: string;
+} {
+  void src;
+  return {
+    zoom: FULL_BAG_TILE_ZOOM,
+    objectPosition: FULL_BAG_SWATCH_FOCAL,
+  };
+}
+
+function useFullBagSwatchFraming(): boolean {
+  return getPdpVersionConfig(usePdpVersion()).useFullBagColorSwatches;
 }
 
 /** Coach.com swatches and legacy hero frames — zoomed to fill the circular clip */
@@ -35,12 +59,27 @@ export function ColorSwatchImage({
   className?: string;
   objectPosition?: string;
   zoom?: number;
-  /** coach = Coach.com swatch frame; product = full hero crop */
+  /** @deprecated Ignored when full-bag framing is active */
   variant?: "coach" | "product";
 }) {
-  const coachMode = variant === "coach" || (variant !== "product" && isCoachSwatchSrc(src));
-  const focal = objectPosition ?? (coachMode ? COACH_SWATCH_FOCAL : PRODUCT_SWATCH_FOCAL);
-  const scale = zoom ?? (coachMode ? COACH_SWATCH_ZOOM : PRODUCT_SWATCH_ZOOM);
+  const fullBag = useFullBagSwatchFraming();
+  const coachMode =
+    !fullBag &&
+    (variant === "coach" || (variant !== "product" && isCoachSwatchSrc(src)));
+  const focal = objectPosition ?? (
+    fullBag
+      ? FULL_BAG_SWATCH_FOCAL
+      : coachMode
+        ? COACH_SWATCH_FOCAL
+        : PRODUCT_SWATCH_FOCAL
+  );
+  const scale = zoom ?? (
+    fullBag
+      ? FULL_BAG_SWATCH_ZOOM
+      : coachMode
+        ? COACH_SWATCH_ZOOM
+        : PRODUCT_SWATCH_ZOOM
+  );
 
   return (
     <span
@@ -86,6 +125,9 @@ export function ColorSwatchTile({
   /** Fill a relative square parent (hero collapsed swatch row). */
   fillParent?: boolean;
 }) {
+  const fullBag = useFullBagSwatchFraming();
+  const framing = fullBag && src ? resolveSquareSwatchFraming(src) : null;
+
   return (
     <span
       aria-hidden
@@ -106,8 +148,8 @@ export function ColorSwatchTile({
         <ColorSwatchImage
           src={src}
           sizes={sizes}
-          objectPosition={objectPosition}
-          zoom={zoom}
+          objectPosition={objectPosition ?? framing?.objectPosition}
+          zoom={zoom ?? framing?.zoom}
         />
       ) : null}
     </span>
@@ -133,6 +175,9 @@ export function ColorSwatchCircle({
   objectPosition?: string;
   zoom?: number;
 }) {
+  const fullBag = useFullBagSwatchFraming();
+  const framing = fullBag && src ? resolveSquareSwatchFraming(src) : null;
+
   return (
     <span
       aria-hidden
@@ -148,8 +193,8 @@ export function ColorSwatchCircle({
         <ColorSwatchImage
           src={src}
           sizes={sizes}
-          objectPosition={objectPosition}
-          zoom={zoom}
+          objectPosition={objectPosition ?? framing?.objectPosition}
+          zoom={zoom ?? framing?.zoom}
         />
       ) : null}
     </span>

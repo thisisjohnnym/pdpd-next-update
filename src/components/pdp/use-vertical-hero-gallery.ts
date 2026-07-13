@@ -9,6 +9,12 @@ export function useVerticalHeroGallery(
 ) {
   const [activeIndex, setActiveIndex] = useState(0);
   const ratiosRef = useRef<Map<number, number>>(new Map());
+  const activeIndexRef = useRef(0);
+  const ignoreObserverRef = useRef(false);
+
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -22,9 +28,14 @@ export function useVerticalHeroGallery(
     }
 
     ratiosRef.current = new Map();
+    let resizeGuardRaf = 0;
 
     const observer = new IntersectionObserver(
       (entries) => {
+        if (ignoreObserverRef.current) {
+          return;
+        }
+
         for (const entry of entries) {
           const index = Number(
             (entry.target as HTMLElement).dataset.heroVerticalSlideIndex,
@@ -56,8 +67,38 @@ export function useVerticalHeroGallery(
       observer.observe(slide);
     }
 
+    // Slide height is 100% of the track. On resize, scrollTop stays put while
+    // heights change — re-pin to the committed slide so snap does not jump.
+    const onResize = () => {
+      const index = Math.min(
+        Math.max(activeIndexRef.current, 0),
+        slides.length - 1,
+      );
+      const slide = slides[index];
+      if (!slide) {
+        return;
+      }
+
+      ignoreObserverRef.current = true;
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
+      }
+      track.scrollTop = slide.offsetTop;
+      resizeGuardRaf = window.requestAnimationFrame(() => {
+        ignoreObserverRef.current = false;
+        resizeGuardRaf = 0;
+      });
+    };
+
+    const ro = new ResizeObserver(onResize);
+    ro.observe(track);
+
     return () => {
+      if (resizeGuardRaf) {
+        window.cancelAnimationFrame(resizeGuardRaf);
+      }
       observer.disconnect();
+      ro.disconnect();
     };
   }, [trackRef, slideCount]);
 

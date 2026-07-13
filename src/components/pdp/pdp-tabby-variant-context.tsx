@@ -18,6 +18,7 @@ import {
   getSizeAvailabilityForStyle,
   resolveTabbySelection,
 } from "./pdp-tabby-catalog";
+import { resolveTabbySelection as resolveTabbySelectionV7 } from "./pdp-tabby-catalog-v7";
 import {
   getDefaultColorIdForSku,
   getTabbyColorOptionsForStyleSize,
@@ -25,6 +26,12 @@ import {
   resolveTabbyColorId,
   type TabbyColorOption,
 } from "./pdp-tabby-colors";
+import {
+  getDefaultColorIdForSku as getDefaultColorIdForSkuV7,
+  getTabbyColorOptionsForStyleSize as getTabbyColorOptionsForStyleSizeV7,
+  getTabbyColorsForSku as getTabbyColorsForSkuV7,
+  resolveTabbyColorId as resolveTabbyColorIdV7,
+} from "./pdp-tabby-colors-v7";
 import {
   DEFAULT_TABBY_SIZE,
   DEFAULT_TABBY_SLUG,
@@ -40,6 +47,7 @@ import {
   type TabbyStyleId,
 } from "./pdp-tabby-variants";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { getPdpVersionConfig } from "./version/pdp-version-config";
 
 type TabbySizeOptionAvailability = {
   option: ReturnType<typeof getTabbySizeOption>;
@@ -63,6 +71,8 @@ export type TabbyVariantContextValue = {
   selectColorAtSize: (colorId: string, size: TabbySize) => void;
   navigateToStyle: (styleId: TabbyStyleId) => void;
   navigateToSize: (size: TabbySize) => void;
+  /** Jump to a style + size in one selection (Find your Tabby Shop CTA). */
+  navigateToStyleSize: (styleId: TabbyStyleId, size: TabbySize) => void;
   summary: {
     name: string;
     subtitle: string;
@@ -103,6 +113,23 @@ export function TabbyVariantProvider({
   const searchParams = useSearchParams();
   const { productId: activeProductId } = useActiveProduct();
   const version = usePdpVersion();
+  const { useFullBagColorSwatches } = getPdpVersionConfig(version);
+  const resolveSelection = useFullBagColorSwatches
+    ? resolveTabbySelectionV7
+    : resolveTabbySelection;
+  const getColorsForSku = useFullBagColorSwatches
+    ? getTabbyColorsForSkuV7
+    : getTabbyColorsForSku;
+  const getColorOptions = useFullBagColorSwatches
+    ? getTabbyColorOptionsForStyleSizeV7
+    : getTabbyColorOptionsForStyleSize;
+  const getDefaultColor = useFullBagColorSwatches
+    ? getDefaultColorIdForSkuV7
+    : getDefaultColorIdForSku;
+  const resolveColorId = useFullBagColorSwatches
+    ? resolveTabbyColorIdV7
+    : resolveTabbyColorId;
+
   const [slug, setSlug] = useState(() => resolveInitialSlug(initialSlug));
 
   const parsed = parseTabbySlug(slug);
@@ -110,10 +137,10 @@ export function TabbyVariantProvider({
   const size = parsed?.size ?? DEFAULT_TABBY_SIZE;
   const sku = useMemo(() => getTabbySku(size, styleId), [size, styleId]);
   const style = useMemo(() => getTabbyStyle(styleId), [styleId]);
-  const colors = useMemo(() => getTabbyColorsForSku(sku), [sku]);
+  const colors = useMemo(() => getColorsForSku(sku), [getColorsForSku, sku]);
   const colorOptions = useMemo(
-    () => getTabbyColorOptionsForStyleSize(styleId, size),
-    [size, styleId],
+    () => getColorOptions(styleId, size),
+    [getColorOptions, size, styleId],
   );
   const sizeOptions = useMemo(() => {
     return getSizeAvailabilityForStyle(styleId).map(({ size: entrySize, available }) => ({
@@ -123,7 +150,7 @@ export function TabbyVariantProvider({
   }, [styleId]);
 
   const [selectedColorId, setSelectedColorIdState] = useState(() =>
-    getDefaultColorIdForSku(sku),
+    getDefaultColor(sku),
   );
 
   useEffect(() => {
@@ -140,7 +167,7 @@ export function TabbyVariantProvider({
       return;
     }
 
-    const resolved = resolveTabbySelection({
+    const resolved = resolveSelection({
       styleId: parsedSlug.styleId,
       size: parsedSlug.size,
       colorId: selectedColorId,
@@ -155,7 +182,7 @@ export function TabbyVariantProvider({
   const paramColor = searchParams.get("color");
 
   useEffect(() => {
-    const resolved = resolveTabbyColorId(styleId, size, paramColor);
+    const resolved = resolveColorId(styleId, size, paramColor);
 
     if (
       paramColor &&
@@ -169,11 +196,11 @@ export function TabbyVariantProvider({
     }
 
     setSelectedColorIdState((current) => {
-      const resolvedCurrent = resolveTabbyColorId(styleId, size, current);
+      const resolvedCurrent = resolveColorId(styleId, size, current);
       if (colors.some((color) => color.id === resolvedCurrent)) {
         return resolvedCurrent;
       }
-      return getDefaultColorIdForSku(sku);
+      return getDefaultColor(sku);
     });
   }, [colors, paramColor, size, sku, styleId]);
 
@@ -183,7 +210,7 @@ export function TabbyVariantProvider({
       nextSize: TabbySize,
       preferredColorId: string,
     ) => {
-      const resolved = resolveTabbySelection({
+      const resolved = resolveSelection({
         styleId: nextStyleId,
         size: nextSize,
         colorId: preferredColorId,
@@ -215,7 +242,7 @@ export function TabbyVariantProvider({
 
   const selectColorAtSize = useCallback(
     (colorId: string, nextSize: TabbySize) => {
-      const nextColors = getTabbyColorsForSku(getTabbySku(nextSize, styleId));
+      const nextColors = getColorsForSku(getTabbySku(nextSize, styleId));
       const color = nextColors.find((entry) => entry.id === colorId);
 
       if (!color || !pdpColorIsSelectable(color.availability)) {
@@ -250,6 +277,17 @@ export function TabbyVariantProvider({
     [applySelection, selectedColorId, size, sizeOptions, styleId],
   );
 
+  const navigateToStyleSize = useCallback(
+    (nextStyleId: TabbyStyleId, nextSize: TabbySize) => {
+      if (nextStyleId === styleId && nextSize === size) {
+        return;
+      }
+
+      applySelection(nextStyleId, nextSize, selectedColorId);
+    },
+    [applySelection, selectedColorId, size, styleId],
+  );
+
   const value = useMemo<TabbyVariantContextValue>(
     () => ({
       slug,
@@ -265,6 +303,7 @@ export function TabbyVariantProvider({
       selectColorAtSize,
       navigateToStyle,
       navigateToSize,
+      navigateToStyleSize,
       summary: {
         name: getTabbyProductTitle(size, styleId),
         subtitle: style.materialLabel,
@@ -277,6 +316,7 @@ export function TabbyVariantProvider({
       colors,
       navigateToSize,
       navigateToStyle,
+      navigateToStyleSize,
       selectColorAtSize,
       selectedColorId,
       setSelectedColorId,

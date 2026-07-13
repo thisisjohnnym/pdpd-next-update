@@ -24,6 +24,8 @@ import {
 } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
+import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpNotifySheetProps = {
@@ -49,7 +51,9 @@ export function PdpNotifySheet({
   const inputId = useId();
   const errorId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const mounted = useOverlayDismiss(open, onClose);
+  const overlayReady = useOverlayDismiss(open, onClose);
+  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
+  const sheetOpen = transition.state === "open";
   const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -84,25 +88,25 @@ export function PdpNotifySheet({
     onSubmit(trimmed);
   };
 
-  if (!mounted || typeof document === "undefined" || !document.body) {
+  if (!overlayReady || !transition.mounted || typeof document === "undefined" || !document.body) {
     return null;
   }
 
   return createPortal(
-    <div className={pdpBottomSheetOverlayClass({ open })} aria-hidden={!open}>
+    <div className={pdpBottomSheetOverlayClass({ open: sheetOpen })} aria-hidden={!sheetOpen}>
       <button
         type="button"
         aria-label="Close notify form"
-        className={pdpBottomSheetBackdropClass()}
+        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
         onClick={onClose}
-        tabIndex={open ? 0 : -1}
+        tabIndex={sheetOpen ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open })}
+        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

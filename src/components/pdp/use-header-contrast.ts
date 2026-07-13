@@ -141,6 +141,14 @@ export function useHeaderContrast(
     };
 
     const handleVideoTimeUpdate = () => {
+      // Intro owns the hero — chrome is hidden and sampling fights decode FPS.
+      const introPhase = document.documentElement.getAttribute(
+        "data-hero-intro-phase",
+      );
+      if (introPhase === "playing" || introPhase === "revealing") {
+        return;
+      }
+
       const now = performance.now();
       if (now - lastVideoSampleAt < VIDEO_SAMPLE_MS) {
         return;
@@ -161,6 +169,10 @@ export function useHeaderContrast(
       document
         .querySelectorAll<HTMLVideoElement>("[data-hero-section] video")
         .forEach((video) => {
+          // Skip the one-shot intro layer — it has its own cue path.
+          if (video.closest(".pdp-hero-360-intro-layer")) {
+            return;
+          }
           video.addEventListener("timeupdate", handleVideoTimeUpdate);
         });
     };

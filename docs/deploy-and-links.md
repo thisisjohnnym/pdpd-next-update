@@ -4,8 +4,8 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 ## In short
 
-- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v6` (latest round).
-- **Compare all versions** on the same deploy: `/v1` … `/v6` on that host.
+- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v7` (latest round).
+- **Compare all versions** on the same deploy: `/v1` … `/v7` on that host.
 - **Git push alone** updates Preview only — run `vercel --prod` when stakeholders need the main URL updated.
 
 ---
@@ -16,8 +16,9 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 | Purpose | URL |
 |---------|-----|
-| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` · `/v5` · `/v6` |
-| Latest feedback round only | https://pdp-next-sigma.vercel.app/v6 |
+| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` · `/v5` · `/v6` · `/v7` |
+| Latest feedback round only | https://pdp-next-sigma.vercel.app/v7 |
+| Frozen fall-in + vertical gallery (v6) | https://pdp-next-sigma.vercel.app/v6 |
 | Frozen Sean polish (v5) | https://pdp-next-sigma.vercel.app/v5 |
 | Legacy baseline (same as v1) | https://pdp-next-sigma.vercel.app/ |
 | Stripped PDP (Kira) on latest round | https://pdp-next-sigma.vercel.app/v4/products/kira-crossbody-bag-18 |
@@ -65,7 +66,7 @@ vercel --prod --yes
 | Name | Meaning |
 |------|---------|
 | Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v6`) and active prototype work |
-| Routes `/v1`–`/v6` | Frozen comparison URLs on one deploy — not separate git branches |
+| Routes `/v1`–`/v7` | Frozen comparison URLs on one deploy — not separate git branches |
 | Git branch `v2` | Legacy development line (merged into `main`); keep in sync or retire |
 
 When someone says “deploy v4,” they mean **ship code to production so `/v4` shows the latest round** — not a separate `v4` git branch.
@@ -84,10 +85,18 @@ v2 (first pivot):      https://pdp-next-sigma.vercel.app/v2
 v3 (r4 hero/CTA):      https://pdp-next-sigma.vercel.app/v3
 v4 (Johnny r5 baseline): https://pdp-next-sigma.vercel.app/v4
 v5 (frozen Sean polish): https://pdp-next-sigma.vercel.app/v5
-v6 (latest — feedback):  https://pdp-next-sigma.vercel.app/v6
+v6 (fall-in + vertical):  https://pdp-next-sigma.vercel.app/v6
+v7 (latest — Skelly):     https://pdp-next-sigma.vercel.app/v7
 ```
 
-For “what changed in the latest round,” point reviewers to [rounds/r7-v6.md](rounds/r7-v6.md).
+**FC01 UXR study pair (final candidate — brand-approved template):**
+
+```
+fc01 (horizontal gallery): https://pdp-next-sigma.vercel.app/fc01
+fc01v (vertical gallery):  https://pdp-next-sigma.vercel.app/fc01v
+```
+
+For “what changed in the latest round,” point reviewers to [rounds/r8-v7.md](rounds/r8-v7.md), [rounds/fc01.md](rounds/fc01.md) (UXR pair), or [rounds/r7-v6.md](rounds/r7-v6.md).
 
 ---
 
@@ -97,7 +106,8 @@ Use before every production deploy:
 
 - [ ] Changes for the new round are behind flags in `pdp-version-config.ts` (or in `src/components/pdp/version/`)
 - [ ] `/v1`, `/v2`, `/v3`, `/v4`, `/v5` spot-checked — still match their frozen baselines
-- [ ] `/v6` matches the round doc + Paper artboard (if design-led)
+- [ ] `/v6` matches the round doc (fall-in + vertical gallery)
+- [ ] `/v7` matches [rounds/r8-v7.md](rounds/r8-v7.md) (Skelly parity)
 - [ ] `pnpm check:versions` passes
 - [ ] `pnpm build` passes
 - [ ] `git push origin main` (and `vercel --prod --yes` if promoting manually)

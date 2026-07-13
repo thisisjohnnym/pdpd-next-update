@@ -150,11 +150,14 @@ function AgingCareHelp({
 export function PdpLeatherAgingCareUpsell({
   stageIndex,
   isDragging = false,
+  alwaysVisible = false,
   onQuickAdd,
   className,
 }: {
   stageIndex: number;
   isDragging?: boolean;
+  /** Show care rows regardless of aging stage (v7 ways-to-wear wipe). */
+  alwaysVisible?: boolean;
   onQuickAdd?: () => void;
   className?: string;
 }) {
@@ -186,12 +189,14 @@ export function PdpLeatherAgingCareUpsell({
         isDragging
           ? "transition-none"
           : "transition-[max-height,margin,opacity] duration-500 ease-out",
-        stageIndex === 0
-          ? "max-h-0 opacity-0"
+        alwaysVisible || stageIndex === 0
+          ? alwaysVisible
+            ? "mt-2 max-h-56 opacity-100"
+            : "max-h-0 opacity-0"
           : "mt-2 max-h-56 opacity-100",
         className,
       )}
-      aria-hidden={stageIndex === 0}
+      aria-hidden={!alwaysVisible && stageIndex === 0}
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col divide-y divide-neutral-200/80">

@@ -1,0 +1,84 @@
+/*
+ * v7 — Skelly parity round (Jul 2026).
+ * Imports v5 baseline via layout; rules here are scoped under [data-pdp-version="v7"] only.
+ */
+
+[data-pdp-version="v7"] {
+  --pdp-v5-editorial-beige: #efeae7;
+}
+
+/* ── Hero land intro (Skelly stagger — no fall-in) ───────────────────────── */
+
+[data-pdp-version="v7"] .pdp-hero-header-enter {
+  animation: pdp-hero-chrome-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 820ms both;
+}
+
+[data-pdp-version="v7"] .pdp-v5-hero-overlay-enter {
+  animation: pdp-hero-hud-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 1040ms backwards;
+}
+
+[data-pdp-version="v7"] .pdp-v5-hero-footer-enter > * {
+  animation: pdp-hero-hud-enter 1050ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-pdp-version="v7"] .pdp-v5-hero-footer-enter > *:nth-child(1) {
+  animation-delay: 960ms;
+}
+
+[data-pdp-version="v7"] .pdp-v5-hero-footer-enter > *:nth-child(2) {
+  animation-delay: 1120ms;
+}
+
+[data-pdp-version="v7"] .pdp-v5-hero-footer-enter > *:nth-child(3) {
+  animation-delay: 1280ms;
+}
+
+[data-pdp-version="v7"] .pdp-hero-hud-enter,
+[data-pdp-version="v7"] .pdp-hero-bottom-enter {
+  animation: none;
+}
+
+[data-pdp-version="v7"] .pdp-social-rail-item {
+  opacity: 1;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-pdp-version="v7"] .pdp-hero-header-enter,
+  [data-pdp-version="v7"] .pdp-v5-hero-overlay-enter,
+  [data-pdp-version="v7"] .pdp-v5-hero-footer-enter > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Gallery → docked buy bar seam */
+[data-pdp-version="v7"] .pdp-hero-immersive--fill-frame {
+  background-color: #f0f0f0;
+  margin-bottom: -1px;
+}
+
+[data-pdp-version="v7"] .pdp-hero-docked-footer {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-pdp-version="v7"] .pdp-hero-docked-footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  pointer-events: none;
+}
+
+/* Editorial bands — solid warm beige (Skelly) */
+[data-pdp-version="v7"] .pdp-v5-ugc-testimonials,
+[data-pdp-version="v7"] .pdp-v5-quote-card-section {
+  background-color: var(--pdp-v5-editorial-beige);
+}
