@@ -147,6 +147,10 @@ export const HERO_ON_MODEL_BLACK_DRESS_SRC =
 const HERO_ON_MODEL_BOMBER_PLAID_SRC =
   "/images/gallery/tabby-on-model-bomber-plaid.jpg";
 
+/** On-model still — lifestyle mirror selfie, crossbody carry. */
+const HERO_ON_MODEL_MIRROR_SELFIE_SRC =
+  "/images/gallery/tabby-on-model-mirror-selfie.jpg";
+
 /** Move a slide to index 0 without mutating the frozen source array. */
 function promoteHeroGallerySlideToLead(
   slides: PdpHeroGallerySlide[],
@@ -489,6 +493,14 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     kind: "image",
     src: HERO_ON_MODEL_BOMBER_PLAID_SRC,
     alt: "Model in a tan utility jacket and brown plaid mini skirt with Tabby Shoulder Bag 26 in black leather worn crossbody",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+  },
+  {
+    kind: "image",
+    src: HERO_ON_MODEL_MIRROR_SELFIE_SRC,
+    alt: "Model in a black ribbed sweater and beige trousers with Tabby Shoulder Bag 26 in black leather worn crossbody",
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",

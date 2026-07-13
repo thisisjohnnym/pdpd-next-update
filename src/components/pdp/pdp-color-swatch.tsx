@@ -4,43 +4,44 @@ import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
-/** Coach.com $desktopSwatchImage$ — C clasp centered in the square crop */
-const COACH_SWATCH_FOCAL = "50% 90%";
-const COACH_SWATCH_ZOOM = 3.25;
+/** Full-bag studio shots — bag sits low in frame; anchor near the bottom */
+const PRODUCT_SWATCH_FOCAL = "50% 82%";
+const PRODUCT_SWATCH_ZOOM = 2.5;
 
-/** Hero color row — square tiles need extra zoom vs circular chips */
-export const SQUARE_SWATCH_TILE_ZOOM = 4.5;
-/** Anchor on clasp — centered in the hero square crop */
-export const SQUARE_SWATCH_TILE_FOCAL = "50% 80%";
+/** Square tiles — crop into the bag body */
+const SQUARE_SWATCH_TILE_ZOOM = 3;
+/** Pull the bag up into the square (source focal near bottom of frame) */
+const SQUARE_SWATCH_TILE_FOCAL = "50% 82%";
 
-/** Product-shot crop — legacy hero frames; C clasp sits ~58% from top */
-const PRODUCT_SWATCH_FOCAL = "50% 58%";
-const PRODUCT_SWATCH_ZOOM = 2.25;
-
-function isCoachSwatchSrc(src: string): boolean {
-  return src.includes("/images/colors/tabby/");
+/** Square / circular swatch framing — zoomed into the bag */
+export function resolveSquareSwatchFraming(_src?: string): {
+  zoom: number;
+  objectPosition: string;
+} {
+  return {
+    zoom: SQUARE_SWATCH_TILE_ZOOM,
+    objectPosition: SQUARE_SWATCH_TILE_FOCAL,
+  };
 }
 
-/** Coach.com swatches and legacy hero frames — zoomed to fill the circular clip */
+/** Full bag photos — zoomed to fill the clip */
 export function ColorSwatchImage({
   src,
   sizes,
   className,
   objectPosition,
   zoom,
-  variant,
 }: {
   src: string;
   sizes: string;
   className?: string;
   objectPosition?: string;
   zoom?: number;
-  /** coach = Coach.com swatch frame; product = full hero crop */
+  /** @deprecated Ignored — framing comes from zoom / objectPosition */
   variant?: "coach" | "product";
 }) {
-  const coachMode = variant === "coach" || (variant !== "product" && isCoachSwatchSrc(src));
-  const focal = objectPosition ?? (coachMode ? COACH_SWATCH_FOCAL : PRODUCT_SWATCH_FOCAL);
-  const scale = zoom ?? (coachMode ? COACH_SWATCH_ZOOM : PRODUCT_SWATCH_ZOOM);
+  const focal = objectPosition ?? PRODUCT_SWATCH_FOCAL;
+  const scale = zoom ?? PRODUCT_SWATCH_ZOOM;
 
   return (
     <span

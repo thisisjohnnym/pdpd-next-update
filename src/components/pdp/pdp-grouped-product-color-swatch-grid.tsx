@@ -11,7 +11,7 @@ import {
   pdpColorAvailabilityLabel,
   pdpColorIsSelectable,
 } from "./pdp-data";
-import { ColorSwatchTile, SQUARE_SWATCH_TILE_FOCAL, SQUARE_SWATCH_TILE_ZOOM } from "./pdp-color-swatch";
+import { ColorSwatchTile, resolveSquareSwatchFraming } from "./pdp-color-swatch";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
 import { splitCoachColorName } from "./pdp-tabby-colors";
 import type { TabbySize } from "./pdp-tabby-variants";
@@ -173,8 +173,7 @@ function ColorSwatchOptionButton({
         widthClass={stretchRow ? undefined : "w-11"}
         fillParent={stretchRow}
         sizes={swatchTileSizes}
-        zoom={SQUARE_SWATCH_TILE_ZOOM}
-        objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+        {...resolveSquareSwatchFraming(color.swatch)}
         dimmed={!interactive}
       />
       {isNotify ? (

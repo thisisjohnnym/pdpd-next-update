@@ -24,7 +24,7 @@ import {
   pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "../pdp-bottom-sheet";
-import { ColorSwatchCircle, ColorSwatchTile, SQUARE_SWATCH_TILE_FOCAL, SQUARE_SWATCH_TILE_ZOOM } from "../pdp-color-swatch";
+import { ColorSwatchCircle, ColorSwatchTile, resolveSquareSwatchFraming } from "../pdp-color-swatch";
 import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
@@ -103,8 +103,7 @@ function ColorRowSwatch({
         src={swatch}
         widthClass="size-12"
         sizes="48px"
-        zoom={SQUARE_SWATCH_TILE_ZOOM}
-        objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+        {...resolveSquareSwatchFraming(swatch)}
         dimmed={!selectable}
       />
     );

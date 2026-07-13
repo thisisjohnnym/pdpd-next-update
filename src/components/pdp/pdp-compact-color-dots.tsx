@@ -4,11 +4,7 @@ import { useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-import {
-  ColorSwatchTile,
-  SQUARE_SWATCH_TILE_FOCAL,
-  SQUARE_SWATCH_TILE_ZOOM,
-} from "./pdp-color-swatch";
+import { ColorSwatchTile, resolveSquareSwatchFraming } from "./pdp-color-swatch";
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
@@ -64,8 +60,7 @@ function CompactColorSwatch({
       fill={color.swatch ? undefined : (color.chromeSample ?? "#d4d4d4")}
       widthClass={widthClass}
       sizes={sizes}
-      zoom={SQUARE_SWATCH_TILE_ZOOM}
-      objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+      {...(color.swatch ? resolveSquareSwatchFraming(color.swatch) : {})}
     />
   );
 }
