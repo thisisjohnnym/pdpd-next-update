@@ -14,7 +14,7 @@ import {
 
 import { usePdpRuntime } from "./pdp-runtime-context";
 
-export type Hero360IntroPhase = "playing" | "revealing" | "ready";
+type Hero360IntroPhase = "playing" | "revealing" | "ready";
 
 type Hero360IntroContextValue = {
   enabled: boolean;

@@ -514,36 +514,3 @@ export function resolveTabbyColorId(
 
   return getDefaultColorIdForStyleSize(styleId, size);
 }
-
-/** Display name for adjustment copy */
-function getTabbyColorName(
-  styleId: TabbyStyleId,
-  colorId: string,
-): string {
-  const seeds = getAllColorSeedsForStyle(styleId);
-  return seeds.find((seed) => seed.id === colorId)?.name ?? colorId;
-}
-
-/** Dedicated studio hero — distinct from the swatch thumbnail; renders as static 4:5 hero */
-export function hasTabbyColorHeroOverride(color: PdpColor): boolean {
-  return color.hero !== color.swatch;
-}
-
-/** Coach "Hardware/Shade" — compact bar shows shade; sheet keeps full name */
-export function splitCoachColorName(name: string): {
-  hardware: string;
-  shade: string;
-  full: string;
-} {
-  const slash = name.indexOf("/");
-
-  if (slash === -1) {
-    return { hardware: "", shade: name, full: name };
-  }
-
-  return {
-    hardware: name.slice(0, slash),
-    shade: name.slice(slash + 1),
-    full: name,
-  };
-}

@@ -1,5 +1,5 @@
 import type { TabbySize, TabbyStyleId } from "./pdp-tabby-variants";
-import { getTabbyFamilyNavLabel, getTabbyStyle, TABBY_SIZES } from "./pdp-tabby-variants";
+import { getTabbyStyle } from "./pdp-tabby-variants";
 
 /** Valid style → size → colorIds combination */
 type TabbyFamilySizeEntry = {
@@ -10,11 +10,6 @@ type TabbyFamilySizeEntry = {
 type TabbyFamilyStyleEntry = {
   styleId: TabbyStyleId;
   sizes: TabbyFamilySizeEntry[];
-};
-
-export type TabbySizeAvailability = {
-  size: TabbySize;
-  available: boolean;
 };
 
 export type TabbySelectionAdjustment = {
@@ -209,7 +204,7 @@ function getTabbyFamilyStyleEntry(
   return CATALOG_BY_STYLE.get(styleId);
 }
 
-export function getAvailableSizesForStyle(styleId: TabbyStyleId): TabbySize[] {
+function getAvailableSizesForStyle(styleId: TabbyStyleId): TabbySize[] {
   return getTabbyFamilyStyleEntry(styleId)?.sizes.map((entry) => entry.size) ?? [];
 }
 
@@ -218,17 +213,6 @@ function isSizeAvailableForStyle(
   size: TabbySize,
 ): boolean {
   return getAvailableSizesForStyle(styleId).includes(size);
-}
-
-export function getSizeAvailabilityForStyle(
-  styleId: TabbyStyleId,
-): TabbySizeAvailability[] {
-  const available = new Set(getAvailableSizesForStyle(styleId));
-
-  return TABBY_SIZES.map((size) => ({
-    size,
-    available: available.has(size),
-  }));
 }
 
 export function getColorIdsForStyleSize(
@@ -257,15 +241,7 @@ export function getColorIdsForStyle(styleId: TabbyStyleId): string[] {
   return [...ids];
 }
 
-export function isColorAvailableForStyleSize(
-  styleId: TabbyStyleId,
-  size: TabbySize,
-  colorId: string,
-): boolean {
-  return getColorIdsForStyleSize(styleId, size).includes(colorId);
-}
-
-export function getNearestAvailableSize(
+function getNearestAvailableSize(
   styleId: TabbyStyleId,
   preferred: TabbySize,
 ): TabbySize {
@@ -373,92 +349,4 @@ export function resolveTabbySelection({
     slug,
     adjustments,
   };
-}
-
-const TABBY_FAMILY_EXPLORER_STYLE_IDS: TabbyStyleId[] = [
-  "soft",
-  "pillow-quilted",
-  "chain",
-];
-
-const TABBY_FAMILY_EXPLORER_DESCRIPTORS: Record<
-  TabbyStyleId | "messenger",
-  string
-> = {
-  classic: "Structured polish with iconic Tabby hardware",
-  soft: "Supple leather with a relaxed silhouette",
-  quilted: "Diamond-quilted texture with a little shine",
-  "pillow-quilted": "Padded construction with a softer feel",
-  "signature-canvas": "Logo-forward canvas with a lighter feel",
-  twisted: "Sculptural twist detail, quietly bold",
-  "loved-leather": "Broken-in character from day one",
-  chain: "A dressier interpretation with chain hardware",
-  messenger: "A more casual everyday carry",
-};
-
-/** Coach.com Tabby Messenger — separate product line until a prototype PDP exists. */
-const TABBY_MESSENGER_PDP_HREF =
-  "https://www.coach.com/shop/women/bags/crossbody-bags/tabby-messenger-bag-23/CCZ48.html";
-
-export type TabbyFamilyExplorerLink =
-  | {
-      id: string;
-      name: string;
-      descriptor: string;
-      thumbnail: string;
-      thumbnailAlt: string;
-      kind: "internal";
-      slug: string;
-      colorId: string;
-    }
-  | {
-      id: string;
-      name: string;
-      descriptor: string;
-      thumbnail: string;
-      thumbnailAlt: string;
-      kind: "external";
-      href: string;
-    };
-
-/** Adjacent Tabby silhouettes — separate PDPs, not in-place variant picks. */
-export function getTabbyFamilyExplorerLinks(
-  currentStyleId: TabbyStyleId,
-  currentSize: TabbySize,
-  preferredColorId: string,
-): TabbyFamilyExplorerLink[] {
-  const styleLinks: TabbyFamilyExplorerLink[] = TABBY_FAMILY_EXPLORER_STYLE_IDS.filter(
-    (styleId) => styleId !== currentStyleId,
-  ).map((styleId) => {
-    const style = getTabbyStyle(styleId);
-    const resolved = resolveTabbySelection({
-      styleId,
-      size: currentSize,
-      colorId: preferredColorId,
-    });
-
-    return {
-      id: styleId,
-      name: getTabbyFamilyNavLabel(styleId),
-      descriptor: TABBY_FAMILY_EXPLORER_DESCRIPTORS[styleId],
-      thumbnail: style.thumbnail,
-      thumbnailAlt: style.thumbnailAlt,
-      kind: "internal",
-      slug: resolved.slug,
-      colorId: resolved.colorId,
-    };
-  });
-
-  return [
-    ...styleLinks,
-    {
-      id: "messenger",
-      name: "Tabby Messenger",
-      descriptor: TABBY_FAMILY_EXPLORER_DESCRIPTORS.messenger,
-      thumbnail: "/images/compare/tabby-style-classic.jpg",
-      thumbnailAlt: "Tabby Messenger Bag in Brass/Black polished pebble leather",
-      kind: "external",
-      href: TABBY_MESSENGER_PDP_HREF,
-    },
-  ];
 }

@@ -10,12 +10,12 @@
  */
 
 /** Emphasized decelerate — small UI (fade, pop, icons). Skill default. */
-export const PDP_EASE_EMPHASIZED = "cubic-bezier(0.2, 0, 0, 1)" as const;
+const PDP_EASE_EMPHASIZED = "cubic-bezier(0.2, 0, 0, 1)" as const;
 
 /** Settle curve — sheets + hero family. Soft land, not snappy. */
-export const PDP_EASE_SETTLE = "cubic-bezier(0.16, 1, 0.3, 1)" as const;
+const PDP_EASE_SETTLE = "cubic-bezier(0.16, 1, 0.3, 1)" as const;
 
-export const PDP_MOTION_MS = {
+const PDP_MOTION_MS = {
   /** Press / tap scale return */
   press: 140,
   /** Scrim / simple opacity fades */
