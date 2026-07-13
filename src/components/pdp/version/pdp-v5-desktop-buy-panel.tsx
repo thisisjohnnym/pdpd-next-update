@@ -38,11 +38,11 @@ export function PdpV5DesktopBuyPanel({
   return (
     <div className="pdp-v5-desktop-buy-panel flex w-full min-w-0 flex-col gap-0 bg-white">
       <div className="flex min-w-0 flex-col gap-3 pb-4 lg:gap-4">
-        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
           <p
             className={cn(
               pdpProductTitleClass,
-              "min-w-0 text-pretty text-lg leading-snug text-black",
+              "min-w-0 text-pretty text-lg leading-tight text-black",
             )}
           >
             {summary.name}
@@ -50,9 +50,14 @@ export function PdpV5DesktopBuyPanel({
           <PdpProductPrice
             price={displayPrice.price}
             compareAtPrice={displayPrice.compareAtPrice}
-            className="shrink-0 justify-self-end pt-0.5 text-lg leading-snug"
+            className="shrink-0 justify-self-end text-lg leading-tight"
           />
-          <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
+          <p
+            className={cn(
+              pdpType.label,
+              "col-start-1 min-w-0 leading-none text-neutral-500",
+            )}
+          >
             in {summary.subtitle}
           </p>
         </div>

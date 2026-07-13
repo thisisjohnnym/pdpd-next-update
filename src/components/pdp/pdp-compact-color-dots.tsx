@@ -114,7 +114,7 @@ export function PdpCompactColorDots({
                   : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
               }
               className={cn(
-                "relative size-8 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
                 "before:absolute before:inset-[-8px] before:content-['']",
                 isSelected
                   ? "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"

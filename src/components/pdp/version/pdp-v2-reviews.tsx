@@ -196,8 +196,8 @@ function V4ReviewSummary({
       className={cn(
         "flex w-full shrink-0 flex-col px-4",
         emphasizeReviewsModule
-          ? "bg-[#F3F1EE] pb-8 pt-16"
-          : "bg-white pb-4 pt-14",
+          ? "bg-[#F3F1EE] py-14"
+          : "bg-white py-14",
       )}
     >
       <div className={cn("flex w-full flex-col gap-5", alignClass)}>

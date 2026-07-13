@@ -83,11 +83,11 @@ export function PdpV3HeroLayout({
         >
           {useCompactBuyBarColorDots ? (
             <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
-              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5">
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
                 <p
                   className={cn(
                     pdpProductTitleClass,
-                    "min-w-0 text-pretty text-base leading-snug text-black lg:text-lg",
+                    "min-w-0 text-pretty text-base leading-tight text-black lg:text-lg",
                   )}
                 >
                   {summary.name}
@@ -95,9 +95,14 @@ export function PdpV3HeroLayout({
                 <PdpProductPrice
                   price={displayPrice.price}
                   compareAtPrice={displayPrice.compareAtPrice}
-                  className="shrink-0 justify-self-end pt-0.5 text-base leading-snug lg:text-lg"
+                  className="shrink-0 justify-self-end text-base leading-tight lg:text-lg"
                 />
-                <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
+                <p
+                  className={cn(
+                    pdpType.label,
+                    "col-start-1 min-w-0 leading-none text-neutral-500",
+                  )}
+                >
                   in {summary.subtitle}
                 </p>
               </div>
