@@ -1,23 +1,16 @@
 ---
-description: PDP Next layout grid — Mobile 12/12/4, Desktop 24/20/8. Always apply for layout work.
-alwaysApply: true
+description: PDP Next layout grid — Mobile 12/12/4, Desktop 24/20/8. Apply for layout, spacing, typography, or icons.
+globs: src/**/*.{ts,tsx,css},docs/design-system/**
+alwaysApply: false
 ---
 
 # PDP Next Grid System
 
-All layout in this project uses the Figma grid:
+- **Mobile** `12/12/4` — 12 cols · 12px margin · 4px gutter · 375px
+- **Desktop** `24/20/8` — 24 cols · 20px margin · 8px gutter · 1440px
 
-- **Mobile** `12/12/4` — 12 columns · 12px margin · 4px gutter · 375px frame
-- **Desktop** `24/20/8` — 24 columns · 20px margin · 8px gutter · 1440px frame
+Use `PageShell`, `PageGrid`, `GridItem` from `@/components/grid/page-grid`. No arbitrary page padding or custom column counts.
 
-Use `@/components/grid/page-grid` (`PageShell`, `PageGrid`, `GridItem`). Do not use arbitrary page padding or custom column counts.
-
-Full reference: `docs/design-system/grid.md` · Skill: `.cursor/skills/pdp-grid-system/SKILL.md`
-
-## Typography
-
-All UI text: **Helvetica Neue LT Pro**. See `docs/design-system/typography.md`.
-
-## Icons
-
-All icons: **Google Material Symbols** via `@/components/icons/material-icon`. See `docs/design-system/icons.md`.
+- Grid: `docs/design-system/grid.md` · skill `.cursor/skills/pdp-grid-system/SKILL.md`
+- Type: Helvetica Neue LT Pro · `docs/design-system/typography.md`
+- Icons: Material Symbols via `@/components/icons/material-icon` · `docs/design-system/icons.md`

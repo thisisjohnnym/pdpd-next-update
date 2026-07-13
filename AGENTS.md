@@ -4,67 +4,15 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-## Planning (Plan mode)
+## Project rules (load on demand)
 
-In **Plan mode**, load `.cursor/rules/agent-planning.mdc` (or `@agent-planning`). Do scoped recon before presenting a plan; output execution-ready steps with verified paths. During Agent execution, follow the plan and discover further only when the plan defers it, an assumption breaks, or a check fails.
+Do **not** restate these here — use the Cursor rules / docs so context stays small:
 
-## PDP versions (read before any PDP edit)
-
-The PDP ships **four comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, and **v4** (latest round). Be version-aware before touching PDP code.
-
-- Architecture & flags: `docs/pdp-versions.md`
-- Deploy & stakeholder links: `docs/deploy-and-links.md`
-- Prototype playbook: `docs/prototype-versions.md`
-- Per-round changelogs: `docs/rounds/`
-- v2+ changes go in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts` — never rewrite v1 defaults.
-- Never edit `pdp-data.ts`, `pdp-section-chapters.ts`, or `globals.css` for version-only needs (prefer `pdp-vN.css`).
-- After changes, confirm older routes unchanged and run `pnpm check:versions`.
-- Cursor rule: `.cursor/rules/pdp-versions.mdc` (always on).
-
-### Pre-ship checklist
-
-Before sharing `/v4` (or any round) with stakeholders:
-
-1. `pnpm check:versions` and `pnpm build` pass
-2. Spot-check `/v1`–`/v3` unchanged; `/v4` matches round doc
-3. `git push origin main` (production updates when Vercel tracks `main`; use `vercel --prod --yes` to promote manually)
-4. Update `docs/rounds/README.md` deploy date and `docs/rounds/rN-vN.md` deploy log
-
-Full checklist: `docs/deploy-and-links.md`
-
-## Layout grid (always use)
-
-**Mobile `12/12/4`** · **Desktop `24/20/8`**
-
-| | Mobile | Desktop |
-|---|--------|---------|
-| Columns | 12 | 24 |
-| Margin | 12px | 20px |
-| Gutter | 4px | 8px |
-| Frame | 375px | 1440px |
-
-Use `PageShell`, `PageGrid`, `GridItem` from `@/components/grid/page-grid`. See `docs/design-system/grid.md`.
-
-## Hero chrome
-
-Tabby video hero land (inset shell, floating CTA): `docs/pdp-hero-chrome.md`.
-
-## Typography
-
-All UI text uses **Helvetica Neue LT Pro** (Coach 2026 Font Set). See `docs/design-system/typography.md`.
-
-## Icons
-
-All icons use **Google Material Symbols** via `MaterialIcon`. See `docs/design-system/icons.md`.
-
-## Animation & motion
-
-Any animation, transition, enter/exit, stagger, scroll fade, or micro-interaction work **must** implement and validate the **make-interfaces-feel-better** skill before handoff.
-
-- JS-orchestrated motion uses **GSAP**; see `docs/design-system/animations.md`
-- Full reference: `docs/design-system/animations.md`
-- Skill: `.agents/skills/make-interfaces-feel-better/SKILL.md` · Cursor: `.cursor/skills/make-interfaces-feel-better/SKILL.md`
-- Hero timing/reveal: `docs/pdp-hero-chrome.md`
-- Progressive blur: load `progressive-blur.mdc` when building fade-to-blur chrome
-
-Work is not complete until the skill Review Checklist passes and handoff includes Before | After tables for every applied principle.
+| Topic | Rule / doc |
+| --- | --- |
+| Plan mode | `.cursor/rules/agent-planning.mdc` |
+| PDP v1–v4 boundaries | `.cursor/rules/pdp-versions.mdc` · `docs/pdp-versions.md` |
+| Grid / type / icons | `.cursor/rules/pdp-grid-system.mdc` · `docs/design-system/` |
+| Motion | `.cursor/rules/pdp-animations.mdc` · make-interfaces-feel-better skill |
+| Paper | `.cursor/rules/paper.mdc` |
+| Deploy / share | `docs/deploy-and-links.md` |

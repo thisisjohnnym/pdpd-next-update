@@ -1,41 +1,28 @@
 ---
 description: PDP v1–v4 version boundaries — read before any PDP edit. Keeps frozen baselines safe while building the latest round.
-alwaysApply: true
+globs: src/**/*.{ts,tsx,css},docs/pdp*.md,docs/rounds/**,scripts/check-pdp*.mjs
+alwaysApply: false
 ---
 
 # PDP Versions (v1 frozen … v4 active)
 
-The PDP ships four comparison routes on one deploy from **`main`**:
+Four comparison routes from **`main`**: **v1** `/v1` (frozen) · **v2** `/v2` (frozen) · **v3** `/v3` (frozen) · **v4** `/v4` (active).
 
-- **v1** (`/v1`, legacy `/`) — frozen brand baseline
-- **v2** (`/v2`) — first stakeholder pivot (frozen)
-- **v3** (`/v3`) — Paper r4 pivot (frozen)
-- **v4** (`/v4`) — Paper r5 / latest feedback round — **active work**
-
-**Docs (read before edits):**
-
-- Architecture & flags: `docs/pdp-versions.md`
-- Deploy & links: `docs/deploy-and-links.md`
-- Playbook: `docs/prototype-versions.md`
-- Round changelogs: `docs/rounds/`
+Docs: `docs/pdp-versions.md` · `docs/deploy-and-links.md` · `docs/prototype-versions.md` · `docs/rounds/`
 
 ## Rules
 
-- Read `docs/pdp-versions.md` before editing any PDP code.
-- New round work goes in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1/v2/v3 defaults.
-- Do not branch on `version === "v2"` / `"v3"` / `"v4"` across the codebase. Add a flag to `PdpVersionConfig`.
+- New round work → `src/components/pdp/version/` or flags in `pdp-version-config.ts`. Never rewrite v1/v2/v3 defaults.
+- Do not branch on `version === "v2"|"v3"|"v4"`. Add a flag to `PdpVersionConfig`.
 - Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for new-round needs.
-- Never add version-only CSS to `globals.css`. Use `src/app/vN/pdp-vN.css` scoped under `[data-pdp-version="vN"]`. Treat `globals.css` edits as cross-version.
-- Shared `pdp-v2-*` components render on `/v2`, `/v3`, and `/v4` — gate v4-only layout behind v4 flags.
-- After any change, confirm older routes still match baseline, then run `pnpm check:versions`.
-- Before stakeholder share: follow pre-ship checklist in `docs/deploy-and-links.md` (`vercel --prod` updates production).
+- Version-only CSS → `src/app/vN/pdp-vN.css` under `[data-pdp-version="vN"]`, not `globals.css`.
+- Shared `pdp-v2-*` also render on `/v3`/`/v4` — gate v4-only layout behind v4 flags.
+- After changes: spot-check older routes, then `pnpm check:versions`.
+- Stakeholder share: pre-ship checklist in `docs/deploy-and-links.md`.
 
 ## Quick map
 
-- Provider/hook: `src/components/pdp/version/pdp-version-context.tsx` (`usePdpVersion()`)
-- Config adapter: `src/components/pdp/version/pdp-version-config.ts` (`getPdpVersionConfig(version)`)
-- v2 slides: `src/components/pdp/version/pdp-data-v2.ts`
-- v2 chapters: `src/components/pdp/version/pdp-section-chapters-v2.ts`
-- v3 hero/CTA/color-sheet: `src/components/pdp/version/pdp-v3-*.tsx`
-- v4 specs: `src/components/pdp/version/pdp-v4-specs.ts`
-- Boundary checks: `scripts/check-pdp-version-boundaries.mjs`
+- `pdp-version-context.tsx` · `pdp-version-config.ts`
+- v2: `pdp-data-v2.ts`, `pdp-section-chapters-v2.ts`
+- v3: `pdp-v3-*.tsx` · v4: `pdp-v4-specs.ts`
+- Boundaries: `scripts/check-pdp-version-boundaries.mjs`
