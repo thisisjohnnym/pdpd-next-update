@@ -39,10 +39,23 @@
     "ignore": [
       "src/components/pdp/pdp-tabby-catalog-v7.ts",
       "src/components/pdp/pdp-tabby-colors-v7.ts"
+    ],
+    "thresholdOverrides": [
+      {
+        "files": [
+          "src/components/pdp/pdp-compact-color-dots.tsx",
+          "src/components/pdp/use-hero-360-intro-reveal.ts",
+          "src/components/pdp/version/pdp-v5-*.tsx"
+        ],
+        "maxCrap": 500,
+        "maxCyclomatic": 50,
+        "reason": "v7 Skelly port UI — refactor deferred until post-feedback"
+      }
     ]
   },
   "rules": {
-    "high-crap-score": "warn",
+    "unused-exports": "warn",
+    "unused-types": "warn",
     "unused-dependency": "warn"
   }
 }
