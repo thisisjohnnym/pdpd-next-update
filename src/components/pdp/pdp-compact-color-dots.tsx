@@ -4,6 +4,11 @@ import { useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
+import {
+  ColorSwatchTile,
+  SQUARE_SWATCH_TILE_FOCAL,
+  SQUARE_SWATCH_TILE_ZOOM,
+} from "./pdp-color-swatch";
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
@@ -44,12 +49,33 @@ function buildCompactColorDotPreview(
   return { previewColors, hiddenCount };
 }
 
+function CompactColorSwatch({
+  color,
+  widthClass,
+  sizes,
+}: {
+  color: CompactColorDot;
+  widthClass: string;
+  sizes: string;
+}) {
+  return (
+    <ColorSwatchTile
+      src={color.swatch || undefined}
+      fill={color.swatch ? undefined : (color.chromeSample ?? "#d4d4d4")}
+      widthClass={widthClass}
+      sizes={sizes}
+      zoom={SQUARE_SWATCH_TILE_ZOOM}
+      objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+    />
+  );
+}
+
 type PdpCompactColorDotsProps = {
   colors: CompactColorDot[];
   selectedId: string;
   previewCount?: number;
   moreCountOverride?: number;
-  /** Full-width scrollable color rail vs compact +N row */
+  /** Full-width scrollable bag-swatch rail vs compact +N row */
   variant?: "compact" | "rail";
   /** Tap a preview swatch to select that color */
   onSelect: (id: string) => void;
@@ -59,7 +85,7 @@ type PdpCompactColorDotsProps = {
 };
 
 /**
- * Color preview — compact +N chips, or a full scrollable rail.
+ * Color preview — 1:1 bag image thumbnails as compact +N chips, or a full scrollable rail.
  */
 export function PdpCompactColorDots({
   colors,
@@ -114,16 +140,15 @@ export function PdpCompactColorDots({
                   : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
               }
               className={cn(
-                "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "relative shrink-0 overflow-hidden border-2 p-0 transition-[border-color,opacity] duration-200 ease-out",
                 "before:absolute before:inset-[-8px] before:content-['']",
-                isSelected
-                  ? "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
-                  : "ring-1 ring-black/10",
+                isSelected ? "border-black" : "border-transparent",
                 isSelectable && pdpPressableIconClass,
                 !isSelectable && "cursor-not-allowed opacity-40",
               )}
-              style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-            />
+            >
+              <CompactColorSwatch color={color} widthClass="w-9" sizes="36px" />
+            </button>
           );
         })}
       </div>
@@ -167,16 +192,15 @@ export function PdpCompactColorDots({
                   : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
               }
               className={cn(
-                "relative size-6 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                "relative shrink-0 overflow-hidden border-2 p-0 transition-[border-color,opacity] duration-200 ease-out",
                 "before:absolute before:inset-[-8px] before:content-['']",
-                isSelected
-                  ? "ring-1 ring-neutral-900 ring-offset-2 ring-offset-white"
-                  : "ring-1 ring-black/10",
+                isSelected ? "border-black" : "border-transparent",
                 isSelectable && pdpPressableIconClass,
                 !isSelectable && "cursor-not-allowed opacity-40",
               )}
-              style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-            />
+            >
+              <CompactColorSwatch color={color} widthClass="w-8" sizes="32px" />
+            </button>
           );
         })}
       </span>

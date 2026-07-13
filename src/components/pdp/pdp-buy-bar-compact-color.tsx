@@ -17,7 +17,7 @@ type PdpBuyBarCompactColorProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
-  /** Full scrollable 28px rail vs compact +N chips */
+  /** Full scrollable bag-swatch rail vs compact +N chips */
   variant?: "compact" | "rail";
   className?: string;
 };

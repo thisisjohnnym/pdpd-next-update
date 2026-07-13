@@ -214,12 +214,12 @@ export type PdpVersionConfig = {
    */
   inlineBuyBarColorSwatches: boolean;
   /**
-   * Replace the below-fold swatch grid with compact color dots below Add to bag.
+   * Replace the below-fold swatch grid with compact bag-image swatches below Add to bag.
    * v5 only.
    */
   useCompactBuyBarColorDots: boolean;
   /**
-   * Solid color dots shown before the +N label in the compact buy-bar row.
+   * Bag image thumbnails shown before the +N label in the compact buy-bar row.
    * v5 only.
    */
   compactBuyBarColorDotCount: number;

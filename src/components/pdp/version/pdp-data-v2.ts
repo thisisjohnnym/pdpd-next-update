@@ -831,8 +831,8 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     title: "Crafted to Age Beautifully",
     caption: "Glovetanned full-grain leather that gets richer with every wear.",
     ...CRAFTED_TO_AGE_TRAY,
-    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
-    alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
+    src: "/images/gallery/tabby-leather-full-grain-back.jpg",
+    alt: "Back of the Tabby bag in full-grain leather with THE TABBY BAG stamp and gold Coach snap",
     objectPosition: "center",
   },
   {
