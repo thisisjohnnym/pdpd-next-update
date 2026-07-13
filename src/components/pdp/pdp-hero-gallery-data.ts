@@ -89,6 +89,8 @@ const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk
  *   - Optionally lead with the studio drag-zoom product still (916) instead of
  *     the lifestyle land video — `heroGalleryStudioDragZoom`.
  *   - Otherwise lead with the A0 product still — `leadGalleryWithProductStill`.
+ *   - Keep A0 in the product block without promoting — `includeProductFrontStill`
+ *     (v5 logical category order).
  *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
  */
 function applyV4HeroGallery(
@@ -96,8 +98,14 @@ function applyV4HeroGallery(
   options: {
     leadGalleryWithProductStill?: boolean;
     heroGalleryStudioDragZoom?: boolean;
+    /** Keep the A0 front product still without promoting it to lead (v5). */
+    includeProductFrontStill?: boolean;
   } = {},
 ): PdpHeroGallerySlide[] {
+  const keepProductFront =
+    options.heroGalleryStudioDragZoom ||
+    options.leadGalleryWithProductStill ||
+    options.includeProductFrontStill;
   const swapped = slides
     .map((slide) =>
       slide.src === HERO_FEATURE_CALLOUT_SRC
@@ -105,10 +113,7 @@ function applyV4HeroGallery(
         : slide,
     )
     .filter(
-      (slide) =>
-        options.heroGalleryStudioDragZoom ||
-        options.leadGalleryWithProductStill ||
-        slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
+      (slide) => keepProductFront || slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
     );
 
   if (options.heroGalleryStudioDragZoom) {
@@ -313,10 +318,13 @@ export function orderHeroGallerySlides(
     options.heroGalleryStudioDragZoom ||
     useLogicalBlocks
       ? applyV4HeroGallery(slides, {
+          // Logical blocks own land order (on-model first) — keep A0 front
+          // still in the product block, but do not promote it to slide 0.
           leadGalleryWithProductStill: useLogicalBlocks
             ? false
             : options.leadGalleryWithProductStill,
           heroGalleryStudioDragZoom: options.heroGalleryStudioDragZoom,
+          includeProductFrontStill: useLogicalBlocks,
         })
       : slides;
 

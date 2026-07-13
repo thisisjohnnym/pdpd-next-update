@@ -152,11 +152,14 @@ export function PdpLeatherAgingCareUpsell({
   isDragging = false,
   onQuickAdd,
   className,
+  alwaysVisible = false,
 }: {
   stageIndex: number;
   isDragging?: boolean;
   onQuickAdd?: () => void;
   className?: string;
+  /** Skip stage-gated collapse (v5 wipe module always shows care). */
+  alwaysVisible?: boolean;
 }) {
   const { careNudge } = PDP_LEATHER_AGING;
   const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
@@ -179,19 +182,23 @@ export function PdpLeatherAgingCareUpsell({
     return null;
   }
 
+  const collapsed = !alwaysVisible && stageIndex === 0;
+
   return (
     <div
       className={cn(
         "w-full self-stretch overflow-hidden",
-        isDragging
+        alwaysVisible || isDragging
           ? "transition-none"
           : "transition-[max-height,margin,opacity] duration-500 ease-out",
-        stageIndex === 0
+        collapsed
           ? "max-h-0 opacity-0"
-          : "mt-2 max-h-56 opacity-100",
+          : alwaysVisible
+            ? "mt-0 max-h-none opacity-100"
+            : "mt-2 max-h-56 opacity-100",
         className,
       )}
-      aria-hidden={stageIndex === 0}
+      aria-hidden={collapsed}
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col divide-y divide-neutral-200/80">

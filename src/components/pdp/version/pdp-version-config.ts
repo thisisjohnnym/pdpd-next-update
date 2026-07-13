@@ -411,6 +411,11 @@ export type PdpVersionConfig = {
    */
   enlargeReviewUgcMomentText: boolean;
   /**
+   * Make the reviews preview hard to miss — warm band, larger rating, solid
+   * primary CTA. v5 only; v4 keeps the quieter white outline treatment.
+   */
+  emphasizeReviewsModule: boolean;
+  /**
    * Unify module H1s to `pdpType.headline` (20px) — matches The Details and
    * Out in the wild instead of the legacy 24px r5 override. v5 only.
    */
@@ -430,6 +435,11 @@ export type PdpVersionConfig = {
    * "Feel the leather" lifestyle slide). v5 only.
    */
   showGetTheHighlights: boolean;
+  /**
+   * Show sale price with struck list price in the hero / desktop buy panel.
+   * v5 merchandising prototype only.
+   */
+  showSalePricing: boolean;
   /**
    * Pad below-fold hero color rows with visual-only swatch placeholders for
    * sparse size tabs. v5 prototype only.
@@ -575,6 +585,7 @@ const V1_CONFIG: PdpVersionConfig = {
   enlargeReviewAiSummary: false,
   hideReviewUgcMomentCaption: false,
   enlargeReviewUgcMomentText: false,
+  emphasizeReviewsModule: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -584,6 +595,7 @@ const V1_CONFIG: PdpVersionConfig = {
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  showSalePricing: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -683,6 +695,7 @@ const V2_CONFIG: PdpVersionConfig = {
   enlargeReviewAiSummary: false,
   hideReviewUgcMomentCaption: false,
   enlargeReviewUgcMomentText: false,
+  emphasizeReviewsModule: false,
   useConsistentModuleHeadings: false,
   useV4GranularScrollReveal: false,
   useV4CompactUgcStrip: false,
@@ -694,6 +707,7 @@ const V2_CONFIG: PdpVersionConfig = {
   showMoreLikeThisCompare: false,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  showSalePricing: false,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,
@@ -826,6 +840,8 @@ const V5_CONFIG: PdpVersionConfig = {
   hideReviewUgcMomentCaption: true,
   // v5 bumps quote + handle type in the reviews UGC moments rail.
   enlargeReviewUgcMomentText: true,
+  // v5 reviews module gets a warm band + solid CTA so it isn't missed.
+  emphasizeReviewsModule: true,
   compactUgcMoreCountOverride: 6,
   useConsistentModuleHeadings: true,
   moreLikeThisLargeCards: true,
@@ -833,6 +849,7 @@ const V5_CONFIG: PdpVersionConfig = {
   squareButtonCorners: true,
   showWaysToWearModule: true,
   showGetTheHighlights: true,
+  showSalePricing: true,
   demoHeroColorSwatchRow: false,
   collapseHeroColorSwatches: false,
   heroColorSwatchPreviewCount: 0,

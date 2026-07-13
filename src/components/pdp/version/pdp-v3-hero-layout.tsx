@@ -12,7 +12,9 @@ import { PdpHeroBelowFoldColorSwatches } from "../pdp-hero-below-fold-color-swat
 import { PdpHeroShell } from "../pdp-hero-shell";
 import { useHeroEnterOnce } from "../use-hero-enter-once";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
+import { PdpProductPrice } from "../pdp-product-price";
+import { pdpProductTitleClass, pdpType } from "../pdp-type";
+import { usePdpDisplayPrice } from "../use-pdp-display-price";
 
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -54,6 +56,7 @@ export function PdpV3HeroLayout({
     getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
+  const displayPrice = usePdpDisplayPrice(summary.price);
   const heroEnterOnce = useHeroEnterOnce();
   const playLandIntro = playHeroLandIntro && heroEnterOnce;
 
@@ -89,14 +92,11 @@ export function PdpV3HeroLayout({
                 >
                   {summary.name}
                 </p>
-                <p
-                  className={cn(
-                    pdpProductPriceClass,
-                    "shrink-0 justify-self-end pt-0.5 text-base leading-snug text-black lg:text-lg",
-                  )}
-                >
-                  {summary.price}
-                </p>
+                <PdpProductPrice
+                  price={displayPrice.price}
+                  compareAtPrice={displayPrice.compareAtPrice}
+                  className="shrink-0 justify-self-end pt-0.5 text-base leading-snug lg:text-lg"
+                />
                 <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
                   in {summary.subtitle}
                 </p>
@@ -117,9 +117,11 @@ export function PdpV3HeroLayout({
                 <p className={cn(pdpProductTitleClass, "min-w-0 flex-1 truncate py-1 -my-1 text-base leading-none")}>
                   {summary.name}
                 </p>
-                <p className={cn(pdpProductPriceClass, "shrink-0 text-base leading-none text-neutral-900")}>
-                  {summary.price}
-                </p>
+                <PdpProductPrice
+                  price={displayPrice.price}
+                  compareAtPrice={displayPrice.compareAtPrice}
+                  className="shrink-0 text-base leading-none text-neutral-900"
+                />
               </div>
 
               <div className="flex items-center justify-between gap-4">

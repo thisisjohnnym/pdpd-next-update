@@ -2,9 +2,12 @@
 
 import { cn } from "@/lib/cn";
 
+import { PdpLeatherAgingCareUpsell } from "../pdp-leather-aging-care-upsell";
 import { PdpModuleHeading } from "../pdp-module-heading";
 import { pdpModuleIntroClass } from "../pdp-module-section";
+import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
+import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import {
   PDP_WAYS_TO_WEAR_SECTION,
@@ -15,17 +18,25 @@ import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
 /**
- * v5 "Ways to wear" — before/after drag slider between shoulder and crossbody.
+ * v5 leather-aging wipe — New vs 2 years compare, with Leather Cleaner /
+ * Conditioner upsell underneath (replaces the separate aging stage rail).
  */
-export function PdpV5WaysToWear() {
-  const { leftAlignModuleHeadings, useV4ModuleSpacing } =
-    getPdpVersionConfig(usePdpVersion());
+export function PdpV5WaysToWear({
+  onQuickAdd,
+}: {
+  onQuickAdd?: () => void;
+} = {}) {
+  const {
+    leftAlignModuleHeadings,
+    useV4ModuleSpacing,
+    showLeatherCareUpsell,
+  } = getPdpVersionConfig(usePdpVersion());
   const { headline, body } = PDP_WAYS_TO_WEAR_SECTION;
   const alignClass = leftAlignModuleHeadings
     ? "items-start text-left"
     : "items-center text-center";
 
-  const [shoulder, crossbody] = PDP_WAYS_TO_WEAR_STYLES;
+  const [newStage, agedStage] = PDP_WAYS_TO_WEAR_STYLES;
 
   return (
     <section
@@ -60,9 +71,21 @@ export function PdpV5WaysToWear() {
         </div>
 
         <PdpV5WaysToWearCompareSlider
-          styles={[shoulder, crossbody]}
+          styles={[newStage, agedStage]}
           leftAlign={leftAlignModuleHeadings}
+          tablistLabel="Leather aging"
+          sliderLabel="Compare new leather and two years of wear"
         />
+
+        {showLeatherCareUpsell ? (
+          <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
+            <PdpLeatherAgingCareUpsell
+              stageIndex={1}
+              alwaysVisible
+              onQuickAdd={onQuickAdd}
+            />
+          </PdpRevealItem>
+        ) : null}
       </div>
     </section>
   );

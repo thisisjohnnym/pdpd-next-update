@@ -976,7 +976,9 @@ export function PdpGalleryView({
             return [
               gallerySection(
                 `ways-to-wear-${index}`,
-                <PdpV5WaysToWear />,
+                <PdpV5WaysToWear
+                  onQuickAdd={() => onAddSimilarToBag?.()}
+                />,
                 { surface: "light" },
               ),
             ];

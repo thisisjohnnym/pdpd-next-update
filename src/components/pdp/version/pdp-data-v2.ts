@@ -26,7 +26,7 @@ export type PdpGalleryUgcCommunitySlide = {
   type: "ugc-community";
 };
 
-/** v5-only styling carousel — shoulder, crossbody, and on-model looks */
+/** v5-only leather aging wipe — New vs 2 years compare + care upsell */
 export type PdpGalleryWaysToWearSlide = {
   type: "ways-to-wear";
 };
@@ -708,9 +708,9 @@ export const PDP_V5_EDITORIAL_QUOTE = {
   alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
 } as const;
 export const PDP_WAYS_TO_WEAR_SECTION = {
-  headline: "Made to move",
+  headline: "Where wear becomes beauty",
   body:
-    "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
+    "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
 } as const;
 
 export type PdpWaysToWearStyle = {
@@ -721,23 +721,38 @@ export type PdpWaysToWearStyle = {
   alt: string;
 };
 
-/** Shoulder and crossbody carry — large editorial stills for v5 */
+/**
+ * v5 leather-aging wipe endpoints — New vs 2 years (reuses frozen
+ * `PDP_LEATHER_AGING` stage stills; does not mutate `pdp-data.ts`).
+ */
 export const PDP_WAYS_TO_WEAR_STYLES = [
   {
-    id: "shoulder",
-    label: "Shoulder carry",
-    caption: "Relaxed, elevated styling for everyday wear.",
-    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
-    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a beige top and tailored trousers",
+    id: "new",
+    label: "New",
+    caption: "Crisp grain, structured shape. No special care needed yet.",
+    src: "/images/gallery/tabby-leather-aging-new-day-one.jpg",
+    alt: "Tabby Shoulder Bag 26 in black leather with gold C clasp hardware — new, day one",
   },
   {
-    id: "crossbody",
-    label: "Crossbody",
-    caption: "Hands-free comfort for commuting and travel.",
-    src: "/images/gallery/tabby-crossbody-trench.jpg",
-    alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
+    id: "two-years",
+    label: "2 years",
+    caption:
+      "Rich depth, supple drape, honest creasing. Condition regularly to restore moisture and protect against drying.",
+    src: "/images/gallery/tabby-leather-aging-two-years.jpg",
+    alt: "Tabby Shoulder Bag 26 after two years of daily carry — rich patina and honest wear",
   },
-] satisfies PdpWaysToWearStyle[];
+] satisfies [PdpWaysToWearStyle, PdpWaysToWearStyle];
+
+/**
+ * v5 demo sale prices — compare-at remains the coach.com list price from
+ * `SIZE_PRICES` / `summary.price`. ~20% off for prototype merchandising.
+ */
+export const PDP_V5_SALE_PRICES: Record<20 | 26 | 33 | 36, string> = {
+  20: "$300",
+  26: "$380",
+  33: "$580",
+  36: "$556",
+};
 
 /**
  * v5 "Get the highlights" — Apple-style highlight rail that replaces the
@@ -1078,9 +1093,9 @@ export const PDP_FIND_YOUR_TABBY_FAMILY: FindYourTabbyFamilyMember[] =
   });
 
 /**
- * Insert the v5 Ways to wear module immediately after Up close / editorial
- * carousel, and swap the Feel the leather studio slide for the Apple-style
- * "Get the highlights" rail.
+ * Insert the v5 leather-aging wipe module after Up close / editorial carousel,
+ * swap Feel the leather for Get the highlights, and drop the stage-rail
+ * leather-aging slide (care upsell lives under the wipe instead).
  */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
@@ -1088,6 +1103,10 @@ export function applyV5GallerySlidePatches(
   const result: PdpGallerySlideV2[] = [];
 
   for (const slide of slides) {
+    if (slide.type === "leather-aging") {
+      continue;
+    }
+
     if (slide.type === "immersive" && slide.src === STUDIO_PRODUCT_SRC) {
       result.push({ type: "get-the-highlights" });
       continue;

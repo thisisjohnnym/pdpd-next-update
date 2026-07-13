@@ -5,8 +5,10 @@ import { cn } from "@/lib/cn";
 import { useActiveProduct } from "../pdp-active-product-context";
 import { PdpBuyBarRow } from "../pdp-buy-bar-row";
 import { PdpBuyBarCompactColor } from "../pdp-buy-bar-compact-color";
+import { PdpProductPrice } from "../pdp-product-price";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import { pdpProductPriceClass, pdpProductTitleClass, pdpType } from "../pdp-type";
+import { pdpProductTitleClass, pdpType } from "../pdp-type";
+import { usePdpDisplayPrice } from "../use-pdp-display-price";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
@@ -31,6 +33,7 @@ export function PdpV5DesktopBuyPanel({
   const { useCompactBuyBarColorDots } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
+  const displayPrice = usePdpDisplayPrice(summary.price);
 
   return (
     <div className="pdp-v5-desktop-buy-panel flex w-full min-w-0 flex-col gap-0 bg-white">
@@ -44,14 +47,11 @@ export function PdpV5DesktopBuyPanel({
           >
             {summary.name}
           </p>
-          <p
-            className={cn(
-              pdpProductPriceClass,
-              "shrink-0 justify-self-end pt-0.5 text-lg leading-snug text-black",
-            )}
-          >
-            {summary.price}
-          </p>
+          <PdpProductPrice
+            price={displayPrice.price}
+            compareAtPrice={displayPrice.compareAtPrice}
+            className="shrink-0 justify-self-end pt-0.5 text-lg leading-snug"
+          />
           <p className={cn(pdpType.label, "col-start-1 min-w-0 text-neutral-500")}>
             in {summary.subtitle}
           </p>
