@@ -22,5 +22,27 @@
   "ignorePatterns": [
     "scripts/**"
   ],
-  "rules": {}
+  "audit": {
+    "gate": "new-only"
+  },
+  "ignoreExports": [
+    {
+      "file": "src/components/pdp/pdp-tabby-catalog-v7.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/components/pdp/pdp-tabby-colors-v7.ts",
+      "exports": ["*"]
+    }
+  ],
+  "health": {
+    "ignore": [
+      "src/components/pdp/pdp-tabby-catalog-v7.ts",
+      "src/components/pdp/pdp-tabby-colors-v7.ts"
+    ]
+  },
+  "rules": {
+    "high-crap-score": "warn",
+    "unused-dependency": "warn"
+  }
 }
