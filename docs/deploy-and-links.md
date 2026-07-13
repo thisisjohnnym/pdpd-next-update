@@ -4,9 +4,10 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 ## In short
 
-- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v7` (latest round).
-- **Compare all versions** on the same deploy: `/v1` … `/v7` on that host.
-- **Git push alone** updates Preview only — run `vercel --prod` when stakeholders need the main URL updated.
+- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v7` (latest round — shipped Jul 13, 2026).
+- **Compare all versions** on the same deploy: `/v1` … `/v7` on that host (nothing removed when `/v7` merged).
+- **UXR study pair** (same deploy): `/fc01` (horizontal) · `/fc01v` (vertical).
+- Pushing **`main`** updates production when Vercel tracks `main`; use `vercel --prod --yes` to promote manually.
 
 ---
 
@@ -65,7 +66,7 @@ vercel --prod --yes
 
 | Name | Meaning |
 |------|---------|
-| Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v6`) and active prototype work |
+| Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v7`, plus `/fc01`/`/fc01v`) and active prototype work |
 | Routes `/v1`–`/v7` | Frozen comparison URLs on one deploy — not separate git branches |
 | Git branch `v2` | Legacy development line (merged into `main`); keep in sync or retire |
 

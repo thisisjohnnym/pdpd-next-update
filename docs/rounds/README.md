@@ -14,15 +14,23 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | r7 | `/v6` | Post-v5 feedback | Fall-in intro + vertical mobile gallery UXR variant | Frozen | [r7-v6.md](r7-v6.md) |
 | r8 | `/v7` | Skelly parity | Skelly visual SoT on our motion stack | **Active** | [r8-v7.md](r8-v7.md) |
 
+## Current state (Jul 13, 2026)
+
+- **Active round:** r8 → `/v7` (Skelly parity on our motion stack).
+- **Merged to `main`:** PR [#1](https://github.com/thisisjohnnym/pdpd-next-update/pull/1) · `272ce8b` — `feat(v7): Skelly parity route on our motion stack`.
+- **Comparison routes:** `/v1`–`/v7` all live on one deploy — nothing removed.
+- **Also on `main`:** `/fc01` + `/fc01v` UXR study pair (see [fc01.md](fc01.md)).
+- **Frozen note:** `/v1`–`/v4` should match their baselines. `/v5` and `/v6` inherited shared Skelly component updates from the same merge train (docked color rail, closer-look stage, etc.) — no longer pixel-frozen to their Jul 7 ship.
+- **Next:** stakeholder feedback lands on `/v7` behind new flags in `V7_CONFIG` — do not rewrite frozen route defaults.
+
 ## Last production deploy
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 7, 2026 |
-| Commit | `d7fe1f5` — fix(v6): beige UGC band, carousel drag snap, and footer rhythm |
-| URL | https://pdp-next-sigma.vercel.app/v6 |
-
-_Update after first `/v7` production ship._
+| Date | Jul 13, 2026 |
+| Commit | `272ce8b` — feat(v7): Skelly parity route on our motion stack (#1) |
+| URL | https://pdp-next-sigma.vercel.app/v7 |
+| Prior ship | Jul 7, 2026 · `d7fe1f5` · `/v6` |
 
 ## Quick links (Tabby)
 

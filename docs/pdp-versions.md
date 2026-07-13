@@ -6,8 +6,10 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round (frozen). **v6** is the fall-in + vertical gallery UXR variant (frozen). **v7** is the active Skelly parity round.
-- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, **`/v6`**, and **`/v7`** on the same deploy.
+- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round. **v6** is the fall-in + vertical gallery UXR variant. **v7** is the **active** Skelly parity round (shipped to `main` Jul 13, 2026).
+- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, **`/v6`**, and **`/v7`** on the same deploy — merging `/v7` did **not** remove older routes.
+- **Current state:** `main` @ `272ce8b` · share **`/v7`** for feedback · `/fc01` + `/fc01v` also live for the UXR study pair.
+- **Frozen caveat:** `/v1`–`/v4` stay baseline-safe. `/v5` and `/v6` picked up shared Skelly component updates from the Jul 13 merge train — compare against [rounds/README.md](rounds/README.md) if pixel parity matters.
 - v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
@@ -305,7 +307,9 @@ For the full r5 (v4) module map, node-verify workflow, and Definition of Done, s
 
 ## 8.6. v5 — Sean r5 polish (skelly import)
 
-v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the frozen v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, desktop split layout, UGC testimonials, closer-look trays, and module spacing polish. Mobile also plays the shared fall-in hero intro (horizontal gallery — vertical gallery stays v6-only). **v1–v4 are unchanged.**
+v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, desktop split layout, UGC testimonials, closer-look trays, and module spacing polish. Mobile also plays the shared fall-in hero intro (horizontal gallery — vertical gallery stays v6-only). **v1–v4 are unchanged.**
+
+**Jul 13, 2026 note:** the r8 merge refreshed shared v5 modules (docked color rail, Find your Tabby carousel, compare sheets). `/v5` is a frozen *route* for comparison, but it is no longer pixel-identical to the Jul 7 `/v6` ship.
 
 ### v5-only files
 

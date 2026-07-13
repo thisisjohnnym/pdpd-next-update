@@ -24,10 +24,10 @@ The PDP ships **seven comparison routes** from one codebase: **v1** (frozen base
 
 ### Pre-ship checklist
 
-Before sharing `/v4` (or any round) with stakeholders:
+Before sharing `/v7` (or any round) with stakeholders:
 
 1. `pnpm check:versions` and `pnpm build` pass
-2. Spot-check `/v1`–`/v3` unchanged; `/v4` matches round doc
+2. Spot-check `/v1`–`/v4` unchanged; active round (`/v7`) matches its round doc
 3. `git push origin main` (production updates when Vercel tracks `main`; use `vercel --prod --yes` to promote manually)
 4. Update `docs/rounds/README.md` deploy date and `docs/rounds/rN-vN.md` deploy log
 
