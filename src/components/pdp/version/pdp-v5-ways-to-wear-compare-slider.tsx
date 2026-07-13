@@ -199,7 +199,7 @@ export function PdpV5WaysToWearCompareSlider({
 
       <p
         className={cn(
-          "font-extended m-0 text-neutral-500",
+          "font-extended m-0 whitespace-nowrap text-neutral-500",
           pdpType.micro,
           leftAlign ? "text-left" : "text-center",
           !dragging && !reducedMotion && "transition-opacity duration-200",

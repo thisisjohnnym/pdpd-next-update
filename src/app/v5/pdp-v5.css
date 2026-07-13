@@ -129,12 +129,8 @@
   box-shadow: none;
 }
 
-/* "What customers are saying" band — warm beige editorial testimonial (Figma 409:460). */
-[data-pdp-version="v5"] .pdp-v5-ugc-testimonials {
-  background-color: var(--pdp-v5-editorial-beige);
-}
-
-/* 9:16 editorial quote card — photo + warm beige pull quote. */
+/* Editorial bands — solid warm beige. */
+[data-pdp-version="v5"] .pdp-v5-ugc-testimonials,
 [data-pdp-version="v5"] .pdp-v5-quote-card-section {
   background-color: var(--pdp-v5-editorial-beige);
 }

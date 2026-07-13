@@ -737,7 +737,7 @@ export const PDP_WAYS_TO_WEAR_STYLES = [
     id: "two-years",
     label: "2 years",
     caption:
-      "Rich depth, supple drape, honest creasing. Condition regularly to restore moisture and protect against drying.",
+      "Rich depth, soft drape, honest creasing. Condition regularly.",
     src: "/images/gallery/tabby-leather-aging-two-years.jpg",
     alt: "Tabby Shoulder Bag 26 after two years of daily carry — rich patina and honest wear",
   },
