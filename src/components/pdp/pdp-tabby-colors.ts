@@ -49,7 +49,7 @@ const LEGACY_COLOR_ID_MAP: Record<string, string> = {
 /** Full-bag studio shots where available; clasp crops only as fallback */
 const COACH_SWATCH = {
   "brass-black": "/images/colors/soft-tabby/black.png",
-  "silver-black": "/images/colors/soft-tabby/black-charm.png",
+  "silver-black": "/images/colors/soft-tabby/black.png",
   "brass-chalk": "/images/colors/tabby/brass-chalk.jpg",
   "brass-maple": "/images/colors/soft-tabby/canyon.png",
   "brass-biscuit": "/images/colors/tabby/brass-biscuit.jpg",
@@ -124,14 +124,6 @@ const CLASSIC_26: TabbyColorSeed[] = [
     availability: "in_stock",
   },
   {
-    id: "silver-black",
-    name: "Silver/Black",
-    swatch: coachSwatch("soft-black-charm"),
-    hero: coachSwatch("soft-black-charm"),
-    chromeSample: "#1a1a1a",
-    availability: "in_stock",
-  },
-  {
     id: "brass-tan-fringe",
     name: "Brass/Tan Fringe",
     swatch: coachSwatch("soft-tan-fringe"),
@@ -155,13 +147,6 @@ const QUILTED_26: TabbyColorSeed[] = [
     id: "brass-black",
     name: "Brass/Black",
     swatch: coachSwatch("brass-black"),
-    chromeSample: "#1a1a1a",
-    availability: "in_stock",
-  },
-  {
-    id: "silver-black",
-    name: "Silver/Black",
-    swatch: coachSwatch("silver-black"),
     chromeSample: "#1a1a1a",
     availability: "in_stock",
   },

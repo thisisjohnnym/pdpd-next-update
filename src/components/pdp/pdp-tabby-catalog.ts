@@ -54,7 +54,6 @@ const TABBY_FAMILY_CATALOG: TabbyFamilyStyleEntry[] = [
           "brass-black",
           "brass-canyon",
           "brass-black-multi",
-          "silver-black",
           "brass-tan-fringe",
           "silver-black-fringe",
         ],
@@ -103,7 +102,6 @@ const TABBY_FAMILY_CATALOG: TabbyFamilyStyleEntry[] = [
         size: 26,
         colorIds: [
           "brass-black",
-          "silver-black",
           "silver-soft-purple",
           "brass-maple",
           "brass-black-multi",
