@@ -28,9 +28,9 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | Field | Value |
 |-------|-------|
 | Date | Jul 13, 2026 |
-| Commit | `272ce8b` — feat(v7): Skelly parity route on our motion stack (#1) |
+| Commit | `0a3d34f` — feat(v7): land chrome polish + fuller fall-in framing |
 | URL | https://pdp-next-sigma.vercel.app/v7 |
-| Prior ship | Jul 7, 2026 · `d7fe1f5` · `/v6` |
+| Prior ship | Jul 13, 2026 · `272ce8b` · `/v7` Skelly parity merge |
 
 ## Quick links (Tabby)
 
