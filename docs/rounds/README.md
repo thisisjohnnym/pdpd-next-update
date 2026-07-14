@@ -28,9 +28,9 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | Field | Value |
 |-------|-------|
 | Date | Jul 13, 2026 |
-| Commit | `0a3d34f` — feat(v7): land chrome polish + fuller fall-in framing |
+| Commit | `9548c7f` — fix(v7): flush ATB dock, WebKit intro play, kill scroll jitter |
 | URL | https://pdp-next-sigma.vercel.app/v7 |
-| Prior ship | Jul 13, 2026 · `272ce8b` · `/v7` Skelly parity merge |
+| Prior ship | Jul 13, 2026 · `0a3d34f` · land chrome polish |
 
 ## Quick links (Tabby)
 
