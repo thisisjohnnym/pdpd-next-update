@@ -34,7 +34,7 @@ export function PdpBottomActions({
   const barRef = useRef<HTMLDivElement>(null);
   const playHeroEnter = useHeroEnterOnce();
 
-  const { showSectionJumpBar, inlineBuyBarColorSwatches } =
+  const { showSectionJumpBar, inlineBuyBarColorSwatches, floatingBuyBarLandCta, hero360IntroEnabled } =
     getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
 
@@ -58,6 +58,8 @@ export function PdpBottomActions({
       data-floating-cta-bar
       className={cn(
         "pointer-events-none fixed inset-x-0 z-40 bg-white transition-transform duration-300 ease-out",
+        floatingBuyBarLandCta && "pdp-v7-fixed-cta-dock",
+        hero360IntroEnabled && "pdp-hero-intro-chrome",
         chromeHidden ? "translate-y-full" : "translate-y-0",
       )}
       style={{
@@ -70,7 +72,7 @@ export function PdpBottomActions({
       <div
         className={cn(
           "pointer-events-auto w-full",
-          playHeroEnter && "pdp-hero-bottom-enter",
+          !hero360IntroEnabled && playHeroEnter && "pdp-hero-bottom-enter",
         )}
         style={{ gap: CTA_BAR_GAP_PX }}
       >
@@ -81,7 +83,8 @@ export function PdpBottomActions({
           onColorSheetOpenChange={setColorSheetOpen}
           hideColor={inlineBuyBarColorSwatches}
           inlineColorSwatches={false}
-          className="gap-2.5"
+          landCta={floatingBuyBarLandCta}
+          className={cn("gap-2.5", floatingBuyBarLandCta && "px-0")}
         />
       </div>
     </footer>,

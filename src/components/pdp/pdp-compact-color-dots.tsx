@@ -60,8 +60,10 @@ type PdpCompactColorDotsProps = {
    * "dot" — tiny availability cue with +N chips (default). "swatch" — large
    * tappable swatches with a halo ring on the selected color (v6 docked hero
    * footer). "rail" — full-width scrollable 32px color rail (docked land CTA).
+   * "compact-swatch" — small full-bag photo tiles + +N (v7 land).
+   * "land-dock" — large scrollable full-bag tiles, half-cropped by docked CTA.
    */
-  variant?: "dot" | "swatch" | "rail";
+  variant?: "dot" | "swatch" | "rail" | "compact-swatch" | "land-dock";
   className?: string;
 };
 
@@ -215,7 +217,149 @@ export function PdpCompactColorDots({
     );
   }
 
-  return (
+  if (variant === "land-dock") {
+    return (
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "pdp-v7-land-dock-swatches flex min-w-0 w-full max-w-full items-center gap-2 overflow-x-auto overscroll-x-contain",
+          "px-0.5 py-0.5",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
+      >
+        {colors.map((color) => {
+          const isSelected = color.id === selectedId;
+          const isSelectable = isInStockForPreview(color);
+
+          return (
+            <button
+              key={color.id}
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              aria-disabled={!isSelectable}
+              disabled={!isSelectable}
+              onClick={() => {
+                if (isSelectable) {
+                  onSelect(color.id);
+                }
+              }}
+              aria-label={
+                isSelectable
+                  ? `Select ${color.name}`
+                  : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+              }
+              className={cn(
+                "relative size-14 shrink-0 overflow-hidden rounded-sm transition-[border-color,opacity] duration-200 ease-out",
+                "before:absolute before:inset-[-8px] before:content-['']",
+                isSelected ? "border-2 border-black" : "ring-1 ring-black/10",
+                isSelectable && pdpPressableIconClass,
+                !isSelectable && "cursor-not-allowed opacity-40",
+              )}
+            >
+              {useFullBagColorSwatches && color.swatch ? (
+                <ColorSwatchTile
+                  src={color.swatch}
+                  widthClass="size-full"
+                  sizes="56px"
+                  fillParent
+                  {...resolveSquareSwatchFraming(color.swatch)}
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (variant === "compact-swatch") {
+    return (
+      <div
+        role="listbox"
+        aria-label="Choose color"
+        className={cn("inline-flex min-h-[28px] items-center gap-2", className)}
+      >
+        <span className="flex items-center gap-1.5">
+          {previewColors.map((color) => {
+            const isSelected = color.id === selectedId;
+            const isSelectable = isInStockForPreview(color);
+
+            return (
+              <button
+                key={color.id}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={!isSelectable}
+                disabled={!isSelectable}
+                onClick={() => {
+                  if (isSelectable) {
+                    onSelect(color.id);
+                  }
+                }}
+                aria-label={
+                  isSelectable
+                    ? `Select ${color.name}`
+                    : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+                }
+                className={cn(
+                  "relative size-7 shrink-0 overflow-hidden rounded-sm transition-[border-color,opacity] duration-200 ease-out",
+                  "before:absolute before:inset-[-8px] before:content-['']",
+                  isSelected ? "border-2 border-black" : "ring-1 ring-black/10",
+                  isSelectable && pdpPressableIconClass,
+                  !isSelectable && "cursor-not-allowed opacity-40",
+                )}
+              >
+                {useFullBagColorSwatches && color.swatch ? (
+                  <ColorSwatchTile
+                    src={color.swatch}
+                    widthClass="size-full"
+                    sizes="28px"
+                    fillParent
+                    {...resolveSquareSwatchFraming(color.swatch)}
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </span>
+        {moreCount > 0 ? (
+          <button
+            type="button"
+            onClick={onOpenSheet}
+            aria-haspopup="dialog"
+            aria-label={`View ${moreCount} more colors`}
+            className={cn(
+              "shrink-0 text-neutral-900",
+              pdpType.micro,
+              pdpPressableIconClass,
+            )}
+          >
+            +{moreCount}
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (variant === "dot") {
+    return (
     <div
       role="listbox"
       aria-label="Choose color"
@@ -275,4 +419,5 @@ export function PdpCompactColorDots({
       ) : null}
     </div>
   );
+  }
 }

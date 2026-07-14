@@ -118,7 +118,7 @@ export function PdpHero360IntroProvider({
       // for a frame is what flashes header/footer on reload.
       if (
         typeof location !== "undefined" &&
-        /^\/v[56](\/|$)/.test(location.pathname)
+        /^\/v[567](\/|$)/.test(location.pathname)
       ) {
         return;
       }

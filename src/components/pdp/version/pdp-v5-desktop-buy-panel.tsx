@@ -30,7 +30,8 @@ export function PdpV5DesktopBuyPanel({
 }: PdpV5DesktopBuyPanelProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useCompactBuyBarColorDots } = getPdpVersionConfig(usePdpVersion());
+  const { useCompactBuyBarColorDots, heroLandColorSwatchVariant } =
+    getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
@@ -65,7 +66,7 @@ export function PdpV5DesktopBuyPanel({
           <PdpBuyBarCompactColor
             selectedColorId={selectedColorId}
             onColorSelect={onColorSelect}
-            variant="rail"
+            variant={heroLandColorSwatchVariant}
             className="min-w-0"
           />
         ) : null}

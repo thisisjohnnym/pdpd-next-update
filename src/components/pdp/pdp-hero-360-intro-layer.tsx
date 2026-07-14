@@ -33,6 +33,8 @@ const INTRO_FAIL_OPEN_MS = Math.ceil(
  * the bag enters — and any positive Y "fix" then slid the clip upward against
  * the fall. Contain shows the full 9:16 on the studio ground: bag enters at the
  * top of the viewport and settles centered, with no camera transform.
+ * v7 punches the bag up via a container-sized width-fill scale in `pdp-v7.css`
+ * (still contain — not cover) so letterboxing doesn’t leave the product tiny.
  *
  * Soft UI cue at media ~1.2s via `timeupdate` only — no rAF loop fighting the
  * decoder. End frame stays as slide 0.

@@ -1,6 +1,6 @@
 /**
  * Static first-paint hide — no JS required after phase is stamped.
- * Gate on `html[data-hero-intro-phase="playing"]` (boot stamps this on /v5–/v6).
+ * Gate on `html[data-hero-intro-phase="playing"]` (boot stamps this on /v5–/v7).
  * Do not require a descendant `[data-pdp-version]` — RSC can stream chrome
  * outside the layout wrapper. Lift on `revealing` so GSAP can tween.
  * Studio ground must live here too — body is black and the hero shell is
@@ -37,7 +37,7 @@ html[data-hero-intro-phase="playing"] .pdp-hero-docked-footer::before{
 
 /**
  * Stamp version + intro phase on <html> before chrome paints.
- * /v5, /v6, and the /fc01 + /fc01v UXR pair all use the desktop split
+ * /v5, /v6, /v7, and the /fc01 + /fc01v UXR pair all use the desktop split
  * (lg:hidden mobile hero) — only stamp
  * playing below the lg breakpoint so desktop never hides chrome for a 0x0 video.
  * Keep this string free of bare backticks — it is embedded in a template literal.
@@ -48,6 +48,7 @@ export const PDP_V6_INTRO_BOOT_SCRIPT = `
   var version = null;
   if (/^\\/v5(\\/|$)/.test(path)) version = "v5";
   else if (/^\\/v6(\\/|$)/.test(path)) version = "v6";
+  else if (/^\\/v7(\\/|$)/.test(path)) version = "v7";
   else if (/^\\/fc01v(\\/|$)/.test(path)) version = "fc01v";
   else if (/^\\/fc01(\\/|$)/.test(path)) version = "fc01";
   if (!version) return;

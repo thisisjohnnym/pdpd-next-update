@@ -27,6 +27,8 @@ type PdpHeroBelowFoldColorSwatchesProps = {
   onColorSelect: (id: string) => void;
   /** Render inside the docked hero footer — no outer section padding or seam. */
   embedded?: boolean;
+  /** v7 scroll-expand — hide caption; tighter rail after hero scrolls away. */
+  scrollExpand?: boolean;
 };
 
 /** Full-width color rail — sits below the hero shell so it is not above the fold. */
@@ -34,6 +36,7 @@ export function PdpHeroBelowFoldColorSwatches({
   selectedColorId,
   onColorSelect,
   embedded = false,
+  scrollExpand = false,
 }: PdpHeroBelowFoldColorSwatchesProps) {
   const tabby = useOptionalTabbyVariant();
   const { productId } = useActiveProduct();
@@ -47,6 +50,8 @@ export function PdpHeroBelowFoldColorSwatches({
     heroColorSwatchMoreCountOverride,
     useV3ColorSheet,
     hideHeroColorSwatchLabel,
+    flatColorSheet,
+    heroColorSwatchesExpandOnScroll,
   } = getPdpVersionConfig(version);
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
   const [notifyLabel, setNotifyLabel] = useState<string | null>(null);
@@ -156,17 +161,26 @@ export function PdpHeroBelowFoldColorSwatches({
         aria-label={showTabbyAlsoAvailableAs ? "Color" : "Color and size"}
         className={cn(
           "pdp-hero-below-fold-colors w-full shrink-0 border-0 bg-white",
+          scrollExpand && "pdp-v7-hero-colors-expand-section",
           embedded
             ? "px-0 pb-0 pt-3"
-            : useV4ModuleSpacing
-              ? "px-4 pb-4 pt-4"
-              : "px-3 pb-3 pt-3",
+            : scrollExpand
+              ? "px-3 pb-2 pt-1"
+              : heroColorSwatchesExpandOnScroll
+                ? "px-3 pb-2 pt-2"
+                : useV4ModuleSpacing
+                  ? "px-4 pb-4 pt-4"
+                  : "px-3 pb-3 pt-3",
         )}
       >
         <div
           className={cn(
             "flex flex-col",
-            isTabbyProduct && showTabbyAlsoAvailableAs ? "gap-4" : "gap-8",
+            isTabbyProduct && showTabbyAlsoAvailableAs
+              ? "gap-4"
+              : scrollExpand || heroColorSwatchesExpandOnScroll
+                ? "gap-3"
+                : "gap-8",
           )}
         >
           <PdpGroupedProductColorSwatchGrid
@@ -176,12 +190,12 @@ export function PdpHeroBelowFoldColorSwatches({
             onNotify={setNotifyLabel}
             tabbyCurrentSize={isTabbyProduct ? tabby!.size : undefined}
             tabbySizeOptions={
-              isTabbyProduct && !showTabbyAlsoAvailableAs
+              isTabbyProduct && !showTabbyAlsoAvailableAs && !flatColorSheet
                 ? tabby!.sizeOptions
                 : undefined
             }
             onFamilySelect={
-              isTabbyProduct && !showTabbyAlsoAvailableAs
+              isTabbyProduct && !showTabbyAlsoAvailableAs && !flatColorSheet
                 ? handleFamilySelect
                 : undefined
             }
@@ -199,7 +213,7 @@ export function PdpHeroBelowFoldColorSwatches({
             }
             moreCountOverride={heroColorSwatchMoreCountOverride}
             onOpenColorSheet={() => setColorSheetOpen(true)}
-            hideColorLabel={hideHeroColorSwatchLabel}
+            hideColorLabel={scrollExpand || hideHeroColorSwatchLabel}
           />
 
           {isTabbyProduct && showTabbyAlsoAvailableAs ? (

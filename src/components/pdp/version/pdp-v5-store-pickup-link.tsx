@@ -52,13 +52,18 @@ const NEARBY_STORES = [
 
 type PdpV5StorePickupLinkProps = {
   className?: string;
+  /** v7 meta strip — full-width row with trailing chevron */
+  metaStripRow?: boolean;
 };
 
 /**
  * Quiet fulfillment affordance under Add to bag — opens a lightweight
  * nearby-store tray without competing with the primary CTA.
  */
-export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
+export function PdpV5StorePickupLink({
+  className,
+  metaStripRow = false,
+}: PdpV5StorePickupLinkProps) {
   const { showStorePickupLink, squareButtonCorners } = getPdpVersionConfig(
     usePdpVersion(),
   );
@@ -85,16 +90,35 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className={cn(pdpTextLinkCtaClass, "min-h-[40px]")}
+          className={cn(
+            metaStripRow
+              ? "flex min-h-[44px] w-full items-center justify-between gap-3 px-3 py-2.5 text-left active:bg-neutral-100/80"
+              : pdpTextLinkCtaClass,
+            !metaStripRow && "min-h-[40px]",
+          )}
         >
-          <MaterialIcon
-            name="storefront"
-            size={16}
-            className="shrink-0"
-          />
-          <span className={cn(pdpTextLinkCtaLabelClass, pdpType.label)}>
-            Pick up in store
+          <span className="flex min-w-0 items-center gap-2">
+            <MaterialIcon
+              name="storefront"
+              size={16}
+              className="shrink-0 text-neutral-600"
+            />
+            <span
+              className={cn(
+                metaStripRow ? pdpType.body : pdpTextLinkCtaLabelClass,
+                metaStripRow ? "text-neutral-900" : pdpType.label,
+              )}
+            >
+              Pick up in store
+            </span>
           </span>
+          {metaStripRow ? (
+            <MaterialIcon
+              name="chevron_right"
+              size={18}
+              className="shrink-0 text-neutral-400"
+            />
+          ) : null}
         </button>
       </div>
 

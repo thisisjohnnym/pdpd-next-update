@@ -16,11 +16,21 @@ const REVEAL_STAGGER_S = 0.08;
 const REVEAL_DURATION_S = 0.5;
 
 function collectIntroChrome(root: HTMLElement): HTMLElement[] {
-  return [
-    ...root.querySelectorAll<HTMLElement>(".pdp-hero-intro-chrome"),
-    // Header can stream outside the layout version wrapper.
-    ...document.querySelectorAll<HTMLElement>("[data-header-chrome]"),
-  ];
+  const seen = new Set<HTMLElement>();
+  const add = (nodes: NodeListOf<HTMLElement>) => {
+    for (const node of nodes) {
+      seen.add(node);
+    }
+  };
+
+  add(root.querySelectorAll<HTMLElement>(".pdp-hero-intro-chrome"));
+  add(
+    document.querySelectorAll<HTMLElement>(
+      "[data-header-chrome], [data-floating-cta-bar]",
+    ),
+  );
+
+  return [...seen];
 }
 
 /**

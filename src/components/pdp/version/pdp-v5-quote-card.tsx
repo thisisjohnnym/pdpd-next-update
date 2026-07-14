@@ -18,10 +18,12 @@ const QUOTE_CARD_SCALE_FROM = 0.88;
  * v5 — 9:16 editorial quote card.
  *
  * Celebrity photo above a warm beige pull-quote panel.
+ * v7 flush caption: photo-led card, quote + name only (no competing eyebrow).
  */
 export function PdpV5QuoteCard() {
   const version = usePdpVersion();
-  const { useV4GranularScrollReveal } = getPdpVersionConfig(version);
+  const { useV4GranularScrollReveal, quoteCardFlushCaption } =
+    getPdpVersionConfig(version);
   const { eyebrow, quote, attribution, src, alt } = PDP_V5_EDITORIAL_QUOTE;
   const cardRef = usePdpElementReveal<HTMLElement>({
     scaleFrom: QUOTE_CARD_SCALE_FROM,
@@ -33,15 +35,32 @@ export function PdpV5QuoteCard() {
       as="section"
       fullWidth
       data-header-surface="light"
-      aria-label={eyebrow}
-      className="pdp-v5-quote-card-section shrink-0 py-3 lg:py-4"
+      className={cn(
+        "pdp-v5-quote-card-section shrink-0",
+        quoteCardFlushCaption ? "py-2 lg:py-3" : "py-3 lg:py-4",
+      )}
     >
       <GridItem mobile={12} desktop={6} desktopStart={10}>
         <figure
           ref={useV4GranularScrollReveal ? cardRef : undefined}
-          className="pdp-v5-quote-card m-0 flex aspect-[9/16] w-full min-w-0 flex-col overflow-hidden"
+          aria-label={
+            quoteCardFlushCaption ? `Quote from ${attribution}` : undefined
+          }
+          className={cn(
+            "pdp-v5-quote-card m-0 flex w-full min-w-0 flex-col overflow-hidden",
+            quoteCardFlushCaption
+              ? "pdp-v5-quote-card--flush"
+              : "aspect-[9/16]",
+          )}
         >
-          <div className="pdp-v5-quote-card__media relative min-h-0 w-full flex-[11]">
+          <div
+            className={cn(
+              "pdp-v5-quote-card__media relative min-h-0 w-full",
+              quoteCardFlushCaption
+                ? "aspect-[4/5] shrink-0"
+                : "flex-[11]",
+            )}
+          >
             <Image
               src={src}
               alt={alt}
@@ -52,8 +71,19 @@ export function PdpV5QuoteCard() {
             />
           </div>
 
-          <figcaption className="pdp-v5-quote-card__body flex min-h-0 w-full flex-[9] flex-col items-center justify-center text-center">
-            <p className="pdp-v5-quote-card__eyebrow m-0 uppercase">{eyebrow}</p>
+          <figcaption
+            className={cn(
+              "pdp-v5-quote-card__body flex w-full flex-col items-center text-center",
+              quoteCardFlushCaption
+                ? "shrink-0"
+                : "min-h-0 flex-[9] justify-center",
+            )}
+          >
+            {!quoteCardFlushCaption ? (
+              <p className="pdp-v5-quote-card__eyebrow m-0 uppercase">
+                {eyebrow}
+              </p>
+            ) : null}
 
             <div className="pdp-v5-quote-card__quote-wrap w-full">
               <blockquote className="m-0 p-0">
@@ -63,7 +93,12 @@ export function PdpV5QuoteCard() {
               </blockquote>
             </div>
 
-            <p className={cn("pdp-v5-quote-card__attribution m-0 uppercase")}>
+            <p
+              className={cn(
+                "pdp-v5-quote-card__attribution m-0",
+                !quoteCardFlushCaption && "uppercase",
+              )}
+            >
               {attribution}
             </p>
           </figcaption>

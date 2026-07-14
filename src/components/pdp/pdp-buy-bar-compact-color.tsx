@@ -20,8 +20,10 @@ type PdpBuyBarCompactColorProps = {
   /**
    * "dot" — +N chips (default). "swatch" — large v6 hero footer swatches.
    * "rail" — full scrollable color rail (docked land CTA).
+   * "compact-swatch" — small full-bag tiles + +N (v7 land).
+   * "land-dock" — large scroll rail half-cropped by docked CTA (v7 land).
    */
-  variant?: "dot" | "swatch" | "rail";
+  variant?: "dot" | "swatch" | "rail" | "compact-swatch" | "land-dock";
   className?: string;
 };
 

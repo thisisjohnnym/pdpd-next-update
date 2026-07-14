@@ -39,8 +39,12 @@ const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
  */
 export function PdpV5GetTheHighlights() {
   const { headline, watchLabel } = PDP_GET_THE_HIGHLIGHTS_SECTION;
-  const { leftAlignModuleHeadings, useV4ModuleSpacing, useLeatherAgingWaysToWear } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    leftAlignModuleHeadings,
+    useV4ModuleSpacing,
+    useLeatherAgingWaysToWear,
+    getTheHighlightsCompactHeader,
+  } = getPdpVersionConfig(usePdpVersion());
   const highlightCards = useLeatherAgingWaysToWear
     ? PDP_GET_THE_HIGHLIGHTS_CARDS.map((card) =>
         card.id === "crafted-to-age"
@@ -63,18 +67,26 @@ export function PdpV5GetTheHighlights() {
       aria-label={headline}
       className={cn(
         "w-full shrink-0 bg-white",
-        useV4ModuleSpacing ? "pt-14 pb-10" : "pt-12 pb-8",
+        getTheHighlightsCompactHeader
+          ? "pt-6 pb-10"
+          : useV4ModuleSpacing
+            ? "pt-14 pb-10"
+            : "pt-12 pb-8",
       )}
     >
       <div
         className={cn(
-          "flex flex-col gap-1.5",
+          "flex flex-col",
+          getTheHighlightsCompactHeader ? "gap-1" : "gap-1.5",
           useV4ModuleSpacing ? "px-4" : "px-3",
         )}
       >
         <PdpModuleHeading
           spacing="none"
-          className={leftAlignModuleHeadings ? "text-left" : "text-center"}
+          className={cn(
+            leftAlignModuleHeadings ? "text-left" : "text-center",
+            getTheHighlightsCompactHeader && "leading-none",
+          )}
         >
           {headline}
         </PdpModuleHeading>
@@ -82,7 +94,8 @@ export function PdpV5GetTheHighlights() {
           <a
             href={`#highlight-${WATCH_THE_FILM_CARD_ID}`}
             className={cn(
-              "group inline-flex min-h-[40px] items-center gap-1.5 text-black",
+              "group inline-flex items-center gap-1.5 text-black",
+              getTheHighlightsCompactHeader ? "h-5 min-h-5" : "min-h-[40px]",
               "transition-colors active:text-neutral-700",
               pdpPressableClass,
             )}
@@ -99,7 +112,12 @@ export function PdpV5GetTheHighlights() {
         </PdpTextReveal>
       </div>
 
-      <div className={cn(pdpCarouselScrollWrapClass, "mt-6")}>
+      <div
+        className={cn(
+          pdpCarouselScrollWrapClass,
+          getTheHighlightsCompactHeader ? "mt-3" : "mt-6",
+        )}
+      >
         <div
           className={cn(pdpCarouselScrollClass, "flex items-stretch gap-3")}
           aria-label={headline}

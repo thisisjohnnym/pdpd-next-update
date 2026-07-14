@@ -23,6 +23,8 @@ import { usePdpVersion } from "./pdp-version-context";
 import { PdpV6MobileHeroLayout } from "./pdp-v6-mobile-hero-layout";
 import { PdpV5ReviewTeaser } from "./pdp-v5-review-teaser";
 import { PdpV5StorePickupLink } from "./pdp-v5-store-pickup-link";
+import { PdpV7HeroMetaStrip } from "./pdp-v7-hero-meta-strip";
+import { useHeroBuyBarVisibility } from "./use-hero-buy-bar-visibility";
 
 type PdpV3HeroLayoutProps = {
   selectedColorId: string;
@@ -77,6 +79,8 @@ function PdpV3HeroLayoutDefault({
   introReveal = false,
 }: PdpV3HeroLayoutProps & { introReveal?: boolean }) {
   const shellRef = useRef<HTMLDivElement>(null);
+  const localSentinelRef = useRef<HTMLDivElement>(null);
+  const heroSentinelRef = sentinelRef ?? localSentinelRef;
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
   const {
@@ -89,12 +93,39 @@ function PdpV3HeroLayoutDefault({
     playHeroLandIntro,
     showStorePickupLink,
     showSubtleReviewTeaser,
+    heroLandColorSwatchVariant,
+    heroLandStickyCtaDock,
+    heroColorSwatchesExpandOnScroll,
+    useHeroMetaStrip,
+    showFloatingBuyBar,
+    floatingBuyBarWhenHeroHidden,
   } = getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
   const heroEnterOnce = useHeroEnterOnce();
   const playLandIntro = playHeroLandIntro && heroEnterOnce && !introReveal;
+  const showBelowFoldColorSwatches =
+    inlineBuyBarColorSwatches &&
+    (heroColorSwatchesExpandOnScroll || !useCompactBuyBarColorDots);
+  const landSwatchVariant = useCompactBuyBarColorDots
+    ? heroLandColorSwatchVariant
+    : "dot";
+  const heroScrolledPast = useHeroBuyBarVisibility(
+    heroSentinelRef,
+    heroColorSwatchesExpandOnScroll,
+  );
+  const showExpandedColorSwatches =
+    showBelowFoldColorSwatches &&
+    (!heroColorSwatchesExpandOnScroll || heroScrolledPast);
+
+  const useFixedBuyBarOnly =
+    showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
+  const landSwatchFooter =
+    useCompactBuyBarColorDots &&
+    (heroLandColorSwatchVariant === "land-dock" || useFixedBuyBarOnly);
+  const landDockFooter =
+    useCompactBuyBarColorDots && heroLandStickyCtaDock && !useFixedBuyBarOnly;
 
   useHero360IntroReveal(shellRef);
 
@@ -122,6 +153,44 @@ function PdpV3HeroLayoutDefault({
             )}
           >
             {useCompactBuyBarColorDots ? (
+              landSwatchFooter ? (
+                <div className="pdp-v7-land-footer flex min-w-0 w-full flex-col">
+                  <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3">
+                    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
+                      <p
+                        className={cn(
+                          pdpProductTitleClass,
+                          "min-w-0 text-pretty text-base leading-tight text-black lg:text-lg",
+                        )}
+                      >
+                        {summary.name}
+                      </p>
+                      <PdpProductPrice
+                        price={displayPrice.price}
+                        compareAtPrice={displayPrice.compareAtPrice}
+                        className="shrink-0 justify-self-end text-base leading-tight lg:text-lg"
+                      />
+                      <p
+                        className={cn(
+                          pdpType.label,
+                          "col-start-1 min-w-0 leading-none text-neutral-400",
+                        )}
+                      >
+                        in {summary.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pdp-v7-land-swatch-stage min-w-0 px-3 pb-1">
+                    <PdpBuyBarCompactColor
+                      selectedColorId={selectedColorId}
+                      onColorSelect={onColorSelect}
+                      onColorSheetOpenChange={onColorSheetOpenChange}
+                      variant={landSwatchVariant}
+                      className="min-w-0"
+                    />
+                  </div>
+                </div>
+              ) : (
               <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
                 <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
                   <p
@@ -151,11 +220,12 @@ function PdpV3HeroLayoutDefault({
                     selectedColorId={selectedColorId}
                     onColorSelect={onColorSelect}
                     onColorSheetOpenChange={onColorSheetOpenChange}
-                    variant="rail"
+                    variant={landSwatchVariant}
                     className="min-w-0"
                   />
                 </div>
               </div>
+              )
             ) : (
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-baseline justify-between gap-4">
@@ -195,34 +265,43 @@ function PdpV3HeroLayoutDefault({
               </div>
             )}
 
-            <PdpBuyBarRow
-              selectedColorId={selectedColorId}
-              onColorSelect={onColorSelect}
-              onAddToBag={onAddToBag}
-              onColorSheetOpenChange={onColorSheetOpenChange}
-              hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
-              hideColorLabel={hideBuyBarColorLabel}
-              inlineColorSwatches={false}
-              landCta={useCompactBuyBarColorDots}
-              className={cn(
-                useCompactBuyBarColorDots
-                  ? "px-3 pb-3 lg:px-5 lg:pb-4"
-                  : useV4ModuleSpacing
-                    ? "gap-3"
-                    : "gap-2",
-              )}
-            />
+            {!landDockFooter && !useFixedBuyBarOnly ? (
+              <PdpBuyBarRow
+                selectedColorId={selectedColorId}
+                onColorSelect={onColorSelect}
+                onAddToBag={onAddToBag}
+                onColorSheetOpenChange={onColorSheetOpenChange}
+                hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
+                hideColorLabel={hideBuyBarColorLabel}
+                inlineColorSwatches={false}
+                landCta={useCompactBuyBarColorDots}
+                className={cn(
+                  useCompactBuyBarColorDots
+                    ? cn(
+                        "px-3 lg:px-5",
+                        heroColorSwatchesExpandOnScroll ? "pb-2" : "pb-3 lg:pb-4",
+                      )
+                    : useV4ModuleSpacing
+                      ? "gap-3"
+                      : "gap-2",
+                )}
+              />
+            ) : null}
           </footer>
 
           <div
-            ref={sentinelRef}
+            ref={heroSentinelRef}
             aria-hidden
             className="h-0 w-full shrink-0 overflow-hidden"
           />
         </PdpHeroShell>
       </div>
 
-      {showStorePickupLink || showSubtleReviewTeaser ? (
+      {useHeroMetaStrip && (showStorePickupLink || showSubtleReviewTeaser) ? (
+        <div className="pdp-v7-hero-meta-block bg-white px-3 pt-2 pb-2 lg:px-5">
+          <PdpV7HeroMetaStrip />
+        </div>
+      ) : showStorePickupLink || showSubtleReviewTeaser ? (
         <div className="flex flex-col gap-3 bg-white px-3 pb-5 pt-4 lg:px-5">
           {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
           {showSubtleReviewTeaser ? (
@@ -237,11 +316,18 @@ function PdpV3HeroLayoutDefault({
         </div>
       ) : null}
 
-      {inlineBuyBarColorSwatches && !useCompactBuyBarColorDots ? (
-        <div className={cn(introReveal && "pdp-hero-intro-chrome")}>
+      {showExpandedColorSwatches ? (
+        <div
+          className={cn(
+            introReveal && "pdp-hero-intro-chrome",
+            heroColorSwatchesExpandOnScroll &&
+              "pdp-v7-hero-colors-expand pdp-v7-hero-colors-expand--revealed lg:hidden",
+          )}
+        >
           <PdpHeroBelowFoldColorSwatches
             selectedColorId={selectedColorId}
             onColorSelect={onColorSelect}
+            scrollExpand={heroColorSwatchesExpandOnScroll}
           />
         </div>
       ) : null}

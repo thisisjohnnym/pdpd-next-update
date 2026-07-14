@@ -226,10 +226,41 @@ export type PdpVersionConfig = {
    */
   useCompactBuyBarColorDots: boolean;
   /**
-   * Solid color dots shown before the +N label in the compact buy-bar row.
+   * Compact color dots shown before the +N label in the compact buy-bar row.
    * v5 only.
    */
   compactBuyBarColorDotCount: number;
+  /**
+   * Land docked-footer color preview density — dot, swatch, rail,
+   * compact-swatch (small full-bag tiles + +N), or land-dock (large scroll
+   * rail half-cropped by the docked CTA). v7 uses land-dock.
+   */
+  heroLandColorSwatchVariant:
+    | "dot"
+    | "swatch"
+    | "rail"
+    | "compact-swatch"
+    | "land-dock";
+  /**
+   * Dock the land Add to bag in a bottom tray inside the hero footer.
+   * Superseded on v7 by the always-on fixed bar (`showFloatingBuyBar` +
+   * `floatingBuyBarLandCta`).
+   */
+  heroLandStickyCtaDock: boolean;
+  /**
+   * Style the fixed floating buy bar as a full-width land tray (ATB only).
+   * v7 only.
+   */
+  floatingBuyBarLandCta: boolean;
+  /**
+   * Render expanded color swatches below the hero meta block (before gallery).
+   * Pairs with compact land preview. v7 only.
+   */
+  heroColorSwatchesExpandOnScroll: boolean;
+  /**
+   * Unified pickup + review meta strip under the hero land. v7 only.
+   */
+  useHeroMetaStrip: boolean;
   /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
    * v5 only.
@@ -347,6 +378,11 @@ export type PdpVersionConfig = {
    */
   showEditorialQuoteCard: boolean;
   /**
+   * Quote card caption flush under photo — photo-led layout, quote + name only.
+   * v7 only.
+   */
+  quoteCardFlushCaption: boolean;
+  /**
    * Fixed "+N more" label on the compact UGC strip — when > 0, replaces the
    * data-driven count. v5 uses 6 to match the Coach community grid. 0 = auto.
    */
@@ -442,6 +478,11 @@ export type PdpVersionConfig = {
    * "Feel the leather" lifestyle slide). v5 only.
    */
   showGetTheHighlights: boolean;
+  /**
+   * Tight Get the highlights header row — 20px title + watch link, reduced top
+   * padding after hero meta. v7 only.
+   */
+  getTheHighlightsCompactHeader: boolean;
   /**
    * Reviews module gets a warm band + solid black CTA (Skelly v7 merchandising).
    */
@@ -594,6 +635,11 @@ const V1_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  heroLandColorSwatchVariant: "rail",
+  heroLandStickyCtaDock: false,
+  floatingBuyBarLandCta: false,
+  heroColorSwatchesExpandOnScroll: false,
+  useHeroMetaStrip: false,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -631,9 +677,11 @@ const V1_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
+  quoteCardFlushCaption: false,
   compactUgcMoreCountOverride: 0,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  getTheHighlightsCompactHeader: false,
   emphasizeReviewsModule: false,
   showSalePricing: false,
   useFullBagColorSwatches: false,
@@ -711,6 +759,11 @@ const V2_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  heroLandColorSwatchVariant: "rail",
+  heroLandStickyCtaDock: false,
+  floatingBuyBarLandCta: false,
+  heroColorSwatchesExpandOnScroll: false,
+  useHeroMetaStrip: false,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -748,11 +801,13 @@ const V2_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: false,
   useV5UgcTestimonialCarousel: false,
   showEditorialQuoteCard: false,
+  quoteCardFlushCaption: false,
   compactUgcMoreCountOverride: 0,
   moreLikeThisLargeCards: false,
   showMoreLikeThisCompare: false,
   showWaysToWearModule: false,
   showGetTheHighlights: false,
+  getTheHighlightsCompactHeader: false,
   emphasizeReviewsModule: false,
   showSalePricing: false,
   useFullBagColorSwatches: false,
@@ -988,7 +1043,9 @@ const HERO_MIRROR_SELFIE_SLIDE: PdpHeroGallerySlide = {
  */
 const V7_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
-  showFloatingBuyBar: false,
+  showFloatingBuyBar: true,
+  floatingBuyBarWhenHeroHidden: false,
+  floatingBuyBarLandCta: true,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
   detailsAfterSlideIndex: 1,
   hideBuyBarColorLabel: true,
@@ -997,9 +1054,13 @@ const V7_CONFIG: PdpVersionConfig = {
   hideDockedBuyBarColor: true,
   useCompactBuyBarColorDots: true,
   compactBuyBarColorDotCount: 4,
+  heroLandColorSwatchVariant: "land-dock",
+  heroLandStickyCtaDock: false,
+  heroColorSwatchesExpandOnScroll: true,
+  useHeroMetaStrip: true,
   showStorePickupLink: true,
   showSubtleReviewTeaser: true,
-  inlineBuyBarColorSwatches: false,
+  inlineBuyBarColorSwatches: true,
   hideColorSheetSizePrice: true,
   useV4DetailsTileCarousel: true,
   useV5DetailsSheet: true,
@@ -1011,12 +1072,12 @@ const V7_CONFIG: PdpVersionConfig = {
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,
   showEditorialQuoteCard: true,
+  quoteCardFlushCaption: true,
   showLeatherCareUpsell: true,
   flatColorSheet: true,
   exploreFamilyColorSheetLabel: false,
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
-  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
   heroGalleryLogicalBlockOrder: true,
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
     HERO_GALLERY_V5_UGC_TESTIMONIAL_IDS,
@@ -1039,6 +1100,7 @@ const V7_CONFIG: PdpVersionConfig = {
   squareButtonCorners: true,
   showWaysToWearModule: true,
   showGetTheHighlights: true,
+  getTheHighlightsCompactHeader: true,
   showSalePricing: true,
   useFullBagColorSwatches: true,
   useLeatherAgingWaysToWear: true,
@@ -1054,9 +1116,11 @@ const V7_CONFIG: PdpVersionConfig = {
   useHeroGalleryProgressBar: true,
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
-  playHeroLandIntro: true,
-  hero360IntroEnabled: false,
-  hero360IntroVideoSrc: "",
+  playHeroLandIntro: false,
+  hero360IntroEnabled: true,
+  hero360IntroVideoSrc: HERO_360_INTRO_VIDEO_SRC,
+  heroGalleryLeadSlideSrc: "",
+  heroGalleryPrependLeadSlide: undefined,
   heroVerticalGallery: false,
   heroProductSlidesFillFrame: false,
 };
