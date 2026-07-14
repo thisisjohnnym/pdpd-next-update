@@ -28,9 +28,9 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | Field | Value |
 |-------|-------|
 | Date | Jul 13, 2026 |
-| Commit | `9548c7f` — fix(v7): flush ATB dock, WebKit intro play, kill scroll jitter |
+| Commit | `6d6c04d` — fix(v7): land chrome spacing, intro meta sync, padded ATB |
 | URL | https://pdp-next-sigma.vercel.app/v7 |
-| Prior ship | Jul 13, 2026 · `0a3d34f` · land chrome polish |
+| Prior ship | Jul 13, 2026 · `9548c7f` · ATB flush + WebKit intro |
 
 ## Quick links (Tabby)
 
