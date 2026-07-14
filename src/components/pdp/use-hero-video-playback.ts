@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { videoDecoderRegistry } from "./pdp-decoder-registry";
 import {
@@ -156,6 +156,86 @@ export function useHeroVideoPlayback({
       mountedRef.current = false;
     };
   }, []);
+
+  /**
+   * WebKit (Safari / iOS Chrome): `loadeddata` / `canplay` can fire before React
+   * effects subscribe, leaving priority intros at readyState 4 with play() never
+   * called and `isReady` stuck false (poster forever). Layout pass catches the
+   * already-ready element. One-shots must seek to 0 first — a prior HTML autoplay
+   * or media-memory restore can leave currentTime at the end (play is a no-op).
+   */
+  useLayoutEffect(() => {
+    if (!priorityAutoplay || !isMounted || !shouldPlay) {
+      return;
+    }
+
+    const video = videoRef.current;
+    if (!video || userPausedRef.current) {
+      return;
+    }
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.loop = loop;
+    try {
+      video.playbackRate = playbackRate;
+    } catch {
+      // Some WebKit builds reject rate until metadata exists.
+    }
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      setIsReady(true);
+    }
+
+    const kickPlay = () => {
+      if (!mountedRef.current || userPausedRef.current) {
+        return;
+      }
+      logVideoTelemetry("autoplay_attempt", {
+        src,
+        readyState: video.readyState,
+      });
+      void video.play().catch((error) => {
+        if (!mountedRef.current) {
+          return;
+        }
+        logVideoTelemetry("autoplay_blocked", {
+          src,
+          readyState: video.readyState,
+          reason:
+            error instanceof DOMException
+              ? error.name
+              : error instanceof Error
+                ? error.message
+                : "play_promise_rejected",
+        });
+        setAutoplayRestricted(true);
+      });
+    };
+
+    if (!loop && (video.ended || video.currentTime > 0.05)) {
+      const onSeeked = () => {
+        video.removeEventListener("seeked", onSeeked);
+        kickPlay();
+      };
+      video.addEventListener("seeked", onSeeked);
+      try {
+        video.pause();
+        video.currentTime = 0;
+      } catch {
+        video.removeEventListener("seeked", onSeeked);
+        kickPlay();
+      }
+      return () => {
+        video.removeEventListener("seeked", onSeeked);
+      };
+    }
+
+    kickPlay();
+  }, [priorityAutoplay, isMounted, shouldPlay, src, loop, playbackRate]);
 
   useEffect(() => {
     setIsReady(false);

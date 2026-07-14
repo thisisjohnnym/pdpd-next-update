@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
@@ -157,13 +159,17 @@ export function PdpBuyBarRow({
     </div>
   ) : null;
 
+  const landAtbWrapStyle = landCta
+    ? ({ "--pdp-v7-atb-bg": atbChrome.background } as CSSProperties)
+    : undefined;
+
   const stackColor =
     stackColorBelow || showInlineSwatches;
 
   return (
     <div
       className={cn(
-        "flex w-full",
+        "pdp-buy-bar-row flex w-full",
         stackColor
           ? "flex-col items-stretch gap-2"
           : "items-stretch gap-2.5",
@@ -172,13 +178,18 @@ export function PdpBuyBarRow({
     >
       {stackColor ? (
         <>
-          <div className="min-w-0 w-full">{atbButton}</div>
+          <div className="min-w-0 w-full" style={landAtbWrapStyle}>
+            {atbButton}
+          </div>
           {colorSelector}
         </>
       ) : (
         <>
           {colorSelector}
-          <div className={hideColor ? "min-w-0 w-full flex-1" : "min-w-0 flex-1"}>
+          <div
+            className={hideColor ? "min-w-0 w-full flex-1" : "min-w-0 flex-1"}
+            style={landAtbWrapStyle}
+          >
             {atbButton}
           </div>
         </>

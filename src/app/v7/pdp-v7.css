@@ -32,17 +32,21 @@
 
 /*
  * Keep object-contain (cover crops the bag’s fall entry on wide shells).
- * Scale past pure width-fill so the bag body reads fuller — the 9:16 studio
- * plate has a tall strap arch that otherwise leaves the product tiny.
- * Cap keeps short/wide shells from over-cropping; origin sits slightly low
- * so strap tip can soft-clip while the bag stays centered.
+ * Enlarge the media *stage* (not the <video>) so WebKit still paints frames —
+ * CSS transform on <video> blanks hardware-decoded playback on iOS Safari /
+ * Chrome. Scale must live on the *child* (cq units on the container itself
+ * resolve to 0 — no ancestor container).
  */
-[data-pdp-version="v7"] .pdp-hero-360-intro-layer video,
-[data-pdp-version="v7"] .pdp-hero-360-intro-layer img {
-  transform: scale(
-    min(1.48, max(1.12, (100cqw / 100cqh) * (16 / 9) * 1.12))
+[data-pdp-version="v7"] .pdp-hero-360-intro-layer > div {
+  --pdp-v7-intro-scale: min(
+    1.48,
+    max(1.12, (100cqw / 100cqh) * (16 / 9) * 1.12)
   );
-  transform-origin: center 48%;
+  inset: auto;
+  width: calc(100cqw * var(--pdp-v7-intro-scale));
+  height: calc(100cqh * var(--pdp-v7-intro-scale));
+  left: calc(50% - (100cqw * var(--pdp-v7-intro-scale) / 2));
+  top: calc(48% - (100cqh * var(--pdp-v7-intro-scale) / 2));
 }
 
 html[data-pdp-version="v7"][data-hero-intro-phase="playing"] .pdp-hero-intro-chrome,
@@ -140,13 +144,19 @@ html[data-hero-intro-phase="playing"] [data-pdp-version="v7"] .pdp-hero-docked-f
 [data-pdp-version="v7"] .pdp-v7-fixed-cta-dock {
   border-radius: 0;
   box-shadow: 0 -10px 28px rgb(0 0 0 / 0.08);
-  padding-top: calc(var(--pdp-v7-land-swatch-crop) + 4px);
-  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  /* Top only — no bottom padding (that was the white gap under ATB).
+     !important beats the shared footer’s inline CTA_BAR_PADDING. */
+  padding: calc(var(--pdp-v7-land-swatch-crop) + 4px) 0 0 !important;
+  /* Kill leftover GSAP/Tailwind transforms — fixed + transform jitters on iOS. */
+  transform: none !important;
 }
 
 [data-pdp-version="v7"] .pdp-v7-fixed-cta-dock .pdp-buy-bar-row > div {
   border-radius: 0;
   overflow: hidden;
+  /* Extend ATB fill into the home indicator — no white stripe under the button. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background-color: var(--pdp-v7-atb-bg, #0a0a0a);
 }
 
 /* Give the gallery more breathing room — soften hard cover crop on land. */

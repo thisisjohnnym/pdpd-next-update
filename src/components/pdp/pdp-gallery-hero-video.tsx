@@ -291,6 +291,7 @@ export function PdpGalleryHeroVideo({
       loop={loop}
       muted
       playsInline
+      autoPlay={priorityAutoplay && loop}
       preload={effectivePreload}
       src={primarySrc}
       poster={priorityAutoplay && !poster ? undefined : poster}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -33,8 +33,8 @@ const INTRO_FAIL_OPEN_MS = Math.ceil(
  * the bag enters — and any positive Y "fix" then slid the clip upward against
  * the fall. Contain shows the full 9:16 on the studio ground: bag enters at the
  * top of the viewport and settles centered, with no camera transform.
- * v7 punches the bag up via a container-sized width-fill scale in `pdp-v7.css`
- * (still contain — not cover) so letterboxing doesn’t leave the product tiny.
+ * v7 punches the bag up via an enlarged media *stage* in `pdp-v7.css`
+ * (still contain — not cover; never transform the <video> — iOS WebKit blanks).
  *
  * Soft UI cue at media ~1.2s via `timeupdate` only — no rAF loop fighting the
  * decoder. End frame stays as slide 0.
@@ -48,24 +48,26 @@ export function PdpHero360IntroLayer({
   const cuedRef = useRef(false);
   const endedRef = useRef(false);
   const sparseCueTimerRef = useRef<number | null>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
+  const onUiCueRef = useRef(onUiCue);
+  const onVideoEndedRef = useRef(onVideoEnded);
+  onUiCueRef.current = onUiCue;
+  onVideoEndedRef.current = onVideoEnded;
 
+  // Stable deps — callback identity churn was resetting the fail-open timer.
   useEffect(() => {
     if (!enabled) {
       return;
     }
 
-    // Soft cue only after the clip has actually started. A blind wall-clock
-    // timer (old Safari Low Power fallback) moved us to `revealing` while
-    // WebKit still had NETWORK_NO_SOURCE — empty gray + progress bar, forever
-    // locked. Fail-open below covers the no-playback case.
     const failOpenTimer = window.setTimeout(() => {
       if (!cuedRef.current) {
         cuedRef.current = true;
-        onUiCue();
+        onUiCueRef.current();
       }
       if (!endedRef.current) {
         endedRef.current = true;
-        onVideoEnded();
+        onVideoEndedRef.current();
       }
     }, INTRO_FAIL_OPEN_MS);
 
@@ -75,7 +77,82 @@ export function PdpHero360IntroLayer({
         window.clearTimeout(sparseCueTimerRef.current);
       }
     };
-  }, [enabled, onUiCue, onVideoEnded]);
+  }, [enabled]);
+
+  /**
+   * WebKit belt-and-suspenders: if the shared playback hook misses attach
+   * (ready events before subscribe / media-memory at end), force muted play
+   * from 0 on the intro <video> in this layer.
+   */
+  useLayoutEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const layer = layerRef.current;
+    if (!layer) {
+      return;
+    }
+
+    let cancelled = false;
+    let attempts = 0;
+
+    const kick = () => {
+      if (cancelled) {
+        return;
+      }
+      const video = layer.querySelector("video");
+      if (!video) {
+        if (attempts++ < 20) {
+          window.setTimeout(kick, 50);
+        }
+        return;
+      }
+
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      try {
+        video.playbackRate = INTRO_PLAYBACK_RATE;
+      } catch {
+        // WebKit may reject rate until metadata.
+      }
+
+      const play = () => {
+        if (cancelled) {
+          return;
+        }
+        void video.play().catch(() => {
+          // Shared hook owns restriction UI; fail-open covers total miss.
+        });
+      };
+
+      if (video.ended || video.currentTime > 0.05) {
+        const onSeeked = () => {
+          video.removeEventListener("seeked", onSeeked);
+          play();
+        };
+        video.addEventListener("seeked", onSeeked);
+        try {
+          video.pause();
+          video.currentTime = 0;
+        } catch {
+          video.removeEventListener("seeked", onSeeked);
+          play();
+        }
+        return;
+      }
+
+      play();
+    };
+
+    kick();
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, videoSrc]);
 
   const handleTimeUpdate = useCallback(
     (currentTime: number) => {
@@ -127,6 +204,7 @@ export function PdpHero360IntroLayer({
 
   return (
     <div
+      ref={layerRef}
       aria-hidden
       className="pdp-hero-360-intro-layer pointer-events-none absolute inset-0 z-[2] overflow-hidden bg-[#f0f0f0]"
     >
