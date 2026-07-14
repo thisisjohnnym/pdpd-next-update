@@ -6,7 +6,12 @@
 [data-pdp-version="v7"] {
   --pdp-v5-editorial-beige: #efeae7;
   --pdp-v7-land-swatch-size: 56px;
-  --pdp-v7-land-swatch-crop: 28px;
+  /* Half the swatch peeks above the fixed ATB; rest sits under the dock. */
+  --pdp-v7-land-atb-peek: calc(var(--pdp-v7-land-swatch-size) / 2);
+  --pdp-v7-land-raise: calc(
+    var(--cta-bar-height, 64px) - var(--pdp-v7-land-atb-peek)
+  );
+  --pdp-v7-meta-after-swatch: 16px;
 }
 
 /* ── Hero fall-in intro (shared v5 clip + GSAP UI fade) ───────────────────── */
@@ -70,10 +75,12 @@ html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) body {
 
 html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) .pdp-hero-shell,
 html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) .pdp-hero-media-frame--docked,
+html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) .pdp-v7-hero-meta-block,
 html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) .pdp-v5-page-root,
 html[data-pdp-version="v7"]:not([data-hero-intro-phase="ready"]) [data-pdp-page-root],
 html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v7"] .pdp-hero-shell,
-html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v7"] .pdp-hero-media-frame--docked {
+html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v7"] .pdp-hero-media-frame--docked,
+html:not([data-hero-intro-phase="ready"]) [data-pdp-version="v7"] .pdp-v7-hero-meta-block {
   background-color: #f0f0f0 !important;
 }
 
@@ -123,40 +130,42 @@ html[data-hero-intro-phase="playing"] [data-pdp-version="v7"] .pdp-hero-docked-f
   pointer-events: none;
 }
 
-/* Land swatches — larger row, bottom half tucked under the fixed ATB tray. */
+/*
+ * Raise land product info (shortens gallery slightly) so ~half the swatch
+ * row sits above the ATB. Meta pulls up by the same raise, leaving 16px
+ * between swatches and the pickup card.
+ */
 [data-pdp-version="v7"] .pdp-v7-land-footer {
   position: relative;
   overflow: visible;
-  /* Clear the fixed bar so info + swatches sit above it; crop overlaps into tray. */
-  padding-bottom: calc(
-    var(--cta-bar-height, 72px) - var(--pdp-v7-land-swatch-crop) + 4px
-  );
+  padding-bottom: var(--pdp-v7-land-raise);
 }
 
 [data-pdp-version="v7"] .pdp-v7-land-swatch-stage {
   position: relative;
-  z-index: 1;
-  margin-bottom: calc(-1 * var(--pdp-v7-land-swatch-crop));
   padding-top: 8px;
+  padding-bottom: 0;
 }
 
-/* Fixed page ATB — single tray for the whole scroll (mobile). */
+[data-pdp-version="v7"] .pdp-v7-hero-meta-block {
+  margin-top: calc(
+    -1 * var(--pdp-v7-land-raise) + var(--pdp-v7-meta-after-swatch)
+  );
+  padding-top: 0;
+  /* Sit above the docked land pad (z-index: 1) so the card isn’t covered. */
+  position: relative;
+  z-index: 2;
+}
+
+/* Fixed page ATB — padded white tray (not full-bleed). */
 [data-pdp-version="v7"] .pdp-v7-fixed-cta-dock {
   border-radius: 0;
   box-shadow: 0 -10px 28px rgb(0 0 0 / 0.08);
-  /* Top only — no bottom padding (that was the white gap under ATB).
-     !important beats the shared footer’s inline CTA_BAR_PADDING. */
-  padding: calc(var(--pdp-v7-land-swatch-crop) + 4px) 0 0 !important;
-  /* Kill leftover GSAP/Tailwind transforms — fixed + transform jitters on iOS. */
-  transform: none !important;
 }
 
 [data-pdp-version="v7"] .pdp-v7-fixed-cta-dock .pdp-buy-bar-row > div {
   border-radius: 0;
   overflow: hidden;
-  /* Extend ATB fill into the home indicator — no white stripe under the button. */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background-color: var(--pdp-v7-atb-bg, #0a0a0a);
 }
 
 /* Give the gallery more breathing room — soften hard cover crop on land. */
@@ -174,8 +183,8 @@ html[data-hero-intro-phase="playing"] [data-pdp-version="v7"] .pdp-hero-docked-f
     padding-bottom: 0;
   }
 
-  [data-pdp-version="v7"] .pdp-v7-land-swatch-stage {
-    margin-bottom: 0;
+  [data-pdp-version="v7"] .pdp-v7-hero-meta-block {
+    margin-top: 0;
   }
 }
 

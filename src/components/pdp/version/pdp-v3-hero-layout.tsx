@@ -180,7 +180,7 @@ function PdpV3HeroLayoutDefault({
                       </p>
                     </div>
                   </div>
-                  <div className="pdp-v7-land-swatch-stage min-w-0 px-3 pb-1">
+                  <div className="pdp-v7-land-swatch-stage min-w-0 px-3 pb-0">
                     <PdpBuyBarCompactColor
                       selectedColorId={selectedColorId}
                       onColorSelect={onColorSelect}
@@ -298,7 +298,13 @@ function PdpV3HeroLayoutDefault({
       </div>
 
       {useHeroMetaStrip && (showStorePickupLink || showSubtleReviewTeaser) ? (
-        <div className="pdp-v7-hero-meta-block bg-white px-3 pt-2 pb-2 lg:px-5">
+        <div
+          className={cn(
+            "pdp-v7-hero-meta-block bg-white px-3 pt-0 pb-2 lg:px-5",
+            // Outside shellRef — still tagged so boot CSS + document chrome collect hide/fade with intro.
+            introReveal && "pdp-hero-intro-chrome",
+          )}
+        >
           <PdpV7HeroMetaStrip />
         </div>
       ) : showStorePickupLink || showSubtleReviewTeaser ? (

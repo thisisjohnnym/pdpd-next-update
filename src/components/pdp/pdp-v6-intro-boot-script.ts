@@ -24,6 +24,7 @@ html[data-hero-intro-phase="playing"] .pdp-hero-bottom-enter{
 html[data-hero-intro-phase="playing"] .pdp-hero-shell,
 html[data-hero-intro-phase="playing"] .pdp-hero-media-frame--docked,
 html[data-hero-intro-phase="playing"] .pdp-hero-docked-footer,
+html[data-hero-intro-phase="playing"] .pdp-v7-hero-meta-block,
 html[data-hero-intro-phase="playing"] .pdp-hero-below-fold-colors,
 html[data-hero-intro-phase="playing"] .pdp-hero-360-intro-layer,
 html[data-hero-intro-phase="playing"] .pdp-v5-page-root,

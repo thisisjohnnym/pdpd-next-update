@@ -23,6 +23,9 @@ function collectIntroChrome(root: HTMLElement): HTMLElement[] {
     }
   };
 
+  // Document-wide: meta strip + below-fold colors sit outside the hero shell
+  // ref but still use `.pdp-hero-intro-chrome` and must fade with the rest.
+  add(document.querySelectorAll<HTMLElement>(".pdp-hero-intro-chrome"));
   add(root.querySelectorAll<HTMLElement>(".pdp-hero-intro-chrome"));
   add(
     document.querySelectorAll<HTMLElement>(

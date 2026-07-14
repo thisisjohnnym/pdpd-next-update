@@ -57,34 +57,19 @@ export function PdpBottomActions({
       ref={barRef}
       data-floating-cta-bar
       className={cn(
-        "pointer-events-none fixed inset-x-0 z-40 bg-white",
-        // Land dock stays put — avoid transform transitions fighting scroll /
-        // visualViewport (jitter). Non-land bars still slide for jump-bar swap.
-        floatingBuyBarLandCta
-          ? chromeHidden
-            ? "invisible pointer-events-none"
-            : null
-          : cn(
-              "transition-transform duration-300 ease-out",
-              chromeHidden ? "translate-y-full" : "translate-y-0",
-            ),
+        "pointer-events-none fixed inset-x-0 z-40 bg-white transition-transform duration-300 ease-out",
         floatingBuyBarLandCta && "pdp-v7-fixed-cta-dock",
         hero360IntroEnabled && "pdp-hero-intro-chrome",
+        chromeHidden ? "translate-y-full" : "translate-y-0",
       )}
-      style={
-        floatingBuyBarLandCta
-          ? {
-              // Flush land tray — padding owned by `pdp-v7.css` (do not set
-              // inline padding: it overrides the swatch-crop top pad).
-              bottom: 0,
-            }
-          : {
-              bottom: BOTTOM_CHROME_OFFSET,
-              padding: CTA_BAR_PADDING_PX,
-              paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-              paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-            }
-      }
+      style={{
+        // Even 8px tray inset — land swatches clear the dock via footer pad, not crop.
+        bottom: BOTTOM_CHROME_OFFSET,
+        paddingTop: CTA_BAR_PADDING_PX,
+        paddingBottom: `max(${CTA_BAR_PADDING_PX}px, env(safe-area-inset-bottom, 0px))`,
+        paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+        paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+      }}
     >
       <div
         className={cn(
