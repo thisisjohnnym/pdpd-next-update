@@ -29,10 +29,10 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 13, 2026 |
-| Commit | `6d6c04d` — fix(v7): land chrome spacing, intro meta sync, padded ATB |
-| URL | https://pdp-next-sigma.vercel.app/v7 |
-| Prior ship | Jul 13, 2026 · `9548c7f` · ATB flush + WebKit intro |
+| Date | Jul 15, 2026 |
+| Commit | `37cd257` — feat(v8): ship alternate hero route with gallery polish |
+| URL | https://pdp-next-sigma.vercel.app/v8 |
+| Prior ship | Jul 13, 2026 · `6d6c04d` · v7 land chrome spacing |
 
 ## Quick links (Tabby)
 
