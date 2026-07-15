@@ -544,6 +544,9 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",
+    // Tall 430×840 still — cover + center-top crops the Tabby out of the land frame.
+    framing: { objectFit: "contain", objectPosition: "center" },
+    ground: "beige",
   },
   {
     kind: "image",
