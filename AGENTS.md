@@ -10,7 +10,7 @@ In **Plan mode**, load `.cursor/rules/agent-planning.mdc` (or `@agent-planning`)
 
 ## PDP versions (read before any PDP edit)
 
-The PDP ships **seven comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, **v4**, **v5**, **v6** (frozen UXR variants), and **v7** (active Skelly parity round). Be version-aware before touching PDP code.
+The PDP ships **eight comparison routes** from one codebase: **v1** (frozen baseline, `/v1` and legacy `/`), **v2**, **v3**, **v4**, **v5**, **v6**, **v7** (frozen UXR variants), and **v8** (active alternate-hero round). Be version-aware before touching PDP code.
 
 - Architecture & flags: `docs/pdp-versions.md`
 - Deploy & stakeholder links: `docs/deploy-and-links.md`
@@ -24,10 +24,10 @@ The PDP ships **seven comparison routes** from one codebase: **v1** (frozen base
 
 ### Pre-ship checklist
 
-Before sharing `/v7` (or any round) with stakeholders:
+Before sharing `/v8` (or any round) with stakeholders:
 
 1. `pnpm check:versions` and `pnpm build` pass
-2. Spot-check `/v1`–`/v4` unchanged; active round (`/v7`) matches its round doc
+2. Spot-check `/v1`–`/v7` unchanged; active round (`/v8`) matches its round doc
 3. `git push origin main` (production updates when Vercel tracks `main`; use `vercel --prod --yes` to promote manually)
 4. Update `docs/rounds/README.md` deploy date and `docs/rounds/rN-vN.md` deploy log
 

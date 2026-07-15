@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useLayoutEffect } from "react";
+import { useMemo, useRef, useLayoutEffect, type ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -19,6 +19,8 @@ import {
 } from "./pdp-hero-gallery-data";
 import {
   heroSlideBackground,
+  PDP_HERO_GROUND_CLASS,
+  resolveHeroLetterboxGround,
   resolveHeroSlideFraming,
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
@@ -52,11 +54,15 @@ function HeroSlideMedia({
   /** Decode immediately — first image slides for snappy first swipe */
   eager: boolean;
 }) {
-  const { objectFit, objectPosition } = resolveHeroSlideFraming(
+  const { objectFit, objectPosition, scale = 1 } = resolveHeroSlideFraming(
     slide.shotType,
     slide.framing,
   );
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
+  const mediaStyle = {
+    objectPosition,
+    ...(scale !== 1 ? { transform: `scale(${scale})` } : null),
+  };
 
   if (slide.kind === "video") {
     return (
@@ -75,7 +81,7 @@ function HeroSlideMedia({
         controlsPosition="bottom-right"
         controlsElevated
         className={cn("size-full object-center", fitClass)}
-        style={{ objectPosition }}
+        style={mediaStyle}
       />
     );
   }
@@ -88,7 +94,7 @@ function HeroSlideMedia({
       priority={eager}
       sizes="100vw"
       className={cn("object-center", fitClass)}
-      style={{ objectPosition }}
+      style={mediaStyle}
     />
   );
 }
@@ -121,6 +127,7 @@ export function PdpHeroGallery({
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
+  afterGallery,
 }: PdpHeroGalleryProps) {
   const versionConfig = getPdpVersionConfig(usePdpVersion());
 
@@ -142,6 +149,7 @@ export function PdpHeroGallery({
       onOpenArTryOn={onOpenArTryOn}
       isLastPanel={isLastPanel}
       fillFrame={fillFrame}
+      afterGallery={afterGallery}
       versionConfig={versionConfig}
     />
   );
@@ -154,6 +162,8 @@ type PdpHeroGalleryProps = {
   isLastPanel?: boolean;
   /** Size to the parent media frame (PdpHeroShell) instead of 100svh */
   fillFrame?: boolean;
+  /** Rendered inside the gallery provider after the media section (v8 product info) */
+  afterGallery?: ReactNode;
 };
 
 /** Horizontal snap carousel — split out so hooks stay unconditional above the v6 vertical branch. */
@@ -163,6 +173,7 @@ function PdpHeroGalleryHorizontal({
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
+  afterGallery,
   versionConfig,
 }: PdpHeroGalleryProps & {
   versionConfig: ReturnType<typeof getPdpVersionConfig>;
@@ -302,12 +313,27 @@ function PdpHeroGalleryHorizontal({
               <div
                 key={`${getHeroGallerySlideKey(slide)}-${index}`}
                 className="relative h-full w-full shrink-0 snap-center snap-always"
-                style={{ backgroundColor: heroSlideBackground(slide.shotType) }}
+                style={{
+                  backgroundColor: heroSlideBackground(
+                    slide.shotType,
+                    slide.kind,
+                    slide.ground,
+                  ),
+                }}
               >
                 {hideSlideMediaForIntro || suppressNeighborMedia ? (
                   <div
                     aria-hidden
-                    className="absolute inset-0 bg-[#f0f0f0]"
+                    className={cn(
+                      "absolute inset-0",
+                      PDP_HERO_GROUND_CLASS[
+                        resolveHeroLetterboxGround(
+                          slide.shotType,
+                          slide.kind,
+                          slide.ground,
+                        )
+                      ],
+                    )}
                   />
                 ) : (
                   <HeroSlideMedia
@@ -371,6 +397,7 @@ function PdpHeroGalleryHorizontal({
           </>
         )}
       </section>
+      {afterGallery}
       </HeroGalleryIdleProvider>
     </PdpHeroGalleryProvider>
   );

@@ -661,7 +661,21 @@ export function buildV2Slides(
 }
 
 /** Tabby v2 gallery — Details, studio product, ugc-community, then editorial carousel */
-export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALLERY_SLIDES);
+export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = forceGallerySlidesAspect45(
+  buildV2Slides(PDP_GALLERY_SLIDES),
+);
+
+/** Force every portrait gallery slide to 4:5 (ignores legacy 9:16 slide data). */
+function forceGallerySlidesAspect45(
+  slides: PdpGallerySlideV2[],
+): PdpGallerySlideV2[] {
+  return slides.map((slide) => {
+    if (slide.type === "immersive" || slide.type === "video") {
+      return { ...slide, aspect: "4/5" as const };
+    }
+    return slide;
+  });
+}
 
 /** v4 studio drag-zoom slide — 4:5 frame with copy above the image (Paper KJY-0). */
 const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
@@ -699,8 +713,8 @@ export function applyV4GallerySlidePatches(
 }
 
 /** Tabby v4 gallery — same flow as v2 with the studio product slide reframed for r5. */
-export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePatches(
-  buildV2Slides(PDP_GALLERY_SLIDES),
+export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = forceGallerySlidesAspect45(
+  applyV4GallerySlidePatches(buildV2Slides(PDP_GALLERY_SLIDES)),
 );
 
 /** Shared poster/video for the “An Icon, Reimagined” highlight card. */

@@ -1,4 +1,4 @@
-# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6 / v7)
+# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6 / v7 / v8)
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
@@ -6,11 +6,10 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2** is the first stakeholder pivot. **v3** is the Paper r4 pivot. **v4** is the Paper r5 feedback round. **v5** is Sean's r5 polish round. **v6** is the fall-in + vertical gallery UXR variant. **v7** is the **active** Skelly parity round (shipped to `main` Jul 13, 2026).
-- Brand team compares them at **`/v1`**, **`/v2`**, **`/v3`**, **`/v4`**, **`/v5`**, **`/v6`**, and **`/v7`** on the same deploy — merging `/v7` did **not** remove older routes.
-- **Current state:** `main` @ `272ce8b` · share **`/v7`** for feedback · `/fc01` + `/fc01v` also live for the UXR study pair.
-- **Frozen caveat:** `/v1`–`/v4` stay baseline-safe. `/v5` and `/v6` picked up shared Skelly component updates from the Jul 13 merge train — compare against [rounds/README.md](rounds/README.md) if pixel parity matters.
-- v2, v3, and v4 differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3.
+- **v1** is the frozen current design. **v2**–**v7** are frozen comparison pivots. **v8** is the **active** alternate-hero round (Paper page v8).
+- Brand team compares them at **`/v1`** … **`/v8`** on the same deploy.
+- **Current state:** share **`/v8`** for alt-hero feedback · `/v7` remains the Skelly parity reference.
+- v2+ differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3 defaults.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
 
@@ -47,7 +46,8 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v4 (r5 feedback) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
 | v5 (Sean polish — frozen) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) |
 | v6 (fall-in + vertical — frozen) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
-| v7 (Skelly parity — active) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
+| v7 (Skelly parity — frozen) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
+| v8 (alternate hero — active) | https://pdp-next-sigma.vercel.app/v8 | [rounds/r9-v8.md](rounds/r9-v8.md) |
 
 Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
 
@@ -361,9 +361,9 @@ Full changelog: [rounds/r7-v6.md](rounds/r7-v6.md). Deploy links: [deploy-and-li
 
 ---
 
-## 8.8. v7 — Skelly parity (active)
+## 8.8. v7 — Skelly parity (frozen)
 
-v7 is the **active** round. Visual / merchandising source of truth is Skelly's fork (`skelly363/pdp-next` @ `90e2295`), manually ported — **not** merged. Motion / interaction stays on our stack (iOS drawers, carousel snap, motion tokens).
+v7 is a **frozen** Skelly parity reference. Visual / merchandising source of truth is Skelly's fork (`skelly363/pdp-next` @ `90e2295`), manually ported — **not** merged. Motion / interaction stays on our stack (iOS drawers, carousel snap, motion tokens).
 
 `V7_CONFIG` spreads **`V4_CONFIG`** (not our r7-mutated `V5_CONFIG`) and applies Skelly's v5 flag snapshot: flat color sheet, sale pricing, full-bag swatches, emphasized reviews, land intro (no fall-in), mirror-selfie gallery slide.
 
@@ -391,7 +391,45 @@ Full changelog: [rounds/r8-v7.md](rounds/r8-v7.md). Deploy links: [deploy-and-li
 
 ---
 
-## 8.9. fc01 / fc01v — final-candidate UXR study pair
+## 8.9. v8 — alternate hero (active)
+
+v8 is the **active** round. Paper SoT: page [v8 `D-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/D-0) (mobile artboards `v8 - hero on land` / `v8 - color tapped`).
+
+`V8_CONFIG` spreads **`V7_CONFIG`** and overrides land chrome only. Merchandising below the hero stays on the v7 stack.
+
+### Layout (do not contradict Paper spacing)
+
+Flex column in document flow: **inline nav (48px, 12px pad) → gallery (flex-1) → product info (8px gap/pad)**. Gallery must not use the global immersive `100svh` absolute cover — v8 CSS overrides `.pdp-hero-immersive` height inside `.pdp-v8-land-stack`. Color drawer is absolute on product info (`bottom: 100%`), closed border = `--color-bg` (invisible), open border = `--color-line-soft`.
+
+### v8-only files
+
+| File | Role |
+|------|------|
+| `src/app/v8/` | Route folder — imports v5/v7 CSS + `pdp-v8.css` |
+| `pdp-v8-hero-layout.tsx` | Alt hero composition |
+| `pdp-v8-inline-nav.tsx` | Inline header |
+| `pdp-v8-thumbnail-strip.tsx` | Solid-color thumbs |
+| `pdp-v8-color-drawer.tsx` | Absolute upward drawer |
+| `pdp-store-pickup-block.tsx` | Pickup inside ATB sheet |
+| `docs/rounds/r9-v8.md` | Round changelog + Paper spacing table |
+
+### Key v8 flags (`V8_CONFIG`)
+
+| Flag | Purpose |
+|------|---------|
+| `useAltHeroComposition` | Mount `PdpV8HeroLayout` |
+| `useInlineHeroNav` | Suppress overlay header |
+| `showHeroThumbnailStrip` | Solid thumb strip |
+| `useAbsoluteColorDrawer` | Upward drawer; disable bottom color sheet |
+| `showPickupInAtbSheet` | Pickup in Add to bag sheet |
+| `floatingBuyBarWhenHeroHidden` | ATB scrolls then docks |
+| `desktopSplitLayout: false` | Mobile-first |
+
+Full changelog: [rounds/r9-v8.md](rounds/r9-v8.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+
+---
+
+## 8.10. fc01 / fc01v — final-candidate UXR study pair
 
 Brand approved the Skelly template, so the study ships as an **FC (final candidate) pair** rather than another numbered round:
 

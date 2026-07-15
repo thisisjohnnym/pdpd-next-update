@@ -2,12 +2,16 @@ import {
   PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
 } from "./pdp-data";
-import type { PdpHeroFraming, PdpHeroShotType } from "./pdp-hero-framing";
+import type {
+  PdpHeroFraming,
+  PdpHeroLetterboxGround,
+  PdpHeroShotType,
+} from "./pdp-hero-framing";
 
 /**
  * Header chrome contrast per slide.
  * - `dark` surface → white nav (the cinematic lifestyle video)
- * - `light` surface → dark nav (studio stills + spins on the #f0f0f0 ground)
+ * - `light` surface → dark nav (studio stills + spins on grey / beige ground)
  *
  * Mirrors the `data-header-surface` convention sampled by `useHeaderContrast`.
  */
@@ -35,6 +39,11 @@ type PdpHeroGalleryBaseSlide = {
   galleryCategory?: PdpHeroGalleryCategory;
   /** Per-slide crop override — e.g. contain on-model on the studio grey ground */
   framing?: Partial<PdpHeroFraming>;
+  /**
+   * Letterbox fill behind `contain` media. Omit to use shotType/kind defaults
+   * (product/detail stills → beige; videos → grey; lifestyle → black).
+   */
+  ground?: PdpHeroLetterboxGround;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -407,8 +416,8 @@ export function orderHeroGallerySlides(
  * Side-scrolling hero gallery for Tabby Shoulder Bag 26.
  *
  * Slide 0 is the lifestyle land video (white nav). Every following slide is a
- * studio still or product video on the #f0f0f0 ground and uses the dark nav.
- * Shot types drive cropping — see `pdp-hero-framing.ts`.
+ * studio still or product video — letterbox ground is selective (beige stills vs
+ * grey spins). Shot types drive cropping — see `pdp-hero-framing.ts`.
  */
 export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
   {
@@ -436,6 +445,8 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "product",
     headerSurface: "light",
     galleryCategory: "product-photos",
+    // Legacy square still on cool #f0f0f0 — not the r7 warm beige ground
+    ground: "grey",
   },
   {
     kind: "image",
@@ -462,6 +473,8 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "studio",
     headerSurface: "light",
     galleryCategory: "360",
+    // Square spin sits small in the land frame — nudge up 20% so the bag fills better.
+    framing: { scale: 1.2 },
   },
   {
     kind: "image",
@@ -519,6 +532,10 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",
+    // Tall 430×840 still — cover crops the Tabby at the land gallery seam.
+    // Contain keeps the full bag in frame on the warm studio ground.
+    framing: { objectFit: "contain", objectPosition: "center" },
+    ground: "beige",
   },
   {
     kind: "image",
@@ -535,6 +552,7 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "detail",
     headerSurface: "light",
     galleryCategory: "product-photos",
+    ground: "grey",
   },
   {
     kind: "image",

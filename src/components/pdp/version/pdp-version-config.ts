@@ -262,6 +262,33 @@ export type PdpVersionConfig = {
    */
   useHeroMetaStrip: boolean;
   /**
+   * Alternate hero composition — inline nav, thumbnail strip, absolute color
+   * drawer, in-flow ATB (Paper v8). Mounts `PdpV8HeroLayout`.
+   */
+  useAltHeroComposition: boolean;
+  /**
+   * Inline Coach nav above the gallery (not the fixed overlay header). v8.
+   */
+  useInlineHeroNav: boolean;
+  /**
+   * Swipable thumbnail strip under the hero gallery for quick scan. v8.
+   */
+  showHeroThumbnailStrip: boolean;
+  /**
+   * Absolute upward color drawer anchored on product info (replaces bottom
+   * color sheet). v8.
+   */
+  useAbsoluteColorDrawer: boolean;
+  /**
+   * Store pickup UI inside the Add to bag sheet (not under the hero). v8.
+   */
+  showPickupInAtbSheet: boolean;
+  /**
+   * Bottom-left tick slide indicator when the progress bar and category rail
+   * are both off. Disable on the alt hero (v8).
+   */
+  showHeroGalleryTickIndicator: boolean;
+  /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
    * v5 only.
    */
@@ -640,6 +667,12 @@ const V1_CONFIG: PdpVersionConfig = {
   floatingBuyBarLandCta: false,
   heroColorSwatchesExpandOnScroll: false,
   useHeroMetaStrip: false,
+  useAltHeroComposition: false,
+  useInlineHeroNav: false,
+  showHeroThumbnailStrip: false,
+  useAbsoluteColorDrawer: false,
+  showPickupInAtbSheet: false,
+  showHeroGalleryTickIndicator: true,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -764,6 +797,12 @@ const V2_CONFIG: PdpVersionConfig = {
   floatingBuyBarLandCta: false,
   heroColorSwatchesExpandOnScroll: false,
   useHeroMetaStrip: false,
+  useAltHeroComposition: false,
+  useInlineHeroNav: false,
+  showHeroThumbnailStrip: false,
+  useAbsoluteColorDrawer: false,
+  showPickupInAtbSheet: false,
+  showHeroGalleryTickIndicator: true,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -1125,6 +1164,45 @@ const V7_CONFIG: PdpVersionConfig = {
   heroProductSlidesFillFrame: false,
 };
 
+/**
+ * v8 — alternate hero composition (Paper page v8). Spreads v7 merchandising,
+ * then overrides land chrome: inline nav, thumbnail strip, absolute color
+ * drawer, in-flow ATB with dock handoff, pickup in ATB sheet.
+ */
+const V8_CONFIG: PdpVersionConfig = {
+  ...V7_CONFIG,
+  useAltHeroComposition: true,
+  useInlineHeroNav: true,
+  showHeroThumbnailStrip: true,
+  useAbsoluteColorDrawer: true,
+  useV3ColorSheet: false,
+  useHeroMetaStrip: false,
+  showStorePickupLink: false,
+  showSubtleReviewTeaser: false,
+  showPickupInAtbSheet: true,
+  floatingBuyBarWhenHeroHidden: true,
+  floatingBuyBarLandCta: true,
+  showFloatingBuyBar: true,
+  useHeroGalleryProgressBar: false,
+  showHeroGalleryCategoryRail: false,
+  desktopSplitLayout: false,
+  heroColorSwatchesExpandOnScroll: false,
+  heroLandStickyCtaDock: false,
+  hideDockedBuyBarColor: true,
+  inlineBuyBarColorSwatches: true,
+  useCompactBuyBarColorDots: true,
+  compactBuyBarColorDotCount: 4,
+  heroLandColorSwatchVariant: "dot",
+  heroColorSwatchMoreCountOverride: 6,
+  hideBuyBarAtbIcon: false,
+  squareButtonCorners: true,
+  showHeroGalleryTickIndicator: false,
+  showHeroFitsInsideCta: false,
+  showArTryOn: false,
+  // Drop legacy grey-ground a3 — duplicates the r7 a5 back view in the thumb strip.
+  heroGalleryExcludeSlideSrcs: [HERO_THREE_QUARTER_STILL_SRC],
+};
+
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
@@ -1133,6 +1211,7 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v5: V5_CONFIG,
   v6: V6_CONFIG,
   v7: V7_CONFIG,
+  v8: V8_CONFIG,
   fc01: FC01_CONFIG,
   fc01v: FC01V_CONFIG,
 };

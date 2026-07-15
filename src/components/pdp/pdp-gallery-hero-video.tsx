@@ -6,6 +6,7 @@ import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import { PDP_GALLERY_HERO_VIDEO } from "./pdp-data";
+import { PDP_HERO_STUDIO_BG_CLASS } from "./pdp-hero-framing";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpPillRadiusClass } from "./pdp-type";
 import { resolveVideoSources } from "./pdp-video-sources";
@@ -54,7 +55,7 @@ type PdpGalleryHeroVideoProps = {
   blurReveal?: boolean;
   /** Match gallery Image slides — absolute inset-0 within a relative slide cell. */
   fill?: boolean;
-  /** Letterbox on #f0f0f0 instead of the video element's default black. */
+  /** Letterbox on the studio beige ground instead of the video element's default black. */
   studioGround?: boolean;
   /** Playback speed multiplier. Defaults to 1. */
   playbackRate?: number;
@@ -263,7 +264,7 @@ export function PdpGalleryHeroVideo({
 
   const videoClassName = cn(
     fill && "absolute inset-0 h-full w-full",
-    studioGround && "bg-[#f0f0f0]",
+    studioGround && PDP_HERO_STUDIO_BG_CLASS,
     className,
     showBlurReveal
       ? cn(
@@ -317,7 +318,7 @@ export function PdpGalleryHeroVideo({
           !poster && !priorityAutoplay && "motion-safe:animate-pulse",
           !poster &&
             (skeletonTone === "light" ? "bg-neutral-200" : "bg-neutral-900"),
-          studioGround && "bg-[#f0f0f0]",
+          studioGround && PDP_HERO_STUDIO_BG_CLASS,
           !fill && className,
         )}
         style={style}
@@ -418,6 +419,7 @@ export function PdpGalleryHeroVideo({
       {controlsTransition.mounted ? (
         usePillControls ? (
           <div
+            data-hero-video-controls
             className={cn(
               "absolute",
               controlsPositionClass,
@@ -498,6 +500,7 @@ export function PdpGalleryHeroVideo({
           </div>
         ) : (
           <div
+            data-hero-video-controls
             className={cn(
               "absolute flex items-center gap-1.5 pdp-video-controls-pop pdp-video-controls-stagger",
               controlsPositionClass,

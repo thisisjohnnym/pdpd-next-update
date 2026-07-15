@@ -41,6 +41,7 @@ import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { PdpV3HeroLayout } from "./version/pdp-v3-hero-layout";
 import { PdpV5DesktopHeroSplit } from "./version/pdp-v5-desktop-hero-split";
+import { PdpV8HeroLayout } from "./version/pdp-v8-hero-layout";
 import { useHeroBuyBarVisibility } from "./version/use-hero-buy-bar-visibility";
 
 type BagConfirmation =
@@ -136,6 +137,8 @@ function PdpSocialViewInner() {
     desktopSplitLayout,
     showArTryOn,
     showHeroGalleryCategoryRail,
+    useAltHeroComposition,
+    useInlineHeroNav,
   } = versionConfig;
 
   const handleOpenArTryOn =
@@ -205,17 +208,20 @@ function PdpSocialViewInner() {
     : true;
   const useV3Hero =
     heroScrollsWithPage && showBrandBar && product.hero.kind === "video";
+  const useV8Hero = useAltHeroComposition && useV3Hero;
 
   const pageBody = (
     <>
       <PdpBrowserChromeSync />
       <PdpProductUrlSync activeColorId={activeColorId} />
-      <PdpOverlayHeader
-        bagCount={bagCount}
-        menuOpen={navOpen}
-        onOpenMenu={() => setNavOpen(true)}
-        hugBrandBar={showBrandBar && versionConfig.showBrandSwitcher}
-      />
+      {useInlineHeroNav ? null : (
+        <PdpOverlayHeader
+          bagCount={bagCount}
+          menuOpen={navOpen}
+          onOpenMenu={() => setNavOpen(true)}
+          hugBrandBar={showBrandBar && versionConfig.showBrandSwitcher}
+        />
+      )}
       {!isStripped && versionConfig.showSectionJumpBar ? (
         <PdpSectionIndicator suppressed={chromeSuppressed} />
       ) : null}
@@ -225,6 +231,18 @@ function PdpSocialViewInner() {
           alt={product.hero.alt}
           objectPosition={product.hero.objectPosition}
           onOpenReviews={() => openReviews("comments")}
+        />
+      ) : useV8Hero ? (
+        <PdpV8HeroLayout
+          selectedColorId={activeColorId}
+          onColorSelect={setSelectedColorId}
+          onAddToBag={handleAddToBag}
+          onOpenMenu={() => setNavOpen(true)}
+          menuOpen={navOpen}
+          bagCount={bagCount}
+          onOpenReviews={() => openReviews("comments")}
+          onOpenArTryOn={handleOpenArTryOn}
+          sentinelRef={heroSentinelRef}
         />
       ) : useV3Hero ? (
         <>
@@ -344,7 +362,9 @@ function PdpSocialViewInner() {
       data-pdp-page-root
       className={cn(
         "relative min-h-svh w-full overflow-x-clip",
-        isStaticHero || isColorHero ? "bg-white" : "bg-black",
+        isStaticHero || isColorHero || useAltHeroComposition
+          ? "bg-white"
+          : "bg-black",
         desktopSplitLayout && "pdp-v5-page-root",
       )}
     >

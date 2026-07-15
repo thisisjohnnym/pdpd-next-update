@@ -36,7 +36,7 @@ export function PdpV3GalleryOverlay({
   const { opacity } = useHeroUiChrome();
   const visible = isHeroUiChromeVisible(opacity);
   const { overlayCta } = usePdpHeroGallery();
-  const { useV4ModuleSpacing, showHeroFitsInsideCta, useHeroGalleryProgressBar, showHeroGalleryCategoryRail, showArTryOn, playHeroLandIntro } =
+  const { useV4ModuleSpacing, showHeroFitsInsideCta, useHeroGalleryProgressBar, showHeroGalleryCategoryRail, showArTryOn, playHeroLandIntro, showHeroGalleryTickIndicator } =
     getPdpVersionConfig(usePdpVersion());
   const heroEnterOnce = useHeroEnterOnce();
   const playLandIntro = playHeroLandIntro && heroEnterOnce;
@@ -89,7 +89,9 @@ export function PdpV3GalleryOverlay({
               !useV4ModuleSpacing && "pl-2",
             )}
           >
-            {useHeroGalleryProgressBar ? null : <PdpHeroGalleryIndicator />}
+            {useHeroGalleryProgressBar || !showHeroGalleryTickIndicator ? null : (
+              <PdpHeroGalleryIndicator />
+            )}
           </div>
         ) : null}
         <div className="pointer-events-none flex shrink-0 flex-col items-end gap-3">

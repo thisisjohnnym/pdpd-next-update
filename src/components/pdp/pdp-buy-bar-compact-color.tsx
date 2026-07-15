@@ -18,6 +18,11 @@ type PdpBuyBarCompactColorProps = {
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
   /**
+   * When set (v8 absolute drawer), opens the in-land color drawer instead of
+   * the bottom color sheet.
+   */
+  onOpenAbsoluteDrawer?: () => void;
+  /**
    * "dot" — +N chips (default). "swatch" — large v6 hero footer swatches.
    * "rail" — full scrollable color rail (docked land CTA).
    * "compact-swatch" — small full-bag tiles + +N (v7 land).
@@ -32,6 +37,7 @@ export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
   onColorSheetOpenChange,
+  onOpenAbsoluteDrawer,
   variant = "dot",
   className,
 }: PdpBuyBarCompactColorProps) {
@@ -42,6 +48,7 @@ export function PdpBuyBarCompactColor({
     compactBuyBarColorDotCount,
     heroColorSwatchMoreCountOverride,
     useV3ColorSheet,
+    useAbsoluteColorDrawer,
   } = getPdpVersionConfig(usePdpVersion());
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
 
@@ -52,11 +59,22 @@ export function PdpBuyBarCompactColor({
     : undefined;
 
   const setSheetOpen = (open: boolean) => {
+    if (useAbsoluteColorDrawer && onOpenAbsoluteDrawer) {
+      if (open) {
+        onOpenAbsoluteDrawer();
+      }
+      return;
+    }
     setColorSheetOpen(open);
     onColorSheetOpenChange?.(open);
   };
 
   const handleColorSelect = (id: string) => {
+    if (useAbsoluteColorDrawer && onOpenAbsoluteDrawer) {
+      onOpenAbsoluteDrawer();
+      return;
+    }
+
     const color = colors.find((entry) => entry.id === id);
     const combinationAvailable =
       !color ||
@@ -81,7 +99,7 @@ export function PdpBuyBarCompactColor({
 
   return (
     <>
-      {useV3ColorSheet && isTabbyProduct ? (
+      {useAbsoluteColorDrawer ? null : useV3ColorSheet && isTabbyProduct ? (
         <PdpV3ColorSheet open={colorSheetOpen} onClose={() => setSheetOpen(false)} />
       ) : (
         <PdpColorSheet

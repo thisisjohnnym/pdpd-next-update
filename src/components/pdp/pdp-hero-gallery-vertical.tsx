@@ -41,11 +41,15 @@ function VerticalHeroSlideMedia({
   isActive: boolean;
   eager: boolean;
 }) {
-  const { objectFit, objectPosition } = resolveHeroSlideFraming(
+  const { objectFit, objectPosition, scale = 1 } = resolveHeroSlideFraming(
     slide.shotType,
     slide.framing,
   );
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
+  const mediaStyle = {
+    objectPosition,
+    ...(scale !== 1 ? { transform: `scale(${scale})` } : null),
+  };
 
   if (slide.kind === "video") {
     return (
@@ -61,7 +65,7 @@ function VerticalHeroSlideMedia({
         showMuteControl={false}
         passThroughTouch
         className={cn("size-full object-center", fitClass)}
-        style={{ objectPosition }}
+        style={mediaStyle}
       />
     );
   }
@@ -74,7 +78,7 @@ function VerticalHeroSlideMedia({
       priority={eager}
       sizes="100vw"
       className={cn("object-center", fitClass)}
-      style={{ objectPosition }}
+      style={mediaStyle}
     />
   );
 }
@@ -206,7 +210,13 @@ export function PdpHeroGalleryVertical({
                 data-hero-vertical-slide
                 data-hero-vertical-slide-index={index}
                 className="relative h-full min-h-full w-full shrink-0 snap-start snap-always"
-                style={{ backgroundColor: heroSlideBackground(slide.shotType) }}
+                style={{
+                  backgroundColor: heroSlideBackground(
+                    slide.shotType,
+                    slide.kind,
+                    slide.ground,
+                  ),
+                }}
               >
                 {!(index === 0 && useIntroLeadSlide) ? (
                   <VerticalHeroSlideMedia

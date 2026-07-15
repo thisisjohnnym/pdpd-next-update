@@ -19,7 +19,7 @@ import {
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpScrollReveal } from "./pdp-scroll-reveal";
 import { PdpSiteFooter } from "./pdp-site-footer";
-import { PDP_STUDIO_BACKDROP_CLASS } from "./pdp-data";
+import { PDP_HERO_STUDIO_BG_CLASS } from "./pdp-hero-framing";
 import { pdpModuleSectionClass } from "./pdp-module-section";
 import type { PdpProductConfig, PdpProductHero, PdpProductSummary } from "./pdp-products";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
@@ -36,8 +36,8 @@ import {
 
 const STRIPPED_SCROLL_PAD = { paddingBottom: BOTTOM_CTA_OFFSET } as const;
 
-function staticHeroAspectClass(aspect?: "4/5" | "9/16") {
-  return aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]";
+function staticHeroAspectClass(_aspect?: "4/5" | "9/16") {
+  return "aspect-[4/5]";
 }
 
 export type PdpStaticHeroImage = {
@@ -89,7 +89,7 @@ export function PdpStaticHero({
       data-header-surface="light"
       className="w-full shrink-0 bg-white"
     >
-      <div className={cn("relative w-full overflow-hidden", PDP_STUDIO_BACKDROP_CLASS)}>
+      <div className={cn("relative w-full overflow-hidden", PDP_HERO_STUDIO_BG_CLASS)}>
         <PdpRevealItem className={cn("relative w-full overflow-hidden", aspectClass)}>
           <Image
             key={`${productId}-${image.src}`}
@@ -200,13 +200,13 @@ export function PdpStrippedView({
               <section
                 className={cn(
                   "relative w-full shrink-0 overflow-hidden",
-                  PDP_STUDIO_BACKDROP_CLASS,
+                  PDP_HERO_STUDIO_BG_CLASS,
                 )}
               >
                 <PdpRevealItem
                   className={cn(
                     "relative w-full overflow-hidden",
-                    slide.aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
+                    "aspect-[4/5]",
                   )}
                 >
                   <Image

@@ -31,6 +31,7 @@ import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
 import { pdpPillRadiusClass, pdpProductPriceClass, pdpProductTitleClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass, pdpType } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
+import { PdpStorePickupBlock } from "./version/pdp-store-pickup-block";
 import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
@@ -302,7 +303,9 @@ export function PdpAddToBagSheet({
   const overlayReady = useOverlayDismiss(open, onClose);
   const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
   const sheetOpen = transition.state === "open";
-  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
+  const { squareButtonCorners, showPickupInAtbSheet } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
 
   const colors = getPdpColors(productId);
   const upsells = getPdpBagUpsells(productId);
@@ -419,6 +422,10 @@ export function PdpAddToBagSheet({
               <span className="translate-y-px">Checkout</span>
             </button>
           </div>
+
+          {showPickupInAtbSheet && !isBundle ? (
+            <PdpStorePickupBlock className="mb-2" />
+          ) : null}
 
           {!isBundle ? (
             <BagUpsellList

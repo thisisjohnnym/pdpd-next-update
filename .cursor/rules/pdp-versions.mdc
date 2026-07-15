@@ -3,9 +3,9 @@ description: PDP v1–v5 version boundaries — read before any PDP edit. Keeps 
 alwaysApply: true
 ---
 
-# PDP Versions (v1 frozen … v7 active)
+# PDP Versions (v1 frozen … v8 active)
 
-The PDP ships seven comparison routes on one deploy from **`main`**:
+The PDP ships eight comparison routes on one deploy from **`main`**:
 
 - **v1** (`/v1`, legacy `/`) — frozen brand baseline
 - **v2** (`/v2`) — first stakeholder pivot (frozen)
@@ -13,7 +13,8 @@ The PDP ships seven comparison routes on one deploy from **`main`**:
 - **v4** (`/v4`) — Paper r5 feedback round (frozen)
 - **v5** (`/v5`) — Sean r5 polish round (frozen)
 - **v6** (`/v6`) — post-v5 feedback round — **frozen**
-- **v7** (`/v7`) — Skelly parity round — **active work**
+- **v7** (`/v7`) — Skelly parity round — **frozen**
+- **v8** (`/v8`) — alternate hero composition — **active work**
 
 **Docs (read before edits):**
 
@@ -26,10 +27,10 @@ The PDP ships seven comparison routes on one deploy from **`main`**:
 
 - Read `docs/pdp-versions.md` before editing any PDP code.
 - New round work goes in `src/components/pdp/version/` or behind flags in `pdp-version-config.ts`. Never rewrite v1/v2/v3/v4/v5 defaults.
-- Do not branch on `version === "v2"` / `"v3"` / `"v4"` / `"v5"` / `"v6"` across the codebase. Add a flag to `PdpVersionConfig`.
+- Do not branch on `version === "v2"` / `"v3"` / `"v4"` / `"v5"` / `"v6"` / `"v7"` / `"v8"` across the codebase. Add a flag to `PdpVersionConfig`.
 - Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for new-round needs.
 - Never add version-only CSS to `globals.css`. Use `src/app/vN/pdp-vN.css` scoped under `[data-pdp-version="vN"]`. Treat `globals.css` edits as cross-version.
-- Shared `pdp-v2-*` components render on `/v2`–`/v6` — gate v4/v5/v6-only layout behind flags.
+- Shared `pdp-v2-*` components render on `/v2`–`/v8` — gate later-round-only layout behind flags.
 - After any change, confirm older routes still match baseline, then run `pnpm check:versions`.
 - Before stakeholder share: follow pre-ship checklist in `docs/deploy-and-links.md` (`vercel --prod` updates production).
 
@@ -44,4 +45,5 @@ The PDP ships seven comparison routes on one deploy from **`main`**:
 - v5 desktop/UGC: `src/components/pdp/version/pdp-v5-*.tsx`
 - v6 feedback: add flags to `V6_CONFIG` + `src/app/v6/pdp-v6.css`
 - v7 Skelly parity: add flags to `V7_CONFIG` + `src/app/v7/pdp-v7.css`
+- v8 alt hero: add flags to `V8_CONFIG` + `src/app/v8/pdp-v8.css`
 - Boundary checks: `scripts/check-pdp-version-boundaries.mjs`

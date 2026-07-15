@@ -10,7 +10,7 @@ import {
   PDP_HERO_GALLERY_SLIDES,
   orderHeroGallerySlides,
 } from "../pdp-hero-gallery-data";
-import { resolveHeroSlideFraming } from "../pdp-hero-framing";
+import { heroSlideBackground, resolveHeroSlideFraming } from "../pdp-hero-framing";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
@@ -61,20 +61,31 @@ export function PdpV5DesktopMediaColumn() {
       className="pdp-v5-desktop-media grid w-full grid-cols-2 gap-2 bg-[#f0f0f0]"
     >
       {slides.map((slide, index) => {
-        const { objectFit, objectPosition } = resolveHeroSlideFraming(
+        const { objectFit, objectPosition, scale = 1 } = resolveHeroSlideFraming(
           slide.shotType,
           slide.framing,
         );
         const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
+        const mediaStyle = {
+          objectPosition,
+          ...(scale !== 1 ? { transform: `scale(${scale})` } : null),
+        };
 
         return (
           <figure
             key={`${getHeroGallerySlideKey(slide)}-${index}`}
             data-header-surface={slide.headerSurface}
             className={cn(
-              "relative m-0 w-full overflow-hidden bg-[#f0f0f0]",
+              "relative m-0 w-full overflow-hidden",
               "aspect-[4/5]",
             )}
+            style={{
+              backgroundColor: heroSlideBackground(
+                slide.shotType,
+                slide.kind,
+                slide.ground,
+              ),
+            }}
           >
             {slide.kind === "video" ? (
               <PdpGalleryHeroVideo
@@ -87,7 +98,7 @@ export function PdpV5DesktopMediaColumn() {
                 preload="metadata"
                 skeletonTone="light"
                 className={cn("size-full object-center", fitClass)}
-                style={{ objectPosition }}
+                style={mediaStyle}
               />
             ) : (
               <Image
@@ -96,7 +107,7 @@ export function PdpV5DesktopMediaColumn() {
                 fill
                 priority={index === 0}
                 className={cn("object-center", fitClass)}
-                style={{ objectPosition }}
+                style={mediaStyle}
                 sizes="(min-width: 1024px) 30vw, 100vw"
               />
             )}

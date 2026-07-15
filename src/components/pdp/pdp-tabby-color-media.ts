@@ -48,7 +48,7 @@ function swapPurpleModelSlides(slides: PdpGallerySlide[]): PdpGallerySlide[] {
         src: PURPLE_ON_MODEL_FULL,
         alt: PURPLE_FULL_ALT,
         objectPosition: "center top",
-        aspect: "9/16",
+        aspect: "4/5",
         shopTheLookId: undefined,
       };
     }

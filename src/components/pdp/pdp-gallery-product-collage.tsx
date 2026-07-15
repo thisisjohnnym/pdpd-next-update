@@ -5,7 +5,8 @@ import Image from "next/image";
 import { GridItem, PageGrid } from "@/components/grid/page-grid";
 import { cn } from "@/lib/cn";
 
-import { PDP_GALLERY_PRODUCT_DETAIL_COLLAGE, PDP_STUDIO_BACKDROP_CLASS } from "./pdp-data";
+import { PDP_GALLERY_PRODUCT_DETAIL_COLLAGE } from "./pdp-data";
+import { PDP_HERO_STUDIO_BG_CLASS } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
 import { PDP_PANEL_SCROLL } from "./pdp-panel-scroll";
 import { BOTTOM_CTA_OFFSET } from "./pdp-viewport-chrome";
@@ -38,8 +39,8 @@ function CollageImage({
 }
 
 /**
- * Product detail collage — native 9:16 studio shots in a flush grid:
- * full-width hero, two matching portraits below (no square crop on portrait assets).
+ * Product detail collage — 4:5 studio shots in a flush grid:
+ * full-width hero, two matching portraits below.
  */
 export function PdpGalleryProductCollage({
   isLastPanel = false,
@@ -49,11 +50,11 @@ export function PdpGalleryProductCollage({
   const { hero, secondary } = PDP_GALLERY_PRODUCT_DETAIL_COLLAGE;
 
   const collageGrid = (
-    <div className={cn("grid w-full grid-cols-2", PDP_STUDIO_BACKDROP_CLASS)}>
+    <div className={cn("grid w-full grid-cols-2", PDP_HERO_STUDIO_BG_CLASS)}>
       <div
         className={cn(
-          "relative col-span-2 aspect-[9/16] overflow-hidden",
-          PDP_STUDIO_BACKDROP_CLASS,
+          "relative col-span-2 aspect-[4/5] overflow-hidden",
+          PDP_HERO_STUDIO_BG_CLASS,
         )}
       >
         <CollageImage
@@ -68,7 +69,7 @@ export function PdpGalleryProductCollage({
       {secondary.map((tile) => (
         <div
           key={tile.src}
-          className={cn("relative aspect-[9/16] overflow-hidden", PDP_STUDIO_BACKDROP_CLASS)}
+          className={cn("relative aspect-[4/5] overflow-hidden", PDP_HERO_STUDIO_BG_CLASS)}
         >
           <CollageImage
             src={tile.src}
@@ -87,7 +88,7 @@ export function PdpGalleryProductCollage({
         data-header-surface="light"
         className={cn(
           "relative w-full shrink-0 overflow-hidden",
-          PDP_STUDIO_BACKDROP_CLASS,
+          PDP_HERO_STUDIO_BG_CLASS,
           galleryPanelClassName(isLastPanel),
         )}
       >
@@ -101,7 +102,7 @@ export function PdpGalleryProductCollage({
       data-header-surface="light"
       className={cn(
         "relative flex w-full shrink-0 flex-col overflow-hidden",
-        PDP_STUDIO_BACKDROP_CLASS,
+        PDP_HERO_STUDIO_BG_CLASS,
         galleryPanelClassName(isLastPanel),
       )}
       style={{

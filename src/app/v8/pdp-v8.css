@@ -1,0 +1,323 @@
+/*
+ * v8 — alternate hero composition (Paper page v8, Jul 2026).
+ * Spacing mirrors Paper tokens: --space-card-gap 8px, nav pad 12px,
+ * nav links gap 16px (--space-module-x), thumb 40×52, ATB 50px,
+ * drawer closed border = --color-bg (invisible).
+ */
+
+[data-pdp-version="v8"] {
+  --pdp-v8-nav-height: 48px;
+  --pdp-v8-space: 8px; /* Paper --space-card-gap */
+  --pdp-v8-nav-pad: 12px; /* Paper --space-margin */
+  --pdp-v8-nav-links-gap: 16px; /* Paper --space-module-x */
+  --pdp-v8-thumb-w: 40px;
+  --pdp-v8-thumb-h: 52px;
+  --pdp-v8-drawer-closed-h: 13px;
+  /* Paper 102 + ring-inclusive swatch (46) + 4px row pad */
+  --pdp-v8-drawer-open-h: 112px;
+  --pdp-v8-atb-h: 50px;
+  --pdp-v8-color-swatch-size: 40px;
+  --pdp-v8-color-swatch-ring: 3px;
+  --pdp-v8-color-bg: #ffffff; /* Paper --color-bg */
+  --pdp-v8-color-surface: #eeeeee; /* Paper --color-surface */
+  --pdp-v8-color-line-soft: #efefef; /* Paper --color-line-soft */
+  --pdp-v8-color-ink: #171717; /* Paper --color-ink */
+}
+
+/* ── Land composition (nav → gallery → product info) ─────────────────────── */
+
+[data-pdp-version="v8"] .pdp-v8-hero {
+  background: var(--pdp-v8-color-bg);
+  color: var(--pdp-v8-color-ink);
+  /* One viewport land: nav + gallery flex + product info */
+  min-height: 100svh;
+}
+
+[data-pdp-version="v8"] .pdp-v8-land-stack {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  /* Remaining viewport under the 48px nav */
+  min-height: calc(100svh - var(--pdp-v8-nav-height));
+}
+
+/*
+ * Gallery sits in normal flex flow between nav and product info.
+ * Override globals `.pdp-hero-immersive { height: 100svh }` so the media
+ * region only fills the flex slot — it must not cover product info.
+ */
+[data-pdp-version="v8"] .pdp-v8-land-stack > [data-hero-section].pdp-hero-immersive,
+[data-pdp-version="v8"] .pdp-v8-land-stack > [data-hero-section].pdp-hero-immersive--fill-frame {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  min-height: 0;
+  height: auto !important;
+  max-height: none;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+/* Track fills the gallery flex slot only (not the whole page). */
+[data-pdp-version="v8"] .pdp-v8-land-stack [data-hero-gallery-track] {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * Video controls clear the closed color-drawer handle (13px) that sits on
+ * top of the gallery bottom edge, plus module-x breathing room (16px).
+ */
+[data-pdp-version="v8"] [data-hero-section] [data-hero-video-controls] {
+  bottom: calc(var(--pdp-v8-drawer-closed-h) + var(--pdp-v8-nav-links-gap));
+}
+
+[data-pdp-version="v8"] .pdp-v8-inline-nav {
+  height: var(--pdp-v8-nav-height);
+  padding: var(--pdp-v8-nav-pad);
+  background: var(--pdp-v8-color-bg);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+[data-pdp-version="v8"] .pdp-v8-inline-nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--pdp-v8-nav-links-gap);
+  height: 24px;
+  font-family: var(--font-helvetica-neue-extended, var(--font-helvetica-neue, "Helvetica Neue", Helvetica, Arial, sans-serif));
+  font-size: 11px; /* Paper --text-micro */
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 14px;
+  text-transform: uppercase;
+  color: var(--pdp-v8-color-ink);
+}
+
+[data-pdp-version="v8"] .pdp-v8-inline-nav-divider {
+  width: 1.5px;
+  height: 17px; /* Paper ~70% of 24px link row */
+  background: #e5e5e5; /* Paper --color-line */
+  flex-shrink: 0;
+}
+
+/* Paper product info: gap + padding = --space-card-gap (8px) */
+[data-pdp-version="v8"] .pdp-v8-product-info {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pdp-v8-space);
+  padding: var(--pdp-v8-space);
+  background: var(--pdp-v8-color-bg);
+  flex-shrink: 0;
+}
+
+[data-pdp-version="v8"] .pdp-v8-info-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--pdp-v8-space);
+  width: 100%;
+  padding-bottom: var(--pdp-v8-space);
+}
+
+[data-pdp-version="v8"] .pdp-v8-title {
+  font-size: 14px; /* Paper --text-body */
+  line-height: 1.15;
+  letter-spacing: 0.4px;
+}
+
+[data-pdp-version="v8"] .pdp-v8-price {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ── Thumbnail strip — solid blocks only (Paper placeholders) ────────────── */
+
+[data-pdp-version="v8"] .pdp-v8-thumbnail-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--pdp-v8-space);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  background: var(--pdp-v8-color-bg);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-thumbnail-strip::-webkit-scrollbar {
+  display: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--pdp-v8-thumb-w);
+  height: var(--pdp-v8-thumb-h);
+  overflow: hidden;
+  background: var(--pdp-v8-color-surface);
+  border: 2px solid transparent;
+  padding: 0;
+}
+
+[data-pdp-version="v8"] .pdp-v8-thumb[data-active="true"] {
+  border-color: #000000;
+}
+
+[data-pdp-version="v8"] .pdp-v8-thumb img {
+  object-fit: cover;
+}
+
+/* ── Color drawer ────────────────────────────────────────────────────────── */
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pdp-v8-space);
+  width: 100%;
+  padding: 8px 8px 0;
+  background: var(--pdp-v8-color-bg);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  overflow: hidden;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* Closed: Paper borderBottomColor = --color-bg (invisible against white). */
+[data-pdp-version="v8"] .pdp-v8-color-drawer[data-open="false"] {
+  height: var(--pdp-v8-drawer-closed-h);
+  padding-bottom: 0;
+  border-bottom-color: var(--pdp-v8-color-bg);
+}
+
+/* Open: Paper --color-line-soft */
+[data-pdp-version="v8"] .pdp-v8-color-drawer[data-open="true"] {
+  height: var(--pdp-v8-drawer-open-h);
+  border-bottom-color: var(--pdp-v8-color-line-soft);
+  touch-action: auto;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer-handle-hit {
+  cursor: grab;
+  touch-action: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: #d4d4d4;
+  flex-shrink: 0;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--pdp-v8-space);
+  width: 100%;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer[data-open="true"] .pdp-v8-color-drawer-body {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer-swatches {
+  display: flex;
+  align-items: center;
+  gap: var(--pdp-v8-space);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  /* Keep swatches off the overflow clip edge so the 1px ring isn’t shaved */
+  padding: 4px 4px 8px;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-drawer-swatches::-webkit-scrollbar {
+  display: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-swatch {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  /* Hit target includes the ring so overflow-x cannot clip selection */
+  width: calc(
+    var(--pdp-v8-color-swatch-size) + 2 * var(--pdp-v8-color-swatch-ring)
+  );
+  height: calc(
+    var(--pdp-v8-color-swatch-size) + 2 * var(--pdp-v8-color-swatch-ring)
+  );
+  border-radius: 999px;
+  background: transparent;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-swatch-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid #0a0a0a;
+  pointer-events: none;
+}
+
+[data-pdp-version="v8"] .pdp-v8-color-swatch-fill {
+  position: absolute;
+  inset: var(--pdp-v8-color-swatch-ring);
+  border-radius: 999px;
+}
+
+[data-pdp-version="v8"] .pdp-v8-atb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: var(--pdp-v8-atb-h);
+  width: 100%;
+  flex-shrink: 0;
+  background: var(--pdp-v8-color-ink);
+  color: #fff;
+  border: none;
+  font-family: var(--font-helvetica-neue, "Helvetica Neue", Helvetica, Arial, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+[data-pdp-version="v8"] .pdp-v8-atb:active {
+  background: #0a0a0a;
+}
+
+[data-pdp-version="v8"] .pdp-v7-fixed-cta-dock .pdp-buy-bar-row {
+  gap: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-pdp-version="v8"] .pdp-v8-color-drawer {
+    transition:
+      height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease;
+  }
+
+  [data-pdp-version="v8"] .pdp-v8-color-drawer-body {
+    transition: opacity 180ms ease;
+  }
+}
