@@ -75,8 +75,11 @@ function TopReviewPreviews() {
       className="m-0 flex list-none flex-col gap-3 p-0"
     >
       {TOP_REVIEW_PREVIEWS.map((review) => (
-        <li key={review.id}>
-          <article className="flex flex-col gap-2 bg-white px-4 py-4">
+        <li
+          key={review.id}
+          className="border-t border-neutral-200 pt-4 first:border-t-0 first:pt-0"
+        >
+          <article className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <PdpStarRating rating={review.rating ?? 0} size={16} />
               {review.verified ? (
@@ -308,14 +311,11 @@ function V4ReviewSummary({
           ) : null}
         </div>
 
-        {/* AI review summary — flat grey tray (matches reviews sheet) */}
+        {/* AI review summary — flush with module, no tray */}
         <PdpRevealItem delay={revealStaggerDelay(2)} className="w-full">
           <PdpAiInsightCard
             variant="minimal"
             size={enlargeReviewAiSummary ? "compact" : "xs"}
-            contained
-            containedSurface={emphasizeReviewsModule ? "elevated" : "flat"}
-            squareCorners={squareButtonCorners}
             showIcon={false}
             clampBodyLines={2}
             moreLabel="See more"
