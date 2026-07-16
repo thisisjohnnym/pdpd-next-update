@@ -1,8 +1,5 @@
 import { PDP_GALLERY_SLIDES } from "../pdp-data";
-import {
-  HERO_ON_MODEL_BLACK_DRESS_SRC,
-  type PdpHeroGallerySlide,
-} from "../pdp-hero-gallery-data";
+import type { PdpHeroGallerySlide } from "../pdp-hero-gallery-data";
 import { PDP_CHAPTERS, type PdpChapter } from "../pdp-section-chapters";
 
 import {
@@ -154,6 +151,12 @@ export type PdpVersionConfig = {
    * land). Empty string = disabled. v5 only.
    */
   heroGalleryLeadSlideSrc: string;
+  /** Move a specific gallery slide to the final position. Empty string = disabled. */
+  heroGalleryLastSlideSrc: string;
+  /** Gallery images omitted for this version. */
+  heroGalleryExcludedSlideSrcs: string[];
+  /** Version-specific gallery slides merged before logical category ordering. */
+  heroGalleryAdditionalSlides: PdpHeroGallerySlide[];
   /**
    * Prepend an extra hero land slide ahead of the base slides (deduped by src),
    * applied after `heroGalleryLeadSlideSrc`. Used to lead the gallery with a
@@ -229,7 +232,7 @@ export type PdpVersionConfig = {
    */
   showStorePickupLink: boolean;
   /**
-   * Compact ratings summary under the hero land — full star row, score/count,
+   * Compact ratings cue under the product name — stars + score/count,
    * and recommend line. Metadata module (not a muted text-link CTA). v5 only.
    */
   showSubtleReviewTeaser: boolean;
@@ -354,11 +357,21 @@ export type PdpVersionConfig = {
    */
   showReviewHighlightTags: boolean;
   /**
+   * Replace the UGC photo rail with three formal customer-review previews.
+   * v5 only.
+   */
+  showTopReviewPreviews: boolean;
+  /**
    * Show the Coach / Coach Outlet brand switcher strip above the video hero
    * (`PdpBrandBarReveal`). v4 (Paper r5) hides it; v1/v2/v3 keep it. When false
    * the overlay header also stops hugging the (absent) brand bar.
    */
   showBrandSwitcher: boolean;
+  /**
+   * Slim text Coach / Outlet tabs pinned above the overlay header row.
+   * v5 only — lighter than `PdpBrandBar`; does not use pull-to-reveal.
+   */
+  showSlimSiteSwitcher: boolean;
   /**
    * Run the hero shrink/reveal choreography (intro peek + pull-to-reveal) that
    * exposes the brand switcher. v4 hides the switcher, so the reveal has nothing
@@ -545,6 +558,9 @@ const V1_CONFIG: PdpVersionConfig = {
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
   heroGalleryLeadSlideSrc: "",
+  heroGalleryLastSlideSrc: "",
+  heroGalleryExcludedSlideSrcs: [],
+  heroGalleryAdditionalSlides: [],
   heroGalleryLogicalBlockOrder: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
@@ -574,9 +590,11 @@ const V1_CONFIG: PdpVersionConfig = {
   showUpCloseModule: true,
   showCloserLookStage: false,
   showBrandSwitcher: true,
+  showSlimSiteSwitcher: false,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   showReviewHighlightTags: true,
+  showTopReviewPreviews: false,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
   useRailLeatherAgingSlider: false,
@@ -655,6 +673,9 @@ const V2_CONFIG: PdpVersionConfig = {
   leadGalleryWithProductStill: false,
   heroGalleryStudioDragZoom: false,
   heroGalleryLeadSlideSrc: "",
+  heroGalleryLastSlideSrc: "",
+  heroGalleryExcludedSlideSrcs: [],
+  heroGalleryAdditionalSlides: [],
   heroGalleryLogicalBlockOrder: false,
   demoPopularColorStates: false,
   flattenBuyBarCta: false,
@@ -684,9 +705,11 @@ const V2_CONFIG: PdpVersionConfig = {
   showUpCloseModule: true,
   showCloserLookStage: false,
   showBrandSwitcher: true,
+  showSlimSiteSwitcher: false,
   enableHeroReveal: true,
   useV4ModuleSpacing: false,
   showReviewHighlightTags: true,
+  showTopReviewPreviews: false,
   useV4LeatherAgingLayout: false,
   leatherAgingHeaderAboveImage: false,
   useRailLeatherAgingSlider: false,
@@ -749,7 +772,7 @@ const V4_CONFIG: PdpVersionConfig = {
   showTrenchPortraitSlide: false,
   // r5 Details module: Height / Width / Depth / Weight / Strap drop.
   useV4Specs: true,
-  // r5 hero gallery leads with the A0 product still.
+  // r5 hero gallery leads with the campaign product still.
   leadGalleryWithProductStill: true,
   // r5 color drawer demos the sold-out + Notify me affordance on Popular Colors.
   demoPopularColorStates: true,
@@ -769,6 +792,7 @@ const V4_CONFIG: PdpVersionConfig = {
   useV4LeatherAgingLayout: true,
   // r5 hides the Coach / Coach Outlet brand switcher above the hero.
   showBrandSwitcher: false,
+  showSlimSiteSwitcher: false,
   // No switcher to reveal — keep the hero full-bleed (no shrink/peek).
   enableHeroReveal: false,
   // r5 scroll-triggered per-element reveals (headlines blur, blocks lift).
@@ -786,8 +810,9 @@ const V4_CONFIG: PdpVersionConfig = {
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
-  // v5 polish — docked hero ATB only; no sticky floating bar for now.
+  // Place Add to bag in document flow beneath store availability.
   showFloatingBuyBar: false,
+  floatingBuyBarWhenHeroHidden: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
   // v5 story: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging → Find your Tabby (above More like this).
   detailsAfterSlideIndex: 1,
@@ -818,7 +843,44 @@ const V5_CONFIG: PdpVersionConfig = {
   flatColorSheet: true,
   hideInStockColorLabel: true,
   lockHeroGalleryTemplate: true,
-  heroGalleryLeadSlideSrc: HERO_ON_MODEL_BLACK_DRESS_SRC,
+  heroGalleryLeadSlideSrc: "/images/gallery/tabby-on-model-leopard-coat.png",
+  heroGalleryLastSlideSrc: "/videos/tabby-hero.mp4",
+  heroGalleryExcludedSlideSrcs: [
+    "/images/gallery/tabby-on-model-mirror-selfie.jpg",
+    "/images/gallery/tabby-on-model-ivory-black-blazer.avif",
+    "/images/gallery/tabby-on-model-brown-signature-coat-detail.avif",
+    "/images/gallery/tabby-on-model-brown-signature-coat-stairs.avif",
+    "/images/gallery/tabby-product-still-russet-cherry.avif",
+    "/images/gallery/tabby-product-still-brown-stone.avif",
+  ],
+  heroGalleryAdditionalSlides: [
+    {
+      kind: "video",
+      src: "/videos/tabby-graphic-campaign.mp4",
+      poster: "/images/posters/tabby-graphic-campaign.jpg",
+      alt: "Model styling an ivory Tabby Shoulder Bag in a Coach campaign video",
+      shotType: "on-model",
+      headerSurface: "light",
+      galleryCategory: "video",
+    },
+    {
+      kind: "video",
+      src: "/videos/soft-tabby-charms-campaign.mp4",
+      poster: "/images/posters/soft-tabby-charms-campaign.jpg",
+      alt: "Model adding a cherry charm to a dark brown Soft Tabby bag",
+      shotType: "on-model",
+      headerSurface: "light",
+      galleryCategory: "video",
+    },
+  ],
+  heroGalleryPrependLeadSlide: {
+    kind: "image",
+    src: "/images/gallery/tabby-on-model-leopard-coat.png",
+    alt: "Model in a leopard-print coat carrying a dark brown Tabby Shoulder Bag",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+  },
   heroGalleryLogicalBlockOrder: true,
   // v5 weaves Out in the wild UGC into the hero carousel after product content.
   heroGalleryUgcSlides: buildHeroGallerySlidesFromUgcTestimonials(
@@ -856,6 +918,7 @@ const V5_CONFIG: PdpVersionConfig = {
   heroColorSwatchMoreCountOverride: 6,
   showTabbyAlsoAvailableAs: false,
   showReviewHighlightTags: false,
+  showTopReviewPreviews: true,
   // v5 desktop responsive split — media left, sticky buy panel right at lg+.
   desktopSplitLayout: true,
   // v5 trims the Afterpay card to one line (drops "No impact to credit.").
@@ -867,6 +930,8 @@ const V5_CONFIG: PdpVersionConfig = {
   // Hide the standalone AR button — category rail carries AR instead.
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
+  // Keep the header focused on the PDP; do not reveal site tabs at scroll top.
+  showSlimSiteSwitcher: false,
   // v5 lands with a slow, subtle staggered chrome intro over the settled video.
   playHeroLandIntro: true,
 };

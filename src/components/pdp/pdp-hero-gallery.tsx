@@ -36,6 +36,7 @@ import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
 
+// fallow-ignore-next-line complexity
 function HeroSlideMedia({
   slide,
   isActive,
@@ -45,7 +46,7 @@ function HeroSlideMedia({
   slide: PdpHeroGallerySlide;
   isActive: boolean;
   keepMounted?: boolean;
-  /** Decode immediately — first image slides for snappy first swipe */
+  /** Start loading immediately so nearby slides are ready before a swipe lands */
   eager: boolean;
 }) {
   const { objectFit, objectPosition } = resolveHeroSlideFraming(
@@ -81,7 +82,7 @@ function HeroSlideMedia({
       src={slide.src}
       alt={slide.alt}
       fill
-      priority={eager}
+      loading={eager ? "eager" : "lazy"}
       sizes="100vw"
       className={cn("object-center", fitClass)}
       style={{ objectPosition }}
@@ -111,6 +112,7 @@ function circularSlideDistance(
  * vice versa). The active slide drives `data-header-surface` (nav contrast), video
  * playback, the scrim fade, and the slide indicator in the product HUD.
  */
+// fallow-ignore-next-line complexity
 export function PdpHeroGallery({
   slides = PDP_HERO_GALLERY_SLIDES,
   onOpenReviews,
@@ -132,6 +134,9 @@ export function PdpHeroGallery({
     leadGalleryWithProductStill,
     heroGalleryStudioDragZoom,
     heroGalleryLeadSlideSrc,
+    heroGalleryLastSlideSrc,
+    heroGalleryExcludedSlideSrcs,
+    heroGalleryAdditionalSlides,
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
@@ -147,6 +152,9 @@ export function PdpHeroGallery({
         leadGalleryWithProductStill,
         heroGalleryStudioDragZoom,
         heroGalleryLeadSlideSrc,
+        heroGalleryLastSlideSrc,
+        heroGalleryExcludedSlideSrcs,
+        heroGalleryAdditionalSlides,
         heroGalleryPrependLeadSlide,
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
@@ -157,6 +165,9 @@ export function PdpHeroGallery({
       leadGalleryWithProductStill,
       heroGalleryStudioDragZoom,
       heroGalleryLeadSlideSrc,
+      heroGalleryLastSlideSrc,
+      heroGalleryExcludedSlideSrcs,
+      heroGalleryAdditionalSlides,
       heroGalleryPrependLeadSlide,
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
@@ -222,6 +233,9 @@ export function PdpHeroGallery({
             const nearActive =
               circularSlideDistance(logicalIndex, activeIndex, orderedSlides.length) <=
               1;
+            const preloadNearby =
+              circularSlideDistance(logicalIndex, activeIndex, orderedSlides.length) <=
+              2;
             const isCanonicalClone =
               orderedSlides.length <= 1 || index === orderedSlides.length + logicalIndex;
             const warmVideoNeighbor =
@@ -238,7 +252,7 @@ export function PdpHeroGallery({
                   slide={slide}
                   isActive={isCentered}
                   keepMounted={warmVideoNeighbor}
-                  eager={logicalIndex <= 1}
+                  eager={preloadNearby}
                 />
                 {slideScrimVisible ? (
                   <>

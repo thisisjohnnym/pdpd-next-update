@@ -51,16 +51,11 @@ export function PdpV5GetTheHighlights() {
       data-header-surface="light"
       aria-label={headline}
       className={cn(
-        "w-full shrink-0 bg-white",
-        useV4ModuleSpacing ? "pt-14 pb-12" : "pt-12 pb-8",
+        "relative z-[1] -mt-px w-full shrink-0 border-0 bg-white shadow-none outline-none",
+        useV4ModuleSpacing ? "pt-8 pb-4" : "pt-8 pb-8",
       )}
     >
-      <div
-        className={cn(
-          "flex flex-col gap-1.5",
-          useV4ModuleSpacing ? "px-4" : "px-3",
-        )}
-      >
+      <div className="flex flex-col gap-1 px-3 lg:px-5">
         <PdpModuleHeading
           spacing="none"
           className={leftAlignModuleHeadings ? "text-left" : "text-center"}
@@ -71,7 +66,7 @@ export function PdpV5GetTheHighlights() {
           <a
             href={`#highlight-${WATCH_THE_FILM_CARD_ID}`}
             className={cn(
-              "group inline-flex min-h-[40px] items-center gap-1.5 text-black",
+              "group inline-flex min-h-8 items-center gap-1.5 text-black",
               "transition-colors active:text-neutral-700",
               pdpPressableClass,
             )}
@@ -88,7 +83,7 @@ export function PdpV5GetTheHighlights() {
         </PdpTextReveal>
       </div>
 
-      <div className={cn(pdpCarouselScrollWrapClass, "mt-6")}>
+      <div className={cn(pdpCarouselScrollWrapClass, "mt-4")}>
         <div
           className={cn(pdpCarouselScrollClass, "flex items-stretch gap-3")}
           aria-label={headline}
@@ -116,6 +111,7 @@ export function PdpV5GetTheHighlights() {
   );
 }
 
+// fallow-ignore-next-line complexity
 function PdpV5HighlightCard({
   card,
   index,

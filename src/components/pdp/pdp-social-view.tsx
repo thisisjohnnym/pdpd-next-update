@@ -77,6 +77,7 @@ export function PdpSocialView({
   );
 }
 
+// fallow-ignore-next-line complexity
 function PdpSocialViewInner() {
   const { productId, product } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
@@ -203,6 +204,8 @@ function PdpSocialViewInner() {
   const floatingBuyBarVisible = floatingBuyBarWhenHeroHidden
     ? heroScrolledAway
     : true;
+  const usesPersistentAtb =
+    showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
   const useV3Hero =
     heroScrollsWithPage && showBrandBar && product.hero.kind === "video";
 
@@ -234,6 +237,7 @@ function PdpSocialViewInner() {
               onColorSelect={setSelectedColorId}
               onAddToBag={handleAddToBag}
               onOpenReviews={() => openReviews("comments")}
+              onViewReviews={() => openReviews("reviews")}
               onOpenArTryOn={handleOpenArTryOn}
               sentinelRef={heroSentinelRef}
             />
@@ -243,6 +247,7 @@ function PdpSocialViewInner() {
               selectedColorId={activeColorId}
               onColorSelect={setSelectedColorId}
               onAddToBag={handleAddToBag}
+              onViewReviews={() => openReviews("reviews")}
             />
           ) : null}
         </>
@@ -258,7 +263,14 @@ function PdpSocialViewInner() {
           />
         </PdpHeroShell>
       ) : null}
-      <SafeAreaMain className="bg-transparent" omitTop>
+      <SafeAreaMain
+        className={cn(
+          "bg-transparent",
+          usesPersistentAtb &&
+            "pb-[calc(var(--pdp-safe-area-bottom)+var(--cta-bar-height,64px))]",
+        )}
+        omitTop
+      >
         {tabbyColorHero ? (
           <PdpStaticHero
             hero={{

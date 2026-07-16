@@ -61,6 +61,8 @@ export type TabbyVariantContextValue = {
   setSelectedColorId: (colorId: string) => void;
   /** Jump to another size in the current style and select a color */
   selectColorAtSize: (colorId: string, size: TabbySize) => void;
+  /** Jump to another style and select a preferred color in one action. */
+  selectColorInStyle: (styleId: TabbyStyleId, colorId: string) => void;
   navigateToStyle: (styleId: TabbyStyleId) => void;
   navigateToSize: (size: TabbySize) => void;
   /** Jump to a style + size in one selection (Find your Tabby Shop CTA). */
@@ -95,6 +97,7 @@ function resolveInitialSlug(initialSlug?: string): string {
 }
 
 /** Style → Size → Color configurator for the Tabby product family */
+// fallow-ignore-next-line complexity
 export function TabbyVariantProvider({
   slug: initialSlug,
   children,
@@ -229,6 +232,13 @@ export function TabbyVariantProvider({
     [applySelection, styleId],
   );
 
+  const selectColorInStyle = useCallback(
+    (nextStyleId: TabbyStyleId, colorId: string) => {
+      applySelection(nextStyleId, size, colorId);
+    },
+    [applySelection, size],
+  );
+
   const navigateToStyle = useCallback(
     (nextStyleId: TabbyStyleId) => {
       if (nextStyleId === styleId) {
@@ -276,6 +286,7 @@ export function TabbyVariantProvider({
       selectedColorId,
       setSelectedColorId,
       selectColorAtSize,
+      selectColorInStyle,
       navigateToStyle,
       navigateToSize,
       navigateToStyleSize,
@@ -292,6 +303,7 @@ export function TabbyVariantProvider({
       navigateToSize,
       navigateToStyle,
       navigateToStyleSize,
+      selectColorInStyle,
       selectColorAtSize,
       selectedColorId,
       setSelectedColorId,

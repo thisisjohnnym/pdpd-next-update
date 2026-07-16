@@ -27,6 +27,7 @@ type PdpV3HeroLayoutProps = {
   onAddToBag: () => void;
   onColorSheetOpenChange?: (open: boolean) => void;
   onOpenReviews?: () => void;
+  onViewReviews?: () => void;
   onOpenArTryOn?: () => void;
   /** Marks the bottom of the hero block — drives the floating buy bar handoff. */
   sentinelRef?: RefObject<HTMLDivElement | null>;
@@ -41,19 +42,35 @@ type PdpV3HeroLayoutProps = {
  * page; the floating bar (`PdpBottomActions`) returns once the sentinel leaves
  * the viewport.
  */
+// fallow-ignore-next-line complexity
 export function PdpV3HeroLayout({
   selectedColorId,
   onColorSelect,
   onAddToBag,
   onColorSheetOpenChange,
   onOpenReviews,
+  onViewReviews,
   onOpenArTryOn,
   sentinelRef,
 }: PdpV3HeroLayoutProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useV4ModuleSpacing, hideBuyBarColorLabel, heroMaterialSubtitleLine, hideDockedBuyBarColor, inlineBuyBarColorSwatches, useCompactBuyBarColorDots, playHeroLandIntro, showStorePickupLink, showSubtleReviewTeaser } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    useV4ModuleSpacing,
+    hideBuyBarColorLabel,
+    heroMaterialSubtitleLine,
+    hideDockedBuyBarColor,
+    inlineBuyBarColorSwatches,
+    useCompactBuyBarColorDots,
+    playHeroLandIntro,
+    showStorePickupLink,
+    showSubtleReviewTeaser,
+    showFloatingBuyBar,
+    floatingBuyBarWhenHeroHidden,
+  } = getPdpVersionConfig(usePdpVersion());
+  const usesPersistentAtb =
+    showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
+  const placeAtbAfterPickup = showStorePickupLink && !showFloatingBuyBar;
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
@@ -87,7 +104,7 @@ export function PdpV3HeroLayout({
                 <p
                   className={cn(
                     pdpProductTitleClass,
-                    "min-w-0 text-pretty text-base leading-tight text-black lg:text-lg",
+                    "min-w-0 text-pretty text-lg leading-tight text-black",
                   )}
                 >
                   {summary.name}
@@ -106,7 +123,7 @@ export function PdpV3HeroLayout({
                   in {summary.subtitle}
                 </p>
               </div>
-              <div className="min-w-0 -mx-3 px-3 lg:-mx-5 lg:px-5">
+              <div className="-mx-3 min-w-0 w-[calc(100%+1.5rem)] px-3 lg:-mx-5 lg:w-[calc(100%+2.5rem)] lg:px-5">
                 <PdpBuyBarCompactColor
                   selectedColorId={selectedColorId}
                   onColorSelect={onColorSelect}
@@ -145,39 +162,58 @@ export function PdpV3HeroLayout({
             </div>
           )}
 
-          <PdpBuyBarRow
-            selectedColorId={selectedColorId}
-            onColorSelect={onColorSelect}
-            onAddToBag={onAddToBag}
-            onColorSheetOpenChange={onColorSheetOpenChange}
-            hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
-            hideColorLabel={hideBuyBarColorLabel}
-            inlineColorSwatches={false}
-            landCta={useCompactBuyBarColorDots}
-            className={cn(
-              useCompactBuyBarColorDots
-                ? "px-3 pb-3 lg:px-5 lg:pb-4"
-                : useV4ModuleSpacing
-                  ? "gap-3"
-                  : "gap-2",
-            )}
-          />
+          {!usesPersistentAtb && !placeAtbAfterPickup ? (
+            <>
+              <PdpBuyBarRow
+                selectedColorId={selectedColorId}
+                onColorSelect={onColorSelect}
+                onAddToBag={onAddToBag}
+                onColorSheetOpenChange={onColorSheetOpenChange}
+                hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
+                hideColorLabel={hideBuyBarColorLabel}
+                inlineColorSwatches={false}
+                landCta={useCompactBuyBarColorDots}
+                className={cn(
+                  useCompactBuyBarColorDots
+                    ? "px-3 pb-3 lg:px-5 lg:pb-4"
+                    : useV4ModuleSpacing
+                      ? "gap-3"
+                      : "gap-2",
+                )}
+              />
+              {showSubtleReviewTeaser && onViewReviews ? (
+                <div
+                  className={cn(
+                    useCompactBuyBarColorDots ? "px-3 pb-3 lg:px-5 lg:pb-4" : null,
+                  )}
+                >
+                  <PdpV5ReviewTeaser onViewReviews={onViewReviews} />
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </footer>
 
         <div ref={sentinelRef} aria-hidden className="h-0 w-full shrink-0 overflow-hidden" />
       </PdpHeroShell>
 
-      {showStorePickupLink || showSubtleReviewTeaser ? (
-        <div className="flex flex-col gap-3 bg-white px-3 pb-5 pt-4 lg:px-5">
+      {showStorePickupLink ||
+      (showSubtleReviewTeaser && onViewReviews && placeAtbAfterPickup) ? (
+        <div className="relative z-[1] -mt-px flex flex-col gap-2.5 border-0 bg-white px-3 pb-3 pt-3 shadow-none outline-none lg:px-5">
           {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
-          {showSubtleReviewTeaser ? (
-            <PdpV5ReviewTeaser
-              className={
-                showStorePickupLink
-                  ? "border-t border-neutral-100 pt-3"
-                  : undefined
-              }
+          {placeAtbAfterPickup ? (
+            <PdpBuyBarRow
+              selectedColorId={selectedColorId}
+              onColorSelect={onColorSelect}
+              onAddToBag={onAddToBag}
+              onColorSheetOpenChange={onColorSheetOpenChange}
+              hideColor
+              inlineColorSwatches={false}
+              landCta
             />
+          ) : null}
+          {showSubtleReviewTeaser && onViewReviews && placeAtbAfterPickup ? (
+            <PdpV5ReviewTeaser onViewReviews={onViewReviews} />
           ) : null}
         </div>
       ) : null}

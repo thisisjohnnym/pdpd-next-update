@@ -902,9 +902,9 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
         objectPosition: "center 25%",
       },
     ],
-    src: "/images/gallery/tabby-on-model-black-dress.png",
-    alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
-    objectPosition: "center 20%",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-dog.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag while posing with a dog",
+    objectPosition: "center top",
   },
   {
     id: "whats-inside",
@@ -970,9 +970,9 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
         alt: "Tabby with shoulder and crossbody straps attached",
       },
     ],
-    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
-    alt: "Model wearing the Tabby Shoulder Bag 26 on the shoulder in a beige look",
-    objectPosition: "center 30%",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-books.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag with a cherry charm",
+    objectPosition: "center top",
   },
 ];
 

@@ -179,6 +179,61 @@ export type V3ColorSheetSections = {
   sizes: TabbyVariantContextValue["sizeOptions"];
 };
 
+export type V5ColorSwatchEntry = {
+  styleId: TabbyStyleId;
+  materialLabel: string;
+  color: TabbyColorOption;
+};
+
+export type V5ColorSwatchGroup = {
+  id: string;
+  label: string;
+  entries: V5ColorSwatchEntry[];
+};
+
+const V5_COLOR_SWATCH_GROUPS: Array<{
+  id: string;
+  label: string;
+  styleIds: TabbyStyleId[];
+}> = [
+  {
+    id: "smooth-leathers",
+    label: "Smooth Leathers",
+    styleIds: ["classic", "soft"],
+  },
+  {
+    id: "quilted",
+    label: "Quilted",
+    styleIds: ["quilted", "pillow-quilted"],
+  },
+  {
+    id: "signature-textures",
+    label: "Signature & Texture",
+    styleIds: ["signature-canvas", "twisted"],
+  },
+  {
+    id: "special-editions",
+    label: "Special Editions",
+    styleIds: ["loved-leather", "chain"],
+  },
+];
+
+/** v5-only horizontal collection rails — real catalog options across Tabby materials. */
+export function getV5ColorSwatchGroups(size: TabbySize): V5ColorSwatchGroup[] {
+  return V5_COLOR_SWATCH_GROUPS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    entries: group.styleIds.flatMap((styleId) => {
+      const materialLabel = getTabbyStyle(styleId).materialLabel;
+      return getTabbyColorOptionsForStyleSize(styleId, size).map((color) => ({
+        styleId,
+        materialLabel,
+        color,
+      }));
+    }),
+  })).filter((group) => group.entries.length > 0);
+}
+
 export function getV3ColorSheetSections(
   tabby: TabbyVariantContextValue,
   options: { demoPopularColorStates?: boolean } = {},

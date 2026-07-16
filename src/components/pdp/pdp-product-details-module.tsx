@@ -150,7 +150,9 @@ function SpecListV4({
 
   return (
     <div className="grid grid-cols-2">
-      {specs.map((spec, index) => {
+      {specs.map(
+        // fallow-ignore-next-line complexity
+        (spec, index) => {
         const delay = revealStaggerDelay(staggerIndex);
         staggerIndex += 1;
         const isRightColumn = index % 2 === 1;
@@ -251,13 +253,16 @@ function DetailsSketchCarousel({
         {slides.map((slide) => (
           <div
             key={slide.id}
-            className="relative aspect-[4/5] w-full shrink-0 snap-start snap-always flex-[0_0_100%] bg-white"
+            className="relative aspect-[10/11] w-full shrink-0 snap-start snap-always flex-[0_0_100%] bg-white"
           >
             <Image
               src={slide.src}
               alt={slide.alt}
               fill
-              className="object-contain object-center"
+              className={cn(
+                "object-center",
+                slide.id === "strap" ? "object-contain" : "object-cover",
+              )}
               sizes="(min-width: 1024px) 45rem, 100vw"
               draggable={false}
             />
@@ -299,7 +304,7 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
   staggerIndex += 1;
 
   return (
-    <div className="flex flex-col gap-5 px-4 pt-12 pb-16">
+    <div className="flex flex-col gap-5 px-4 pt-6 pb-16">
       <div className="flex flex-col gap-1.5">
         <PdpModuleHeading spacing="none" className="text-left">
           {eyebrow}
@@ -461,6 +466,7 @@ function DetailTileCarousel({
 }
 
 /** Product details — macro hero, spec row, and 2×2 visual gallery */
+// fallow-ignore-next-line complexity
 export function PdpProductDetailsModule({
   showHeading = true,
   useV4Specs = false,

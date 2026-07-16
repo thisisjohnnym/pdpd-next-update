@@ -7,6 +7,7 @@ type PdpV5DesktopHeroSplitProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onAddToBag: () => void;
+  onViewReviews?: () => void;
 };
 
 /**
@@ -20,6 +21,7 @@ export function PdpV5DesktopHeroSplit({
   selectedColorId,
   onColorSelect,
   onAddToBag,
+  onViewReviews,
 }: PdpV5DesktopHeroSplitProps) {
   return (
     <div className="pdp-v5-desktop-split hidden bg-white lg:grid">
@@ -32,6 +34,7 @@ export function PdpV5DesktopHeroSplit({
             selectedColorId={selectedColorId}
             onColorSelect={onColorSelect}
             onAddToBag={onAddToBag}
+            onViewReviews={onViewReviews}
           />
         </div>
       </div>

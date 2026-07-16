@@ -11,11 +11,13 @@ import { pdpProductTitleClass, pdpType } from "../pdp-type";
 import { usePdpDisplayPrice } from "../use-pdp-display-price";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpV5ReviewTeaser } from "./pdp-v5-review-teaser";
 
 type PdpV5DesktopBuyPanelProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onAddToBag: () => void;
+  onViewReviews?: () => void;
 };
 
 /**
@@ -27,10 +29,12 @@ export function PdpV5DesktopBuyPanel({
   selectedColorId,
   onColorSelect,
   onAddToBag,
+  onViewReviews,
 }: PdpV5DesktopBuyPanelProps) {
   const { product, productId } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
-  const { useCompactBuyBarColorDots } = getPdpVersionConfig(usePdpVersion());
+  const { useCompactBuyBarColorDots, showSubtleReviewTeaser } =
+    getPdpVersionConfig(usePdpVersion());
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
@@ -79,6 +83,11 @@ export function PdpV5DesktopBuyPanel({
         inlineColorSwatches={false}
         landCta={useCompactBuyBarColorDots}
       />
+      {showSubtleReviewTeaser && onViewReviews ? (
+        <div className="pt-3">
+          <PdpV5ReviewTeaser onViewReviews={onViewReviews} />
+        </div>
+      ) : null}
     </div>
   );
 }

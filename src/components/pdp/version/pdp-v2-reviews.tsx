@@ -66,11 +66,63 @@ function ReviewCard({
   );
 }
 
+const TOP_REVIEW_PREVIEWS = PDP_CUSTOMER_REVIEWS.slice(0, 3);
+
+function TopReviewPreviews() {
+  return (
+    <ol
+      aria-label="Top customer reviews"
+      className="m-0 flex list-none flex-col gap-3 p-0"
+    >
+      {TOP_REVIEW_PREVIEWS.map((review) => (
+        <li key={review.id}>
+          <article className="flex flex-col gap-2 bg-white px-4 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <PdpStarRating rating={review.rating ?? 0} size={16} />
+              {review.verified ? (
+                <span
+                  className={cn(
+                    pdpType.micro,
+                    "flex items-center gap-1 text-neutral-500",
+                  )}
+                >
+                  <MaterialIcon
+                    name="verified"
+                    size={14}
+                    className="text-[#1D9BF0]"
+                    aria-hidden
+                  />
+                  Verified buyer
+                </span>
+              ) : null}
+            </div>
+            <h3 className={cn(pdpType.body, "m-0 text-pretty text-black")}>
+              {review.title}
+            </h3>
+            <p
+              className={cn(
+                pdpType.label,
+                "m-0 line-clamp-3 text-pretty text-neutral-600",
+              )}
+            >
+              {review.body}
+            </p>
+            <p className={cn(pdpType.micro, "m-0 text-neutral-500")}>
+              {review.author} · {review.date}
+            </p>
+          </article>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 type PdpV2ReviewsProps = {
   onReadAll?: () => void;
   onWriteReview?: () => void;
 };
 
+// fallow-ignore-next-line complexity
 function ReviewUgcMomentCard({
   photo,
   className,
@@ -170,6 +222,7 @@ function ReviewUgcMomentsRail() {
   );
 }
 
+// fallow-ignore-next-line complexity
 function V4ReviewSummary({
   onReadAll,
   leftAlignModuleHeadings,
@@ -187,18 +240,14 @@ function V4ReviewSummary({
     hideReviewSummaryRating,
     enlargeReviewAiSummary,
     emphasizeReviewsModule,
+    showTopReviewPreviews,
   } = getPdpVersionConfig(usePdpVersion());
   const alignClass = leftAlignModuleHeadings ? "items-start text-left" : "items-center text-center";
 
   return (
     <section
       data-header-surface="light"
-      className={cn(
-        "flex w-full shrink-0 flex-col px-4",
-        emphasizeReviewsModule
-          ? "bg-[#F3F1EE] py-14"
-          : "bg-white py-14",
-      )}
+      className="flex w-full shrink-0 flex-col bg-white px-4 py-14"
     >
       <div className={cn("flex w-full flex-col gap-5", alignClass)}>
         {/* Title + aggregate rating */}
@@ -278,9 +327,13 @@ function V4ReviewSummary({
           />
         </PdpRevealItem>
 
-        {/* Customer photo rail — primary evidence */}
+        {/* v5 shares formal reviews; v4 keeps the customer-photo rail. */}
         <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
-          <ReviewUgcMomentsRail />
+          {showTopReviewPreviews ? (
+            <TopReviewPreviews />
+          ) : (
+            <ReviewUgcMomentsRail />
+          )}
         </PdpRevealItem>
 
         {/* Compact review highlights — secondary to photos */}
@@ -363,6 +416,7 @@ function V4ReviewSummary({
   );
 }
 
+// fallow-ignore-next-line complexity
 export function PdpV2Reviews({
   onReadAll,
   onWriteReview,

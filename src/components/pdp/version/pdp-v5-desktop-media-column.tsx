@@ -19,6 +19,9 @@ function usePdpV5DesktopMediaSlides() {
   const version = usePdpVersion();
   const {
     heroGalleryLeadSlideSrc,
+    heroGalleryLastSlideSrc,
+    heroGalleryExcludedSlideSrcs,
+    heroGalleryAdditionalSlides,
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
@@ -27,6 +30,9 @@ function usePdpV5DesktopMediaSlides() {
 
   return orderHeroGallerySlides(PDP_HERO_GALLERY_SLIDES, {
     heroGalleryLeadSlideSrc,
+    heroGalleryLastSlideSrc,
+    heroGalleryExcludedSlideSrcs,
+    heroGalleryAdditionalSlides,
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,

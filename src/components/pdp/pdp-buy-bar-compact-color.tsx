@@ -9,6 +9,7 @@ import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { getV5ColorSwatchGroups } from "./version/pdp-v3-color-sheet-sections";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3ColorSheet } from "./version/pdp-v3-color-sheet";
@@ -23,6 +24,7 @@ type PdpBuyBarCompactColorProps = {
 };
 
 /** Compact swatch row — tap a color to select; tap +N to open the full tray. */
+// fallow-ignore-next-line complexity
 export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
@@ -35,13 +37,35 @@ export function PdpBuyBarCompactColor({
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
   const {
     compactBuyBarColorDotCount,
+    flatColorSheet,
     heroColorSwatchMoreCountOverride,
     useV3ColorSheet,
   } = getPdpVersionConfig(usePdpVersion());
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
 
-  const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
-  const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
+  const showAllTabbyOptionsInline =
+    isTabbyProduct && variant === "rail" && flatColorSheet;
+  const allTabbyRailOptions = showAllTabbyOptionsInline
+    ? getV5ColorSwatchGroups(tabby!.size).flatMap((group) =>
+        group.entries.map((entry) => ({
+          ...entry.color,
+          styleId: entry.styleId,
+          selectionId: `${entry.styleId}:${entry.color.id}`,
+          selectionLabel: `${entry.color.name} in ${entry.materialLabel}`,
+          groupLabel: entry.materialLabel,
+        })),
+      )
+    : [];
+  const colors = showAllTabbyOptionsInline
+    ? allTabbyRailOptions
+    : isTabbyProduct
+      ? tabby!.colorOptions
+      : getPdpColors(productId);
+  const activeColorId = showAllTabbyOptionsInline
+    ? `${tabby!.styleId}:${tabby!.selectedColorId}`
+    : isTabbyProduct
+      ? tabby!.selectedColorId
+      : selectedColorId;
   const colorGroups = isTabbyProduct
     ? getTabbyColorSheetGroups(tabby!.styleId, tabby!.size)
     : undefined;
@@ -51,7 +75,25 @@ export function PdpBuyBarCompactColor({
     onColorSheetOpenChange?.(open);
   };
 
+  // fallow-ignore-next-line complexity
   const handleColorSelect = (id: string) => {
+    if (showAllTabbyOptionsInline) {
+      const option = allTabbyRailOptions.find(
+        (entry) => entry.selectionId === id,
+      );
+
+      if (
+        !option ||
+        !option.combinationAvailable ||
+        !pdpColorIsSelectable(option.availability)
+      ) {
+        return;
+      }
+
+      tabby!.selectColorInStyle(option.styleId, option.id);
+      return;
+    }
+
     const color = colors.find((entry) => entry.id === id);
     const combinationAvailable =
       !color ||
