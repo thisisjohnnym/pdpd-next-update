@@ -80,6 +80,18 @@ const HERO_STUDIO_DRAG_ZOOM_SLIDE: PdpHeroGalleryImageSlide = {
   dragZoom: true,
 };
 
+/** Official Coach.com A0 head-on product still — v5 product-photos block. */
+const HERO_PRODUCT_FRONT_A0_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
+
+const HERO_PRODUCT_FRONT_A0_SLIDE: PdpHeroGalleryImageSlide = {
+  kind: "image",
+  src: HERO_PRODUCT_FRONT_A0_SRC,
+  alt: "Tabby Shoulder Bag 26 in black leather, front view with gold C turnlock clasp and dual straps",
+  shotType: "product",
+  headerSurface: "light",
+  galleryCategory: "product-photos",
+};
+
 /** The broken/too-small feature-callout still and its r5 replacement (Paper r5). */
 const HERO_FEATURE_CALLOUT_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`;
 const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101-r5.png`;
@@ -123,6 +135,13 @@ function applyV4HeroGallery(
   }
 
   if (!options.leadGalleryWithProductStill) {
+    if (options.includeProductFrontStill) {
+      const withoutA0 = swapped.filter(
+        (slide) => slide.src !== HERO_PRODUCT_FRONT_A0_SRC,
+      );
+      // Lead the product-photos block with the official head-on A0 still.
+      return [HERO_PRODUCT_FRONT_A0_SLIDE, ...withoutA0];
+    }
     return swapped;
   }
 

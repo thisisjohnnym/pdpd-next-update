@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -16,6 +16,10 @@ import { PdpModuleHeading } from "../pdp-module-heading";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "../pdp-type";
+import {
+  useCarouselSnapStartActiveIndex,
+  useDragToScroll,
+} from "../use-infinite-centered-carousel";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import {
@@ -30,6 +34,7 @@ import { usePdpVersion } from "./pdp-version-context";
 
 const WATCH_THE_FILM_CARD_ID = "icon-reimagined";
 const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
+const HIGHLIGHT_CARD_COUNT = PDP_GET_THE_HIGHLIGHTS_CARDS.length;
 
 /**
  * v5 "Get the highlights" — Apple-style highlight rail. A light section with a
@@ -45,6 +50,30 @@ export function PdpV5GetTheHighlights() {
   const activeCard =
     PDP_GET_THE_HIGHLIGHTS_CARDS.find((card) => card.id === activeCardId) ??
     null;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const activeIndex = useCarouselSnapStartActiveIndex(scrollRef);
+  useDragToScroll(scrollRef);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+    const clamped = Math.min(Math.max(index, 0), HIGHLIGHT_CARD_COUNT - 1);
+    const child = el.children[clamped] as HTMLElement | undefined;
+    if (!child) {
+      return;
+    }
+    const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+    el.scrollTo({
+      left: child.offsetLeft - paddingLeft,
+      behavior: "smooth",
+    });
+  }, []);
+
+  const atStart = activeIndex === 0;
+  const atEnd = activeIndex >= HIGHLIGHT_CARD_COUNT - 1;
 
   return (
     <section
@@ -83,9 +112,18 @@ export function PdpV5GetTheHighlights() {
         </PdpTextReveal>
       </div>
 
-      <div className={cn(pdpCarouselScrollWrapClass, "mt-4")}>
+      <div
+        className={cn(
+          pdpCarouselScrollWrapClass,
+          "group/highlights relative mt-4",
+        )}
+      >
         <div
-          className={cn(pdpCarouselScrollClass, "flex items-stretch gap-3")}
+          ref={scrollRef}
+          className={cn(
+            pdpCarouselScrollClass,
+            "pdp-carousel-draggable flex items-stretch gap-3",
+          )}
           aria-label={headline}
         >
           {PDP_GET_THE_HIGHLIGHTS_CARDS.map((card, index) => (
@@ -100,6 +138,17 @@ export function PdpV5GetTheHighlights() {
             />
           ))}
         </div>
+
+        <HighlightsCarouselArrow
+          direction="prev"
+          disabled={atStart}
+          onClick={() => scrollToIndex(activeIndex - 1)}
+        />
+        <HighlightsCarouselArrow
+          direction="next"
+          disabled={atEnd}
+          onClick={() => scrollToIndex(activeIndex + 1)}
+        />
       </div>
 
       <PdpV5HighlightDetailSheet
@@ -108,6 +157,49 @@ export function PdpV5GetTheHighlights() {
         onClose={() => setActiveCardId(null)}
       />
     </section>
+  );
+}
+
+// fallow-ignore-next-line complexity
+function HighlightsCarouselArrow({
+  direction,
+  disabled,
+  onClick,
+}: {
+  direction: "prev" | "next";
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const isPrev = direction === "prev";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={isPrev ? "Previous highlight" : "Next highlight"}
+      className={cn(
+        "absolute top-[40%] z-10 hidden size-9 -translate-y-1/2 items-center justify-center",
+        "bg-white/90 text-black backdrop-blur-sm",
+        "outline outline-1 -outline-offset-1 outline-black/10",
+        "transition-[opacity,transform] duration-200 ease-out",
+        "lg:inline-flex",
+        isPrev ? "left-3" : "right-3",
+        disabled
+          ? "pointer-events-none opacity-0"
+          : cn(
+              "opacity-0",
+              "group-hover/highlights:opacity-100 group-focus-within/highlights:opacity-100",
+              pdpPressableIconClass,
+            ),
+      )}
+    >
+      <MaterialIcon
+        name={isPrev ? "chevron_left" : "chevron_right"}
+        size={20}
+        className="leading-none"
+      />
+    </button>
   );
 }
 
@@ -163,12 +255,17 @@ function PdpV5HighlightCard({
       }
       delay={revealStaggerDelay(index)}
       className={cn(
-        "flex h-[70svh] max-h-[620px] min-h-[460px] w-[calc((100vw-1.25rem)/1.15)]",
+        // Width-driven 4:5 media at all breakpoints — caption wrap must not
+        // shrink/grow the image (the old 70svh + flex-1 frame did that).
+        "flex w-[calc((100vw-1.25rem)/1.15)]",
         "shrink-0 snap-start snap-always scroll-mt-24 flex-col gap-3 overflow-hidden rounded-none bg-white",
-        "lg:w-[calc((100vw-2.25rem)/2.4)]",
+        "lg:w-[calc((100vw-2.25rem)/2.6)]",
       )}
     >
-      <div ref={mediaRef} className="relative min-h-0 flex-1 bg-neutral-100">
+      <div
+        ref={mediaRef}
+        className="relative aspect-[4/5] shrink-0 bg-neutral-100"
+      >
         {card.videoSrc ? (
           <PdpGalleryHeroVideo
             src={card.videoSrc}

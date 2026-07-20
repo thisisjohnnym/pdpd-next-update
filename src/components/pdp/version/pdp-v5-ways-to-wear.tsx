@@ -20,22 +20,21 @@ import { usePdpVersion } from "./pdp-version-context";
 /**
  * v5 leather-aging wipe — New vs 2 years compare, with Leather Cleaner /
  * Conditioner upsell underneath (replaces the separate aging stage rail).
+ *
+ * Mobile: stacked heading → compare → care.
+ * Desktop: flush-left compare beside a right rail of copy + care products.
  */
+// fallow-ignore-next-line complexity
 export function PdpV5WaysToWear({
   onQuickAdd,
 }: {
   onQuickAdd?: () => void;
 } = {}) {
   const {
-    leftAlignModuleHeadings,
     useV4ModuleSpacing,
     showLeatherCareUpsell,
   } = getPdpVersionConfig(usePdpVersion());
   const { headline, body } = PDP_WAYS_TO_WEAR_SECTION;
-  const alignClass = leftAlignModuleHeadings
-    ? "items-start text-left"
-    : "items-center text-center";
-
   const [newStage, agedStage] = PDP_WAYS_TO_WEAR_STYLES;
 
   return (
@@ -43,42 +42,42 @@ export function PdpV5WaysToWear({
       data-header-surface="light"
       className={cn(
         "w-full shrink-0 bg-white",
-        useV4ModuleSpacing ? "pt-14 pb-10" : "pt-12 pb-8",
+        useV4ModuleSpacing ? "pt-14 pb-10 lg:pt-10 lg:pb-0" : "pt-12 pb-8 lg:pt-10 lg:pb-0",
       )}
     >
       <div
         className={cn(
-          "flex flex-col",
+          "pdp-v5-aging-sheet flex flex-col",
           useV4ModuleSpacing ? "gap-8 px-4" : "gap-6 px-3",
         )}
       >
-        <div className={cn("flex flex-col gap-3", alignClass)}>
-          <PdpModuleHeading
-            spacing="none"
-            className={leftAlignModuleHeadings ? "text-left" : "text-center"}
-          >
+        <div className="pdp-v5-aging-sheet__copy flex flex-col items-start gap-3 text-left">
+          <PdpModuleHeading spacing="none" className="text-left">
             {headline}
           </PdpModuleHeading>
           <PdpTextReveal
             as="p"
             delay={100}
-            className={pdpModuleIntroClass(
-              leftAlignModuleHeadings ? "left" : "center",
-            )}
+            className={pdpModuleIntroClass("left")}
           >
             {body}
           </PdpTextReveal>
         </div>
 
-        <PdpV5WaysToWearCompareSlider
-          styles={[newStage, agedStage]}
-          leftAlign={leftAlignModuleHeadings}
-          tablistLabel="Leather aging"
-          sliderLabel="Compare new leather and two years of wear"
-        />
+        <div className="pdp-v5-aging-sheet__media min-w-0">
+          <PdpV5WaysToWearCompareSlider
+            styles={[newStage, agedStage]}
+            leftAlign
+            tablistLabel="Leather aging"
+            sliderLabel="Compare new leather and two years of wear"
+          />
+        </div>
 
         {showLeatherCareUpsell ? (
-          <PdpRevealItem delay={revealStaggerDelay(3)} className="w-full">
+          <PdpRevealItem
+            delay={revealStaggerDelay(3)}
+            className="pdp-v5-aging-sheet__care w-full"
+          >
             <PdpLeatherAgingCareUpsell
               stageIndex={1}
               alwaysVisible

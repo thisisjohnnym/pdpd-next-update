@@ -311,10 +311,13 @@ function V4ReviewSummary({
           ) : null}
         </div>
 
-        {/* AI review summary — flush with module, no tray */}
+        {/* AI review summary — soft grey tray, matches the above-fold teaser. */}
         <PdpRevealItem delay={revealStaggerDelay(2)} className="w-full">
           <PdpAiInsightCard
             variant="minimal"
+            contained
+            containedSurface="flat"
+            squareCorners={squareButtonCorners}
             size={enlargeReviewAiSummary ? "compact" : "xs"}
             showIcon={false}
             clampBodyLines={2}

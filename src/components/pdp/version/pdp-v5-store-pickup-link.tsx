@@ -63,7 +63,17 @@ type PdpV5StorePickupLinkProps = {
 const pickupCardClass =
   "overflow-hidden rounded-none bg-neutral-50 shadow-[0_1px_0_rgba(0,0,0,0.02)]";
 
-function PickupMapPreview() {
+function googleMapsDirectionsUrl(destination: string) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+}
+
+function PickupMapPreview({
+  storeName,
+  storeAddress,
+}: {
+  storeName: string;
+  storeAddress: string;
+}) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
@@ -81,6 +91,10 @@ function PickupMapPreview() {
     dragStart.current = null;
     setDragging(false);
   };
+
+  const directionsHref = googleMapsDirectionsUrl(
+    `${storeName}, ${storeAddress}`,
+  );
 
   return (
     <div
@@ -140,10 +154,6 @@ function PickupMapPreview() {
         </span>
       </div>
 
-      <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] text-neutral-700 shadow-sm">
-        Drag to explore
-      </span>
-
       <div className="absolute right-2 top-2 flex flex-col overflow-hidden rounded-lg bg-white shadow-[0_1px_6px_rgba(0,0,0,0.18)]">
         <button
           type="button"
@@ -164,6 +174,24 @@ function PickupMapPreview() {
           <MaterialIcon name="remove" size={18} />
         </button>
       </div>
+
+      <a
+        href={directionsHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        onPointerDown={(event) => event.stopPropagation()}
+        className={cn(
+          "absolute bottom-2 left-2 z-10 inline-flex h-10 items-center gap-1.5",
+          "rounded-full bg-white px-3.5 text-black shadow-[0_1px_6px_rgba(0,0,0,0.18)]",
+          "transition-transform active:scale-[0.96]",
+          pdpPressableClass,
+        )}
+      >
+        <MaterialIcon name="directions" size={18} className="shrink-0" />
+        <span className={cn(pdpType.micro, "font-normal leading-none")}>
+          Get directions
+        </span>
+      </a>
 
       <button
         type="button"
@@ -321,27 +349,39 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
                         className="mt-0.5 shrink-0 text-black"
                       />
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className={cn(pdpType.micro, "font-normal text-[#386247]")}>
-                          {selectedStore.availabilityLabel}
+                        <span
+                          className={cn(
+                            pdpType.micro,
+                            "flex flex-wrap items-baseline gap-x-1.5 font-normal",
+                          )}
+                        >
+                          <span className="text-[#386247]">
+                            {selectedStore.availabilityLabel}
+                          </span>
+                          <span aria-hidden className="text-neutral-300">
+                            ·
+                          </span>
+                          <span className="tabular-nums text-neutral-500">
+                            {selectedStore.distance}
+                          </span>
+                        </span>
+                        <span className={cn(pdpType.body, "text-pretty text-black")}>
+                          {selectedStore.name.replace(/^Coach\s+/, "")}
                         </span>
                         <span
                           className={cn(
-                            pdpType.body,
-                            "text-pretty text-black",
+                            pdpType.micro,
+                            "text-pretty text-neutral-500",
                           )}
                         >
-                          {selectedStore.name}
-                        </span>
-                        <span className={cn(pdpType.label, "text-pretty text-neutral-500")}>
-                          {selectedStore.detail}
-                        </span>
-                        <span className={cn(pdpType.micro, "text-pretty text-neutral-600")}>
-                          {selectedStore.pickupDetail} ·{" "}
-                          <span className="tabular-nums">{selectedStore.distance}</span>
+                          {selectedStore.pickupDetail}
                         </span>
                       </div>
                     </div>
-                    <PickupMapPreview />
+                    <PickupMapPreview
+                      storeName={selectedStore.name}
+                      storeAddress={selectedStore.detail}
+                    />
                   </div>
                 ) : null}
 

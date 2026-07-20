@@ -852,6 +852,8 @@ const V5_CONFIG: PdpVersionConfig = {
     "/images/gallery/tabby-on-model-brown-signature-coat-stairs.avif",
     "/images/gallery/tabby-product-still-russet-cherry.avif",
     "/images/gallery/tabby-product-still-brown-stone.avif",
+    // Prefer the official A0 head-on still over the angled black+cherry crop.
+    "/images/gallery/tabby-product-still-black-cherry.avif",
   ],
   heroGalleryAdditionalSlides: [
     {

@@ -243,12 +243,14 @@
     background-color: #fff;
   }
 
-  /* Desktop 24/20/8 grid (docs/design-system/grid.md): 1440 frame, 20px
-   * margins, 8px gutter, 24 columns. Media spans 15 cols, buy rail spans 9. */
+  /* Desktop 24/20/8 grid (docs/design-system/grid.md): 1440 frame, 8px
+   * gutter, 24 columns. Media is full-bleed on the left (hero imagery sits
+   * outside page margins); buy rail keeps the 20px right margin. Media spans
+   * 15 cols, buy rail spans 9. */
   [data-pdp-version="v5"] .pdp-v5-desktop-split {
     max-width: var(--grid-max-width-desktop, 1440px);
     margin-inline: auto;
-    padding-inline: var(--grid-margin-desktop, 20px);
+    padding-inline: 0 var(--grid-margin-desktop, 20px);
     grid-template-columns: repeat(24, minmax(0, 1fr));
     column-gap: var(--grid-gutter-desktop, 8px);
     align-items: stretch;
@@ -274,6 +276,125 @@
   /* Product media rail — uniform stacked frames on the studio ground. */
   [data-pdp-version="v5"] .pdp-v5-desktop-media {
     gap: var(--grid-gutter-desktop, 8px);
+  }
+
+  /* Editorial quote — photo flush left, pull-quote in the right rail. */
+  [data-pdp-version="v5"] .pdp-v5-quote-card-section {
+    padding-block: 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    column-gap: var(--grid-gutter-desktop, 8px);
+    align-items: stretch;
+    max-width: none;
+    aspect-ratio: auto;
+    min-height: min(70vh, 40rem);
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__media {
+    grid-column: 1 / span 13;
+    min-height: min(70vh, 40rem);
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__body {
+    grid-column: 14 / span 11;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    padding-inline: clamp(2rem, 4vw, 3.5rem)
+      var(--grid-margin-desktop, 20px);
+    padding-block: clamp(2.5rem, 6vh, 4rem);
+    gap: 1.75rem;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__eyebrow,
+  [data-pdp-version="v5"] .pdp-v5-quote-card__attribution,
+  [data-pdp-version="v5"] .pdp-v5-quote-card__quote {
+    margin-inline: 0;
+    text-align: left;
+    padding-inline: 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__quote-wrap {
+    justify-content: flex-start;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__body blockquote {
+    margin-inline: 0;
+    max-width: 22rem;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__quote {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-quote-card__attribution {
+    max-width: none;
+  }
+
+  /* Product Details — sketch flush left (~15/24), heading + facts in the
+   * right rail (~9/24). Matches the hero split rhythm. */
+  [data-pdp-version="v5"] .pdp-v5-details-sheet {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    column-gap: var(--grid-gutter-desktop, 8px);
+    row-gap: 1.5rem;
+    padding: 2.5rem var(--grid-margin-desktop, 20px) 5rem 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-details-sheet__media {
+    grid-column: 1 / span 15;
+    grid-row: 1 / span 2;
+    min-width: 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-details-sheet__copy {
+    grid-column: 16 / span 9;
+    grid-row: 1;
+    padding-left: 1.5rem;
+    align-self: start;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-details-sheet__facts {
+    grid-column: 16 / span 9;
+    grid-row: 2;
+    padding-left: 1.5rem;
+    align-self: start;
+  }
+
+  /* Leather aging — compare wipe flush left; copy + care in the right rail. */
+  [data-pdp-version="v5"] .pdp-v5-aging-sheet {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    column-gap: var(--grid-gutter-desktop, 8px);
+    row-gap: 1.5rem;
+    padding: 0 var(--grid-margin-desktop, 20px) 5rem 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-aging-sheet__media {
+    grid-column: 1 / span 15;
+    grid-row: 1 / span 2;
+    min-width: 0;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-aging-sheet__copy {
+    grid-column: 16 / span 9;
+    grid-row: 1;
+    padding-left: 1.5rem;
+    align-self: start;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  [data-pdp-version="v5"] .pdp-v5-aging-sheet__care {
+    grid-column: 16 / span 9;
+    grid-row: 2;
+    padding-left: 1.5rem;
+    align-self: start;
   }
 
   /* Below-fold modules follow the 1440 grid frame — they can expand wide. */

@@ -72,7 +72,7 @@ export function pdpBottomSheetPanelClass({
       : PDP_BOTTOM_SHEET_MAX_HEIGHT_CLASS[maxHeight];
 
   return cn(
-    "font-extended relative flex min-h-0 w-full max-w-none flex-col overflow-hidden rounded-t-[20px] bg-white transition-transform duration-300 ease-out lg:mx-auto lg:max-w-[430px]",
+    "font-extended relative flex min-h-0 w-full max-w-none flex-col overflow-hidden rounded-none bg-white transition-transform duration-300 ease-out lg:mx-auto lg:max-w-[430px]",
     PDP_BOTTOM_SHEET_PANEL_SHADOW,
     heightClass,
     open ? "translate-y-0" : "translate-y-full",

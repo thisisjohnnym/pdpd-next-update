@@ -32,6 +32,7 @@ import {
   useInfiniteFullBleedCarousel,
 } from "./use-infinite-centered-carousel";
 import { HeroGalleryIdleProvider } from "./use-hero-gallery-idle-visible";
+import { useHeroGalleryTouchScrollPassthrough } from "./use-hero-gallery-touch-scroll";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
@@ -183,6 +184,7 @@ export function PdpHeroGallery({
     orderedSlides.length,
     { stableLoop: useStableInfiniteCarousel },
   );
+  useHeroGalleryTouchScrollPassthrough(trackRef);
   const setHeroChromeSurface = useSetHeroChromeSurface();
 
   const surface = orderedSlides[activeIndex]?.headerSurface ?? "dark";

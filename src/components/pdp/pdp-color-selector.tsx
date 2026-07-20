@@ -89,7 +89,7 @@ function PdpInlineColorSwatchCarousel({
       aria-label="Choose color"
       className={cn(
         pdpCarouselScrollClass,
-        "pdp-carousel-draggable flex min-w-0 items-center gap-2.5 py-0.5 pl-0 scroll-pl-0",
+        "pdp-carousel-draggable flex min-w-0 items-center gap-2.5 overflow-y-clip overscroll-y-none touch-pan-x py-0.5 pl-0 scroll-pl-0",
       )}
     >
       {colors.map((color) => {

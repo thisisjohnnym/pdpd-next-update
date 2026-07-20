@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import Image from "next/image";
 
+import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
 import {
@@ -20,7 +21,7 @@ import { PdpModuleHeading } from "./pdp-module-heading";
 import { pdpModuleIntroClass } from "./pdp-module-section";
 import { PdpRevealItem } from "./pdp-reveal-item";
 import { PdpTextReveal } from "./pdp-text-reveal";
-import { pdpType } from "./pdp-type";
+import { pdpPressableIconClass, pdpType } from "./pdp-type";
 import { revealStaggerDelay } from "./use-pdp-element-reveal";
 import {
   useCarouselSnapStartActiveIndex,
@@ -229,6 +230,7 @@ function SpecSheetV5Cell({
 
 /**
  * v5 Signature Details — swipeable front / side dimension sketches.
+ * Desktop: hover arrows; mobile: swipe + drag.
  */
 function DetailsSketchCarousel({
   slides,
@@ -237,42 +239,81 @@ function DetailsSketchCarousel({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeIndex = useCarouselSnapStartActiveIndex(scrollRef);
-
   useDragToScroll(scrollRef);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+    const clamped = Math.min(Math.max(index, 0), slides.length - 1);
+    const child = el.children[clamped] as HTMLElement | undefined;
+    if (!child) {
+      return;
+    }
+    el.scrollTo({
+      left: child.offsetLeft,
+      behavior: "smooth",
+    });
+  }, [slides.length]);
+
+  const atStart = activeIndex === 0;
+  const atEnd = activeIndex >= slides.length - 1;
 
   return (
     <div className="flex flex-col gap-3">
-      <div
-        ref={scrollRef}
-        className={cn(
-          "pdp-carousel-draggable flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain",
-          "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        )}
-        aria-label="Technical dimension drawings"
-      >
-        {slides.map((slide) => (
-          <div
-            key={slide.id}
-            className="relative aspect-[10/11] w-full shrink-0 snap-start snap-always flex-[0_0_100%] bg-white"
-          >
-            <Image
-              src={slide.src}
-              alt={slide.alt}
-              fill
-              className={cn(
-                "object-center",
-                slide.id === "strap" ? "object-contain" : "object-cover",
-              )}
-              sizes="(min-width: 1024px) 45rem, 100vw"
-              draggable={false}
+      <div className="group/sketch relative">
+        <div
+          ref={scrollRef}
+          className={cn(
+            "pdp-carousel-draggable flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain",
+            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          )}
+          aria-label="Technical dimension drawings"
+        >
+          {slides.map((slide) => (
+            <div
+              key={slide.id}
+              className="relative aspect-[10/11] w-full shrink-0 snap-start snap-always flex-[0_0_100%] bg-white lg:aspect-[4/5]"
+            >
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                className={cn(
+                  "object-center",
+                  slide.id === "strap" ? "object-contain" : "object-cover",
+                )}
+                sizes="(min-width: 1024px) 55vw, 100vw"
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
+
+        {slides.length > 1 ? (
+          <>
+            <DetailsSketchArrow
+              direction="prev"
+              disabled={atStart}
+              onClick={() => scrollToIndex(activeIndex - 1)}
             />
-          </div>
-        ))}
+            <DetailsSketchArrow
+              direction="next"
+              disabled={atEnd}
+              onClick={() => scrollToIndex(activeIndex + 1)}
+            />
+          </>
+        ) : null}
       </div>
       {slides.length > 1 ? (
         <p
           aria-live="polite"
-          className={cn(pdpType.label, "m-0 tabular-nums text-neutral-500")}
+          className={cn(
+            pdpType.label,
+            "m-0 tabular-nums text-neutral-500",
+            "lg:px-0",
+          )}
         >
           {activeIndex + 1} / {slides.length}
         </p>
@@ -281,10 +322,56 @@ function DetailsSketchCarousel({
   );
 }
 
+// fallow-ignore-next-line complexity
+function DetailsSketchArrow({
+  direction,
+  disabled,
+  onClick,
+}: {
+  direction: "prev" | "next";
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const isPrev = direction === "prev";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={isPrev ? "Previous drawing" : "Next drawing"}
+      className={cn(
+        "absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center",
+        "bg-white/90 text-black backdrop-blur-sm",
+        "outline outline-1 -outline-offset-1 outline-black/10",
+        "transition-[opacity,transform] duration-200 ease-out",
+        "lg:inline-flex",
+        isPrev ? "left-3" : "right-3",
+        disabled
+          ? "pointer-events-none opacity-0"
+          : cn(
+              "opacity-0",
+              "group-hover/sketch:opacity-100 group-focus-within/sketch:opacity-100",
+              pdpPressableIconClass,
+            ),
+      )}
+    >
+      <MaterialIcon
+        name={isPrev ? "chevron_left" : "chevron_right"}
+        size={20}
+        className="leading-none"
+      />
+    </button>
+  );
+}
+
 /**
  * v5 Details sheet (Paper node 407:399) — 28px heading, 16px intro, dimension
  * sketches, then a two-column fact list with a hairline under every fact and
  * no vertical rule.
+ *
+ * Mobile: stacked heading → sketch → facts.
+ * Desktop (`pdp-v5.css`): flush-left sketch beside a right rail of heading + facts.
  *
  * Rendered as a row-aligned grid (row-major placement) so a wrapped value —
  * e.g. "Phone - Wallet - Keys" on a narrow screen — never offsets the opposite
@@ -304,8 +391,8 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
   staggerIndex += 1;
 
   return (
-    <div className="flex flex-col gap-5 px-4 pt-6 pb-16">
-      <div className="flex flex-col gap-1.5">
+    <div className="pdp-v5-details-sheet flex flex-col gap-5 px-4 pt-6 pb-16">
+      <div className="pdp-v5-details-sheet__copy flex flex-col gap-1.5">
         <PdpModuleHeading spacing="none" className="text-left">
           {eyebrow}
         </PdpModuleHeading>
@@ -317,10 +404,15 @@ function SpecSheetV5({ eyebrow }: { eyebrow: string }) {
           {PDP_V5_DETAILS_INTRO}
         </PdpTextReveal>
       </div>
-      <PdpRevealItem delay={carouselDelay}>
+
+      <PdpRevealItem
+        delay={carouselDelay}
+        className="pdp-v5-details-sheet__media"
+      >
         <DetailsSketchCarousel slides={PDP_V5_DETAILS_SKETCHES} />
       </PdpRevealItem>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+
+      <div className="pdp-v5-details-sheet__facts grid grid-cols-2 gap-x-5 gap-y-5">
         {rows.map((row, rowIndex) =>
           row.map((spec, columnIndex) => {
             if (!spec) {

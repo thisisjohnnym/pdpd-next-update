@@ -105,6 +105,8 @@ export function PdpV5WaysToWearCompareSlider({
         aria-label={sliderLabel}
         className={cn(
           "relative aspect-[4/5] w-full touch-none select-none overflow-hidden bg-neutral-100",
+          // Desktop: shorter frame so the wipe doesn't dominate the viewport.
+          "lg:aspect-[4/3]",
           dragging ? "cursor-ew-resize" : "cursor-col-resize",
         )}
         onPointerDown={(event) => {
@@ -159,7 +161,7 @@ export function PdpV5WaysToWearCompareSlider({
           alt={rightStyle.alt}
           fill
           className="object-cover object-center"
-          sizes="(min-width: 1024px) 960px, 100vw"
+          sizes="(min-width: 1024px) 55vw, 100vw"
           draggable={false}
         />
 
@@ -177,7 +179,7 @@ export function PdpV5WaysToWearCompareSlider({
             alt={leftStyle.alt}
             fill
             className="object-cover object-center"
-            sizes="(min-width: 1024px) 960px, 100vw"
+            sizes="(min-width: 1024px) 55vw, 100vw"
             draggable={false}
           />
         </div>

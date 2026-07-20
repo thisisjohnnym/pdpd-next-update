@@ -97,8 +97,10 @@ export function PdpCompactColorDots({
         role="listbox"
         aria-label="Choose color"
         className={cn(
-          "flex min-w-0 w-full max-w-full items-center gap-2 overflow-x-auto overscroll-x-contain",
-          "pl-1 pr-4 py-1.5",
+          // Horizontal only — hit-area rings/padding must not create vertical play.
+          "flex min-w-0 w-full max-w-full items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-2",
           "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           className,
         )}
@@ -153,6 +155,8 @@ export function PdpCompactColorDots({
             </Fragment>
           );
         })}
+        {/* Flex overflow ignores padding-inline-end in WebKit — spacer clears the last swatch. */}
+        <span aria-hidden className="w-5 shrink-0" />
       </div>
     );
   }

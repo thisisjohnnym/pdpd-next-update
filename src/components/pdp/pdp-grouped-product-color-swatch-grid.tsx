@@ -374,7 +374,7 @@ export function PdpGroupedProductColorSwatchGrid({
             "pdp-carousel-draggable min-w-0 gap-2 py-2.5",
             stretchRow
               ? "grid w-full overflow-x-visible"
-              : "flex items-center overflow-x-auto overscroll-x-contain",
+              : "flex items-center overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
             colorCarouselClassName,
             !stretchRow &&
               "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
