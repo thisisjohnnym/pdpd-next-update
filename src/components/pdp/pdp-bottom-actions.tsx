@@ -40,6 +40,8 @@ export function PdpBottomActions({
     inlineBuyBarColorSwatches,
     hideDockedBuyBarColor,
     floatingBuyBarWhenHeroHidden,
+    desktopSplitLayout,
+    useCompactBuyBarColorDots,
   } = getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
   const persistentAtb = !floatingBuyBarWhenHeroHidden;
@@ -66,6 +68,8 @@ export function PdpBottomActions({
         "pointer-events-none fixed inset-x-0 z-40 transition-transform duration-300 ease-out",
         persistentAtb ? "bg-transparent" : "bg-white",
         chromeHidden ? "translate-y-full" : "translate-y-0",
+        // Desktop split already has a sticky buy panel — hide the mobile float.
+        desktopSplitLayout && "lg:hidden",
       )}
       style={{
         bottom: BOTTOM_CHROME_OFFSET,
@@ -88,6 +92,7 @@ export function PdpBottomActions({
           onColorSheetOpenChange={setColorSheetOpen}
           hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
           inlineColorSwatches={false}
+          landCta={useCompactBuyBarColorDots}
           className="gap-2.5"
         />
       </div>

@@ -59,7 +59,18 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
   const phoneRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
-  const { showBrandSwitcher, heroDockedBuyBar } = getPdpVersionConfig(usePdpVersion());
+  const {
+    showBrandSwitcher,
+    heroDockedBuyBar,
+    showFloatingBuyBar,
+    floatingBuyBarWhenHeroHidden,
+  } = getPdpVersionConfig(usePdpVersion());
+  // Persistent floating ATB overlays the viewport bottom — shrink the land so
+  // name / price / color in the docked footer stay above the fold.
+  const clearPersistentAtb =
+    heroDockedBuyBar &&
+    showFloatingBuyBar &&
+    !floatingBuyBarWhenHeroHidden;
 
   useEffect(
     () => () => {
@@ -81,7 +92,10 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
       className={cn(
         "relative flex flex-1 flex-col overflow-clip bg-white",
         heroDockedBuyBar
-          ? "h-[var(--pdp-immersive-height,100svh)] max-h-[var(--pdp-immersive-height,100svh)]"
+          ? clearPersistentAtb
+            ? // Persistent ATB — land clears the measured bar so name/price/color stay above it.
+              "h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px)-var(--pdp-fixed-bottom-offset,0px))] max-h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px)-var(--pdp-fixed-bottom-offset,0px))]"
+            : "h-[var(--pdp-immersive-height,100svh)] max-h-[var(--pdp-immersive-height,100svh)]"
           : "min-h-[var(--pdp-immersive-height,100svh)]",
       )}
     >

@@ -227,6 +227,11 @@ export type PdpVersionConfig = {
    */
   compactBuyBarColorDotCount: number;
   /**
+   * Compact price-adjacent color chips open a slim tray over the hero gallery
+   * (instead of the full progressive color sheet). v5 only.
+   */
+  heroColorTrayOverlay: boolean;
+  /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
    * v5 only.
    */
@@ -508,8 +513,8 @@ export type PdpVersionConfig = {
    */
   showArTryOn: boolean;
   /**
-   * Compact category rail over the hero gallery — UGC · 360 · AR · Fits inside.
-   * Replaces the standalone AR button when active. v5 only.
+   * Compact category rail over the hero gallery — On Model · Video ·
+   * Product Photos · What's Inside. v5 only.
    */
   showHeroGalleryCategoryRail: boolean;
   /**
@@ -571,6 +576,7 @@ const V1_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  heroColorTrayOverlay: false,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -686,6 +692,7 @@ const V2_CONFIG: PdpVersionConfig = {
   inlineBuyBarColorSwatches: false,
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
+  heroColorTrayOverlay: false,
   showStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
@@ -810,8 +817,8 @@ const V4_CONFIG: PdpVersionConfig = {
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
-  // Place Add to bag in document flow beneath store availability.
-  showFloatingBuyBar: false,
+  // Sticky Add to bag — always fixed at the bottom (not only after hero scrolls away).
+  showFloatingBuyBar: true,
   floatingBuyBarWhenHeroHidden: false,
   gallerySlides: PDP_GALLERY_SLIDES_V4,
   // v5 story: Highlights → Details → Out in the wild → Quote → Ways to wear → Aging → Find your Tabby (above More like this).
@@ -821,7 +828,8 @@ const V5_CONFIG: PdpVersionConfig = {
   hideBuyBarAtbIcon: true,
   hideDockedBuyBarColor: true,
   useCompactBuyBarColorDots: true,
-  compactBuyBarColorDotCount: 4,
+  compactBuyBarColorDotCount: 3,
+  heroColorTrayOverlay: true,
   showStorePickupLink: true,
   showSubtleReviewTeaser: true,
   inlineBuyBarColorSwatches: false,
@@ -929,7 +937,7 @@ const V5_CONFIG: PdpVersionConfig = {
   showHeroFitsInsideCta: true,
   // v5 swaps the tick indicator for a full-bleed progress bar at the gallery seam.
   useHeroGalleryProgressBar: true,
-  // Hide the standalone AR button — category rail carries AR instead.
+  // Hide the standalone AR button — not part of the v5 gallery category list.
   showArTryOn: false,
   showHeroGalleryCategoryRail: true,
   // Keep the header focused on the PDP; do not reveal site tabs at scroll top.

@@ -7,7 +7,12 @@ import { cn } from "@/lib/cn";
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
-import { pdpPressableIconClass, pdpType } from "./pdp-type";
+import {
+  pdpPressableIconClass,
+  pdpTextLinkCtaClass,
+  pdpTextLinkCtaLabelClass,
+  pdpType,
+} from "./pdp-type";
 import { useDragToScroll } from "./use-infinite-centered-carousel";
 
 type CompactColorDot = (PdpColor | TabbyColorOption) & {
@@ -62,6 +67,13 @@ type PdpCompactColorDotsProps = {
   moreCountOverride?: number;
   /** Full-width scrollable color rail vs compact +N row */
   variant?: "compact" | "rail";
+  /**
+   * Compact only — the whole preview (swatches + +N) opens the tray instead
+   * of selecting a color inline.
+   */
+  openOnInteract?: boolean;
+  /** Label for the openOnInteract text link (defaults to "+ Colors"). */
+  linkLabel?: string;
   /** Tap a preview swatch to select that color */
   onSelect: (id: string) => void;
   /** Tap +N to open the full color tray (compact only) */
@@ -79,6 +91,8 @@ export function PdpCompactColorDots({
   previewCount = 3,
   moreCountOverride = 0,
   variant = "compact",
+  openOnInteract = false,
+  linkLabel,
   onSelect,
   onOpenSheet,
   className,
@@ -168,6 +182,36 @@ export function PdpCompactColorDots({
   );
   const moreCount = moreCountOverride > 0 ? moreCountOverride : hiddenCount;
 
+  if (openOnInteract) {
+    const selected =
+      colors.find((color) => color.id === selectedId) ?? previewColors[0];
+    const selectedName = selected?.name ?? "Color";
+    const label = linkLabel ?? "+ Colors";
+
+    return (
+      <button
+        type="button"
+        onClick={onOpenSheet}
+        aria-haspopup="dialog"
+        aria-label={`${label}. Color: ${selectedName}. Open color picker`}
+        className={cn(
+          "group inline-flex min-h-[28px] max-w-full items-center gap-2",
+          pdpTextLinkCtaClass,
+          className,
+        )}
+      >
+        <span
+          aria-hidden
+          className="relative size-5 shrink-0 rounded-full ring-1 ring-neutral-300 ring-offset-[3px] ring-offset-white"
+          style={{ backgroundColor: selected?.chromeSample ?? "#d4d4d4" }}
+        />
+        <span className={cn("min-w-0 truncate", pdpType.micro, pdpTextLinkCtaLabelClass)}>
+          {label}
+        </span>
+      </button>
+    );
+  }
+
   return (
     <div
       role="listbox"
@@ -220,12 +264,12 @@ export function PdpCompactColorDots({
           aria-haspopup="dialog"
           aria-label={`View ${moreCount} more colors`}
           className={cn(
-            "shrink-0 text-neutral-900",
+            "shrink-0 text-neutral-900 tabular-nums",
             pdpType.micro,
             pdpPressableIconClass,
           )}
         >
-          +{moreCount}
+          + {moreCount}
         </button>
       ) : null}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject } from "react";
+import { useCallback, useState, type RefObject } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -62,6 +62,7 @@ export function PdpV3HeroLayout({
     hideDockedBuyBarColor,
     inlineBuyBarColorSwatches,
     useCompactBuyBarColorDots,
+    heroColorTrayOverlay,
     playHeroLandIntro,
     showStorePickupLink,
     showSubtleReviewTeaser,
@@ -76,15 +77,30 @@ export function PdpV3HeroLayout({
   const displayPrice = usePdpDisplayPrice(summary.price);
   const heroEnterOnce = useHeroEnterOnce();
   const playLandIntro = playHeroLandIntro && heroEnterOnce;
+  const [trayPortalRoot, setTrayPortalRoot] = useState<HTMLElement | null>(
+    null,
+  );
+  const trayRootRef = useCallback((node: HTMLDivElement | null) => {
+    setTrayPortalRoot(node);
+  }, []);
 
   return (
     <>
       <PdpHeroShell>
-        <PdpGalleryHero
-          onOpenReviews={onOpenReviews}
-          onOpenArTryOn={onOpenArTryOn}
-          fillFrame
+        {/* Full-land overlay host — covers gallery + docked footer, not just the image. */}
+        <div
+          ref={trayRootRef}
+          className="pointer-events-none absolute inset-0 z-[42] col-span-full row-span-full"
+          aria-hidden
         />
+
+        <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+          <PdpGalleryHero
+            onOpenReviews={onOpenReviews}
+            onOpenArTryOn={onOpenArTryOn}
+            fillFrame
+          />
+        </div>
 
         <footer
           className={cn(
@@ -100,38 +116,67 @@ export function PdpV3HeroLayout({
         >
           {useCompactBuyBarColorDots ? (
             <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
-              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
-                <p
-                  className={cn(
-                    pdpProductTitleClass,
-                    "min-w-0 text-pretty text-lg leading-tight text-black",
-                  )}
-                >
-                  {summary.name}
-                </p>
-                <PdpProductPrice
-                  price={displayPrice.price}
-                  compareAtPrice={displayPrice.compareAtPrice}
-                  className="shrink-0 justify-self-end text-base leading-tight lg:text-lg"
-                />
-                <p
-                  className={cn(
-                    pdpType.label,
-                    "col-start-1 min-w-0 leading-none text-neutral-500",
-                  )}
-                >
-                  in {summary.subtitle}
-                </p>
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <p
+                    className={cn(
+                      pdpProductTitleClass,
+                      "min-w-0 text-pretty text-lg leading-tight text-black",
+                    )}
+                  >
+                    {summary.name}
+                  </p>
+                  {!heroColorTrayOverlay ? (
+                    <p
+                      className={cn(
+                        pdpType.label,
+                        "min-w-0 leading-none text-neutral-500",
+                      )}
+                    >
+                      in {summary.subtitle}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="justify-self-end">
+                  <PdpProductPrice
+                    price={displayPrice.price}
+                    compareAtPrice={displayPrice.compareAtPrice}
+                    className="shrink-0 text-lg leading-tight"
+                  />
+                </div>
+                {heroColorTrayOverlay ? (
+                  <>
+                    <p
+                      className={cn(
+                        pdpType.label,
+                        "min-w-0 self-center leading-none text-neutral-500",
+                      )}
+                    >
+                      in {summary.subtitle}
+                    </p>
+                    <div className="justify-self-end self-center">
+                      <PdpBuyBarCompactColor
+                        selectedColorId={selectedColorId}
+                        onColorSelect={onColorSelect}
+                        onColorSheetOpenChange={onColorSheetOpenChange}
+                        variant="compact"
+                        trayPortalRoot={trayPortalRoot}
+                      />
+                    </div>
+                  </>
+                ) : null}
               </div>
-              <div className="-mx-3 min-w-0 w-[calc(100%+1.5rem)] px-3 lg:-mx-5 lg:w-[calc(100%+2.5rem)] lg:px-5">
-                <PdpBuyBarCompactColor
-                  selectedColorId={selectedColorId}
-                  onColorSelect={onColorSelect}
-                  onColorSheetOpenChange={onColorSheetOpenChange}
-                  variant="rail"
-                  className="min-w-0"
-                />
-              </div>
+              {!heroColorTrayOverlay ? (
+                <div className="-mx-3 min-w-0 w-[calc(100%+1.5rem)] px-3 lg:-mx-5 lg:w-[calc(100%+2.5rem)] lg:px-5">
+                  <PdpBuyBarCompactColor
+                    selectedColorId={selectedColorId}
+                    onColorSelect={onColorSelect}
+                    onColorSheetOpenChange={onColorSheetOpenChange}
+                    variant="rail"
+                    className="min-w-0"
+                  />
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -198,9 +243,10 @@ export function PdpV3HeroLayout({
       </PdpHeroShell>
 
       {showStorePickupLink ||
-      (showSubtleReviewTeaser && onViewReviews && placeAtbAfterPickup) ? (
+      (showSubtleReviewTeaser &&
+        onViewReviews &&
+        (placeAtbAfterPickup || usesPersistentAtb)) ? (
         <div className="relative z-[1] -mt-px flex flex-col gap-2.5 border-0 bg-white px-3 pb-3 pt-3 shadow-none outline-none lg:px-5">
-          {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
           {placeAtbAfterPickup ? (
             <PdpBuyBarRow
               selectedColorId={selectedColorId}
@@ -212,9 +258,12 @@ export function PdpV3HeroLayout({
               landCta
             />
           ) : null}
-          {showSubtleReviewTeaser && onViewReviews && placeAtbAfterPickup ? (
+          {showSubtleReviewTeaser &&
+          onViewReviews &&
+          (placeAtbAfterPickup || usesPersistentAtb) ? (
             <PdpV5ReviewTeaser onViewReviews={onViewReviews} />
           ) : null}
+          {showStorePickupLink ? <PdpV5StorePickupLink /> : null}
         </div>
       ) : null}
 

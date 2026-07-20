@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { PdpCompactColorDots } from "./pdp-compact-color-dots";
+import { PdpHeroColorTray } from "./pdp-hero-color-tray";
 import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
@@ -20,16 +22,22 @@ type PdpBuyBarCompactColorProps = {
   onColorSheetOpenChange?: (open: boolean) => void;
   /** Full scrollable bag-swatch rail vs compact +N chips */
   variant?: "compact" | "rail";
+  /**
+   * When set, the hero color tray portals into this node (gallery frame).
+   * Used with `heroColorTrayOverlay`.
+   */
+  trayPortalRoot?: HTMLElement | null;
   className?: string;
 };
 
-/** Compact swatch row — tap a color to select; tap +N to open the full tray. */
+/** Compact swatch row — tap opens the color tray (hero overlay or full sheet). */
 // fallow-ignore-next-line complexity
 export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
   onColorSheetOpenChange,
   variant = "compact",
+  trayPortalRoot,
   className,
 }: PdpBuyBarCompactColorProps) {
   const tabby = useOptionalTabbyVariant();
@@ -39,9 +47,11 @@ export function PdpBuyBarCompactColor({
     compactBuyBarColorDotCount,
     flatColorSheet,
     heroColorSwatchMoreCountOverride,
+    heroColorTrayOverlay,
     useV3ColorSheet,
   } = getPdpVersionConfig(usePdpVersion());
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
+  const useHeroTray = heroColorTrayOverlay && variant === "compact";
 
   const showAllTabbyOptionsInline =
     isTabbyProduct && variant === "rail" && flatColorSheet;
@@ -116,9 +126,24 @@ export function PdpBuyBarCompactColor({
     onColorSelect(id);
   };
 
+  const tray = useHeroTray ? (
+    <PdpHeroColorTray
+      open={colorSheetOpen}
+      onClose={() => setSheetOpen(false)}
+      selectedColorId={isTabbyProduct ? tabby!.selectedColorId : selectedColorId}
+      onColorSelect={handleColorSelect}
+      position={trayPortalRoot ? "absolute" : "fixed"}
+    />
+  ) : null;
+
+  const portaledTray =
+    tray && trayPortalRoot && typeof document !== "undefined"
+      ? createPortal(tray, trayPortalRoot)
+      : tray;
+
   return (
     <>
-      {useV3ColorSheet && isTabbyProduct ? (
+      {useHeroTray ? null : useV3ColorSheet && isTabbyProduct ? (
         <PdpV3ColorSheet open={colorSheetOpen} onClose={() => setSheetOpen(false)} />
       ) : (
         <PdpColorSheet
@@ -137,12 +162,15 @@ export function PdpBuyBarCompactColor({
         />
       )}
 
+      {portaledTray}
+
       <PdpCompactColorDots
         colors={colors}
         selectedId={activeColorId}
         previewCount={compactBuyBarColorDotCount}
         moreCountOverride={heroColorSwatchMoreCountOverride}
         variant={variant}
+        openOnInteract={useHeroTray}
         onSelect={handleColorSelect}
         onOpenSheet={() => setSheetOpen(true)}
         className={className}
