@@ -63,15 +63,24 @@ export function PdpV3HeroLayout({
     inlineBuyBarColorSwatches,
     useCompactBuyBarColorDots,
     heroColorTrayOverlay,
+    expandableMaterialSwatchGroups,
     playHeroLandIntro,
     showStorePickupLink,
     showSubtleReviewTeaser,
     showFloatingBuyBar,
     floatingBuyBarWhenHeroHidden,
+    materialSwatchSeeMore,
   } = getPdpVersionConfig(usePdpVersion());
   const usesPersistentAtb =
     showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
   const placeAtbAfterPickup = showStorePickupLink && !showFloatingBuyBar;
+  const landExpandableColors =
+    useCompactBuyBarColorDots &&
+    !heroColorTrayOverlay &&
+    expandableMaterialSwatchGroups;
+  const [swatchesExpanded, setSwatchesExpanded] = useState(false);
+  const heroAllowGrow =
+    landExpandableColors && (swatchesExpanded || !materialSwatchSeeMore);
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
@@ -86,7 +95,7 @@ export function PdpV3HeroLayout({
 
   return (
     <>
-      <PdpHeroShell>
+      <PdpHeroShell allowGrow={heroAllowGrow}>
         {/* Full-land overlay host — covers gallery + docked footer, not just the image. */}
         <div
           ref={trayRootRef}
@@ -159,6 +168,8 @@ export function PdpV3HeroLayout({
                     onColorSelect={onColorSelect}
                     onColorSheetOpenChange={onColorSheetOpenChange}
                     variant="rail"
+                    swatchesExpanded={swatchesExpanded}
+                    onSwatchesExpandedChange={setSwatchesExpanded}
                     className="min-w-0"
                   />
                 </div>

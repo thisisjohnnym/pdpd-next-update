@@ -11,7 +11,7 @@ Do **not** restate these here — use the Cursor rules / docs so context stays s
 | Topic | Rule / doc |
 | --- | --- |
 | Plan mode | `.cursor/rules/agent-planning.mdc` |
-| PDP versions (**v6 active**) | `.cursor/rules/pdp-versions.mdc` · `docs/pdp-versions.md` · `docs/rounds/README.md` |
+| PDP versions (**v7 active**) | `.cursor/rules/pdp-versions.mdc` · `docs/pdp-versions.md` · `docs/rounds/README.md` |
 | Grid / type / icons | `.cursor/rules/pdp-grid-system.mdc` · `docs/design-system/` |
 | Motion | `.cursor/rules/pdp-animations.mdc` · make-interfaces-feel-better skill |
 | Paper | `.cursor/rules/paper.mdc` |

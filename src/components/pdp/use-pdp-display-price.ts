@@ -26,5 +26,6 @@ export function usePdpDisplayPrice(listPrice: string): {
     return { price: listPrice };
   }
 
-  return { price: salePrice, compareAtPrice: listPrice };
+  // Sale price only — no struck list price beside it (v5 / v6).
+  return { price: salePrice };
 }

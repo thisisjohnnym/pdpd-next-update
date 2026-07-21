@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { PdpCompactColorDots } from "./pdp-compact-color-dots";
+import { PdpExpandableMaterialSwatches } from "./pdp-expandable-material-swatches";
 import { PdpHeroColorTray } from "./pdp-hero-color-tray";
 import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
@@ -28,6 +29,8 @@ type PdpBuyBarCompactColorProps = {
    * Used with `heroColorTrayOverlay`.
    */
   trayPortalRoot?: HTMLElement | null;
+  swatchesExpanded?: boolean;
+  onSwatchesExpandedChange?: (expanded: boolean) => void;
   className?: string;
 };
 
@@ -39,6 +42,8 @@ export function PdpBuyBarCompactColor({
   onColorSheetOpenChange,
   variant = "compact",
   trayPortalRoot,
+  swatchesExpanded,
+  onSwatchesExpandedChange,
   className,
 }: PdpBuyBarCompactColorProps) {
   const tabby = useOptionalTabbyVariant();
@@ -46,6 +51,8 @@ export function PdpBuyBarCompactColor({
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
   const {
     compactBuyBarColorDotCount,
+    expandableMaterialSwatchGroups,
+    materialSwatchSeeMore,
     flatColorSheet,
     heroColorSwatchMoreCountOverride,
     heroColorTrayOverlay,
@@ -86,7 +93,9 @@ export function PdpBuyBarCompactColor({
           };
         }
         const leadMaterial = railLeadKeyRef.current?.material ?? "";
-        if (!leadMaterial) return entries;
+        if (!leadMaterial || expandableMaterialSwatchGroups) {
+          return entries;
+        }
         const lead = entries.filter(
           (entry) => entry.groupLabel === leadMaterial,
         );
@@ -96,6 +105,15 @@ export function PdpBuyBarCompactColor({
         return [...lead, ...rest];
       })()
     : [];
+  const railLeadMaterial = showAllTabbyOptionsInline
+    ? expandableMaterialSwatchGroups
+      ? (allTabbyRailOptions.find(
+          (entry) => entry.styleId === tabby!.styleId,
+        )?.groupLabel ?? "")
+      : (railLeadKeyRef.current?.material ?? "")
+    : "";
+  const useExpandableGroups =
+    showAllTabbyOptionsInline && expandableMaterialSwatchGroups;
   const colors = showAllTabbyOptionsInline
     ? allTabbyRailOptions
     : isTabbyProduct
@@ -194,17 +212,30 @@ export function PdpBuyBarCompactColor({
 
       {portaledTray}
 
-      <PdpCompactColorDots
-        colors={colors}
-        selectedId={activeColorId}
-        previewCount={compactBuyBarColorDotCount}
-        moreCountOverride={heroColorSwatchMoreCountOverride}
-        variant={variant}
-        openOnInteract={useHeroTray}
-        onSelect={handleColorSelect}
-        onOpenSheet={() => setSheetOpen(true)}
-        className={className}
-      />
+      {useExpandableGroups ? (
+        <PdpExpandableMaterialSwatches
+          options={allTabbyRailOptions}
+          leadMaterial={railLeadMaterial}
+          selectedId={activeColorId}
+          onSelect={handleColorSelect}
+          seeMore={materialSwatchSeeMore}
+          expanded={swatchesExpanded}
+          onExpandedChange={onSwatchesExpandedChange}
+          className={className}
+        />
+      ) : (
+        <PdpCompactColorDots
+          colors={colors}
+          selectedId={activeColorId}
+          previewCount={compactBuyBarColorDotCount}
+          moreCountOverride={heroColorSwatchMoreCountOverride}
+          variant={variant}
+          openOnInteract={useHeroTray}
+          onSelect={handleColorSelect}
+          onOpenSheet={() => setSheetOpen(true)}
+          className={className}
+        />
+      )}
     </>
   );
 }

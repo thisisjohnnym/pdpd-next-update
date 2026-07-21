@@ -232,6 +232,16 @@ export type PdpVersionConfig = {
    */
   heroColorTrayOverlay: boolean;
   /**
+   * Land color options as wrapping circular swatches (material-grouped rail).
+   * No horizontal scroll. v6 / v7.
+   */
+  expandableMaterialSwatchGroups: boolean;
+  /**
+   * When expandableMaterialSwatchGroups is on: collapse to ~1 row with
+   * “See more colorways” (max 2 rows). Off = all swatches always visible. v6.
+   */
+  materialSwatchSeeMore: boolean;
+  /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
    * v5 / v6.
    */
@@ -460,8 +470,8 @@ export type PdpVersionConfig = {
    */
   showGetTheHighlights: boolean;
   /**
-   * Show sale price with struck list price in the hero / desktop buy panel.
-   * v5 merchandising prototype only.
+   * Show sale price in the hero / desktop buy panel (v5 merchandising).
+   * Compare-at / strikethrough is not shown — sale amount only.
    */
   showSalePricing: boolean;
   /**
@@ -583,6 +593,8 @@ const V1_CONFIG: PdpVersionConfig = {
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
   heroColorTrayOverlay: false,
+  expandableMaterialSwatchGroups: false,
+  materialSwatchSeeMore: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
@@ -700,6 +712,8 @@ const V2_CONFIG: PdpVersionConfig = {
   useCompactBuyBarColorDots: false,
   compactBuyBarColorDotCount: 0,
   heroColorTrayOverlay: false,
+  expandableMaterialSwatchGroups: false,
+  materialSwatchSeeMore: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
@@ -838,6 +852,7 @@ const V5_CONFIG: PdpVersionConfig = {
   useCompactBuyBarColorDots: true,
   compactBuyBarColorDotCount: 3,
   heroColorTrayOverlay: true,
+  expandableMaterialSwatchGroups: false,
   showStorePickupLink: true,
   quietStorePickupLink: true,
   showSubtleReviewTeaser: true,
@@ -957,16 +972,27 @@ const V5_CONFIG: PdpVersionConfig = {
 
 /**
  * v6 — inherits the full v5 baseline and replaces the compact "+ Colors" tray
- * trigger with the full material-grouped swatch rail (Quilted Leather colors |
- * Soft Leather · …) under the product name/price. Share as `/v6`; `/v5` stays
- * comparable.
+ * with an expandable material swatch stack under the product name/price.
+ * Share as `/v6`; `/v5` stays comparable.
  */
 const V6_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
-  // Full horizontal swatch rail with material group labels (no compact tray chip).
+  // Material swatches on land (no compact tray chip).
   heroColorTrayOverlay: false,
+  // ~1 row collapsed; See more expands to max 2 wrapping rows.
+  expandableMaterialSwatchGroups: true,
+  materialSwatchSeeMore: true,
   // Keep the original availability + store-name pickup card (not the quiet line).
   quietStorePickupLink: false,
+};
+
+/**
+ * v7 — same as v6, but all colorways are always visible (no See more).
+ * Share as `/v7`; `/v6` keeps the collapsed + See more colorways control.
+ */
+const V7_CONFIG: PdpVersionConfig = {
+  ...V6_CONFIG,
+  materialSwatchSeeMore: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
@@ -976,6 +1002,7 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v4: V4_CONFIG,
   v5: V5_CONFIG,
   v6: V6_CONFIG,
+  v7: V7_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {
