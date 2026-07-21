@@ -238,7 +238,8 @@ export type PdpVersionConfig = {
   expandableMaterialSwatchGroups: boolean;
   /**
    * When expandableMaterialSwatchGroups is on: collapse to ~1 row with
-   * “See more colorways” (max 2 rows). Off = all swatches always visible. v6.
+   * “See more colorways” (max 2 rows). Off = horizontal scroll rail
+   * (~7 swatches visible left-to-right). v6 on / v7 off.
    */
   materialSwatchSeeMore: boolean;
   /**
@@ -987,7 +988,7 @@ const V6_CONFIG: PdpVersionConfig = {
 };
 
 /**
- * v7 — same as v6, but all colorways are always visible (no See more).
+ * v7 — same as v6, but a single horizontal swatch rail (~7 visible; scroll for more).
  * Share as `/v7`; `/v6` keeps the collapsed + See more colorways control.
  */
 const V7_CONFIG: PdpVersionConfig = {

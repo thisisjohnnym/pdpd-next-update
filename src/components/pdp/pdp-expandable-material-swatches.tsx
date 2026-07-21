@@ -13,6 +13,7 @@ import {
   pdpTextLinkCtaMutedLabelClass,
   pdpType,
 } from "./pdp-type";
+import { useDragToScroll } from "./use-infinite-centered-carousel";
 
 type MaterialSwatchOption = (PdpColor | TabbyColorOption) & {
   selectionId: string;
@@ -31,7 +32,10 @@ type PdpExpandableMaterialSwatchesProps = {
   previewCount?: number;
   /** Max rows when expanded (collapsed is always one preview row). */
   maxExpandedRows?: number;
-  /** When false, all swatches are always visible (no See more). */
+  /**
+   * When true: collapse + See more colorways (wrap).
+   * When false: one horizontal scroll rail (~7 visible left-to-right).
+   */
   seeMore?: boolean;
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
@@ -63,10 +67,49 @@ function orderOptions(
   return [...lead, ...rest];
 }
 
+function SwatchButton({
+  option,
+  isSelected,
+  onSelect,
+}: {
+  option: MaterialSwatchOption;
+  isSelected: boolean;
+  onSelect: (selectionId: string) => void;
+}) {
+  const selectable = isSelectable(option);
+
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={isSelected}
+      aria-disabled={!selectable}
+      disabled={!selectable}
+      onClick={() => {
+        if (selectable) onSelect(option.selectionId);
+      }}
+      aria-label={
+        selectable
+          ? `Select ${option.selectionLabel}`
+          : `${option.selectionLabel}, ${pdpColorAvailabilityLabel(option.availability)}`
+      }
+      className={cn(
+        "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+        "before:absolute before:inset-[-8px] before:content-['']",
+        "shadow-[0_0_0_1px_rgba(0,0,0,0.1)]",
+        isSelected && "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]",
+        selectable && pdpPressableIconClass,
+        !selectable && "cursor-not-allowed opacity-40",
+      )}
+      style={{ backgroundColor: option.chromeSample ?? "#d4d4d4" }}
+    />
+  );
+}
+
 /**
- * Color options with optional See more / See less.
+ * Color options with optional See more / See less, or a horizontal scroll rail.
  * With seeMore: collapsed ~one row, expanded at most two wrapping rows.
- * Without seeMore: all swatches always visible (no toggle).
+ * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
   options,
@@ -86,6 +129,8 @@ export function PdpExpandableMaterialSwatches({
     if (onExpandedChange) onExpandedChange(next);
     else setUncontrolledExpanded(next);
   };
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useDragToScroll(scrollRef);
 
   /** Pin lead material once so picking Soft Leather doesn’t reshuffle the grid. */
   const pinnedLeadRef = useRef(leadMaterial);
@@ -97,6 +142,7 @@ export function PdpExpandableMaterialSwatches({
     () => orderOptions(options, pinnedLeadRef.current || leadMaterial),
     [options, leadMaterial],
   );
+  const horizontal = !seeMore;
   const expandedCount = seeMore
     ? previewCount * Math.max(1, maxExpandedRows)
     : ordered.length;
@@ -107,6 +153,32 @@ export function PdpExpandableMaterialSwatches({
     return null;
   }
 
+  if (horizontal) {
+    return (
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full max-w-full items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-1",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
+      >
+        {ordered.map((option) => (
+          <SwatchButton
+            key={option.selectionId}
+            option={option}
+            isSelected={option.selectionId === selectedId}
+            onSelect={onSelect}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex min-w-0 w-full flex-col gap-2", className)}>
       <div
@@ -114,38 +186,14 @@ export function PdpExpandableMaterialSwatches({
         aria-label="Choose color"
         className="flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1"
       >
-        {visible.map((option) => {
-          const isSelected = option.selectionId === selectedId;
-          const selectable = isSelectable(option);
-
-          return (
-            <button
-              key={option.selectionId}
-              type="button"
-              role="option"
-              aria-selected={isSelected}
-              aria-disabled={!selectable}
-              disabled={!selectable}
-              onClick={() => {
-                if (selectable) onSelect(option.selectionId);
-              }}
-              aria-label={
-                selectable
-                  ? `Select ${option.selectionLabel}`
-                  : `${option.selectionLabel}, ${pdpColorAvailabilityLabel(option.availability)}`
-              }
-              className={cn(
-                "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
-                "before:absolute before:inset-[-8px] before:content-['']",
-                "shadow-[0_0_0_1px_rgba(0,0,0,0.1)]",
-                isSelected && "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]",
-                selectable && pdpPressableIconClass,
-                !selectable && "cursor-not-allowed opacity-40",
-              )}
-              style={{ backgroundColor: option.chromeSample ?? "#d4d4d4" }}
-            />
-          );
-        })}
+        {visible.map((option) => (
+          <SwatchButton
+            key={option.selectionId}
+            option={option}
+            isSelected={option.selectionId === selectedId}
+            onSelect={onSelect}
+          />
+        ))}
       </div>
 
       {canExpand ? (

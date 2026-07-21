@@ -344,11 +344,11 @@ Shared rail logic lives in `PdpBuyBarCompactColor` / `PdpCompactColorDots` (alre
 
 ## 8.8. v7 — always-open colorway swatches
 
-v7 inherits the full v6 baseline (`V7_CONFIG` spreads `V6_CONFIG`) and turns off the See more collapse so every colorway swatch is visible on land.
+v7 inherits the full v6 baseline (`V7_CONFIG` spreads `V6_CONFIG`) and replaces the See more collapse with a single horizontal scroll rail of colorway swatches (~7 visible left-to-right).
 
 ### What v7 changes
 
-1. **All swatches open** — same wrapping circular grid as v6 expanded, with no “See more colorways” control.
+1. **Horizontal swatch rail** — same circular dots as v6, one row, scroll for the rest; no “See more colorways”.
 2. **Everything else matches v6** — gallery, sticky ATB, desktop split, modules, sale pricing, pickup card, etc.
 
 ### v7-only files
@@ -365,7 +365,7 @@ v7 inherits the full v6 baseline (`V7_CONFIG` spreads `V6_CONFIG`) and turns off
 
 | Flag | v6 | v7 | Purpose |
 |------|----|----|---------|
-| `materialSwatchSeeMore` | true | **false** | Hide collapse; show all colorways |
+| `materialSwatchSeeMore` | true | **false** | Horizontal scroll rail instead of wrap + See more |
 
 ### v7 change rules
 

@@ -80,7 +80,7 @@ export function PdpV3HeroLayout({
     expandableMaterialSwatchGroups;
   const [swatchesExpanded, setSwatchesExpanded] = useState(false);
   const heroAllowGrow =
-    landExpandableColors && (swatchesExpanded || !materialSwatchSeeMore);
+    landExpandableColors && materialSwatchSeeMore && swatchesExpanded;
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
