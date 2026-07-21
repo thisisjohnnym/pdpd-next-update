@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useActiveProduct } from "./pdp-active-product-context";
@@ -52,12 +52,20 @@ export function PdpBuyBarCompactColor({
   } = getPdpVersionConfig(usePdpVersion());
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
   const useHeroTray = heroColorTrayOverlay && variant === "compact";
+  /**
+   * Pin the rail’s lead material to the land style (and size). Re-sorting on
+   * every swatch tap made Soft Leather jump to the front and shift the row.
+   */
+  const railLeadKeyRef = useRef<{ size: string; material: string } | null>(
+    null,
+  );
 
   const showAllTabbyOptionsInline =
     isTabbyProduct && variant === "rail" && flatColorSheet;
   const allTabbyRailOptions = showAllTabbyOptionsInline
     ? (() => {
-        const entries = getV5ColorSwatchGroups(tabby!.size).flatMap((group) =>
+        const size = tabby!.size;
+        const entries = getV5ColorSwatchGroups(size).flatMap((group) =>
           group.entries.map((entry) => ({
             ...entry.color,
             styleId: entry.styleId,
@@ -66,17 +74,24 @@ export function PdpBuyBarCompactColor({
             groupLabel: entry.materialLabel,
           })),
         );
-        // Lead with the current material so the land rail matches the buy-box
-        // subtitle (e.g. Quilted Leather colors, then Soft Leather · …).
-        const currentMaterial = entries.find(
-          (entry) => entry.styleId === tabby!.styleId,
-        )?.groupLabel;
-        if (!currentMaterial) return entries;
+        if (
+          !railLeadKeyRef.current ||
+          railLeadKeyRef.current.size !== size
+        ) {
+          const landMaterial = entries.find(
+            (entry) => entry.styleId === tabby!.styleId,
+          )?.groupLabel;
+          railLeadKeyRef.current = landMaterial
+            ? { size, material: landMaterial }
+            : { size, material: "" };
+        }
+        const leadMaterial = railLeadKeyRef.current.material;
+        if (!leadMaterial) return entries;
         const lead = entries.filter(
-          (entry) => entry.groupLabel === currentMaterial,
+          (entry) => entry.groupLabel === leadMaterial,
         );
         const rest = entries.filter(
-          (entry) => entry.groupLabel !== currentMaterial,
+          (entry) => entry.groupLabel !== leadMaterial,
         );
         return [...lead, ...rest];
       })()

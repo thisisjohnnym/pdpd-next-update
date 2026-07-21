@@ -158,9 +158,11 @@ export function PdpCompactColorDots({
                 className={cn(
                   "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
                   "before:absolute before:inset-[-8px] before:content-['']",
-                  isSelected
-                    ? "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
-                    : "ring-1 ring-black/10",
+                  // Always reserve the same shadow stack so selection never
+                  // shifts neighbors / material labels in the flex rail.
+                  "shadow-[0_0_0_1px_rgba(0,0,0,0.1)]",
+                  isSelected &&
+                    "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]",
                   isSelectable && pdpPressableIconClass,
                   !isSelectable && "cursor-not-allowed opacity-40",
                 )}
