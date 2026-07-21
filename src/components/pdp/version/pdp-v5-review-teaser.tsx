@@ -1,9 +1,8 @@
 "use client";
 
-import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
 
-import { PDP_CUSTOMER_REVIEWS, PDP_REVIEWS_SUMMARY } from "../pdp-data";
+import { PDP_REVIEWS_SUMMARY } from "../pdp-data";
 import { PdpStarRating } from "../pdp-review-comment";
 import {
   pdpPillRadiusClass,
@@ -22,14 +21,12 @@ type PdpV5ReviewTeaserProps = {
 const reviewCardClass =
   "overflow-hidden rounded-none border-0 bg-neutral-50 shadow-none outline-none";
 
-/** Featured buyer for the above-fold teaser — first verified review. */
-const FEATURED_REVIEW =
-  PDP_CUSTOMER_REVIEWS.find((review) => review.verified) ??
-  PDP_CUSTOMER_REVIEWS[0]!;
+/** Short praise line — land teaser only (not pdp-data). */
+const PRAISE_LINE =
+  "Loved for its soft leather, roomy interior, and comfortable carry.";
 
 /**
- * Reviews card — aggregate rating, one featured review, plus CTA.
- * Soft fill so it reads as a post-purchase cue under Add to bag.
+ * Reviews card — rating summary, compact praise line, then open highlights.
  */
 export function PdpV5ReviewTeaser({
   className,
@@ -63,71 +60,27 @@ export function PdpV5ReviewTeaser({
             "font-extended tabular-nums text-black",
           )}
         >
-          {average.toFixed(1)} · {count} reviews
+          {average.toFixed(1)} · {count} Reviews
         </span>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-neutral-200 pt-3">
-        <article className="flex flex-col gap-2">
-          {FEATURED_REVIEW.verified ? (
-            <span
-              className={cn(
-                pdpType.micro,
-                "flex items-center gap-1 text-neutral-500",
-              )}
-            >
-              <MaterialIcon
-                name="verified"
-                size={14}
-                className="text-[#1D9BF0]"
-                aria-hidden
-              />
-              Verified buyer
-            </span>
-          ) : null}
-          {FEATURED_REVIEW.title ? (
-            <h3 className={cn(pdpType.body, "m-0 text-pretty text-black")}>
-              {FEATURED_REVIEW.title}
-            </h3>
-          ) : null}
-          {FEATURED_REVIEW.body ? (
-            <p
-              className={cn(
-                pdpType.label,
-                "m-0 line-clamp-3 text-pretty text-neutral-600",
-              )}
-            >
-              {FEATURED_REVIEW.body}
-            </p>
-          ) : (
-            <p
-              className={cn(
-                pdpType.label,
-                "m-0 line-clamp-3 text-pretty text-neutral-600",
-              )}
-            >
-              {FEATURED_REVIEW.quote}
-            </p>
-          )}
-          <p className={cn(pdpType.micro, "m-0 text-neutral-500")}>
-            {FEATURED_REVIEW.author} · {FEATURED_REVIEW.date}
-          </p>
-        </article>
+      <p className={cn(pdpType.label, "m-0 text-pretty text-neutral-600")}>
+        {PRAISE_LINE}
+      </p>
 
-        <button
-          type="button"
-          onClick={onViewReviews}
-          aria-label={`View all ${count} reviews`}
-          className={cn(
-            "font-extended flex h-10 w-full items-center justify-center border border-neutral-200 bg-white px-4 text-center text-black transition-colors active:bg-neutral-50",
-            pdpPillRadiusClass(squareButtonCorners),
-            pdpPressableClass,
-            pdpType.label,
-          )}
-        >
-          <span className="inline-block translate-y-px">View more reviews</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onViewReviews}
+        aria-label={`See what customers say, ${count} reviews`}
+        className={cn(
+          "font-extended flex h-10 w-full items-center justify-center border border-neutral-200 bg-white px-4 text-center text-black transition-colors active:bg-neutral-50",
+          pdpPillRadiusClass(squareButtonCorners),
+          pdpPressableClass,
+          pdpType.label,
+        )}
+      >
+        <span className="inline-block translate-y-px">See what customers say</span>
+      </button>
     </div>
   );
 }

@@ -195,17 +195,24 @@ export function PdpCompactColorDots({
         aria-haspopup="dialog"
         aria-label={`${label}. Color: ${selectedName}. Open color picker`}
         className={cn(
-          "group inline-flex min-h-[28px] max-w-full items-center gap-2",
+          "group inline-flex max-w-full items-center gap-1.5",
           pdpTextLinkCtaClass,
           className,
         )}
       >
         <span
           aria-hidden
-          className="relative size-5 shrink-0 rounded-full ring-1 ring-neutral-300 ring-offset-[3px] ring-offset-white"
+          className="size-3.5 shrink-0 rounded-full ring-1 ring-black/15"
           style={{ backgroundColor: selected?.chromeSample ?? "#d4d4d4" }}
         />
-        <span className={cn("min-w-0 truncate", pdpType.micro, pdpTextLinkCtaLabelClass)}>
+        <span
+          className={cn(
+            "min-w-0 truncate",
+            pdpType.body,
+            "leading-none",
+            pdpTextLinkCtaLabelClass,
+          )}
+        >
           {label}
         </span>
       </button>

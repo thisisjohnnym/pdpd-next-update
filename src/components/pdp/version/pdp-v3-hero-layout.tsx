@@ -115,9 +115,9 @@ export function PdpV3HeroLayout({
           )}
         >
           {useCompactBuyBarColorDots ? (
-            <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-5 lg:pt-4 lg:pb-4">
-              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2">
-                <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex min-w-0 w-full flex-col gap-3 px-3 pt-4 pb-4 lg:gap-4 lg:px-5 lg:pt-5 lg:pb-5">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <div className="flex min-w-0 items-baseline justify-between gap-x-3">
                   <p
                     className={cn(
                       pdpProductTitleClass,
@@ -126,45 +126,31 @@ export function PdpV3HeroLayout({
                   >
                     {summary.name}
                   </p>
-                  {!heroColorTrayOverlay ? (
-                    <p
-                      className={cn(
-                        pdpType.label,
-                        "min-w-0 leading-none text-neutral-500",
-                      )}
-                    >
-                      in {summary.subtitle}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="justify-self-end">
                   <PdpProductPrice
                     price={displayPrice.price}
                     compareAtPrice={displayPrice.compareAtPrice}
                     className="shrink-0 text-lg leading-tight"
                   />
                 </div>
-                {heroColorTrayOverlay ? (
-                  <>
-                    <p
-                      className={cn(
-                        pdpType.label,
-                        "min-w-0 self-center leading-none text-neutral-500",
-                      )}
-                    >
-                      in {summary.subtitle}
-                    </p>
-                    <div className="justify-self-end self-center">
-                      <PdpBuyBarCompactColor
-                        selectedColorId={selectedColorId}
-                        onColorSelect={onColorSelect}
-                        onColorSheetOpenChange={onColorSheetOpenChange}
-                        variant="compact"
-                        trayPortalRoot={trayPortalRoot}
-                      />
-                    </div>
-                  </>
-                ) : null}
+                <div className="flex min-w-0 items-center justify-between gap-x-3">
+                  <p
+                    className={cn(
+                      pdpType.body,
+                      "min-w-0 leading-none text-neutral-600",
+                    )}
+                  >
+                    in {summary.subtitle}
+                  </p>
+                  {heroColorTrayOverlay ? (
+                    <PdpBuyBarCompactColor
+                      selectedColorId={selectedColorId}
+                      onColorSelect={onColorSelect}
+                      onColorSheetOpenChange={onColorSheetOpenChange}
+                      variant="compact"
+                      trayPortalRoot={trayPortalRoot}
+                    />
+                  ) : null}
+                </div>
               </div>
               {!heroColorTrayOverlay ? (
                 <div className="-mx-3 min-w-0 w-[calc(100%+1.5rem)] px-3 lg:-mx-5 lg:w-[calc(100%+2.5rem)] lg:px-5">

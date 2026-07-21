@@ -45,6 +45,7 @@ export function PdpBottomActions({
   } = getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
   const persistentAtb = !floatingBuyBarWhenHeroHidden;
+  const edgeToEdgeCta = useCompactBuyBarColorDots;
 
   useCtaBarHeight(barRef, mounted);
 
@@ -66,17 +67,21 @@ export function PdpBottomActions({
       data-floating-cta-bar
       className={cn(
         "pointer-events-none fixed inset-x-0 z-40 transition-transform duration-300 ease-out",
-        persistentAtb ? "bg-transparent" : "bg-white",
+        persistentAtb || edgeToEdgeCta ? "bg-transparent" : "bg-white",
         chromeHidden ? "translate-y-full" : "translate-y-0",
         // Desktop split already has a sticky buy panel — hide the mobile float.
         desktopSplitLayout && "lg:hidden",
       )}
-      style={{
-        bottom: BOTTOM_CHROME_OFFSET,
-        padding: CTA_BAR_PADDING_PX,
-        paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-        paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-      }}
+      style={
+        edgeToEdgeCta
+          ? { bottom: 0, padding: 0 }
+          : {
+              bottom: BOTTOM_CHROME_OFFSET,
+              padding: CTA_BAR_PADDING_PX,
+              paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+              paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+            }
+      }
     >
       <div
         className={cn(
@@ -93,6 +98,7 @@ export function PdpBottomActions({
           hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
           inlineColorSwatches={false}
           landCta={useCompactBuyBarColorDots}
+          edgeToEdge={edgeToEdgeCta}
           className="gap-2.5"
         />
       </div>

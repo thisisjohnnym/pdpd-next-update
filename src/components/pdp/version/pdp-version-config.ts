@@ -841,8 +841,8 @@ const V5_CONFIG: PdpVersionConfig = {
   useV4CraftsmanshipLayout: false,
   // Drop "Get up close and personal" — quote card still follows this slide slot.
   showUpCloseModule: false,
-  // Find your Tabby sits above More like this (ecommerce stack), not mid-gallery.
-  showCloserLookStage: true,
+  // Find your Tabby — temporarily hidden; flip to true to restore above More like this.
+  showCloserLookStage: false,
   useV4CompactUgcStrip: true,
   useUgcTopicThemes: true,
   useV5UgcTestimonialCarousel: true,

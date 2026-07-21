@@ -45,8 +45,8 @@ export function PdpV5DesktopBuyPanel({
   return (
     <div className="pdp-v5-desktop-buy-panel flex w-full min-w-0 flex-col gap-0 bg-white">
       <div className="flex min-w-0 flex-col gap-3 pb-4 lg:gap-4">
-        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2">
-          <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-col gap-0">
+          <div className="flex min-w-0 items-baseline justify-between gap-x-3">
             <p
               className={cn(
                 pdpProductTitleClass,
@@ -55,44 +55,30 @@ export function PdpV5DesktopBuyPanel({
             >
               {summary.name}
             </p>
-            {!(useCompactBuyBarColorDots && heroColorTrayOverlay) ? (
-              <p
-                className={cn(
-                  pdpType.label,
-                  "min-w-0 leading-none text-neutral-500",
-                )}
-              >
-                in {summary.subtitle}
-              </p>
-            ) : null}
-          </div>
-          <div className="justify-self-end">
             <PdpProductPrice
               price={displayPrice.price}
               compareAtPrice={displayPrice.compareAtPrice}
               className="shrink-0 text-lg leading-tight"
             />
           </div>
-          {useCompactBuyBarColorDots && heroColorTrayOverlay ? (
-            <>
-              <p
-                className={cn(
-                  pdpType.label,
-                  "min-w-0 self-center leading-none text-neutral-500",
-                )}
-              >
-                in {summary.subtitle}
-              </p>
-              <div className="justify-self-end self-center">
-                <PdpBuyBarCompactColor
-                  selectedColorId={selectedColorId}
-                  onColorSelect={onColorSelect}
-                  variant="compact"
-                  trayPortalRoot={trayPortalRoot}
-                />
-              </div>
-            </>
-          ) : null}
+          <div className="flex min-w-0 items-center justify-between gap-x-3">
+            <p
+              className={cn(
+                pdpType.body,
+                "min-w-0 leading-none text-neutral-600",
+              )}
+            >
+              in {summary.subtitle}
+            </p>
+            {useCompactBuyBarColorDots && heroColorTrayOverlay ? (
+              <PdpBuyBarCompactColor
+                selectedColorId={selectedColorId}
+                onColorSelect={onColorSelect}
+                variant="compact"
+                trayPortalRoot={trayPortalRoot}
+              />
+            ) : null}
+          </div>
         </div>
         {useCompactBuyBarColorDots && !heroColorTrayOverlay ? (
           <PdpBuyBarCompactColor
