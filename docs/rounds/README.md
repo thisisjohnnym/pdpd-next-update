@@ -17,8 +17,8 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 6, 2026 |
-| Commit | `d854f34` — feat(v5): Tabby family explorer and buy box merchandising |
+| Date | Jul 21, 2026 |
+| Commit | `7bf2688` — feat(v6): add material-grouped swatch rail route |
 | URL | https://pdp-next-sigma.vercel.app/v6 |
 
 Update this section after every `vercel --prod`.
