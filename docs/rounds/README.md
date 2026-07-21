@@ -10,7 +10,8 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | r3 | `/v2` | [updates r3 `4-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/4-0) | First stakeholder pivot (shorter page, UGC up) | Frozen | [r3-v2.md](r3-v2.md) |
 | r4 | `/v3` | [updates r4 `5-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/5-0) | Hero scrolls with page, docked CTA, color drawer | Frozen | [r4-v3.md](r4-v3.md) |
 | r5 | `/v4` | [updates r5 `6-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/6-0) | r5 feedback refinements | Frozen | [r5-v4.md](r5-v4.md) |
-| r6 | `/v5` | Sean r5 polish | Buy box merchandising, Tabby family nav, module polish | **Active** | — |
+| r6 | `/v5` | Sean r5 polish | Buy box merchandising, Tabby family nav, module polish | Frozen | — |
+| r7 | `/v6` | Material swatch rail | Same as v5 + full material-grouped color swatches | **Active** | [r7-v6.md](r7-v6.md) |
 
 ## Last production deploy
 
@@ -18,7 +19,7 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 |-------|-------|
 | Date | Jul 6, 2026 |
 | Commit | `d854f34` — feat(v5): Tabby family explorer and buy box merchandising |
-| URL | https://pdp-next-sigma.vercel.app/v5 |
+| URL | https://pdp-next-sigma.vercel.app/v6 |
 
 Update this section after every `vercel --prod`.
 
@@ -29,7 +30,8 @@ v1  https://pdp-next-sigma.vercel.app/v1
 v2  https://pdp-next-sigma.vercel.app/v2
 v3  https://pdp-next-sigma.vercel.app/v3
 v4  https://pdp-next-sigma.vercel.app/v4
-v5  https://pdp-next-sigma.vercel.app/v5   ← latest
+v5  https://pdp-next-sigma.vercel.app/v5
+v6  https://pdp-next-sigma.vercel.app/v6   ← latest
 ```
 
 Deploy process: [deploy-and-links.md](../deploy-and-links.md) · Playbook: [prototype-versions.md](../prototype-versions.md)

@@ -4,8 +4,8 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 ## In short
 
-- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v5` (latest round).
-- **Compare all versions** on the same deploy: `/v1` … `/v5` on that host.
+- **Share production** for feedback: `https://pdp-next-sigma.vercel.app/v6` (latest round).
+- **Compare all versions** on the same deploy: `/v1` … `/v6` on that host.
 - **Git push alone** updates Preview only — run `vercel --prod` when stakeholders need the main URL updated.
 
 ---
@@ -16,10 +16,10 @@ How to ship prototype rounds and which URLs to share. Read this before any deplo
 
 | Purpose | URL |
 |---------|-----|
-| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` · `/v5` |
-| Latest feedback round only | https://pdp-next-sigma.vercel.app/v5 |
+| Compare all versions (Tabby default) | https://pdp-next-sigma.vercel.app/v1 · `/v2` · `/v3` · `/v4` · `/v5` · `/v6` |
+| Latest feedback round only | https://pdp-next-sigma.vercel.app/v6 |
 | Legacy baseline (same as v1) | https://pdp-next-sigma.vercel.app/ |
-| Stripped PDP (Kira) on latest round | https://pdp-next-sigma.vercel.app/v5/products/kira-crossbody-bag-18 |
+| Stripped PDP (Kira) on latest round | https://pdp-next-sigma.vercel.app/v6/products/kira-crossbody-bag-18 |
 
 Update the **Last prod deploy** row in [rounds/README.md](rounds/README.md) after every production ship.
 
@@ -32,7 +32,7 @@ Update the **Last prod deploy** row in [rounds/README.md](rounds/README.md) afte
 | **When it updates** | Every `git push` to `origin/main` | When you run `vercel --prod` (or push `main` — Vercel production branch) |
 | **Typical URL** | `https://pdp-next-git-main-thisisjohnnym-9611s-projects.vercel.app` | `https://pdp-next-sigma.vercel.app` |
 | **Use for** | Your own QA before promoting | Stakeholder links, brand-team review |
-| **SSO** | May require Vercel team login | Public (200 on `/v5`) |
+| **SSO** | May require Vercel team login | Public (200 on `/v6`) |
 
 Pushing **`main`** updates `pdp-next-sigma.vercel.app` when Vercel’s production branch is set to `main`. Use `vercel --prod` for a manual promote from your machine.
 
@@ -63,12 +63,12 @@ vercel --prod --yes
 
 | Name | Meaning |
 |------|---------|
-| Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v5`); active work is **`/v5` only** |
-| Routes `/v1`–`/v4` | Frozen comparison URLs on one deploy — not separate git branches |
-| Route `/v5` | Active feedback round |
+| Git branch **`main`** | Canonical branch — holds all route versions (`/v1`–`/v6`); active work is **`/v6` only** |
+| Routes `/v1`–`/v5` | Frozen comparison URLs on one deploy — not separate git branches |
+| Route `/v6` | Active feedback round |
 | Git branch `v2` | Legacy development line (merged into `main`); keep in sync or retire |
 
-When someone says “deploy v5,” they mean **ship code to production so `/v5` shows the latest round** — not a separate `v5` git branch.
+When someone says “deploy v6,” they mean **ship code to production so `/v6` shows the latest round** — not a separate `v6` git branch.
 
 ---
 
@@ -83,10 +83,11 @@ v1 (frozen baseline):  https://pdp-next-sigma.vercel.app/v1
 v2 (first pivot):      https://pdp-next-sigma.vercel.app/v2
 v3 (r4 hero/CTA):      https://pdp-next-sigma.vercel.app/v3
 v4 (Johnny r5 baseline): https://pdp-next-sigma.vercel.app/v4
-v5 (latest — Sean polish): https://pdp-next-sigma.vercel.app/v5
+v5 (Sean polish):      https://pdp-next-sigma.vercel.app/v5
+v6 (latest — material swatch rail): https://pdp-next-sigma.vercel.app/v6
 ```
 
-For “what changed in the latest round,” point reviewers to [rounds/README.md](rounds/README.md) (r6 / `/v5`).
+For “what changed in the latest round,” point reviewers to [rounds/README.md](rounds/README.md) (r7 / `/v6`).
 
 ---
 
@@ -95,8 +96,8 @@ For “what changed in the latest round,” point reviewers to [rounds/README.md
 Use before every production deploy:
 
 - [ ] Changes for the new round are behind flags in `pdp-version-config.ts` (or in `src/components/pdp/version/`)
-- [ ] `/v1`–`/v4` spot-checked — still match their frozen baselines
-- [ ] `/v5` matches the active round intent (Sean polish)
+- [ ] `/v1`–`/v5` spot-checked — still match their frozen baselines
+- [ ] `/v6` matches the active round intent (material-grouped swatch rail)
 - [ ] `pnpm check:versions` passes
 - [ ] `pnpm build` passes
 - [ ] `git push origin main` (and `vercel --prod --yes` if promoting manually)

@@ -56,15 +56,30 @@ export function PdpBuyBarCompactColor({
   const showAllTabbyOptionsInline =
     isTabbyProduct && variant === "rail" && flatColorSheet;
   const allTabbyRailOptions = showAllTabbyOptionsInline
-    ? getV5ColorSwatchGroups(tabby!.size).flatMap((group) =>
-        group.entries.map((entry) => ({
-          ...entry.color,
-          styleId: entry.styleId,
-          selectionId: `${entry.styleId}:${entry.color.id}`,
-          selectionLabel: `${entry.color.name} in ${entry.materialLabel}`,
-          groupLabel: entry.materialLabel,
-        })),
-      )
+    ? (() => {
+        const entries = getV5ColorSwatchGroups(tabby!.size).flatMap((group) =>
+          group.entries.map((entry) => ({
+            ...entry.color,
+            styleId: entry.styleId,
+            selectionId: `${entry.styleId}:${entry.color.id}`,
+            selectionLabel: `${entry.color.name} in ${entry.materialLabel}`,
+            groupLabel: entry.materialLabel,
+          })),
+        );
+        // Lead with the current material so the land rail matches the buy-box
+        // subtitle (e.g. Quilted Leather colors, then Soft Leather · …).
+        const currentMaterial = entries.find(
+          (entry) => entry.styleId === tabby!.styleId,
+        )?.groupLabel;
+        if (!currentMaterial) return entries;
+        const lead = entries.filter(
+          (entry) => entry.groupLabel === currentMaterial,
+        );
+        const rest = entries.filter(
+          (entry) => entry.groupLabel !== currentMaterial,
+        );
+        return [...lead, ...rest];
+      })()
     : [];
   const colors = showAllTabbyOptionsInline
     ? allTabbyRailOptions

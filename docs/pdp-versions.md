@@ -1,4 +1,4 @@
-# PDP Versions (v1 / v2 / v3 / v4 / v5)
+# PDP Versions (v1 / v2 / v3 / v4 / v5 / v6)
 
 Single source of truth for the PDP designs that ship from this codebase. Read this before any PDP edit.
 
@@ -6,13 +6,14 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **Active work is v5 only** (`/v5`). **v1–v4 are frozen** comparison baselines — do not change them unless explicitly fixing a cross-version bug.
-- **v1** frozen brand baseline · **v2** first stakeholder pivot · **v3** Paper r4 · **v4** Paper r5 · **v5** Sean polish (active).
-- Brand team compares them at **`/v1`** … **`/v5`** on the same deploy. Share **`/v5`** for the latest round.
+- **Active work is v6 only** (`/v6`). **v1–v5 are frozen** comparison baselines — do not change them unless explicitly fixing a cross-version bug.
+- **v1** frozen brand baseline · **v2** first stakeholder pivot · **v3** Paper r4 · **v4** Paper r5 · **v5** Sean polish · **v6** material-grouped swatch rail (active).
+- Brand team compares them at **`/v1`** … **`/v6`** on the same deploy. Share **`/v6`** for the latest round.
 - Newer-version differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting older defaults.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
 - v5 inherits the v4 baseline and layers Sean’s polish round (buy box merchandising, Tabby family nav, module polish). See [rounds/README.md](rounds/README.md).
+- v6 inherits the full v5 baseline and shows the full material-grouped color swatch rail under the product name/price (instead of v5’s compact “+ Colors” tray chip). See section 8.7.
 
 ---
 
@@ -45,9 +46,10 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
 | v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
 | v4 (r5 — frozen) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
-| v5 (active) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) (r6) |
+| v5 (Sean polish) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) (r6) |
+| v6 (active) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
 
-Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v5/products/tabby-shoulder-bag-26-black`.
+Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v6/products/tabby-shoulder-bag-26-black`.
 
 Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break.
 
@@ -57,10 +59,10 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v5`) from one codebase.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v6`) from one codebase.
 
-1. All prototype work lands on **`main`** and targets **`/v5`** only.
-2. Route versions `/v1`–`/v4` are frozen comparison URLs; `/v5` is the active round — not separate git branches.
+1. All prototype work lands on **`main`** and targets **`/v6`** only.
+2. Route versions `/v1`–`/v5` are frozen comparison URLs; `/v6` is the active round — not separate git branches.
 3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
 
 When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
@@ -300,6 +302,41 @@ r5 was originally scoped from a verbal feedback checklist, which missed several 
 **Leather aging restructure (v4):** the r5 Leather aging artboards (`JFT-0` / `LM2-0` / …) restructure the module — image on top (no warm header band above it), then a single warm `#EFEAE7` block holding a centered title, per-stage description, and the stage slider. The block is **not** plain white (an earlier draft of this note wrongly said white). The shared `PdpV2LeatherAging` renders this v4 layout behind the `useV4LeatherAgingLayout` flag; v2/v3 keep the r3/r4 `AP5-0` layout (warm header band above the image, caption below the slider).
 
 For the full r5 (v4) module map, node-verify workflow, and Definition of Done, see [pdp-r5-parity.md](pdp-r5-parity.md) and the round changelog [rounds/r5-v4.md](rounds/r5-v4.md).
+
+---
+
+## 8.7. v6 — material-grouped swatch rail
+
+v6 is the next comparison round after Sean’s v5 polish. It **inherits the full v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and changes only how colors appear under the product name/price on land.
+
+### What v6 changes
+
+1. **Full material-grouped swatch rail** — instead of v5’s compact “+ Colors” chip that opens a hero tray, v6 shows a horizontal rail of circular swatches under “in Quilted Leather”.
+2. **Material dividers** — the current material’s colors lead; later materials appear after a thin vertical rule with a gray label (e.g. Soft Leather).
+3. **Everything else matches v5** — gallery, sticky ATB, desktop split, modules, sale pricing, etc.
+
+### v6-only files
+
+| File | Role |
+|------|------|
+| `src/app/v6/` | Route folder — `layout.tsx` sets `data-pdp-version="v6"` and imports `pdp-v6.css`; pages pass `version="v6"` |
+| `src/app/v6/pdp-v6.css` | v6-scoped CSS (inherits v5 land/desktop rules under the v6 attribute) |
+| `src/app/v6/pdp-v6-root-marker.tsx` | Marks `<html>` so portaled chrome gets v6 CSS |
+
+### v6 feature flags (`pdp-version-config.ts`)
+
+`V6_CONFIG` spreads `V5_CONFIG` then sets:
+
+| Flag | v5 | v6 | Purpose |
+|------|----|----|---------|
+| `heroColorTrayOverlay` | true | **false** | Drop the compact tray chip; render the full material-grouped `variant="rail"` swatches |
+
+Shared rail logic lives in `PdpBuyBarCompactColor` / `PdpCompactColorDots` (already used when the tray overlay is off). Current material leads the rail so the land matches the subtitle.
+
+### v6 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1–v5 routes must not import any `*-v6` module, and `pdp-v6.css` selectors must be scoped under `[data-pdp-version="v6"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v6"`. Add a flag to `PdpVersionConfig`.
 
 ---
 

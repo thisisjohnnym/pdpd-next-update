@@ -946,12 +946,25 @@ const V5_CONFIG: PdpVersionConfig = {
   playHeroLandIntro: true,
 };
 
+/**
+ * v6 — inherits the full v5 baseline and replaces the compact "+ Colors" tray
+ * trigger with the full material-grouped swatch rail (Quilted Leather colors |
+ * Soft Leather · …) under the product name/price. Share as `/v6`; `/v5` stays
+ * comparable.
+ */
+const V6_CONFIG: PdpVersionConfig = {
+  ...V5_CONFIG,
+  // Full horizontal swatch rail with material group labels (no compact tray chip).
+  heroColorTrayOverlay: false,
+};
+
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
   v3: V3_CONFIG,
   v4: V4_CONFIG,
   v5: V5_CONFIG,
+  v6: V6_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

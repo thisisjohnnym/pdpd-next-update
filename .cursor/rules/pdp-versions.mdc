@@ -1,33 +1,33 @@
 ---
-description: PDP v1–v5 version boundaries — active work is v5 only. Keeps frozen baselines safe.
+description: PDP v1–v6 version boundaries — active work is v6 only. Keeps frozen baselines safe.
 globs: src/**/*.{ts,tsx,css},docs/pdp*.md,docs/rounds/**,scripts/check-pdp*.mjs
 alwaysApply: false
 ---
 
-# PDP Versions — **v5 active** (v1–v4 frozen)
+# PDP Versions — **v6 active** (v1–v5 frozen)
 
-Routes on **`main`**: **v1** `/v1` · **v2** `/v2` · **v3** `/v3` · **v4** `/v4` · **v5** `/v5` ← **only active work surface**.
+Routes on **`main`**: **v1** `/v1` · **v2** `/v2` · **v3** `/v3` · **v4** `/v4` · **v5** `/v5` · **v6** `/v6` ← **only active work surface**.
 
 Docs: `docs/pdp-versions.md` · `docs/deploy-and-links.md` · `docs/rounds/README.md`
 
-## Active work = `/v5` only
+## Active work = `/v6` only
 
-- Implement and polish **only** on **v5** (`src/app/v5/`, v5 flags in `pdp-version-config.ts`, v5-scoped CSS).
-- Treat **v1–v4 as frozen** — do not change their defaults, routes, or look unless explicitly asked to fix a cross-version bug.
-- Share/preview link: `/v5` (see `docs/deploy-and-links.md`).
+- Implement and polish **only** on **v6** (`src/app/v6/`, v6 flags in `pdp-version-config.ts`, v6-scoped CSS).
+- Treat **v1–v5 as frozen** — do not change their defaults, routes, or look unless explicitly asked to fix a cross-version bug.
+- Share/preview link: `/v6` (see `docs/deploy-and-links.md`).
 
 ## Rules
 
-- New work → `src/components/pdp/version/` or flags in `pdp-version-config.ts`. Never rewrite v1–v4 defaults.
-- Do not branch on `version === "v2"|"v3"|"v4"|"v5"`. Add a flag to `PdpVersionConfig`.
+- New work → `src/components/pdp/version/` or flags in `pdp-version-config.ts`. Never rewrite v1–v5 defaults.
+- Do not branch on `version === "v2"|"v3"|"v4"|"v5"|"v6"`. Add a flag to `PdpVersionConfig`.
 - Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for new-round needs.
 - Version-only CSS → `src/app/vN/pdp-vN.css` under `[data-pdp-version="vN"]`, not `globals.css`.
-- Shared `pdp-v2-*` components may render on `/v2`–`/v5` — gate **v5-only** layout behind **v5** flags.
-- After changes: spot-check `/v1`–`/v4` unchanged, then `pnpm check:versions`.
+- Shared `pdp-v2-*` / `pdp-v5-*` components may render on later routes — gate **v6-only** layout behind **v6** flags.
+- After changes: spot-check `/v1`–`/v5` unchanged, then `pnpm check:versions`.
 
 ## Quick map
 
-- `pdp-version-context.tsx` · `pdp-version-config.ts` (`V5_CONFIG`)
-- Routes: `src/app/v5/` · CSS: `src/app/v5/pdp-v5.css`
-- v2 data/chapters · v3: `pdp-v3-*.tsx` · v4: `pdp-v4-specs.ts`
+- `pdp-version-context.tsx` · `pdp-version-config.ts` (`V6_CONFIG`)
+- Routes: `src/app/v6/` · CSS: `src/app/v6/pdp-v6.css`
+- v2 data/chapters · v3: `pdp-v3-*.tsx` · v4: `pdp-v4-specs.ts` · v5: `pdp-v5-*.tsx`
 - Boundaries: `scripts/check-pdp-version-boundaries.mjs`
