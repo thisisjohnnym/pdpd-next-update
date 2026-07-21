@@ -59,9 +59,13 @@ type PdpV5StorePickupLinkProps = {
   className?: string;
 };
 
-/** Compact supporting surface below the primary purchase CTA. */
+/** Richer pickup card — availability + store name (v6 default). */
 const pickupCardClass =
   "overflow-hidden rounded-none bg-neutral-50 shadow-[0_1px_0_rgba(0,0,0,0.02)]";
+
+/** Quiet single-line pickup affordance — de-emphasized vs the primary buy CTA (v5). */
+const pickupRowClass =
+  "w-full bg-transparent shadow-none";
 
 function googleMapsDirectionsUrl(destination: string) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
@@ -214,9 +218,8 @@ function PickupMapPreview({
  */
 // fallow-ignore-next-line complexity
 export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
-  const { showStorePickupLink, squareButtonCorners } = getPdpVersionConfig(
-    usePdpVersion(),
-  );
+  const { showStorePickupLink, quietStorePickupLink, squareButtonCorners } =
+    getPdpVersionConfig(usePdpVersion());
   const [open, setOpen] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<
     (typeof NEARBY_STORES)[number]["id"] | null
@@ -252,23 +255,40 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
         onClick={() => setOpen(true)}
         aria-label={
           selectedStore
-            ? `${selectedStore.availabilityLabel}. ${selectedStore.name}. ${selectedStore.pickupDetail}, ${selectedStore.distance}. View pickup details.`
-            : "Check store availability near you."
+            ? quietStorePickupLink
+              ? `Pick up in store. ${selectedStore.name}. ${selectedStore.pickupDetail}, ${selectedStore.distance}. View pickup details.`
+              : `${selectedStore.availabilityLabel}. ${selectedStore.name}. ${selectedStore.pickupDetail}, ${selectedStore.distance}. View pickup details.`
+            : quietStorePickupLink
+              ? "Pick up in store. Check availability near you."
+              : "Check store availability near you."
         }
         className={cn(
-          pickupCardClass,
-          "flex min-h-16 w-full items-center gap-2.5 px-3 py-2.5 text-left",
-          "transition-[background-color,transform] active:bg-neutral-100",
+          quietStorePickupLink ? pickupRowClass : pickupCardClass,
+          quietStorePickupLink
+            ? "flex min-h-0 w-full items-center gap-1.5 py-1 text-left transition-opacity active:opacity-70"
+            : "flex min-h-16 w-full items-center gap-2.5 px-3 py-2.5 text-left transition-[background-color,transform] active:bg-neutral-100",
           pdpPressableClass,
           className,
         )}
       >
         <MaterialIcon
-          name="location_on"
-          size={20}
-          className="shrink-0 text-black"
+          name={quietStorePickupLink ? "store" : "location_on"}
+          size={quietStorePickupLink ? 16 : 20}
+          className={cn(
+            "shrink-0",
+            quietStorePickupLink ? "text-neutral-500" : "text-black",
+          )}
         />
-        {selectedStore ? (
+        {quietStorePickupLink ? (
+          <span
+            className={cn(
+              pdpType.label,
+              "min-w-0 flex-1 truncate leading-none text-neutral-600",
+            )}
+          >
+            Pick up in store
+          </span>
+        ) : selectedStore ? (
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className={cn(pdpType.micro, "font-normal text-[#386247]")}>
               {selectedStore.availabilityLabel}
@@ -286,7 +306,7 @@ export function PdpV5StorePickupLink({ className }: PdpV5StorePickupLinkProps) {
         )}
         <MaterialIcon
           name="chevron_right"
-          size={18}
+          size={quietStorePickupLink ? 14 : 18}
           className="shrink-0 text-neutral-400"
         />
       </button>

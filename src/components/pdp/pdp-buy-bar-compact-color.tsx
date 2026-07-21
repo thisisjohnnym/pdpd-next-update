@@ -11,6 +11,7 @@ import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import type { TabbySize } from "./pdp-tabby-variants";
 import { getV5ColorSwatchGroups } from "./version/pdp-v3-color-sheet-sections";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
@@ -56,7 +57,7 @@ export function PdpBuyBarCompactColor({
    * Pin the rail’s lead material to the land style (and size). Re-sorting on
    * every swatch tap made Soft Leather jump to the front and shift the row.
    */
-  const railLeadKeyRef = useRef<{ size: string; material: string } | null>(
+  const railLeadKeyRef = useRef<{ size: TabbySize; material: string } | null>(
     null,
   );
 
@@ -74,18 +75,17 @@ export function PdpBuyBarCompactColor({
             groupLabel: entry.materialLabel,
           })),
         );
-        if (
-          !railLeadKeyRef.current ||
-          railLeadKeyRef.current.size !== size
-        ) {
+        const pinned = railLeadKeyRef.current;
+        if (!pinned || pinned.size !== size) {
           const landMaterial = entries.find(
             (entry) => entry.styleId === tabby!.styleId,
           )?.groupLabel;
-          railLeadKeyRef.current = landMaterial
-            ? { size, material: landMaterial }
-            : { size, material: "" };
+          railLeadKeyRef.current = {
+            size,
+            material: landMaterial ?? "",
+          };
         }
-        const leadMaterial = railLeadKeyRef.current.material;
+        const leadMaterial = railLeadKeyRef.current?.material ?? "";
         if (!leadMaterial) return entries;
         const lead = entries.filter(
           (entry) => entry.groupLabel === leadMaterial,

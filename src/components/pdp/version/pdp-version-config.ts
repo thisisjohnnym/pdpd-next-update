@@ -233,9 +233,15 @@ export type PdpVersionConfig = {
   heroColorTrayOverlay: boolean;
   /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
-   * v5 only.
+   * v5 / v6.
    */
   showStorePickupLink: boolean;
+  /**
+   * De-emphasize store pickup as a single “Pick up in store” line (store icon).
+   * When false, keep the richer availability + store-name card. v5 only —
+   * v6 keeps the original card.
+   */
+  quietStorePickupLink: boolean;
   /**
    * Compact ratings cue under the product name — stars + score/count,
    * and recommend line. Metadata module (not a muted text-link CTA). v5 only.
@@ -578,6 +584,7 @@ const V1_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 0,
   heroColorTrayOverlay: false,
   showStorePickupLink: false,
+  quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
@@ -694,6 +701,7 @@ const V2_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 0,
   heroColorTrayOverlay: false,
   showStorePickupLink: false,
+  quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
   hideColorSheetSizePrice: false,
   flatColorSheet: false,
@@ -831,6 +839,7 @@ const V5_CONFIG: PdpVersionConfig = {
   compactBuyBarColorDotCount: 3,
   heroColorTrayOverlay: true,
   showStorePickupLink: true,
+  quietStorePickupLink: true,
   showSubtleReviewTeaser: true,
   inlineBuyBarColorSwatches: false,
   hideColorSheetSizePrice: true,
@@ -956,6 +965,8 @@ const V6_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
   // Full horizontal swatch rail with material group labels (no compact tray chip).
   heroColorTrayOverlay: false,
+  // Keep the original availability + store-name pickup card (not the quiet line).
+  quietStorePickupLink: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
