@@ -2,7 +2,7 @@
 
 Each **Paper round** maps to a **route version** on the same production deploy. Use this table for stakeholder tracking and link sharing.
 
-**Production base:** https://pdp-next-sigma.vercel.app
+**Production base:** https://pdp-next-nu.vercel.app
 
 | Round | Route | Paper page | Intent | Status | Changelog |
 |-------|-------|------------|--------|--------|-----------|
@@ -13,29 +13,29 @@ Each **Paper round** maps to a **route version** on the same production deploy. 
 | r6 | `/v5` | Sean r5 polish | Buy box merchandising, Tabby family nav, module polish | Frozen | — |
 | r7 | `/v6` | Material swatch rail | Same as v5 + See more colorways | Frozen | [r7-v6.md](r7-v6.md) |
 | r8 | `/v7` | Always-open swatches | Same as v6 without See more | Frozen | [r8-v7.md](r8-v7.md) |
-| r9 | `/v8` | Carousel reviews | Same as v7 + DoorDash-style reviews carousel | **Active** | [r9-v8.md](r9-v8.md) |
+| r9 | `/v8` | Carousel reviews | Same as v7 + DoorDash-style land review teaser | **Active** | [r9-v8.md](r9-v8.md) |
 
 ## Last production deploy
 
 | Field | Value |
 |-------|-------|
-| Date | Jul 21, 2026 |
-| Commit | `7bf2688` — feat(v6): add material-grouped swatch rail route |
-| URL | https://pdp-next-sigma.vercel.app/v8 |
+| Date | Jul 22, 2026 |
+| Commit | `4eb3768` — feat(v8): add DoorDash-style carousel land review teaser |
+| URL | https://pdp-next-nu.vercel.app/v8 |
 
 Update this section after every `vercel --prod`.
 
 ## Quick links (Tabby)
 
 ```
-v1  https://pdp-next-sigma.vercel.app/v1
-v2  https://pdp-next-sigma.vercel.app/v2
-v3  https://pdp-next-sigma.vercel.app/v3
-v4  https://pdp-next-sigma.vercel.app/v4
-v5  https://pdp-next-sigma.vercel.app/v5
-v6  https://pdp-next-sigma.vercel.app/v6
-v7  https://pdp-next-sigma.vercel.app/v7
-v8  https://pdp-next-sigma.vercel.app/v8   ← latest
+v1  https://pdp-next-nu.vercel.app/v1
+v2  https://pdp-next-nu.vercel.app/v2
+v3  https://pdp-next-nu.vercel.app/v3
+v4  https://pdp-next-nu.vercel.app/v4
+v5  https://pdp-next-nu.vercel.app/v5
+v6  https://pdp-next-nu.vercel.app/v6
+v7  https://pdp-next-nu.vercel.app/v7
+v8  https://pdp-next-nu.vercel.app/v8   ← latest
 ```
 
 Deploy process: [deploy-and-links.md](../deploy-and-links.md) · Playbook: [prototype-versions.md](../prototype-versions.md)
