@@ -239,9 +239,15 @@ export type PdpVersionConfig = {
   /**
    * When expandableMaterialSwatchGroups is on: collapse to ~1 row with
    * “See more colorways” (max 2 rows). Off = horizontal scroll rail
-   * (~7 swatches visible left-to-right). v6 on / v7 off.
+   * (~7 swatches visible left-to-right). v6 on / v7+ off.
    */
   materialSwatchSeeMore: boolean;
+  /**
+   * Land review teaser as a horizontal carousel — rating gauge, AI
+   * highlights, and review cards (DoorDash-style). v8 only; earlier
+   * versions keep the stacked `PdpV5ReviewTeaser` card.
+   */
+  useCarouselReviews: boolean;
   /**
    * Quiet "Pick up in store" text link below the hero land (not above the fold).
    * v5 / v6.
@@ -596,6 +602,7 @@ const V1_CONFIG: PdpVersionConfig = {
   heroColorTrayOverlay: false,
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
+  useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
@@ -715,6 +722,7 @@ const V2_CONFIG: PdpVersionConfig = {
   heroColorTrayOverlay: false,
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
+  useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
   showSubtleReviewTeaser: false,
@@ -996,6 +1004,16 @@ const V7_CONFIG: PdpVersionConfig = {
   materialSwatchSeeMore: false,
 };
 
+/**
+ * v8 — inherits v7 and replaces the stacked reviews module with a horizontal
+ * carousel (rating gauge + AI highlights + review cards). Share as `/v8`;
+ * `/v7` keeps the prior reviews layout.
+ */
+const V8_CONFIG: PdpVersionConfig = {
+  ...V7_CONFIG,
+  useCarouselReviews: true,
+};
+
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v1: V1_CONFIG,
   v2: V2_CONFIG,
@@ -1004,6 +1022,7 @@ const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {
   v5: V5_CONFIG,
   v6: V6_CONFIG,
   v7: V7_CONFIG,
+  v8: V8_CONFIG,
 };
 
 export function getPdpVersionConfig(version: PdpVersion): PdpVersionConfig {

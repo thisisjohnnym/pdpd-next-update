@@ -1,33 +1,33 @@
 ---
-description: PDP v1–v7 version boundaries — active work is v7 only. Keeps frozen baselines safe.
+description: PDP v1–v8 version boundaries — active work is v8 only. Keeps frozen baselines safe.
 globs: src/**/*.{ts,tsx,css},docs/pdp*.md,docs/rounds/**,scripts/check-pdp*.mjs
 alwaysApply: false
 ---
 
-# PDP Versions — **v7 active** (v1–v6 frozen)
+# PDP Versions — **v8 active** (v1–v7 frozen)
 
-Routes on **`main`**: **v1** `/v1` · **v2** `/v2` · **v3** `/v3` · **v4** `/v4` · **v5** `/v5` · **v6** `/v6` · **v7** `/v7` ← **only active work surface**.
+Routes on **`main`**: **v1** `/v1` · **v2** `/v2` · **v3** `/v3` · **v4** `/v4` · **v5** `/v5` · **v6** `/v6` · **v7** `/v7` · **v8** `/v8` ← **only active work surface**.
 
 Docs: `docs/pdp-versions.md` · `docs/deploy-and-links.md` · `docs/rounds/README.md`
 
-## Active work = `/v7` only
+## Active work = `/v8` only
 
-- Implement and polish **only** on **v7** (`src/app/v7/`, v7 flags in `pdp-version-config.ts`, v7-scoped CSS).
-- Treat **v1–v6 as frozen** — do not change their defaults, routes, or look unless explicitly asked to fix a cross-version bug.
-- Share/preview link: `/v7` (see `docs/deploy-and-links.md`).
+- Implement and polish **only** on **v8** (`src/app/v8/`, v8 flags in `pdp-version-config.ts`, v8-scoped CSS).
+- Treat **v1–v7 as frozen** — do not change their defaults, routes, or look unless explicitly asked to fix a cross-version bug.
+- Share/preview link: `/v8` (see `docs/deploy-and-links.md`).
 
 ## Rules
 
-- New work → `src/components/pdp/version/` or flags in `pdp-version-config.ts`. Never rewrite v1–v6 defaults.
-- Do not branch on `version === "v2"|"v3"|"v4"|"v5"|"v6"|"v7"`. Add a flag to `PdpVersionConfig`.
+- New work → `src/components/pdp/version/` or flags in `pdp-version-config.ts`. Never rewrite v1–v7 defaults.
+- Do not branch on `version === "v2"|"v3"|"v4"|"v5"|"v6"|"v7"|"v8"`. Add a flag to `PdpVersionConfig`.
 - Never edit `pdp-data.ts` or `pdp-section-chapters.ts` for new-round needs.
 - Version-only CSS → `src/app/vN/pdp-vN.css` under `[data-pdp-version="vN"]`, not `globals.css`.
-- Shared `pdp-v2-*` / `pdp-v5-*` components may render on later routes — gate **v7-only** layout behind **v7** flags.
-- After changes: spot-check `/v1`–`/v6` unchanged, then `pnpm check:versions`.
+- Shared `pdp-v2-*` / `pdp-v5-*` components may render on later routes — gate **v8-only** layout behind **v8** flags.
+- After changes: spot-check `/v1`–`/v7` unchanged, then `pnpm check:versions`.
 
 ## Quick map
 
-- `pdp-version-context.tsx` · `pdp-version-config.ts` (`V7_CONFIG`)
-- Routes: `src/app/v7/` · CSS: `src/app/v7/pdp-v7.css`
-- v2 data/chapters · v3: `pdp-v3-*.tsx` · v4: `pdp-v4-specs.ts` · v5: `pdp-v5-*.tsx`
+- `pdp-version-context.tsx` · `pdp-version-config.ts` (`V8_CONFIG`)
+- Routes: `src/app/v8/` · CSS: `src/app/v8/pdp-v8.css`
+- v2 data/chapters · v3: `pdp-v3-*.tsx` · v4: `pdp-v4-specs.ts` · v5: `pdp-v5-*.tsx` · v8: `pdp-v8-reviews.tsx`
 - Boundaries: `scripts/check-pdp-version-boundaries.mjs`

@@ -11,6 +11,7 @@ import {
 } from "../pdp-type";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpV8Reviews } from "./pdp-v8-reviews";
 
 type PdpV5ReviewTeaserProps = {
   className?: string;
@@ -27,18 +28,26 @@ const PRAISE_LINE =
 
 /**
  * Reviews card — rating summary, compact praise line, then open highlights.
+ * v8 (`useCarouselReviews`): DoorDash-style horizontal carousel teaser.
  */
 export function PdpV5ReviewTeaser({
   className,
   onViewReviews,
 }: PdpV5ReviewTeaserProps) {
-  const { showSubtleReviewTeaser, squareButtonCorners } = getPdpVersionConfig(
-    usePdpVersion(),
-  );
+  const { showSubtleReviewTeaser, squareButtonCorners, useCarouselReviews } =
+    getPdpVersionConfig(usePdpVersion());
   const { average, count } = PDP_REVIEWS_SUMMARY;
 
   if (!showSubtleReviewTeaser) {
     return null;
+  }
+
+  if (useCarouselReviews) {
+    return (
+      <div className={cn("w-full bg-white", className)}>
+        <PdpV8Reviews onReadAll={onViewReviews} />
+      </div>
+    );
   }
 
   return (
