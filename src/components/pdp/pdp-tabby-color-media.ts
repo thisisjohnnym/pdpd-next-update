@@ -48,7 +48,7 @@ function swapPurpleModelSlides(slides: PdpGallerySlide[]): PdpGallerySlide[] {
         src: PURPLE_ON_MODEL_FULL,
         alt: PURPLE_FULL_ALT,
         objectPosition: "center top",
-        aspect: "4/5",
+        aspect: "9/16",
         shopTheLookId: undefined,
       };
     }
@@ -103,17 +103,14 @@ export function getTabbyGallerySlidesForColor(
     omitStudioProduct: config.heroGalleryStudioDragZoom,
   });
 
-  // v5 (and v4) drop the standalone ugc-community slide when the compact strip
-  // is injected beside The Details, and patch the studio drag-zoom frame copy.
-  const applyV4Patches =
-    version === "v4" || version === "v5" || config.useV4CompactUgcStrip;
+  // Drop the standalone ugc-community slide when the compact strip is injected
+  // beside The Details, and patch the studio drag-zoom frame copy (v4+).
+  const applyV4Patches = config.useV4CompactUgcStrip;
 
   let slides = applyV4Patches ? applyV4GallerySlidePatches(v2Slides) : v2Slides;
 
   if (config.showWaysToWearModule) {
-    slides = applyV5GallerySlidePatches(slides, {
-      dropLeatherAgingSlide: config.useLeatherAgingWaysToWear,
-    });
+    slides = applyV5GallerySlidePatches(slides);
   }
 
   return slides;

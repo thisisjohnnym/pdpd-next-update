@@ -1141,6 +1141,34 @@ html.pdp-panel-scroll {
   transform: none;
 }
 
+/* Hero color tray — slide on the shell; frost on the inner surface (transform
+   on the same node as backdrop-filter cancels the blur). */
+.pdp-hero-color-tray {
+  transition: transform 280ms var(--pdp-ease-emphasized);
+}
+.pdp-hero-color-tray[data-state="closed"] {
+  transform: translateY(100%);
+}
+.pdp-hero-color-tray[data-state="open"] {
+  transform: none;
+}
+
+.pdp-hero-color-tray__surface {
+  background-color: rgb(255 255 255 / 0.72);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+  box-shadow:
+    0 -4px 6px -2px rgb(0 0 0 / 0.05),
+    0 -12px 28px -4px rgb(0 0 0 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.85);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .pdp-hero-color-tray__surface {
+    background-color: rgb(255 255 255 / 0.94);
+  }
+}
+
 /* Contextual icon cross-fade — both icons stay mounted, one overlaid.
    Exact values per skill: scale 0.25 -> 1, opacity 0 -> 1, blur 4px -> 0. */
 .pdp-icon-swap {
@@ -1230,6 +1258,7 @@ html.pdp-panel-scroll {
   .pdp-fade,
   .pdp-pop,
   .pdp-pop-up,
+  .pdp-hero-color-tray,
   .pdp-icon-swap__layer,
   .pdp-video-controls-pop,
   .pdp-video-controls-stagger > button {
@@ -1241,7 +1270,8 @@ html.pdp-panel-scroll {
     filter: none;
   }
   .pdp-pop[data-state="closed"],
-  .pdp-pop-up[data-state="closed"] {
+  .pdp-pop-up[data-state="closed"],
+  .pdp-hero-color-tray[data-state="closed"] {
     transform: none;
     filter: none;
   }

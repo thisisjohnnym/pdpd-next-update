@@ -29,6 +29,8 @@ type PdpBuyBarRowProps = {
   inlineColorSwatches?: boolean;
   /** Full-bleed 56px docked land CTA (Figma footer) */
   landCta?: boolean;
+  /** Flush to the viewport bottom — full width, safe-area padding inside the button. */
+  edgeToEdge?: boolean;
   className?: string;
 };
 
@@ -44,6 +46,7 @@ export function PdpBuyBarRow({
   swatchCarouselBleed = false,
   inlineColorSwatches,
   landCta = false,
+  edgeToEdge = false,
   className,
 }: PdpBuyBarRowProps) {
   const tabby = useOptionalTabbyVariant();
@@ -95,20 +98,23 @@ export function PdpBuyBarRow({
       onClick={onAddToBag}
       className={cn(
         "font-extended relative isolate flex min-w-0 w-full items-center justify-center gap-2 overflow-hidden px-3 text-center leading-none transition-[background-color,color,box-shadow,transform,filter] duration-300",
-        landCta ? "h-12" : "h-[50px]",
-        landCta ? "rounded-none" : pdpPillRadiusClass(squareButtonCorners),
+        edgeToEdge
+          ? "min-h-12 rounded-none pb-[var(--pdp-fixed-bottom-offset,0px)]"
+          : landCta
+            ? "h-12 rounded-none"
+            : cn("h-[50px]", pdpPillRadiusClass(squareButtonCorners)),
         pdpPressableSolidClass,
         "active:brightness-90",
       )}
       style={{
         backgroundColor: atbChrome.background,
         color: atbChrome.foreground,
-        boxShadow: flattenBuyBarCta || landCta ? "none" : atbChrome.glow,
+        boxShadow: flattenBuyBarCta || landCta || edgeToEdge ? "none" : atbChrome.glow,
       }}
     >
       <span
         className={cn(
-          "relative z-[1] flex min-w-0 items-center justify-center",
+          "relative z-[1] flex min-h-12 min-w-0 items-center justify-center",
           !hideBuyBarAtbIcon && "gap-2",
         )}
       >
@@ -121,7 +127,12 @@ export function PdpBuyBarRow({
             aria-hidden
           />
         ) : null}
-        <span className={cn("translate-y-0.5", landCta ? "text-sm" : "text-[14px]")}>
+        <span
+          className={cn(
+            "translate-y-0.5",
+            landCta || edgeToEdge ? "text-sm" : "text-[14px]",
+          )}
+        >
           Add to bag
         </span>
       </span>

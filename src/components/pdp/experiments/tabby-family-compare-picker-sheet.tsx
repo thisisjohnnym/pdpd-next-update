@@ -30,8 +30,6 @@ import {
   type TabbyStyleId,
 } from "../pdp-tabby-variants";
 import { pdpType } from "../pdp-type";
-import { PDP_SHEET_PRESENCE_MS } from "../pdp-motion";
-import { useMountTransition } from "../use-mount-transition";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
 import {
   TABBY_COMPARE_STYLE_IDS,
@@ -67,9 +65,7 @@ export function TabbyFamilyComparePickerSheet({
     onClose();
   }, [onClose, pendingStyleId]);
 
-  const overlayReady = useOverlayDismiss(open, handleDismiss);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
+  const mounted = useOverlayDismiss(open, handleDismiss);
 
   useEffect(() => {
     if (!open) {
@@ -102,7 +98,7 @@ export function TabbyFamilyComparePickerSheet({
     onClose();
   };
 
-  if (!overlayReady || !transition.mounted) {
+  if (!mounted) {
     return null;
   }
 
@@ -115,20 +111,20 @@ export function TabbyFamilyComparePickerSheet({
     : [];
 
   return createPortal(
-    <div className={pdpBottomSheetOverlayClass({ open: sheetOpen })} aria-hidden={!sheetOpen}>
+    <div className={pdpBottomSheetOverlayClass({ open })} aria-hidden={!open}>
       <button
         type="button"
         aria-label="Close compare picker"
-        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
-        tabIndex={sheetOpen ? 0 : -1}
+        tabIndex={open ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open: sheetOpen, maxHeight: "88dvh" })}
+        className={pdpBottomSheetPanelClass({ open, maxHeight: "88dvh" })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

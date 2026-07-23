@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useActiveProduct } from "./pdp-active-product-context";
 import { PdpColorSheet } from "./pdp-color-sheet";
 import { PdpCompactColorDots } from "./pdp-compact-color-dots";
+import { PdpExpandableMaterialSwatches } from "./pdp-expandable-material-swatches";
+import { PdpHeroColorTray } from "./pdp-hero-color-tray";
 import { pdpColorIsSelectable } from "./pdp-data";
 import { getPdpColors } from "./pdp-product-colors";
 import { getTabbyColorSheetGroups } from "./pdp-tabby-color-sheet-groups";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import type { TabbySize } from "./pdp-tabby-variants";
+import { getV5ColorSwatchGroups } from "./version/pdp-v3-color-sheet-sections";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3ColorSheet } from "./version/pdp-v3-color-sheet";
@@ -17,28 +22,28 @@ type PdpBuyBarCompactColorProps = {
   selectedColorId: string;
   onColorSelect: (id: string) => void;
   onColorSheetOpenChange?: (open: boolean) => void;
+  /** Full scrollable bag-swatch rail vs compact +N chips */
+  variant?: "compact" | "rail";
   /**
-   * When set (v8 absolute drawer), opens the in-land color drawer instead of
-   * the bottom color sheet.
+   * When set, the hero color tray portals into this node (gallery frame).
+   * Used with `heroColorTrayOverlay`.
    */
-  onOpenAbsoluteDrawer?: () => void;
-  /**
-   * "dot" — +N chips (default). "swatch" — large v6 hero footer swatches.
-   * "rail" — full scrollable color rail (docked land CTA).
-   * "compact-swatch" — small full-bag tiles + +N (v7 land).
-   * "land-dock" — large scroll rail half-cropped by docked CTA (v7 land).
-   */
-  variant?: "dot" | "swatch" | "rail" | "compact-swatch" | "land-dock";
+  trayPortalRoot?: HTMLElement | null;
+  swatchesExpanded?: boolean;
+  onSwatchesExpandedChange?: (expanded: boolean) => void;
   className?: string;
 };
 
-/** Compact swatch row — tap a color to select; tap +N to open the full tray. */
+/** Compact swatch row — tap opens the color tray (hero overlay or full sheet). */
+// fallow-ignore-next-line complexity
 export function PdpBuyBarCompactColor({
   selectedColorId,
   onColorSelect,
   onColorSheetOpenChange,
-  onOpenAbsoluteDrawer,
-  variant = "dot",
+  variant = "compact",
+  trayPortalRoot,
+  swatchesExpanded,
+  onSwatchesExpandedChange,
   className,
 }: PdpBuyBarCompactColorProps) {
   const tabby = useOptionalTabbyVariant();
@@ -46,32 +51,104 @@ export function PdpBuyBarCompactColor({
   const isTabbyProduct = productId === "tabby" && Boolean(tabby);
   const {
     compactBuyBarColorDotCount,
+    expandableMaterialSwatchGroups,
+    materialSwatchSeeMore,
+    flatColorSheet,
     heroColorSwatchMoreCountOverride,
+    heroColorTrayOverlay,
     useV3ColorSheet,
-    useAbsoluteColorDrawer,
   } = getPdpVersionConfig(usePdpVersion());
   const [colorSheetOpen, setColorSheetOpen] = useState(false);
+  const useHeroTray = heroColorTrayOverlay && variant === "compact";
+  /**
+   * Pin the rail’s lead material to the land style (and size). Re-sorting on
+   * every swatch tap made Soft Leather jump to the front and shift the row.
+   */
+  const railLeadKeyRef = useRef<{ size: TabbySize; material: string } | null>(
+    null,
+  );
 
-  const colors = isTabbyProduct ? tabby!.colorOptions : getPdpColors(productId);
-  const activeColorId = isTabbyProduct ? tabby!.selectedColorId : selectedColorId;
+  const showAllTabbyOptionsInline =
+    isTabbyProduct && variant === "rail" && flatColorSheet;
+  const allTabbyRailOptions = showAllTabbyOptionsInline
+    ? (() => {
+        const size = tabby!.size;
+        const entries = getV5ColorSwatchGroups(size).flatMap((group) =>
+          group.entries.map((entry) => ({
+            ...entry.color,
+            styleId: entry.styleId,
+            selectionId: `${entry.styleId}:${entry.color.id}`,
+            selectionLabel: `${entry.color.name} in ${entry.materialLabel}`,
+            groupLabel: entry.materialLabel,
+          })),
+        );
+        const pinned = railLeadKeyRef.current;
+        if (!pinned || pinned.size !== size) {
+          const landMaterial = entries.find(
+            (entry) => entry.styleId === tabby!.styleId,
+          )?.groupLabel;
+          railLeadKeyRef.current = {
+            size,
+            material: landMaterial ?? "",
+          };
+        }
+        const leadMaterial = railLeadKeyRef.current?.material ?? "";
+        if (!leadMaterial || expandableMaterialSwatchGroups) {
+          return entries;
+        }
+        const lead = entries.filter(
+          (entry) => entry.groupLabel === leadMaterial,
+        );
+        const rest = entries.filter(
+          (entry) => entry.groupLabel !== leadMaterial,
+        );
+        return [...lead, ...rest];
+      })()
+    : [];
+  const railLeadMaterial = showAllTabbyOptionsInline
+    ? expandableMaterialSwatchGroups
+      ? (allTabbyRailOptions.find(
+          (entry) => entry.styleId === tabby!.styleId,
+        )?.groupLabel ?? "")
+      : (railLeadKeyRef.current?.material ?? "")
+    : "";
+  const useExpandableGroups =
+    showAllTabbyOptionsInline && expandableMaterialSwatchGroups;
+  const colors = showAllTabbyOptionsInline
+    ? allTabbyRailOptions
+    : isTabbyProduct
+      ? tabby!.colorOptions
+      : getPdpColors(productId);
+  const activeColorId = showAllTabbyOptionsInline
+    ? `${tabby!.styleId}:${tabby!.selectedColorId}`
+    : isTabbyProduct
+      ? tabby!.selectedColorId
+      : selectedColorId;
   const colorGroups = isTabbyProduct
     ? getTabbyColorSheetGroups(tabby!.styleId, tabby!.size)
     : undefined;
 
   const setSheetOpen = (open: boolean) => {
-    if (useAbsoluteColorDrawer && onOpenAbsoluteDrawer) {
-      if (open) {
-        onOpenAbsoluteDrawer();
-      }
-      return;
-    }
     setColorSheetOpen(open);
     onColorSheetOpenChange?.(open);
   };
 
+  // fallow-ignore-next-line complexity
   const handleColorSelect = (id: string) => {
-    if (useAbsoluteColorDrawer && onOpenAbsoluteDrawer) {
-      onOpenAbsoluteDrawer();
+    if (showAllTabbyOptionsInline) {
+      const option = allTabbyRailOptions.find(
+        (entry) => entry.selectionId === id,
+      );
+
+      if (
+        !option ||
+        !option.combinationAvailable ||
+        !pdpColorIsSelectable(option.availability)
+      ) {
+        return;
+      }
+
+      tabby!.selectColorInStyle(option.styleId, option.id);
       return;
     }
 
@@ -97,9 +174,24 @@ export function PdpBuyBarCompactColor({
     onColorSelect(id);
   };
 
+  const tray = useHeroTray ? (
+    <PdpHeroColorTray
+      open={colorSheetOpen}
+      onClose={() => setSheetOpen(false)}
+      selectedColorId={isTabbyProduct ? tabby!.selectedColorId : selectedColorId}
+      onColorSelect={handleColorSelect}
+      position={trayPortalRoot ? "absolute" : "fixed"}
+    />
+  ) : null;
+
+  const portaledTray =
+    tray && trayPortalRoot && typeof document !== "undefined"
+      ? createPortal(tray, trayPortalRoot)
+      : tray;
+
   return (
     <>
-      {useAbsoluteColorDrawer ? null : useV3ColorSheet && isTabbyProduct ? (
+      {useHeroTray ? null : useV3ColorSheet && isTabbyProduct ? (
         <PdpV3ColorSheet open={colorSheetOpen} onClose={() => setSheetOpen(false)} />
       ) : (
         <PdpColorSheet
@@ -118,16 +210,32 @@ export function PdpBuyBarCompactColor({
         />
       )}
 
-      <PdpCompactColorDots
-        colors={colors}
-        selectedId={activeColorId}
-        previewCount={compactBuyBarColorDotCount}
-        moreCountOverride={heroColorSwatchMoreCountOverride}
-        onSelect={handleColorSelect}
-        onOpenSheet={() => setSheetOpen(true)}
-        variant={variant}
-        className={className}
-      />
+      {portaledTray}
+
+      {useExpandableGroups ? (
+        <PdpExpandableMaterialSwatches
+          options={allTabbyRailOptions}
+          leadMaterial={railLeadMaterial}
+          selectedId={activeColorId}
+          onSelect={handleColorSelect}
+          seeMore={materialSwatchSeeMore}
+          expanded={swatchesExpanded}
+          onExpandedChange={onSwatchesExpandedChange}
+          className={className}
+        />
+      ) : (
+        <PdpCompactColorDots
+          colors={colors}
+          selectedId={activeColorId}
+          previewCount={compactBuyBarColorDotCount}
+          moreCountOverride={heroColorSwatchMoreCountOverride}
+          variant={variant}
+          openOnInteract={useHeroTray}
+          onSelect={handleColorSelect}
+          onOpenSheet={() => setSheetOpen(true)}
+          className={className}
+        />
+      )}
     </>
   );
 }

@@ -54,6 +54,7 @@ import {
   PDP_GALLERY_MORE_PHOTOS,
   PDP_GALLERY_SLIDES,
   PDP_SHOP_THE_LOOK,
+  PDP_STUDIO_BACKDROP_CLASS,
   PDP_STRAP_OPTIONS,
 } from "./pdp-data";
 import type {
@@ -62,7 +63,6 @@ import type {
   PdpProductHotspot,
   PdpStrapSetAddPayload,
 } from "./pdp-data";
-import { PDP_HERO_STUDIO_BG_CLASS } from "./pdp-hero-framing";
 import { pdpType } from "./pdp-type";
 import { PdpTextReveal } from "./pdp-text-reveal";
 import {
@@ -138,7 +138,6 @@ export function PdpGalleryHero({
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
-  afterGallery,
 }: {
   /** @deprecated slide 0 lives in PDP_HERO_GALLERY_SLIDES */
   videoSrc?: string;
@@ -149,8 +148,6 @@ export function PdpGalleryHero({
   isLastPanel?: boolean;
   /** Size to parent media frame (PdpHeroShell) instead of 100svh */
   fillFrame?: boolean;
-  /** Rendered inside the gallery provider — e.g. v8 product info + thumbs */
-  afterGallery?: ReactNode;
 }) {
   return (
     <PdpHeroGallery
@@ -158,7 +155,6 @@ export function PdpGalleryHero({
       onOpenArTryOn={onOpenArTryOn}
       isLastPanel={isLastPanel}
       fillFrame={fillFrame}
-      afterGallery={afterGallery}
     />
   );
 }
@@ -200,20 +196,24 @@ function portraitBackgroundClass(
 // fallow-ignore-next-line complexity
 function portraitFrameClass(
   panel: boolean,
-  _aspect: "4/5" | "9/16",
+  aspect: "4/5" | "9/16",
   insetMargins: boolean,
 ): string {
   if (panel) {
     return PANEL_MEDIA_FRAME_CLASS;
   }
-  // All gallery portrait frames use 4:5 (slide.aspect overrides are ignored).
+  // Inset (white-framed) slides keep their compact aspect; full-bleed immersive
+  // media grows to own the screen.
   if (insetMargins) {
-    return cn("relative w-full overflow-hidden bg-white", "aspect-[4/5]");
+    return cn(
+      "relative w-full overflow-hidden bg-white",
+      aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
+    );
   }
   return cn(
     "relative w-full overflow-hidden",
-    "aspect-[4/5]",
-    PDP_HERO_STUDIO_BG_CLASS,
+    aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
+    PDP_STUDIO_BACKDROP_CLASS,
   );
 }
 
@@ -535,13 +535,13 @@ function PdpGalleryPortraitSlide({
   );
 }
 
-/** Immersive gallery video — 4:5 frame */
+/** Immersive gallery video — 4:5 product spin or 9:16 TikTok-style clip */
 function PdpGalleryVideoSlide({
   src,
   poster,
   alt,
   showMuteControl = true,
-  aspect: _aspect = "4/5",
+  aspect = "4/5",
   caption,
   reserveBottomCta = false,
   isLastPanel = false,
@@ -600,7 +600,7 @@ function PdpGalleryVideoSlide({
             ? cn("bg-black", PANEL_MEDIA_FRAME_CLASS)
             : cn(
                 "relative w-full overflow-hidden bg-white",
-                "aspect-[4/5]",
+                aspect === "9/16" ? "aspect-[9/16]" : "aspect-[4/5]",
               ),
         )}
       >
@@ -612,7 +612,6 @@ function PdpGalleryVideoSlide({
             isActive={isActive}
             preload={isActive ? "auto" : "metadata"}
             skeletonTone={PDP_PANEL_SCROLL ? "dark" : "light"}
-            tapToTogglePlayback
             showMuteControl={showMuteControl}
             className={cn(
               "size-full object-cover object-center",
@@ -977,7 +976,9 @@ export function PdpGalleryView({
             return [
               gallerySection(
                 `ways-to-wear-${index}`,
-                <PdpV5WaysToWear />,
+                <PdpV5WaysToWear
+                  onQuickAdd={() => onAddSimilarToBag?.()}
+                />,
                 { surface: "light" },
               ),
             ];

@@ -6,12 +6,16 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **v1** is the frozen current design. **v2**–**v7** are frozen comparison pivots. **v8** is the **active** alternate-hero round (Paper page v8).
-- Brand team compares them at **`/v1`** … **`/v8`** on the same deploy.
-- **Current state:** share **`/v8`** for alt-hero feedback · `/v7` remains the Skelly parity reference.
-- v2+ differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting v1/v2/v3 defaults.
+- **Active work is v8 only** (`/v8`). **v1–v7 are frozen** comparison baselines — do not change them unless explicitly fixing a cross-version bug.
+- **v1** frozen brand baseline · **v2** first stakeholder pivot · **v3** Paper r4 · **v4** Paper r5 · **v5** Sean polish · **v6** See more colorways · **v7** always-open swatches · **v8** carousel reviews (active).
+- Brand team compares them at **`/v1`** … **`/v8`** on the same deploy. Share **`/v8`** for the latest round.
+- Newer-version differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting older defaults.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
+- v5 inherits the v4 baseline and layers Sean’s polish round (buy box merchandising, Tabby family nav, module polish). See [rounds/README.md](rounds/README.md).
+- v6 inherits the full v5 baseline and shows expandable material-grouped swatches (See more colorways). See section 8.7.
+- v7 inherits v6 and shows all colorway swatches open (no See more). See section 8.8.
+- v8 inherits v7 and replaces stacked reviews with a horizontal carousel module. See section 8.9.
 
 ---
 
@@ -43,13 +47,13 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 | v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
 | v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
 | v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
-| v4 (r5 feedback) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
-| v5 (Sean polish — frozen) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) |
-| v6 (fall-in + vertical — frozen) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
-| v7 (Skelly parity — frozen) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
-| v8 (alternate hero — active) | https://pdp-next-sigma.vercel.app/v8 | [rounds/r9-v8.md](rounds/r9-v8.md) |
+| v4 (r5 — frozen) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
+| v5 (Sean polish) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) (r6) |
+| v6 (See more colorways) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
+| v7 (always-open swatches) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
+| v8 (active) | https://pdp-next-sigma.vercel.app/v8 | [rounds/r9-v8.md](rounds/r9-v8.md) |
 
-Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v4/products/tabby-shoulder-bag-26-black`.
+Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v8/products/tabby-shoulder-bag-26-black`.
 
 Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmarks do not break.
 
@@ -59,10 +63,10 @@ Legacy `/` and `/products/[slug]` continue to serve **v1**, so existing bookmark
 
 ## 3. Git workflow
 
-**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v7`) from one codebase.
+**`main`** is the canonical branch. It ships all comparison routes (`/v1`–`/v8`) from one codebase.
 
-1. All prototype work lands on **`main`**.
-2. Route versions (`/v1`–`/v7`) are frozen comparison URLs — not separate git branches.
+1. All prototype work lands on **`main`** and targets **`/v8`** only.
+2. Route versions `/v1`–`/v7` are frozen comparison URLs; `/v8` is the active round — not separate git branches.
 3. Optional: cut a **`v1`** git branch only if you need a frozen historical snapshot.
 
 When a winner is chosen, either delete the v2 adapter layer (if v1 wins) or promote v2 to default (if v2 wins) — see Sunset plan.
@@ -305,152 +309,103 @@ For the full r5 (v4) module map, node-verify workflow, and Definition of Done, s
 
 ---
 
-## 8.6. v5 — Sean r5 polish (skelly import)
+## 8.7. v6 — material-grouped swatch rail
 
-v5 is Sean's polish round, developed in [skelly363/pdp-next](https://github.com/skelly363/pdp-next) and integrated here as `/v5`. It **inherits the v4 baseline** (`V5_CONFIG` spreads `V4_CONFIG`) and layers buy-box merchandising, gallery story reshuffle, desktop split layout, UGC testimonials, closer-look trays, and module spacing polish. Mobile also plays the shared fall-in hero intro (horizontal gallery — vertical gallery stays v6-only). **v1–v4 are unchanged.**
+v6 is the next comparison round after Sean’s v5 polish. It **inherits the full v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and changes only how colors appear under the product name/price on land.
 
-**Jul 13, 2026 note:** the r8 merge refreshed shared v5 modules (docked color rail, Find your Tabby carousel, compare sheets). `/v5` is a frozen *route* for comparison, but it is no longer pixel-identical to the Jul 7 `/v6` ship.
+### What v6 changes
 
-### v5-only files
-
-| File | Role |
-|------|------|
-| `src/app/v5/` | Route folder — `layout.tsx`, `pdp-v5.css`, `pdp-v5-root-marker.tsx` |
-| `src/components/pdp/version/pdp-v5-desktop-*.tsx` | Desktop media column + sticky buy panel |
-| `src/components/pdp/version/pdp-v5-ugc-testimonials.tsx` | UGC testimonial carousel |
-| `src/components/pdp/version/pdp-v5-ways-to-wear*.tsx` | Ways to wear styling module |
-
-### Key v5 flags (`V5_CONFIG` in `pdp-version-config.ts`)
-
-| Flag | Purpose |
-|------|---------|
-| `desktopSplitLayout` | lg+ split — media left, sticky buy panel right |
-| `flatColorSheet` | Single flat color list (no materials/sizes sections) |
-| `useV5DetailsSheet` | Editorial two-column Details sheet |
-| `useV5UgcTestimonialCarousel` | UGC quote carousel in reviews |
-| `showWaysToWearModule` | Styling compare slider module |
-| `showFloatingBuyBar: false` | Docked hero ATB only (no sticky floating bar) |
-| `lockHeroGalleryTemplate` | Preserve gallery slide order on colorway switch |
-| `hero360IntroEnabled` | Mobile fall-in intro (horizontal gallery) |
-| `showCloserLookStage` | Apple-style closer-look trays (replaces craftsmanship carousel) |
-
-Full flag list: `V5_CONFIG` in `pdp-version-config.ts`. Deploy links: [deploy-and-links.md](deploy-and-links.md).
-
----
-
-## 8.7. v6 — fall-in + vertical gallery (frozen)
-
-v6 is a frozen UXR variant. It **inherits the v5 baseline** (`V6_CONFIG` spreads `V5_CONFIG`) and layers the vertical mobile gallery on top of the shared fall-in intro.
+1. **Full material-grouped swatch rail** — instead of v5’s compact “+ Colors” chip that opens a hero tray, v6 shows a horizontal rail of circular swatches under “in Quilted Leather”.
+2. **Material dividers** — the current material’s colors lead; later materials appear after a thin vertical rule with a gray label (e.g. Soft Leather).
+3. **Everything else matches v5** — gallery, sticky ATB, desktop split, modules, sale pricing, etc.
 
 ### v6-only files
 
 | File | Role |
 |------|------|
-| `src/app/v6/` | Route folder — `layout.tsx`, `pdp-v6.css`, `pdp-v6-root-marker.tsx` |
-| `docs/rounds/r7-v6.md` | Round changelog |
+| `src/app/v6/` | Route folder — `layout.tsx` sets `data-pdp-version="v6"` and imports `pdp-v6.css`; pages pass `version="v6"` |
+| `src/app/v6/pdp-v6.css` | v6-scoped CSS (inherits v5 land/desktop rules under the v6 attribute) |
+| `src/app/v6/pdp-v6-root-marker.tsx` | Marks `<html>` so portaled chrome gets v6 CSS |
 
-### Key v6 flags (`V6_CONFIG` in `pdp-version-config.ts`)
+### v6 feature flags (`pdp-version-config.ts`)
 
-| Flag | Purpose |
-|------|---------|
-| `heroVerticalGallery` | Vertical snap gallery (v6-only) |
-| `hero360IntroEnabled` | Fall-in intro (shared with v5; v6 pairs it with vertical gallery) |
-| `useHeroGalleryProgressBar: false` | Tick indicator instead of progress bar |
+`V6_CONFIG` spreads `V5_CONFIG` then sets:
 
-Full changelog: [rounds/r7-v6.md](rounds/r7-v6.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+| Flag | v5 | v6 | Purpose |
+|------|----|----|---------|
+| `heroColorTrayOverlay` | true | **false** | Drop the compact tray chip; render the full material-grouped `variant="rail"` swatches |
+
+Shared rail logic lives in `PdpBuyBarCompactColor` / `PdpCompactColorDots` (already used when the tray overlay is off). Current material leads the rail so the land matches the subtitle.
+
+### v6 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1–v5 routes must not import any `*-v6` module, and `pdp-v6.css` selectors must be scoped under `[data-pdp-version="v6"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v6"`. Add a flag to `PdpVersionConfig`.
 
 ---
 
-## 8.8. v7 — Skelly parity (frozen)
+## 8.8. v7 — always-open colorway swatches
 
-v7 is a **frozen** Skelly parity reference. Visual / merchandising source of truth is Skelly's fork (`skelly363/pdp-next` @ `90e2295`), manually ported — **not** merged. Motion / interaction stays on our stack (iOS drawers, carousel snap, motion tokens).
+v7 inherits the full v6 baseline (`V7_CONFIG` spreads `V6_CONFIG`) and replaces the See more collapse with a single horizontal scroll rail of colorway swatches (~7 visible left-to-right).
 
-`V7_CONFIG` spreads **`V4_CONFIG`** (not our r7-mutated `V5_CONFIG`) and applies Skelly's v5 flag snapshot: flat color sheet, sale pricing, full-bag swatches, emphasized reviews, land intro (no fall-in), mirror-selfie gallery slide.
+### What v7 changes
+
+1. **Horizontal swatch rail** — same circular dots as v6, one row, scroll for the rest; no “See more colorways”.
+2. **Everything else matches v6** — gallery, sticky ATB, desktop split, modules, sale pricing, pickup card, etc.
 
 ### v7-only files
 
 | File | Role |
 |------|------|
-| `src/app/v7/` | Route folder — imports `pdp-v5.css` + thin `pdp-v7.css` |
-| `pdp-tabby-colors-v7.ts`, `pdp-tabby-catalog-v7.ts` | Skelly color/catalog forks |
-| `docs/rounds/r8-v7.md` | Round changelog |
+| `src/app/v7/` | Route folder — `layout.tsx` sets `data-pdp-version="v7"` and imports `pdp-v7.css`; pages pass `version="v7"` |
+| `src/app/v7/pdp-v7.css` | v7-scoped CSS |
+| `src/app/v7/pdp-v7-root-marker.tsx` | Marks `<html>` so portaled chrome gets v7 CSS |
 
-### Key v7 flags (`V7_CONFIG` in `pdp-version-config.ts`)
+### v7 feature flags (`pdp-version-config.ts`)
 
-| Flag | Purpose |
-|------|---------|
-| `showSalePricing` | Strikethrough + sale price in hero / buy panel |
-| `emphasizeReviewsModule` | Warm band + solid reviews CTA |
-| `useFullBagColorSwatches` | Full-bag PNG swatches + v7 color/catalog resolver |
-| `useLeatherAgingWaysToWear` | Ways-to-wear → leather aging wipe module |
-| `heroGalleryExtraSlides` | Mirror-selfie slide (v7 only) |
-| `playHeroLandIntro: true` | Land scroll reveal — no fall-in |
-| `flatColorSheet` | Flat color drawer (not grouped family explorer) |
+`V7_CONFIG` spreads `V6_CONFIG` then sets:
 
-Full changelog: [rounds/r8-v7.md](rounds/r8-v7.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+| Flag | v6 | v7 | Purpose |
+|------|----|----|---------|
+| `materialSwatchSeeMore` | true | **false** | Horizontal scroll rail instead of wrap + See more |
+
+### v7 change rules
+
+- Same Allowed / Forbidden rules as section 5, extended: v1–v6 routes must not import any `*-v7` module, and `pdp-v7.css` selectors must be scoped under `[data-pdp-version="v7"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v7"`. Add a flag to `PdpVersionConfig`.
 
 ---
 
-## 8.9. v8 — alternate hero (active)
+## 8.9. v8 — carousel land review teaser
 
-v8 is the **active** round. Paper SoT: page [v8 `D-0`](https://app.paper.design/file/01KVTV0K48C5PNSC96MPDBVQBM/D-0) (mobile artboards `v8 - hero on land` / `v8 - color tapped`).
+v8 inherits the full v7 baseline (`V8_CONFIG` spreads `V7_CONFIG`) and replaces the land “See what customers say” review teaser with a horizontal carousel inspired by DoorDash store Reviews. The mid-page Reviews module stays as on v7.
 
-`V8_CONFIG` spreads **`V7_CONFIG`** and overrides land chrome only. Merchandising below the hero stays on the v7 stack.
+### What v8 changes
 
-### Layout (do not contradict Paper spacing)
-
-Flex column in document flow: **inline nav (48px, 12px pad) → gallery (flex-1) → product info (8px gap/pad)**. Gallery must not use the global immersive `100svh` absolute cover — v8 CSS overrides `.pdp-hero-immersive` height inside `.pdp-v8-land-stack`. Color drawer is absolute on product info (`bottom: 100%`), closed border = `--color-bg` (invisible), open border = `--color-line-soft`.
+1. **Land review teaser** — title + ratings count, **Add review** pill, photo shortcut, and a horizontal card rail (rating gauge → AI highlights → review snippets).
+2. **Everything else matches v7** — mid-page reviews, gallery, sticky ATB, desktop split, swatch rail.
 
 ### v8-only files
 
 | File | Role |
 |------|------|
-| `src/app/v8/` | Route folder — imports v5/v7 CSS + `pdp-v8.css` |
-| `pdp-v8-hero-layout.tsx` | Alt hero composition |
-| `pdp-v8-inline-nav.tsx` | Inline header |
-| `pdp-v8-thumbnail-strip.tsx` | Solid-color thumbs |
-| `pdp-v8-color-drawer.tsx` | Absolute upward drawer |
-| `pdp-store-pickup-block.tsx` | Pickup inside ATB sheet |
-| `docs/rounds/r9-v8.md` | Round changelog + Paper spacing table |
+| `src/app/v8/` | Route folder — `layout.tsx` sets `data-pdp-version="v8"` and imports `pdp-v8.css`; pages pass `version="v8"` |
+| `src/app/v8/pdp-v8.css` | v8-scoped CSS (inherits v7 land rules + teaser card sizes) |
+| `src/app/v8/pdp-v8-root-marker.tsx` | Marks `<html>` so portaled chrome gets v8 CSS |
+| `src/components/pdp/version/pdp-v8-reviews.tsx` | Carousel land teaser |
 
-### Key v8 flags (`V8_CONFIG`)
+### v8 feature flags (`pdp-version-config.ts`)
 
-| Flag | Purpose |
-|------|---------|
-| `useAltHeroComposition` | Mount `PdpV8HeroLayout` |
-| `useInlineHeroNav` | Suppress overlay header |
-| `showHeroThumbnailStrip` | Solid thumb strip |
-| `useAbsoluteColorDrawer` | Upward drawer; disable bottom color sheet |
-| `showPickupInAtbSheet` | Pickup in Add to bag sheet |
-| `floatingBuyBarWhenHeroHidden` | ATB scrolls then docks |
-| `desktopSplitLayout: false` | Mobile-first |
+`V8_CONFIG` spreads `V7_CONFIG` then sets:
 
-Full changelog: [rounds/r9-v8.md](rounds/r9-v8.md). Deploy links: [deploy-and-links.md](deploy-and-links.md).
+| Flag | v7 | v8 | Purpose |
+|------|----|----|---------|
+| `useCarouselReviews` | false | **true** | Render `PdpV8Reviews` inside `PdpV5ReviewTeaser` |
 
----
+### v8 change rules
 
-## 8.10. fc01 / fc01v — final-candidate UXR study pair
-
-Brand approved the Skelly template, so the study ships as an **FC (final candidate) pair** rather than another numbered round:
-
-- **`/fc01`** — horizontal gallery (Skelly v5 template + FC round tweaks). `FC01_CONFIG` spreads `V5_CONFIG`.
-- **`/fc01v`** — vertical gallery variant for the UXR comparison. `FC01V_CONFIG` spreads `FC01_CONFIG` and layers the v6 gallery overrides (`heroVerticalGallery`, tick indicator, fill-frame stills).
-
-Both play the shared mobile fall-in intro (the boot script in `pdp-v6-intro-boot-script.ts` stamps `/fc01` and `/fc01v` alongside `/v5`–`/v6`).
-
-### FC-only files
-
-| File | Role |
-|------|------|
-| `src/app/fc01/` | Route folder — `layout.tsx`, thin `pdp-fc01.css`, `pdp-fc01-root-marker.tsx` |
-| `src/app/fc01v/` | Route folder — `layout.tsx`, thin `pdp-fc01v.css`, `pdp-fc01v-root-marker.tsx` |
-| `docs/rounds/fc01.md` | Round note |
-
-### CSS sharing
-
-FC routes do **not** copy the v5/v6 stylesheets. Instead `pdp-v5.css` and `pdp-v6.css` use dual scopes — `:is([data-pdp-version="v5"], [data-pdp-version="fc01"])` and `:is([data-pdp-version="v6"], [data-pdp-version="fc01v"])` — and each FC layout imports the paired baseline CSS plus a thin FC overlay for study-only tweaks.
-
-Unlike `/v1`–`/v5`, the FC pair is **not frozen** — it tracks the active FC round. Note that the Skelly sync also updates shared components used by `/v5`/`/v6` (e.g. the docked color rail), so those routes are no longer pixel-frozen to their original ship.
+- Same Allowed / Forbidden rules as section 5, extended: v1–v7 routes must not import any `*-v8` module, and `pdp-v8.css` selectors must be scoped under `[data-pdp-version="v8"]`. Enforced by `pnpm check:versions`.
+- Never branch on `version === "v8"`. Add a flag to `PdpVersionConfig`.
 
 ---
 

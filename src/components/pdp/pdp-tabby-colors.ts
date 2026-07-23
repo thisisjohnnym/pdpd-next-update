@@ -46,17 +46,17 @@ const LEGACY_COLOR_ID_MAP: Record<string, string> = {
   mustard: "brass-mustard",
 };
 
-/** coach.com $desktopSwatchImage$ — Brass/Black, Chalk, Maple, etc. */
+/** Full-bag studio shots where available; clasp crops only as fallback */
 const COACH_SWATCH = {
-  "brass-black": "/images/colors/tabby/brass-black.jpg",
-  "silver-black": "/images/colors/tabby/silver-black.jpg",
+  "brass-black": "/images/colors/soft-tabby/black.png",
+  "silver-black": "/images/colors/soft-tabby/black.png",
   "brass-chalk": "/images/colors/tabby/brass-chalk.jpg",
-  "brass-maple": "/images/colors/tabby/brass-maple.jpg",
+  "brass-maple": "/images/colors/soft-tabby/canyon.png",
   "brass-biscuit": "/images/colors/tabby/brass-biscuit.jpg",
   "brass-moss": "/images/colors/tabby/brass-moss.jpg",
   "brass-indigo": "/images/colors/tabby/brass-indigo.jpg",
-  "brass-black-multi": "/images/colors/tabby/brass-black-multi.png",
-  "silver-soft-purple": "/images/colors/tabby/silver-soft-purple.jpg",
+  "brass-black-multi": "/images/colors/soft-tabby/beaded.png",
+  "silver-soft-purple": "/images/colors/soft-tabby/oxblood.png",
   "silver-midnight-navy": "/images/colors/tabby/silver-midnight-navy.jpg",
   "silver-dragonfruit": "/images/colors/tabby/silver-dragonfruit.jpg",
   "silver-flower-pink": "/images/colors/tabby/silver-flower-pink.jpg",
@@ -87,8 +87,8 @@ function coachHero(id: CoachColorId): string | undefined {
 }
 
 /**
- * Coach US colorways — Tabby Shoulder Bag 26, refined pebble (CH735 / CH857).
- * Fifteen-up grid mirrors coach.com: core leathers, specialty trims, and canvas.
+ * Coach US colorways — Tabby Shoulder Bag 26 with full-bag studio swatches.
+ * Limited to the soft-tabby product shots provided for this prototype.
  */
 const CLASSIC_26: TabbyColorSeed[] = [
   {
@@ -103,6 +103,7 @@ const CLASSIC_26: TabbyColorSeed[] = [
     id: "brass-black",
     name: "Brass/Black",
     swatch: coachSwatch("brass-black"),
+    hero: coachSwatch("brass-black"),
     chromeSample: "#1a1a1a",
     availability: "in_stock",
   },
@@ -115,33 +116,11 @@ const CLASSIC_26: TabbyColorSeed[] = [
     availability: "in_stock",
   },
   {
-    id: "brass-chalk",
-    name: "Brass/Chalk",
-    swatch: coachSwatch("brass-chalk"),
-    chromeSample: "#e8e0d4",
-    availability: "in_stock",
-  },
-  {
-    id: "brass-maple",
-    name: "Brass/Maple",
-    swatch: coachSwatch("brass-maple"),
-    chromeSample: "#c4a06a",
-    availability: "in_stock",
-  },
-  {
     id: "brass-black-multi",
     name: "Brass/Black Multi",
     swatch: coachSwatch("soft-beaded"),
     hero: coachSwatch("soft-beaded"),
     chromeSample: "#8a7a6a",
-    availability: "in_stock",
-  },
-  {
-    id: "silver-black",
-    name: "Silver/Black",
-    swatch: coachSwatch("soft-black-charm"),
-    hero: coachSwatch("soft-black-charm"),
-    chromeSample: "#1a1a1a",
     availability: "in_stock",
   },
   {
@@ -160,53 +139,9 @@ const CLASSIC_26: TabbyColorSeed[] = [
     chromeSample: "#1a1a1a",
     availability: "low_stock",
   },
-  {
-    id: "brass-moss",
-    name: "Brass/Moss",
-    swatch: coachSwatch("brass-moss"),
-    chromeSample: "#556847",
-    availability: "in_stock",
-  },
-  {
-    id: "brass-mustard",
-    name: "Brass/Mustard",
-    swatch: coachSwatch("soft-mustard"),
-    hero: coachSwatch("soft-mustard"),
-    chromeSample: "#c9a227",
-    availability: "in_stock",
-  },
-  {
-    id: "silver-black-scarf",
-    name: "Silver/Black Scarf",
-    swatch: coachSwatch("soft-black-charm"),
-    hero: coachSwatch("soft-black-charm"),
-    chromeSample: "#1a1a1a",
-    availability: "in_stock",
-  },
-  {
-    id: "brass-indigo",
-    name: "Brass/Dark Indigo",
-    swatch: coachSwatch("brass-indigo"),
-    chromeSample: "#3d4a6a",
-    availability: "in_stock",
-  },
-  {
-    id: "brass-black-quilted",
-    name: "Brass/Black Quilted",
-    swatch: coachSwatch("brass-black"),
-    chromeSample: "#1a1a1a",
-    availability: "in_stock",
-  },
-  {
-    id: "signature-canvas-tan",
-    name: "Signature Canvas",
-    swatch: coachSwatch("brass-black-multi"),
-    chromeSample: "#8a7a6a",
-    availability: "notify",
-  },
 ];
 
-/** Coach US — Tabby 26 with quilting, nappa / goat leather (CP150 / CCW83) */
+/** Coach US — Tabby 26 with quilting — only colorways with full-bag studio shots */
 const QUILTED_26: TabbyColorSeed[] = [
   {
     id: "brass-black",
@@ -216,60 +151,28 @@ const QUILTED_26: TabbyColorSeed[] = [
     availability: "in_stock",
   },
   {
-    id: "silver-black",
-    name: "Silver/Black",
-    swatch: coachSwatch("silver-black"),
-    chromeSample: "#1a1a1a",
-    availability: "in_stock",
-  },
-  {
-    id: "brass-chalk",
-    name: "Brass/Chalk",
-    swatch: coachSwatch("brass-chalk"),
-    chromeSample: "#e8e0d4",
-    availability: "in_stock",
-  },
-  {
     id: "silver-soft-purple",
-    name: "Silver/Soft Purple",
+    name: "Silver/Oxblood",
     swatch: coachSwatch("silver-soft-purple"),
-    hero: coachHero("silver-soft-purple"),
-    chromeSample: "#7a5c8a",
+    hero: coachSwatch("silver-soft-purple"),
+    chromeSample: "#6b2c32",
     availability: "low_stock",
   },
   {
-    id: "brass-indigo",
-    name: "Brass/Indigo",
-    swatch: coachSwatch("brass-indigo"),
-    chromeSample: "#3d4a6a",
-    availability: "notify",
-  },
-  {
     id: "brass-maple",
-    name: "Brass/Maple",
+    name: "Brass/Canyon",
     swatch: coachSwatch("brass-maple"),
-    availability: "in_stock",
-  },
-  {
-    id: "brass-biscuit",
-    name: "Brass/Biscuit",
-    swatch: coachSwatch("brass-biscuit"),
-    chromeSample: "#c4a06a",
+    hero: coachSwatch("brass-maple"),
+    chromeSample: "#a34e3d",
     availability: "in_stock",
   },
   {
     id: "brass-black-multi",
     name: "Brass/Black Multi",
     swatch: coachSwatch("brass-black-multi"),
+    hero: coachSwatch("brass-black-multi"),
     chromeSample: "#8a7a6a",
-    availability: "notify",
-  },
-  {
-    id: "silver-midnight-navy",
-    name: "Silver/Midnight Navy",
-    swatch: coachSwatch("silver-midnight-navy"),
-    chromeSample: "#1a2438",
-    availability: "low_stock",
+    availability: "in_stock",
   },
 ];
 

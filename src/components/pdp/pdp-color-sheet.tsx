@@ -34,8 +34,6 @@ import { PdpNotifySheet } from "./pdp-notify-sheet";
 import { PdpTextLinkCta } from "./pdp-text-link-cta";
 import { PdpToast } from "./pdp-toast";
 import { pdpPressableClass, pdpStrokeCtaClass, pdpType } from "./pdp-type";
-import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
-import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpColorSheetColor = PdpColor | TabbyColorOption;
@@ -260,9 +258,7 @@ export function PdpColorSheet({
   const titleId = useId();
   const { productId } = useActiveProduct();
   const showCustomize = productId === "tabby";
-  const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
+  const mounted = useOverlayDismiss(open, onClose);
   const [notifyToastOpen, setNotifyToastOpen] = useState(false);
   const [notifyColor, setNotifyColor] = useState<PdpColorSheetColor | null>(null);
   const resolvedSelectedId = resolveSelectedColorId(colors, selectedId);
@@ -335,7 +331,7 @@ export function PdpColorSheet({
     );
   }
 
-  if (!overlayReady || !transition.mounted || typeof document === "undefined" || !document.body) {
+  if (!mounted || typeof document === "undefined" || !document.body) {
     return null;
   }
 
@@ -355,22 +351,22 @@ export function PdpColorSheet({
       />
 
       <div
-        className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
-        aria-hidden={!sheetOpen}
+        className={pdpBottomSheetOverlayClass({ open })}
+        aria-hidden={!open}
       >
         <button
           type="button"
           aria-label="Close color picker"
-          className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+          className={pdpBottomSheetBackdropClass()}
           onClick={onClose}
-          tabIndex={sheetOpen ? 0 : -1}
+          tabIndex={open ? 0 : -1}
         />
 
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className={pdpBottomSheetPanelClass({ open: sheetOpen })}
+          className={pdpBottomSheetPanelClass({ open })}
         >
           <div className={pdpBottomSheetHeaderClass}>
             <div className={pdpBottomSheetGrabHandleClass} />

@@ -1,15 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useLayoutEffect, type ReactNode } from "react";
+import { useMemo, useRef, useLayoutEffect } from "react";
 
 import { cn } from "@/lib/cn";
 
 import { PdpGalleryHeroVideo } from "./pdp-gallery-hero-video";
 import { PdpGalleryProductHud } from "./pdp-gallery-product-hud";
 import { PdpHeroActionRail } from "./pdp-hero-action-rail";
-import { useHero360Intro } from "./pdp-hero-360-intro-context";
-import { PdpHero360IntroLayer } from "./pdp-hero-360-intro-layer";
 import { PdpHeroGalleryProvider } from "./pdp-hero-gallery-context";
 import {
   PDP_HERO_GALLERY_SLIDES,
@@ -19,8 +17,6 @@ import {
 } from "./pdp-hero-gallery-data";
 import {
   heroSlideBackground,
-  PDP_HERO_GROUND_CLASS,
-  resolveHeroLetterboxGround,
   resolveHeroSlideFraming,
 } from "./pdp-hero-framing";
 import { galleryPanelClassName } from "./pdp-gallery-panel";
@@ -36,12 +32,12 @@ import {
   useInfiniteFullBleedCarousel,
 } from "./use-infinite-centered-carousel";
 import { HeroGalleryIdleProvider } from "./use-hero-gallery-idle-visible";
-import { useReducedMotion } from "./use-reduced-motion";
+import { useHeroGalleryTouchScrollPassthrough } from "./use-hero-gallery-touch-scroll";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
-import { PdpHeroGalleryVertical } from "./pdp-hero-gallery-vertical";
 
+// fallow-ignore-next-line complexity
 function HeroSlideMedia({
   slide,
   isActive,
@@ -51,18 +47,14 @@ function HeroSlideMedia({
   slide: PdpHeroGallerySlide;
   isActive: boolean;
   keepMounted?: boolean;
-  /** Decode immediately — first image slides for snappy first swipe */
+  /** Start loading immediately so nearby slides are ready before a swipe lands */
   eager: boolean;
 }) {
-  const { objectFit, objectPosition, scale = 1 } = resolveHeroSlideFraming(
+  const { objectFit, objectPosition } = resolveHeroSlideFraming(
     slide.shotType,
     slide.framing,
   );
   const fitClass = objectFit === "cover" ? "object-cover" : "object-contain";
-  const mediaStyle = {
-    objectPosition,
-    ...(scale !== 1 ? { transform: `scale(${scale})` } : null),
-  };
 
   if (slide.kind === "video") {
     return (
@@ -81,7 +73,7 @@ function HeroSlideMedia({
         controlsPosition="bottom-right"
         controlsElevated
         className={cn("size-full object-center", fitClass)}
-        style={mediaStyle}
+        style={{ objectPosition }}
       />
     );
   }
@@ -91,10 +83,10 @@ function HeroSlideMedia({
       src={slide.src}
       alt={slide.alt}
       fill
-      priority={eager}
+      loading={eager ? "eager" : "lazy"}
       sizes="100vw"
       className={cn("object-center", fitClass)}
-      style={mediaStyle}
+      style={{ objectPosition }}
     />
   );
 }
@@ -121,62 +113,20 @@ function circularSlideDistance(
  * vice versa). The active slide drives `data-header-surface` (nav contrast), video
  * playback, the scrim fade, and the slide indicator in the product HUD.
  */
+// fallow-ignore-next-line complexity
 export function PdpHeroGallery({
   slides = PDP_HERO_GALLERY_SLIDES,
   onOpenReviews,
   onOpenArTryOn,
   isLastPanel = false,
   fillFrame = false,
-  afterGallery,
-}: PdpHeroGalleryProps) {
-  const versionConfig = getPdpVersionConfig(usePdpVersion());
-
-  if (versionConfig.heroVerticalGallery) {
-    return (
-      <PdpHeroGalleryVertical
-        slides={slides}
-        onOpenArTryOn={onOpenArTryOn}
-        isLastPanel={isLastPanel}
-        fillFrame={fillFrame}
-      />
-    );
-  }
-
-  return (
-    <PdpHeroGalleryHorizontal
-      slides={slides}
-      onOpenReviews={onOpenReviews}
-      onOpenArTryOn={onOpenArTryOn}
-      isLastPanel={isLastPanel}
-      fillFrame={fillFrame}
-      afterGallery={afterGallery}
-      versionConfig={versionConfig}
-    />
-  );
-}
-
-type PdpHeroGalleryProps = {
+}: {
   slides?: PdpHeroGallerySlide[];
   onOpenReviews?: () => void;
   onOpenArTryOn?: () => void;
   isLastPanel?: boolean;
   /** Size to the parent media frame (PdpHeroShell) instead of 100svh */
   fillFrame?: boolean;
-  /** Rendered inside the gallery provider after the media section (v8 product info) */
-  afterGallery?: ReactNode;
-};
-
-/** Horizontal snap carousel — split out so hooks stay unconditional above the v6 vertical branch. */
-function PdpHeroGalleryHorizontal({
-  slides = PDP_HERO_GALLERY_SLIDES,
-  onOpenReviews,
-  onOpenArTryOn,
-  isLastPanel = false,
-  fillFrame = false,
-  afterGallery,
-  versionConfig,
-}: PdpHeroGalleryProps & {
-  versionConfig: ReturnType<typeof getPdpVersionConfig>;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const {
@@ -185,27 +135,16 @@ function PdpHeroGalleryHorizontal({
     leadGalleryWithProductStill,
     heroGalleryStudioDragZoom,
     heroGalleryLeadSlideSrc,
+    heroGalleryLastSlideSrc,
+    heroGalleryExcludedSlideSrcs,
+    heroGalleryAdditionalSlides,
     heroGalleryPrependLeadSlide,
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
-    heroGalleryExcludeSlideSrcs,
-    heroGalleryExtraSlides,
-    heroProductSlidesFillFrame,
     useHeroGalleryProgressBar,
     showHeroGalleryCategoryRail,
-    hero360IntroEnabled,
-    hero360IntroVideoSrc,
-  } = versionConfig;
-  const { enabled: introActive, isGalleryScrollReady } = useHero360Intro();
-  const reducedMotion = useReducedMotion();
-  /** Slide 0 is the intro clip's end frame — not a separate lead still.
-   * Gate on context `enabled` so v5 desktop (mobileOnly skip) does not mount. */
-  const useIntroLeadSlide =
-    introActive &&
-    hero360IntroEnabled &&
-    Boolean(hero360IntroVideoSrc) &&
-    !reducedMotion;
+  } = getPdpVersionConfig(usePdpVersion());
   const idleChromeEnabled =
     useHeroGalleryProgressBar || showHeroGalleryCategoryRail;
   const orderedSlides = useMemo(
@@ -214,26 +153,26 @@ function PdpHeroGalleryHorizontal({
         leadGalleryWithProductStill,
         heroGalleryStudioDragZoom,
         heroGalleryLeadSlideSrc,
+        heroGalleryLastSlideSrc,
+        heroGalleryExcludedSlideSrcs,
+        heroGalleryAdditionalSlides,
         heroGalleryPrependLeadSlide,
         heroGalleryUgcSlides,
         heroGalleryUgcInsertAfterIndex,
         heroGalleryLogicalBlockOrder,
-        heroGalleryExcludeSlideSrcs,
-        heroGalleryExtraSlides,
-        heroProductSlidesFillFrame,
       }),
     [
       slides,
       leadGalleryWithProductStill,
       heroGalleryStudioDragZoom,
       heroGalleryLeadSlideSrc,
+      heroGalleryLastSlideSrc,
+      heroGalleryExcludedSlideSrcs,
+      heroGalleryAdditionalSlides,
       heroGalleryPrependLeadSlide,
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
       heroGalleryLogicalBlockOrder,
-      heroGalleryExcludeSlideSrcs,
-      heroGalleryExtraSlides,
-      heroProductSlidesFillFrame,
     ],
   );
   const loopedSlides = useMemo(
@@ -245,6 +184,7 @@ function PdpHeroGalleryHorizontal({
     orderedSlides.length,
     { stableLoop: useStableInfiniteCarousel },
   );
+  useHeroGalleryTouchScrollPassthrough(trackRef);
   const setHeroChromeSurface = useSetHeroChromeSurface();
 
   const surface = orderedSlides[activeIndex]?.headerSurface ?? "dark";
@@ -283,11 +223,8 @@ function PdpHeroGalleryHorizontal({
           ref={trackRef}
           data-hero-gallery-track
           className={cn(
-            "absolute inset-0 z-0 flex snap-x snap-mandatory overscroll-x-contain",
-            isGalleryScrollReady
-              ? "overflow-x-auto overflow-y-hidden [touch-action:pan-x_pan-y]"
-              : "overflow-hidden touch-none",
-            "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "absolute inset-0 z-0 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain",
+            "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x_pan-y]",
           )}
         >
           {/* fallow-ignore-next-line complexity */}
@@ -298,54 +235,28 @@ function PdpHeroGalleryHorizontal({
             const nearActive =
               circularSlideDistance(logicalIndex, activeIndex, orderedSlides.length) <=
               1;
+            const preloadNearby =
+              circularSlideDistance(logicalIndex, activeIndex, orderedSlides.length) <=
+              2;
             const isCanonicalClone =
               orderedSlides.length <= 1 || index === orderedSlides.length + logicalIndex;
             const warmVideoNeighbor =
               slide.kind === "video" &&
               nearActive &&
               (isCentered || isCanonicalClone);
-            // Intro is a section overlay — never paint slide-0 stills (any clone).
-            // While locked, also blank neighbors so scrollLeft=0 can't flash them.
-            const hideSlideMediaForIntro = useIntroLeadSlide && logicalIndex === 0;
-            const suppressNeighborMedia =
-              useIntroLeadSlide && !isGalleryScrollReady && logicalIndex !== 0;
             return (
               <div
                 key={`${getHeroGallerySlideKey(slide)}-${index}`}
                 className="relative h-full w-full shrink-0 snap-center snap-always"
-                style={{
-                  backgroundColor: heroSlideBackground(
-                    slide.shotType,
-                    slide.kind,
-                    slide.ground,
-                  ),
-                }}
+                style={{ backgroundColor: heroSlideBackground(slide.shotType) }}
               >
-                {hideSlideMediaForIntro || suppressNeighborMedia ? (
-                  <div
-                    aria-hidden
-                    className={cn(
-                      "absolute inset-0",
-                      PDP_HERO_GROUND_CLASS[
-                        resolveHeroLetterboxGround(
-                          slide.shotType,
-                          slide.kind,
-                          slide.ground,
-                        )
-                      ],
-                    )}
-                  />
-                ) : (
-                  <HeroSlideMedia
-                    slide={slide}
-                    isActive={isCentered}
-                    keepMounted={warmVideoNeighbor}
-                    eager={logicalIndex <= 1}
-                  />
-                )}
-                {slideScrimVisible &&
-                !hideSlideMediaForIntro &&
-                !suppressNeighborMedia ? (
+                <HeroSlideMedia
+                  slide={slide}
+                  isActive={isCentered}
+                  keepMounted={warmVideoNeighbor}
+                  eager={preloadNearby}
+                />
+                {slideScrimVisible ? (
                   <>
                     <div
                       aria-hidden
@@ -371,19 +282,6 @@ function PdpHeroGalleryHorizontal({
           })}
         </div>
 
-        {useIntroLeadSlide ? (
-          // Stable section overlay — covers first-loop clones before center, and
-          // stays mounted as slide 0's end frame (hidden when user swipes away).
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-0 z-[2]",
-              isGalleryScrollReady && activeIndex !== 0 && "invisible",
-            )}
-          >
-            <PdpHero360IntroLayer videoSrc={hero360IntroVideoSrc} />
-          </div>
-        ) : null}
-
         {heroDockedBuyBar ? (
           <PdpV3GalleryOverlay onOpenArTryOn={onOpenArTryOn} />
         ) : (
@@ -397,7 +295,6 @@ function PdpHeroGalleryHorizontal({
           </>
         )}
       </section>
-      {afterGallery}
       </HeroGalleryIdleProvider>
     </PdpHeroGalleryProvider>
   );

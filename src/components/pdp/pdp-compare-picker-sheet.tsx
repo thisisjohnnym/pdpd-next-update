@@ -19,9 +19,7 @@ import {
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
-import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpType } from "./pdp-type";
-import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 
 type PdpComparePickerSheetProps = {
@@ -41,37 +39,35 @@ export function PdpComparePickerSheet({
   onSelect,
 }: PdpComparePickerSheetProps) {
   const titleId = useId();
-  const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
+  const mounted = useOverlayDismiss(open, onClose);
 
   const handleSelect = (index: number) => {
     onSelect(index);
     onClose();
   };
 
-  if (!overlayReady || !transition.mounted) {
+  if (!mounted) {
     return null;
   }
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
-      aria-hidden={!sheetOpen}
+      className={pdpBottomSheetOverlayClass({ open })}
+      aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close compare picker"
-        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
-        tabIndex={sheetOpen ? 0 : -1}
+        tabIndex={open ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
+        className={pdpBottomSheetPanelClass({ open })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

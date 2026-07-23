@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -16,6 +16,10 @@ import { PdpModuleHeading } from "../pdp-module-heading";
 import { PdpRevealItem } from "../pdp-reveal-item";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "../pdp-type";
+import {
+  useCarouselSnapStartActiveIndex,
+  useDragToScroll,
+} from "../use-infinite-centered-carousel";
 import { revealStaggerDelay } from "../use-pdp-element-reveal";
 
 import {
@@ -30,6 +34,7 @@ import { usePdpVersion } from "./pdp-version-context";
 
 const WATCH_THE_FILM_CARD_ID = "icon-reimagined";
 const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
+const HIGHLIGHT_CARD_COUNT = PDP_GET_THE_HIGHLIGHTS_CARDS.length;
 
 /**
  * v5 "Get the highlights" — Apple-style highlight rail. A light section with a
@@ -39,54 +44,50 @@ const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
  */
 export function PdpV5GetTheHighlights() {
   const { headline, watchLabel } = PDP_GET_THE_HIGHLIGHTS_SECTION;
-  const {
-    leftAlignModuleHeadings,
-    useV4ModuleSpacing,
-    useLeatherAgingWaysToWear,
-    getTheHighlightsCompactHeader,
-  } = getPdpVersionConfig(usePdpVersion());
-  const highlightCards = useLeatherAgingWaysToWear
-    ? PDP_GET_THE_HIGHLIGHTS_CARDS.map((card) =>
-        card.id === "crafted-to-age"
-          ? {
-              ...card,
-              src: "/images/gallery/tabby-leather-full-grain-back.jpg",
-              alt: "Back of the Tabby bag in full-grain leather with THE TABBY BAG stamp and gold Coach snap",
-            }
-          : card,
-      )
-    : PDP_GET_THE_HIGHLIGHTS_CARDS;
+  const { leftAlignModuleHeadings, useV4ModuleSpacing } =
+    getPdpVersionConfig(usePdpVersion());
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const activeCard =
-    highlightCards.find((card) => card.id === activeCardId) ??
+    PDP_GET_THE_HIGHLIGHTS_CARDS.find((card) => card.id === activeCardId) ??
     null;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const activeIndex = useCarouselSnapStartActiveIndex(scrollRef);
+  useDragToScroll(scrollRef);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+    const clamped = Math.min(Math.max(index, 0), HIGHLIGHT_CARD_COUNT - 1);
+    const child = el.children[clamped] as HTMLElement | undefined;
+    if (!child) {
+      return;
+    }
+    const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+    el.scrollTo({
+      left: child.offsetLeft - paddingLeft,
+      behavior: "smooth",
+    });
+  }, []);
+
+  const atStart = activeIndex === 0;
+  const atEnd = activeIndex >= HIGHLIGHT_CARD_COUNT - 1;
 
   return (
     <section
       data-header-surface="light"
       aria-label={headline}
       className={cn(
-        "w-full shrink-0 bg-white",
-        getTheHighlightsCompactHeader
-          ? "pt-6 pb-10"
-          : useV4ModuleSpacing
-            ? "pt-14 pb-10"
-            : "pt-12 pb-8",
+        "relative z-[1] -mt-px w-full shrink-0 border-0 bg-white shadow-none outline-none",
+        useV4ModuleSpacing ? "pt-8 pb-4" : "pt-8 pb-8",
       )}
     >
-      <div
-        className={cn(
-          "flex flex-col",
-          getTheHighlightsCompactHeader ? "gap-1" : "gap-1.5",
-          useV4ModuleSpacing ? "px-4" : "px-3",
-        )}
-      >
+      <div className="flex flex-col gap-1 px-3 lg:px-5">
         <PdpModuleHeading
           spacing="none"
-          className={cn(
-            leftAlignModuleHeadings ? "text-left" : "text-center",
-            getTheHighlightsCompactHeader && "leading-none",
-          )}
+          className={leftAlignModuleHeadings ? "text-left" : "text-center"}
         >
           {headline}
         </PdpModuleHeading>
@@ -94,8 +95,7 @@ export function PdpV5GetTheHighlights() {
           <a
             href={`#highlight-${WATCH_THE_FILM_CARD_ID}`}
             className={cn(
-              "group inline-flex items-center gap-1.5 text-black",
-              getTheHighlightsCompactHeader ? "h-5 min-h-5" : "min-h-[40px]",
+              "group inline-flex min-h-8 items-center gap-1.5 text-black",
               "transition-colors active:text-neutral-700",
               pdpPressableClass,
             )}
@@ -115,14 +115,18 @@ export function PdpV5GetTheHighlights() {
       <div
         className={cn(
           pdpCarouselScrollWrapClass,
-          getTheHighlightsCompactHeader ? "mt-3" : "mt-6",
+          "group/highlights relative mt-4",
         )}
       >
         <div
-          className={cn(pdpCarouselScrollClass, "flex items-stretch gap-3")}
+          ref={scrollRef}
+          className={cn(
+            pdpCarouselScrollClass,
+            "pdp-carousel-draggable flex items-stretch gap-3",
+          )}
           aria-label={headline}
         >
-          {highlightCards.map((card, index) => (
+          {PDP_GET_THE_HIGHLIGHTS_CARDS.map((card, index) => (
             <PdpV5HighlightCard
               key={card.id}
               card={card}
@@ -134,6 +138,17 @@ export function PdpV5GetTheHighlights() {
             />
           ))}
         </div>
+
+        <HighlightsCarouselArrow
+          direction="prev"
+          disabled={atStart}
+          onClick={() => scrollToIndex(activeIndex - 1)}
+        />
+        <HighlightsCarouselArrow
+          direction="next"
+          disabled={atEnd}
+          onClick={() => scrollToIndex(activeIndex + 1)}
+        />
       </div>
 
       <PdpV5HighlightDetailSheet
@@ -145,6 +160,50 @@ export function PdpV5GetTheHighlights() {
   );
 }
 
+// fallow-ignore-next-line complexity
+function HighlightsCarouselArrow({
+  direction,
+  disabled,
+  onClick,
+}: {
+  direction: "prev" | "next";
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const isPrev = direction === "prev";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={isPrev ? "Previous highlight" : "Next highlight"}
+      className={cn(
+        "absolute top-[40%] z-10 hidden size-9 -translate-y-1/2 items-center justify-center",
+        "bg-white/90 text-black backdrop-blur-sm",
+        "outline outline-1 -outline-offset-1 outline-black/10",
+        "transition-[opacity,transform] duration-200 ease-out",
+        "lg:inline-flex",
+        isPrev ? "left-3" : "right-3",
+        disabled
+          ? "pointer-events-none opacity-0"
+          : cn(
+              "opacity-0",
+              "group-hover/highlights:opacity-100 group-focus-within/highlights:opacity-100",
+              pdpPressableIconClass,
+            ),
+      )}
+    >
+      <MaterialIcon
+        name={isPrev ? "chevron_left" : "chevron_right"}
+        size={20}
+        className="leading-none"
+      />
+    </button>
+  );
+}
+
+// fallow-ignore-next-line complexity
 function PdpV5HighlightCard({
   card,
   index,
@@ -196,12 +255,17 @@ function PdpV5HighlightCard({
       }
       delay={revealStaggerDelay(index)}
       className={cn(
-        "flex h-[70svh] max-h-[620px] min-h-[460px] w-[calc((100vw-1.25rem)/1.15)]",
+        // Width-driven 4:5 media at all breakpoints — caption wrap must not
+        // shrink/grow the image (the old 70svh + flex-1 frame did that).
+        "flex w-[calc((100vw-1.25rem)/1.15)]",
         "shrink-0 snap-start snap-always scroll-mt-24 flex-col gap-3 overflow-hidden rounded-none bg-white",
-        "lg:w-[calc((100vw-2.25rem)/2.4)]",
+        "lg:w-[calc((100vw-2.25rem)/2.6)]",
       )}
     >
-      <div ref={mediaRef} className="relative min-h-0 flex-1 bg-neutral-100">
+      <div
+        ref={mediaRef}
+        className="relative aspect-[4/5] shrink-0 bg-neutral-100"
+      >
         {card.videoSrc ? (
           <PdpGalleryHeroVideo
             src={card.videoSrc}

@@ -19,7 +19,6 @@ import {
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "./pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
-import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpAddIconLabelClass, pdpType } from "./pdp-type";
 import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
@@ -42,8 +41,7 @@ export function PdpStrapOptionsSheet({
   const titleId = useId();
   const { isAdded, confirmAdd } = useTransientAddedSet();
   const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
+  const transition = useMountTransition(open, 300);
   const lastSetRef = useRef(set);
   if (set) {
     lastSetRef.current = set;
@@ -61,22 +59,22 @@ export function PdpStrapOptionsSheet({
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
-      aria-hidden={!sheetOpen}
+      className={pdpBottomSheetOverlayClass({ open })}
+      aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close strap options"
-        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
-        tabIndex={sheetOpen ? 0 : -1}
+        tabIndex={open ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
+        className={pdpBottomSheetPanelClass({ open })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />

@@ -15,6 +15,7 @@ import {
   pdpBottomSheetPanelClass,
   pdpBottomSheetScrollRegionClass,
 } from "./pdp-bottom-sheet";
+
 import {
   PDP_BUNDLE_DISCOUNT,
   PDP_PRODUCT,
@@ -25,14 +26,11 @@ import {
 import { useActiveProduct } from "./pdp-active-product-context";
 import { getPdpBagUpsells, getPdpColors } from "./pdp-product-colors";
 import type { PdpProductConfig } from "./pdp-products";
-import { PDP_SHEET_PRESENCE_MS } from "./pdp-motion";
 import { pdpSheetHeadingClass } from "./pdp-module-section";
 import { PdpPayOverTimeCard } from "./pdp-pay-over-time-card";
 import { pdpPillRadiusClass, pdpProductPriceClass, pdpProductTitleClass, pdpStrokeCtaClass, pdpStrokeCtaMutedClass, pdpAddIconLabelClass, pdpType } from "./pdp-type";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
-import { PdpStorePickupBlock } from "./version/pdp-store-pickup-block";
-import { useMountTransition } from "./use-mount-transition";
 import { useOverlayDismiss } from "./use-overlay-dismiss";
 import { useTransientAddedSet } from "./use-transient-added-set";
 
@@ -300,12 +298,8 @@ export function PdpAddToBagSheet({
   const { isAdded: isQuickAdded, confirmAdd: confirmQuickAdd } =
     useTransientAddedSet();
   const [hasBeenOpen, setHasBeenOpen] = useState(false);
-  const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
-  const { squareButtonCorners, showPickupInAtbSheet } = getPdpVersionConfig(
-    usePdpVersion(),
-  );
+  const mounted = useOverlayDismiss(open, onClose);
+  const { squareButtonCorners } = getPdpVersionConfig(usePdpVersion());
 
   const colors = getPdpColors(productId);
   const upsells = getPdpBagUpsells(productId);
@@ -330,28 +324,28 @@ export function PdpAddToBagSheet({
     confirmQuickAdd(id);
   };
 
-  if (!overlayReady || !transition.mounted) {
+  if (!mounted) {
     return null;
   }
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
-      aria-hidden={!sheetOpen}
+      className={pdpBottomSheetOverlayClass({ open })}
+      aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close add to bag"
-        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
-        tabIndex={sheetOpen ? 0 : -1}
+        tabIndex={open ? 0 : -1}
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={pdpBottomSheetPanelClass({ open: sheetOpen })}
+        className={pdpBottomSheetPanelClass({ open })}
       >
         <div className={pdpBottomSheetHeaderClass}>
           <div className={pdpBottomSheetGrabHandleClass} />
@@ -422,10 +416,6 @@ export function PdpAddToBagSheet({
               <span className="translate-y-px">Checkout</span>
             </button>
           </div>
-
-          {showPickupInAtbSheet && !isBundle ? (
-            <PdpStorePickupBlock className="mb-2" />
-          ) : null}
 
           {!isBundle ? (
             <BagUpsellList

@@ -41,7 +41,6 @@ import { usePdpVersion } from "./version/pdp-version-context";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { PdpV3HeroLayout } from "./version/pdp-v3-hero-layout";
 import { PdpV5DesktopHeroSplit } from "./version/pdp-v5-desktop-hero-split";
-import { PdpV8HeroLayout } from "./version/pdp-v8-hero-layout";
 import { useHeroBuyBarVisibility } from "./version/use-hero-buy-bar-visibility";
 
 type BagConfirmation =
@@ -78,6 +77,7 @@ export function PdpSocialView({
   );
 }
 
+// fallow-ignore-next-line complexity
 function PdpSocialViewInner() {
   const { productId, product } = useActiveProduct();
   const tabby = useOptionalTabbyVariant();
@@ -137,8 +137,6 @@ function PdpSocialViewInner() {
     desktopSplitLayout,
     showArTryOn,
     showHeroGalleryCategoryRail,
-    useAltHeroComposition,
-    useInlineHeroNav,
   } = versionConfig;
 
   const handleOpenArTryOn =
@@ -206,22 +204,21 @@ function PdpSocialViewInner() {
   const floatingBuyBarVisible = floatingBuyBarWhenHeroHidden
     ? heroScrolledAway
     : true;
+  const usesPersistentAtb =
+    showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
   const useV3Hero =
     heroScrollsWithPage && showBrandBar && product.hero.kind === "video";
-  const useV8Hero = useAltHeroComposition && useV3Hero;
 
   const pageBody = (
     <>
       <PdpBrowserChromeSync />
       <PdpProductUrlSync activeColorId={activeColorId} />
-      {useInlineHeroNav ? null : (
-        <PdpOverlayHeader
-          bagCount={bagCount}
-          menuOpen={navOpen}
-          onOpenMenu={() => setNavOpen(true)}
-          hugBrandBar={showBrandBar && versionConfig.showBrandSwitcher}
-        />
-      )}
+      <PdpOverlayHeader
+        bagCount={bagCount}
+        menuOpen={navOpen}
+        onOpenMenu={() => setNavOpen(true)}
+        hugBrandBar={showBrandBar && versionConfig.showBrandSwitcher}
+      />
       {!isStripped && versionConfig.showSectionJumpBar ? (
         <PdpSectionIndicator suppressed={chromeSuppressed} />
       ) : null}
@@ -232,18 +229,6 @@ function PdpSocialViewInner() {
           objectPosition={product.hero.objectPosition}
           onOpenReviews={() => openReviews("comments")}
         />
-      ) : useV8Hero ? (
-        <PdpV8HeroLayout
-          selectedColorId={activeColorId}
-          onColorSelect={setSelectedColorId}
-          onAddToBag={handleAddToBag}
-          onOpenMenu={() => setNavOpen(true)}
-          menuOpen={navOpen}
-          bagCount={bagCount}
-          onOpenReviews={() => openReviews("comments")}
-          onOpenArTryOn={handleOpenArTryOn}
-          sentinelRef={heroSentinelRef}
-        />
       ) : useV3Hero ? (
         <>
           <div className={desktopSplitLayout ? "lg:hidden" : undefined}>
@@ -252,6 +237,7 @@ function PdpSocialViewInner() {
               onColorSelect={setSelectedColorId}
               onAddToBag={handleAddToBag}
               onOpenReviews={() => openReviews("comments")}
+              onViewReviews={() => openReviews("reviews")}
               onOpenArTryOn={handleOpenArTryOn}
               sentinelRef={heroSentinelRef}
             />
@@ -261,6 +247,7 @@ function PdpSocialViewInner() {
               selectedColorId={activeColorId}
               onColorSelect={setSelectedColorId}
               onAddToBag={handleAddToBag}
+              onViewReviews={() => openReviews("reviews")}
             />
           ) : null}
         </>
@@ -276,7 +263,14 @@ function PdpSocialViewInner() {
           />
         </PdpHeroShell>
       ) : null}
-      <SafeAreaMain className="bg-transparent" omitTop>
+      <SafeAreaMain
+        className={cn(
+          "bg-transparent",
+          usesPersistentAtb &&
+            "pb-[calc(var(--pdp-safe-area-bottom)+var(--cta-bar-height,64px))]",
+        )}
+        omitTop
+      >
         {tabbyColorHero ? (
           <PdpStaticHero
             hero={{
@@ -359,12 +353,9 @@ function PdpSocialViewInner() {
 
   return (
     <div
-      data-pdp-page-root
       className={cn(
         "relative min-h-svh w-full overflow-x-clip",
-        isStaticHero || isColorHero || useAltHeroComposition
-          ? "bg-white"
-          : "bg-black",
+        isStaticHero || isColorHero ? "bg-white" : "bg-black",
         desktopSplitLayout && "pdp-v5-page-root",
       )}
     >

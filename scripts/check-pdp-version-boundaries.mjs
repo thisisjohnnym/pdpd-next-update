@@ -8,8 +8,8 @@
  *   2. CSS scope guard — every rule in src/app/v2/pdp-v2.css, v3/pdp-v3.css, and v4/pdp-v4.css must be
  *                        scoped to its [data-pdp-version="..."], and globals.css must not contain that scoping
  *   3. import guard     — a route folder must not import a higher version's *-vN modules
- *                        (v1 → no v2/v3/v4/v5/v6; v2 → no v3/v4/v5/v6; …; v5 → no v6)
- *   4. provider guard   — v1..v6 routes each pass their own version="vN"
+ *                        (v1 → no v2..v8; v2 → no v3..v8; …; v7 → no v8)
+ *   4. provider guard   — v1..v8 routes each pass their own version="vN"
  *   5. routes guard     — Tabby browser URL sync preserves /vN prefix on version home routes
  *
  * Exit code 0 = clean, 1 = one or more violations.
@@ -124,8 +124,6 @@ function checkCssScoping() {
   checkVersionCssScoping("v6");
   checkVersionCssScoping("v7");
   checkVersionCssScoping("v8");
-  checkVersionCssScoping("fc01");
-  checkVersionCssScoping("fc01v");
 }
 
 // ── Guard 3: lower versions must not import higher-version modules ───────────
@@ -146,8 +144,6 @@ function checkVersionImports() {
     { dir: "src/app/v5", forbidden: ["v6", "v7", "v8"], note: "v5 routes must not depend on a later pivot" },
     { dir: "src/app/v6", forbidden: ["v7", "v8"], note: "v6 routes must not depend on a later pivot" },
     { dir: "src/app/v7", forbidden: ["v8"], note: "v7 routes must not depend on the v8 pivot" },
-    // fc01 / fc01v are the final-candidate UXR pair — they may share v5/v6
-    // modules, so no forward-import restrictions apply to them.
   ];
 
   for (const { dir, forbidden, note } of forbiddenByRoute) {
@@ -176,10 +172,8 @@ function checkRouteVersionProps() {
     { dir: "src/app/v4", expected: 'version="v4"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="v8"'] },
     { dir: "src/app/v5", expected: 'version="v5"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v6"', 'version="v7"', 'version="v8"'] },
     { dir: "src/app/v6", expected: 'version="v6"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v7"', 'version="v8"'] },
-    { dir: "src/app/v7", expected: 'version="v7"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v8"', 'version="fc01"', 'version="fc01v"'] },
-    { dir: "src/app/v8", expected: 'version="v8"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="fc01"', 'version="fc01v"'] },
-    { dir: "src/app/fc01", expected: 'version="fc01"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="v8"', 'version="fc01v"'] },
-    { dir: "src/app/fc01v", expected: 'version="fc01v"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"', 'version="v8"', 'version="fc01"'] },
+    { dir: "src/app/v7", expected: 'version="v7"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v8"'] },
+    { dir: "src/app/v8", expected: 'version="v8"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"'] },
   ];
   for (const { dir, expected, forbidden } of checks) {
     for (const file of walk(join(ROOT, dir))) {
@@ -243,40 +237,30 @@ function checkTabbyBrowserUrls() {
 
   const slug = "tabby-shoulder-bag-26-quilted";
   const cases = [
-    [tabbyBrowserUrl("v8", slug, "brass-black", "/v8"), "/v8?color=brass-black"],
+    [tabbyBrowserUrl("v5", slug, "brass-black", "/v5"), "/v5?color=brass-black"],
     [
-      tabbyBrowserUrl("v8", slug, "brass-black", "/v8/products/tabby-shoulder-bag-26-quilted"),
-      "/v8/products/tabby-shoulder-bag-26-quilted?color=brass-black",
-    ],
-    [tabbyBrowserUrl("v7", slug, "brass-black", "/v7"), "/v7?color=brass-black"],
-    [
-      tabbyBrowserUrl("v7", slug, "brass-black", "/v7/products/tabby-shoulder-bag-26-quilted"),
-      "/v7/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+      tabbyBrowserUrl("v5", slug, "brass-black", "/v5/products/tabby-shoulder-bag-26-quilted"),
+      "/v5/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
     [tabbyBrowserUrl("v6", slug, "brass-black", "/v6"), "/v6?color=brass-black"],
     [
       tabbyBrowserUrl("v6", slug, "brass-black", "/v6/products/tabby-shoulder-bag-26-quilted"),
       "/v6/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
-    [tabbyBrowserUrl("v5", slug, "brass-black", "/v5"), "/v5?color=brass-black"],
+    [tabbyBrowserUrl("v7", slug, "brass-black", "/v7"), "/v7?color=brass-black"],
     [
-      tabbyBrowserUrl("v5", slug, "brass-black", "/v5/products/tabby-shoulder-bag-26-quilted"),
-      "/v5/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+      tabbyBrowserUrl("v7", slug, "brass-black", "/v7/products/tabby-shoulder-bag-26-quilted"),
+      "/v7/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+    [tabbyBrowserUrl("v8", slug, "brass-black", "/v8"), "/v8?color=brass-black"],
+    [
+      tabbyBrowserUrl("v8", slug, "brass-black", "/v8/products/tabby-shoulder-bag-26-quilted"),
+      "/v8/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
     [tabbyBrowserUrl("v1", slug, "brass-black", "/"), "/?color=brass-black"],
     [
       tabbyBrowserUrl("v1", slug, "brass-black", "/products/tabby-shoulder-bag-26-quilted"),
       "/products/tabby-shoulder-bag-26-quilted?color=brass-black",
-    ],
-    [tabbyBrowserUrl("fc01", slug, "brass-black", "/fc01"), "/fc01?color=brass-black"],
-    [
-      tabbyBrowserUrl("fc01", slug, "brass-black", "/fc01/products/tabby-shoulder-bag-26-quilted"),
-      "/fc01/products/tabby-shoulder-bag-26-quilted?color=brass-black",
-    ],
-    [tabbyBrowserUrl("fc01v", slug, "brass-black", "/fc01v"), "/fc01v?color=brass-black"],
-    [
-      tabbyBrowserUrl("fc01v", slug, "brass-black", "/fc01v/products/tabby-shoulder-bag-26-quilted"),
-      "/fc01v/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
   ];
 

@@ -823,7 +823,7 @@ export const PDP_COACH_PREMIUM = {
   ] satisfies PdpCoachPremiumPerk[],
 } as const;
 
-export type PdpProductSpec = {
+export type PdpProductDetailSpec = {
   id: string;
   label: string;
   value: string;
@@ -838,7 +838,7 @@ export type PdpProductDetailTile = {
 };
 
 export const PDP_PRODUCT_DETAILS = {
-  eyebrow: "The details",
+  eyebrow: "The Details",
   /** Full-bleed macro at the top of the module — "The details" overlay */
   macro: {
     src: "/images/gallery/tabby-detail-quilt.png",
@@ -851,7 +851,7 @@ export const PDP_PRODUCT_DETAILS = {
     { id: "dimensions", label: "Dimensions", value: '10" × 6"' },
     { id: "weight", label: "Weight", value: "0.9 lb" },
     { id: "drop", label: "Strap drop", value: '22"' },
-  ] satisfies PdpProductSpec[],
+  ] satisfies PdpProductDetailSpec[],
   /** "A closer look" — 2×2 visual detail gallery (row-major order) */
   closerLook: {
     heading: "A closer look",
@@ -1220,6 +1220,9 @@ export type PdpGalleryImmersiveSlide = {
   panelContain?: boolean;
   /** Drag-to-zoom lens overlay — studio product shots */
   dragZoom?: boolean;
+  /** Optional copy above the frame — studio product / drag-zoom slides (v4) */
+  headline?: string;
+  subtext?: string;
   /** Header icon contrast when this frame is active */
   headerSurface?: "light" | "dark";
   hotspots?: PdpProductHotspot[];
@@ -2262,7 +2265,7 @@ const PDP_LEATHER_AGING_TWO_YEARS_IMAGE = {
 
 export const PDP_LEATHER_AGING = {
   moment: "Material",
-  title: "How it evolves over time",
+  title: "Where wear becomes beauty",
   intro:
     "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
   image: PDP_LEATHER_AGING_NEW_IMAGE,
@@ -2272,7 +2275,7 @@ export const PDP_LEATHER_AGING = {
       label: "New",
       timeline: "Day one",
       summary:
-        "Crisp grain, structured shape and factory-fresh. No special care needed yet.",
+        "Crisp grain, structured shape. No special care needed yet.",
       image: PDP_LEATHER_AGING_NEW_IMAGE,
       traits: [
         {
@@ -3002,7 +3005,7 @@ type PdpCommunityMediaItem = {
 const PDP_COMMUNITY_VALIDATION = {
   moment: "Moment #6",
   title: "Community validation",
-  caption: "Real people, real context — not random snaps.",
+  caption: "Real people, real context.",
   items: [
     {
       id: PDP_UGC_CONTEXT.stories[1]!.id,
@@ -3397,9 +3400,14 @@ export const PDP_COMMENTS_SUMMARY = {
 } as const;
 
 export const PDP_REVIEWS_AI_SUMMARY = {
-  headline: "What our customers think",
+  headline: "What to know",
   body: "Many note that Tabby Shoulder Bag 26 is a refined, well-crafted bag that strikes an appealing balance between structure and style. The full-grain pebbled leather and signature C clasp stand out as premium touches.",
   attribution: "Buyer highlights, summarized by AI",
+  highlights: [
+    "Structured shape that still wears casually",
+    "Full-grain pebbled leather with a weighty C clasp",
+    "Strap adjusts easily for crossbody or shoulder carry",
+  ],
 } as const;
 
 const PDP_REVIEWS_RATING_BREAKDOWN = [

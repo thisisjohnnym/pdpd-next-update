@@ -1,7 +1,7 @@
-import type { PdpProductSpec } from "../pdp-data";
+import type { PdpProductDetailSpec } from "../pdp-data";
 
 /** v4 Details fact — editorial spec row (Paper r5 `LD6-0`). */
-export type PdpProductDetailSpecV4 = PdpProductSpec & {
+export type PdpProductDetailSpecV4 = PdpProductDetailSpec & {
   /** Apply tabular numerals to measured values (dimensions, weight). */
   tabular?: boolean;
   /** Quiet second line — keeps the primary value to one short phrase. */
@@ -15,7 +15,7 @@ export const PDP_V4_DETAILS_SECTION = {
 } as const;
 
 /** v5 Details module headline — Paper node 407:399. */
-export const PDP_V5_DETAILS_HEADLINE = "Discover the Craft";
+export const PDP_V5_DETAILS_HEADLINE = "Product Details";
 
 /** v5 Signature Details — technical dimension sketches (swipeable front / side / strap). */
 export type PdpV5DetailsSketchSlide = {

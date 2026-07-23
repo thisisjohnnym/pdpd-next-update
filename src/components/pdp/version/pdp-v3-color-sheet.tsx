@@ -24,18 +24,19 @@ import {
   pdpBottomSheetScrollRegionClass,
   PDP_BOTTOM_SHEET_CLOSE_ICON_SIZE,
 } from "../pdp-bottom-sheet";
-import { ColorSwatchCircle, ColorSwatchTile, SQUARE_SWATCH_TILE_FOCAL, SQUARE_SWATCH_TILE_ZOOM } from "../pdp-color-swatch";
+import { ColorSwatchCircle, ColorSwatchTile, resolveSquareSwatchFraming } from "../pdp-color-swatch";
 import { PdpNotifySheet } from "../pdp-notify-sheet";
 import { PdpToast } from "../pdp-toast";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
-import type { TabbyColorOption } from "../pdp-tabby-colors";
+import { splitCoachColorName, type TabbyColorOption } from "../pdp-tabby-colors";
 import { pdpPillRadiusClass, pdpPressableClass, pdpStrokeCtaClass, pdpType } from "../pdp-type";
-import { PDP_SHEET_PRESENCE_MS } from "../pdp-motion";
-import { useMountTransition } from "../use-mount-transition";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
 import {
   getV3ColorSheetSections,
+  getV5ColorSwatchGroups,
   type V3MaterialEntry,
+  type V5ColorSwatchEntry,
+  type V5ColorSwatchGroup,
 } from "./pdp-v3-color-sheet-sections";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
@@ -105,8 +106,7 @@ function ColorRowSwatch({
         src={swatch}
         widthClass="size-12"
         sizes="48px"
-        zoom={SQUARE_SWATCH_TILE_ZOOM}
-        objectPosition={SQUARE_SWATCH_TILE_FOCAL}
+        {...resolveSquareSwatchFraming(swatch)}
         dimmed={!selectable}
       />
     );
@@ -115,6 +115,7 @@ function ColorRowSwatch({
   return <ColorSwatchCircle fill={fill} sizeClass="size-12" dimmed={!selectable} />;
 }
 
+// fallow-ignore-next-line complexity
 function ColorRow({
   fill,
   swatch,
@@ -201,6 +202,191 @@ function ColorRow({
   );
 }
 
+// fallow-ignore-next-line complexity
+function GroupedColorSwatch({
+  entry,
+  selected,
+  onSelect,
+  onNotify,
+}: {
+  entry: V5ColorSwatchEntry;
+  selected: boolean;
+  onSelect: () => void;
+  onNotify: () => void;
+}) {
+  const { color, materialLabel } = entry;
+  const selectable =
+    color.combinationAvailable && pdpColorIsSelectable(color.availability);
+  const canNotify =
+    color.combinationAvailable && color.availability === "notify";
+  const interactive = selectable || canNotify;
+  const shade = splitCoachColorName(color.name).shade;
+
+  return (
+    <span className="shrink-0">
+      <button
+        type="button"
+        role="option"
+        aria-selected={selected}
+        aria-disabled={!interactive}
+        disabled={!interactive}
+        aria-label={`${shade}, ${materialLabel}${selectable ? "" : `, ${pdpColorAvailabilityLabel(color.availability)}`}`}
+        title={`${shade} · ${materialLabel}`}
+        onClick={selectable ? onSelect : onNotify}
+        className={cn(
+          "relative flex size-14 items-center justify-center rounded-full p-1 transition-[opacity,transform] duration-200 ease-out",
+          selected && "ring-2 ring-black ring-offset-2",
+          interactive ? pdpPressableClass : "cursor-not-allowed opacity-35",
+        )}
+      >
+        <ColorSwatchCircle
+          src={color.swatch}
+          sizeClass="size-12"
+          sizes="48px"
+          {...resolveSquareSwatchFraming(color.swatch)}
+          dimmed={!interactive}
+        />
+        {canNotify ? (
+          <span
+            aria-hidden
+            className="absolute inset-1 flex items-center justify-center rounded-full bg-black/35"
+          >
+            <MaterialIcon name="mail" size={14} className="text-white" />
+          </span>
+        ) : null}
+      </button>
+    </span>
+  );
+}
+
+// fallow-ignore-next-line complexity
+function GroupedColorSwatchRails({
+  groups,
+  selectedStyleId,
+  selectedColorId,
+  onSelect,
+  onNotify,
+}: {
+  groups: V5ColorSwatchGroup[];
+  selectedStyleId: V5ColorSwatchEntry["styleId"];
+  selectedColorId: string;
+  onSelect: (entry: V5ColorSwatchEntry) => void;
+  onNotify: (name: string) => void;
+}) {
+  const initiallySelectedGroup =
+    groups.find((group) =>
+      group.entries.some((entry) => entry.styleId === selectedStyleId),
+    )?.id ?? groups[0]?.id;
+  const [activeGroupId, setActiveGroupId] = useState(initiallySelectedGroup);
+  const activeGroup =
+    groups.find((group) => group.id === activeGroupId) ?? groups[0];
+
+  if (!activeGroup) {
+    return null;
+  }
+
+  const styleGroups = activeGroup.entries.reduce<
+    Array<{
+      styleId: V5ColorSwatchEntry["styleId"];
+      label: string;
+      entries: V5ColorSwatchEntry[];
+    }>
+  >((result, entry) => {
+    const current = result.at(-1);
+    if (current?.styleId === entry.styleId) {
+      current.entries.push(entry);
+      return result;
+    }
+
+    result.push({
+      styleId: entry.styleId,
+      label: entry.materialLabel,
+      entries: [entry],
+    });
+    return result;
+  }, []);
+
+  return (
+    <div className="border-t border-neutral-100 py-4">
+      <div
+        role="tablist"
+        aria-label="Color groups"
+        className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {groups.map((group) => {
+          const active = group.id === activeGroup.id;
+          return (
+            <button
+              key={group.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              aria-controls={`color-group-${group.id}`}
+              onClick={() => setActiveGroupId(group.id)}
+              className={cn(
+                "min-h-10 shrink-0 rounded-full px-4 py-2 transition-[background-color,color] duration-200 ease-out",
+                pdpType.micro,
+                active
+                  ? "bg-black text-white"
+                  : "bg-neutral-100 text-neutral-700",
+                pdpPressableClass,
+              )}
+            >
+              {group.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <section
+        id={`color-group-${activeGroup.id}`}
+        role="tabpanel"
+        aria-label={activeGroup.label}
+      >
+        <ul
+          role="listbox"
+          aria-label={activeGroup.label}
+          className="-mx-3 m-0 flex min-w-0 list-none overflow-x-auto overscroll-x-contain px-3 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {styleGroups.map((styleGroup, groupIndex) => (
+            <li
+              key={styleGroup.styleId}
+              role="presentation"
+              className={cn(
+                "flex shrink-0 items-center gap-2",
+                groupIndex > 0 &&
+                  "ml-3 border-l border-neutral-300 pl-3",
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "max-w-16 shrink-0 text-pretty text-neutral-500",
+                  pdpType.micro,
+                )}
+              >
+                {styleGroup.label}
+              </span>
+              {styleGroup.entries.map((entry, index) => (
+                <GroupedColorSwatch
+                  key={`${entry.styleId}-${entry.color.id}-${index}`}
+                  entry={entry}
+                  selected={
+                    entry.styleId === selectedStyleId &&
+                    entry.color.id === selectedColorId
+                  }
+                  onSelect={() => onSelect(entry)}
+                  onNotify={() => onNotify(entry.color.name)}
+                />
+              ))}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
 const MATERIAL_STATUS_LABEL: Record<V3MaterialEntry["status"], string> = {
   current: "In stock",
   "in-stock": "In stock",
@@ -208,6 +394,7 @@ const MATERIAL_STATUS_LABEL: Record<V3MaterialEntry["status"], string> = {
   "unavailable-in-color": "Not available in selected color",
 };
 
+// fallow-ignore-next-line complexity
 function MaterialRow({
   material,
   onSelect,
@@ -290,6 +477,7 @@ function MaterialRow({
  * Tabby variant context directly so both the docked and floating buy bars share
  * one sheet. Tabby-only — callers fall back to `PdpColorSheet` otherwise.
  */
+// fallow-ignore-next-line complexity
 export function PdpV3ColorSheet({
   open,
   onClose,
@@ -305,11 +493,8 @@ export function PdpV3ColorSheet({
     hideColorSheetSizePrice,
     flatColorSheet,
     hideInStockColorLabel,
-    exploreFamilyColorSheetLabel,
   } = getPdpVersionConfig(version);
-  const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  const sheetOpen = transition.state === "open";
+  const mounted = useOverlayDismiss(open, onClose);
   const ignoreBackdropCloseRef = useRef(false);
   const [popularExpanded, setPopularExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
@@ -331,13 +516,19 @@ export function PdpV3ColorSheet({
     };
   }, [open]);
 
-  if (!overlayReady || !transition.mounted || !tabby || typeof document === "undefined" || !document.body) {
+  if (!mounted || !tabby || typeof document === "undefined" || !document.body) {
     return null;
   }
 
   const { popularColors, materials, sizes } = getV3ColorSheetSections(tabby, {
     demoPopularColorStates,
   });
+  const groupedColorSwatches = flatColorSheet
+    ? getV5ColorSwatchGroups(tabby.size)
+    : [];
+  const selectedColor = popularColors.find(
+    (color) => color.id === tabby.selectedColorId,
+  );
 
   const visiblePopular = popularExpanded
     ? popularColors
@@ -355,6 +546,18 @@ export function PdpV3ColorSheet({
     }
 
     tabby.setSelectedColorId(color.id);
+    onClose();
+  };
+
+  const handleGroupedColorSelect = (entry: V5ColorSwatchEntry) => {
+    if (
+      !entry.color.combinationAvailable ||
+      !pdpColorIsSelectable(entry.color.availability)
+    ) {
+      return;
+    }
+
+    tabby.selectColorInStyle(entry.styleId, entry.color.id);
     onClose();
   };
 
@@ -395,25 +598,25 @@ export function PdpV3ColorSheet({
         }}
       />
 
-      <div className={pdpBottomSheetOverlayClass({ open: sheetOpen })} aria-hidden={!sheetOpen}>
+      <div className={pdpBottomSheetOverlayClass({ open })} aria-hidden={!open}>
         <button
           type="button"
           aria-label="Close color picker"
-          className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+          className={pdpBottomSheetBackdropClass()}
           onClick={() => {
             if (ignoreBackdropCloseRef.current) {
               return;
             }
             onClose();
           }}
-          tabIndex={sheetOpen ? 0 : -1}
+          tabIndex={open ? 0 : -1}
         />
 
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className={pdpBottomSheetPanelClass({ open: sheetOpen })}
+          className={pdpBottomSheetPanelClass({ open })}
         >
           <div className={pdpBottomSheetHeaderClass}>
             <div className={pdpBottomSheetGrabHandleClass} />
@@ -437,7 +640,9 @@ export function PdpV3ColorSheet({
                 )}
               >
                 <h2 id={titleId} className={cn("m-0", pdpType.headline)}>
-                  Choose color
+                  {flatColorSheet && selectedColor
+                    ? `Color: ${splitCoachColorName(selectedColor.name).shade}`
+                    : "Choose color"}
                 </h2>
                 {!hideColorSheetSizePrice ? (
                   <span className={cn("shrink-0 text-neutral-500", pdpType.label)}>
@@ -447,34 +652,13 @@ export function PdpV3ColorSheet({
               </div>
 
               {flatColorSheet ? (
-                <ul
-                  role="listbox"
-                  aria-label="Colors"
-                  className="m-0 flex list-none flex-col border-t border-neutral-100 pt-2"
-                >
-                  {popularColors.map((color) => (
-                    <ColorRow
-                      key={color.id}
-                      fill={color.chromeSample}
-                      swatch={color.swatch}
-                      usePhotoSwatch={flatColorSheet}
-                      name={color.name}
-                      availability={color.availability}
-                      isSelected={
-                        color.id === tabby.selectedColorId &&
-                        color.combinationAvailable
-                      }
-                      combinationAvailable={color.combinationAvailable}
-                      hideInStockLabel={hideInStockColorLabel}
-                      onSelect={() => handleColorSelect(color)}
-                      onNotify={
-                        color.availability === "notify"
-                          ? () => setNotifyLabel(color.name)
-                          : undefined
-                      }
-                    />
-                  ))}
-                </ul>
+                <GroupedColorSwatchRails
+                  groups={groupedColorSwatches}
+                  selectedStyleId={tabby.styleId}
+                  selectedColorId={tabby.selectedColorId}
+                  onSelect={handleGroupedColorSelect}
+                  onNotify={setNotifyLabel}
+                />
               ) : (
                 <>
               <section aria-label="Popular colors" className="border-t border-neutral-100 pt-4">
@@ -539,19 +723,10 @@ export function PdpV3ColorSheet({
               </section>
 
               <section
-                aria-label={
-                  exploreFamilyColorSheetLabel ? "Explore the Family" : "Bag size"
-                }
+                aria-label="Bag size"
                 className="mt-4 border-t border-neutral-100 pb-2 pt-4"
               >
-                {exploreFamilyColorSheetLabel ? (
-                  /* No `capitalize` — keeps the lowercase "the" in the label. */
-                  <p className="mb-3 font-extended text-xs leading-none text-neutral-500">
-                    Explore the Family
-                  </p>
-                ) : (
-                  <p className={cn("mb-3", SECTION_LABEL_CLASS)}>Bag Size</p>
-                )}
+                <p className={cn("mb-3", SECTION_LABEL_CLASS)}>Bag Size</p>
                 <ul className="-mx-3 flex list-none gap-2 overflow-x-auto px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {sizes.map((size) => {
                     const isCurrent = size.option.size === tabby.size;

@@ -1,19 +1,32 @@
 "use client";
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-import { ColorSwatchTile, resolveSquareSwatchFraming } from "./pdp-color-swatch";
 import type { PdpColor } from "./pdp-data";
 import { pdpColorAvailabilityLabel, pdpColorIsSelectable } from "./pdp-data";
 import type { TabbyColorOption } from "./pdp-tabby-colors";
-import { pdpPressableIconClass, pdpType } from "./pdp-type";
+import {
+  pdpPressableIconClass,
+  pdpTextLinkCtaClass,
+  pdpTextLinkCtaLabelClass,
+  pdpType,
+} from "./pdp-type";
 import { useDragToScroll } from "./use-infinite-centered-carousel";
-import { getPdpVersionConfig } from "./version/pdp-version-config";
-import { usePdpVersion } from "./version/pdp-version-context";
 
-type CompactColorDot = PdpColor | TabbyColorOption;
+type CompactColorDot = (PdpColor | TabbyColorOption) & {
+  /** Unique id when the rail includes the same color across multiple materials. */
+  selectionId?: string;
+  /** Accessible label with any material context needed to distinguish the option. */
+  selectionLabel?: string;
+  /** Visible label used to separate material groups in a full rail. */
+  groupLabel?: string;
+};
+
+function getSelectionId(color: CompactColorDot): string {
+  return color.selectionId ?? color.id;
+}
 
 function isCombinationAvailable(color: CompactColorDot): boolean {
   return !("combinationAvailable" in color) || color.combinationAvailable;
@@ -52,23 +65,24 @@ type PdpCompactColorDotsProps = {
   selectedId: string;
   previewCount?: number;
   moreCountOverride?: number;
+  /** Full-width scrollable color rail vs compact +N row */
+  variant?: "compact" | "rail";
+  /**
+   * Compact only — the whole preview (swatches + +N) opens the tray instead
+   * of selecting a color inline.
+   */
+  openOnInteract?: boolean;
+  /** Label for the openOnInteract text link (defaults to "+ Colors"). */
+  linkLabel?: string;
   /** Tap a preview swatch to select that color */
   onSelect: (id: string) => void;
-  /** Tap +N to open the full color tray (dot/swatch only) */
+  /** Tap +N to open the full color tray (compact only) */
   onOpenSheet: () => void;
-  /**
-   * "dot" — tiny availability cue with +N chips (default). "swatch" — large
-   * tappable swatches with a halo ring on the selected color (v6 docked hero
-   * footer). "rail" — full-width scrollable 32px color rail (docked land CTA).
-   * "compact-swatch" — small full-bag photo tiles + +N (v7 land).
-   * "land-dock" — large scrollable full-bag tiles, half-cropped by docked CTA.
-   */
-  variant?: "dot" | "swatch" | "rail" | "compact-swatch" | "land-dock";
   className?: string;
 };
 
 /**
- * Color preview — compact +N chips, large swatch row, or a scrollable rail.
+ * Color preview — compact +N chips, or a full scrollable rail.
  */
 // fallow-ignore-next-line complexity
 export function PdpCompactColorDots({
@@ -76,14 +90,15 @@ export function PdpCompactColorDots({
   selectedId,
   previewCount = 3,
   moreCountOverride = 0,
+  variant = "compact",
+  openOnInteract = false,
+  linkLabel,
   onSelect,
   onOpenSheet,
-  variant = "dot",
   className,
 }: PdpCompactColorDotsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useDragToScroll(scrollRef);
-  const { useFullBagColorSwatches } = getPdpVersionConfig(usePdpVersion());
 
   if (colors.length <= 1) {
     return null;
@@ -96,67 +111,68 @@ export function PdpCompactColorDots({
         role="listbox"
         aria-label="Choose color"
         className={cn(
-          "flex min-w-0 w-full max-w-full items-center gap-2 overflow-x-auto overscroll-x-contain",
-          "px-1 py-1.5",
+          // Horizontal only — hit-area rings/padding must not create vertical play.
+          "flex min-w-0 w-full max-w-full items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-2",
           "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           className,
         )}
       >
-        {/* fallow-ignore-next-line complexity */}
-        {colors.map((color) => {
-          const isSelected = color.id === selectedId;
+        {colors.map(
+          // fallow-ignore-next-line complexity
+          (color, index) => {
+          const selectionId = getSelectionId(color);
+          const isSelected = selectionId === selectedId;
           const isSelectable = isInStockForPreview(color);
+          const startsGroup =
+            Boolean(color.groupLabel) &&
+            (index === 0 || colors[index - 1]?.groupLabel !== color.groupLabel);
 
           return (
-            <button
-              key={color.id}
-              type="button"
-              role="option"
-              aria-selected={isSelected}
-              aria-disabled={!isSelectable}
-              disabled={!isSelectable}
-              onClick={() => {
-                if (isSelectable) {
-                  onSelect(color.id);
-                }
-              }}
-              aria-label={
-                isSelectable
-                  ? `Select ${color.name}`
-                  : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
-              }
-              className={cn(
-                "relative shrink-0 transition-[box-shadow,opacity] duration-200 ease-out",
-                "before:absolute before:inset-[-8px] before:content-['']",
-                useFullBagColorSwatches ? "size-9 rounded-sm" : "size-8 rounded-full",
-                isSelected
-                  ? useFullBagColorSwatches
-                    ? "border-2 border-black"
-                    : "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]"
-                  : "ring-1 ring-black/10",
-                isSelectable && pdpPressableIconClass,
-                !isSelectable && "cursor-not-allowed opacity-40",
-              )}
-            >
-              {useFullBagColorSwatches ? (
-                <ColorSwatchTile
-                  src={color.swatch || undefined}
-                  fill={color.swatch ? undefined : (color.chromeSample ?? "#d4d4d4")}
-                  widthClass="size-full"
-                  sizes="36px"
-                  fillParent
-                  {...(color.swatch ? resolveSquareSwatchFraming(color.swatch) : {})}
-                />
-              ) : (
+            <Fragment key={selectionId}>
+              {startsGroup && index > 0 ? (
                 <span
-                  aria-hidden
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-                />
-              )}
-            </button>
+                  role="presentation"
+                  className="font-extended ml-2 shrink-0 border-l border-neutral-300 pl-3 text-[10px] leading-none text-neutral-500"
+                >
+                  {color.groupLabel}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={!isSelectable}
+                disabled={!isSelectable}
+                onClick={() => {
+                  if (isSelectable) {
+                    onSelect(selectionId);
+                  }
+                }}
+                aria-label={
+                  isSelectable
+                    ? `Select ${color.selectionLabel ?? color.name}`
+                    : `${color.selectionLabel ?? color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
+                }
+                className={cn(
+                  "relative size-7 shrink-0 rounded-full transition-[box-shadow,opacity] duration-200 ease-out",
+                  "before:absolute before:inset-[-8px] before:content-['']",
+                  // Always reserve the same shadow stack so selection never
+                  // shifts neighbors / material labels in the flex rail.
+                  "shadow-[0_0_0_1px_rgba(0,0,0,0.1)]",
+                  isSelected &&
+                    "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]",
+                  isSelectable && pdpPressableIconClass,
+                  !isSelectable && "cursor-not-allowed opacity-40",
+                )}
+                style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
+              />
+            </Fragment>
           );
         })}
+        {/* Flex overflow ignores padding-inline-end in WebKit — spacer clears the last swatch. */}
+        <span aria-hidden className="w-5 shrink-0" />
       </div>
     );
   }
@@ -167,206 +183,54 @@ export function PdpCompactColorDots({
     previewCount,
   );
   const moreCount = moreCountOverride > 0 ? moreCountOverride : hiddenCount;
-  const selectedColor =
-    colors.find((color) => color.id === selectedId) ?? colors[0];
 
-  if (variant === "swatch") {
+  if (openOnInteract) {
+    const selected =
+      colors.find((color) => color.id === selectedId) ?? previewColors[0];
+    const selectedName = selected?.name ?? "Color";
+    const label = linkLabel ?? "+ Colors";
+
     return (
       <button
         type="button"
         onClick={onOpenSheet}
         aria-haspopup="dialog"
-        aria-label={
-          moreCount > 0
-            ? `${selectedColor.name}. ${colors.length} colors available. View all colors.`
-            : `${selectedColor.name}. View all colors.`
-        }
+        aria-label={`${label}. Color: ${selectedName}. Open color picker`}
         className={cn(
-          "inline-flex items-center gap-1.5",
-          pdpPressableIconClass,
+          "group inline-flex max-w-full items-center gap-1.5",
+          pdpTextLinkCtaClass,
           className,
         )}
       >
-        <span aria-hidden className="flex items-center gap-1.5">
-          {previewColors.map((color) =>
-            color.id === selectedId ? (
-              <span
-                key={color.id}
-                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-neutral-200"
-              >
-                <span
-                  className="size-5 rounded-full"
-                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-                />
-              </span>
-            ) : (
-              <span
-                key={color.id}
-                className="size-[30px] shrink-0 rounded-full"
-                style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-              />
-            ),
+        <span
+          aria-hidden
+          className="size-3.5 shrink-0 rounded-full ring-1 ring-black/15"
+          style={{ backgroundColor: selected?.chromeSample ?? "#d4d4d4" }}
+        />
+        <span
+          className={cn(
+            "min-w-0 truncate",
+            pdpType.body,
+            "leading-none",
+            pdpTextLinkCtaLabelClass,
           )}
+        >
+          {label}
         </span>
-        {moreCount > 0 ? (
-          <span className="font-extended text-sm tracking-[0.2px] text-neutral-900">
-            +{moreCount}
-          </span>
-        ) : null}
       </button>
     );
   }
 
-  if (variant === "land-dock") {
-    return (
-      <div
-        ref={scrollRef}
-        role="listbox"
-        aria-label="Choose color"
-        className={cn(
-          "pdp-v7-land-dock-swatches flex min-w-0 w-full max-w-full items-center gap-2 overflow-x-auto overscroll-x-contain",
-          "px-0.5 py-0.5",
-          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-          className,
-        )}
-      >
-        {colors.map((color) => {
-          const isSelected = color.id === selectedId;
-          const isSelectable = isInStockForPreview(color);
-
-          return (
-            <button
-              key={color.id}
-              type="button"
-              role="option"
-              aria-selected={isSelected}
-              aria-disabled={!isSelectable}
-              disabled={!isSelectable}
-              onClick={() => {
-                if (isSelectable) {
-                  onSelect(color.id);
-                }
-              }}
-              aria-label={
-                isSelectable
-                  ? `Select ${color.name}`
-                  : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
-              }
-              className={cn(
-                "relative size-14 shrink-0 overflow-hidden rounded-sm transition-[border-color,opacity] duration-200 ease-out",
-                "before:absolute before:inset-[-8px] before:content-['']",
-                isSelected ? "border-2 border-black" : "ring-1 ring-black/10",
-                isSelectable && pdpPressableIconClass,
-                !isSelectable && "cursor-not-allowed opacity-40",
-              )}
-            >
-              {useFullBagColorSwatches && color.swatch ? (
-                <ColorSwatchTile
-                  src={color.swatch}
-                  widthClass="size-full"
-                  sizes="56px"
-                  fillParent
-                  {...resolveSquareSwatchFraming(color.swatch)}
-                />
-              ) : (
-                <span
-                  aria-hidden
-                  className="absolute inset-0"
-                  style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (variant === "compact-swatch") {
-    return (
-      <div
-        role="listbox"
-        aria-label="Choose color"
-        className={cn("inline-flex min-h-[28px] items-center gap-2", className)}
-      >
-        <span className="flex items-center gap-1.5">
-          {previewColors.map((color) => {
-            const isSelected = color.id === selectedId;
-            const isSelectable = isInStockForPreview(color);
-
-            return (
-              <button
-                key={color.id}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                aria-disabled={!isSelectable}
-                disabled={!isSelectable}
-                onClick={() => {
-                  if (isSelectable) {
-                    onSelect(color.id);
-                  }
-                }}
-                aria-label={
-                  isSelectable
-                    ? `Select ${color.name}`
-                    : `${color.name}, ${pdpColorAvailabilityLabel(color.availability)}`
-                }
-                className={cn(
-                  "relative size-7 shrink-0 overflow-hidden rounded-sm transition-[border-color,opacity] duration-200 ease-out",
-                  "before:absolute before:inset-[-8px] before:content-['']",
-                  isSelected ? "border-2 border-black" : "ring-1 ring-black/10",
-                  isSelectable && pdpPressableIconClass,
-                  !isSelectable && "cursor-not-allowed opacity-40",
-                )}
-              >
-                {useFullBagColorSwatches && color.swatch ? (
-                  <ColorSwatchTile
-                    src={color.swatch}
-                    widthClass="size-full"
-                    sizes="28px"
-                    fillParent
-                    {...resolveSquareSwatchFraming(color.swatch)}
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{ backgroundColor: color.chromeSample ?? "#d4d4d4" }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </span>
-        {moreCount > 0 ? (
-          <button
-            type="button"
-            onClick={onOpenSheet}
-            aria-haspopup="dialog"
-            aria-label={`View ${moreCount} more colors`}
-            className={cn(
-              "shrink-0 text-neutral-900",
-              pdpType.micro,
-              pdpPressableIconClass,
-            )}
-          >
-            +{moreCount}
-          </button>
-        ) : null}
-      </div>
-    );
-  }
-
-  if (variant === "dot") {
-    return (
+  return (
     <div
       role="listbox"
       aria-label="Choose color"
       className={cn("inline-flex min-h-[28px] items-center gap-2", className)}
     >
       <span className="flex items-center gap-2">
-        {previewColors.map((color) => {
+        {previewColors.map(
+          // fallow-ignore-next-line complexity
+          (color) => {
           const isSelected = color.id === selectedId;
           const isSelectable = isInStockForPreview(color);
 
@@ -409,15 +273,14 @@ export function PdpCompactColorDots({
           aria-haspopup="dialog"
           aria-label={`View ${moreCount} more colors`}
           className={cn(
-            "shrink-0 text-neutral-900",
+            "shrink-0 text-neutral-900 tabular-nums",
             pdpType.micro,
             pdpPressableIconClass,
           )}
         >
-          +{moreCount}
+          + {moreCount}
         </button>
       ) : null}
     </div>
   );
-  }
 }

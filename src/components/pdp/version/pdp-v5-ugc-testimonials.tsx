@@ -313,7 +313,7 @@ function useTestimonialSlideMotion({
 }
 
 /**
- * v5 — "What customers are saying" band (Figma node 409:460).
+ * v5 — "Out in the wild" band.
  *
  * Left-aligned single testimonial per topic: title, topic tabs, one large
  * media card and social attribution. Warm beige band.

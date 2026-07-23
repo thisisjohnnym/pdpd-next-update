@@ -1,18 +1,15 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 
 /**
- * Marks `<html>` with data-pdp-version="v7" so v7-scoped CSS reaches portaled
- * chrome (floating CTA) that mounts on document.body.
+ * Marks `<html>` with data-pdp-version="v7" so v7-scoped CSS also reaches
+ * portaled chrome (floating CTA) that mounts on document.body.
  */
 export function PdpV7RootMarker() {
-  useLayoutEffect(() => {
+  useEffect(() => {
     document.documentElement.setAttribute("data-pdp-version", "v7");
     return () => {
-      if (typeof location !== "undefined" && /^\/v7(\/|$)/.test(location.pathname)) {
-        return;
-      }
       document.documentElement.removeAttribute("data-pdp-version");
     };
   }, []);

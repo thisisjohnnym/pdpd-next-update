@@ -4,104 +4,91 @@ import { cn } from "@/lib/cn";
 
 import { PDP_REVIEWS_SUMMARY } from "../pdp-data";
 import { PdpStarRating } from "../pdp-review-comment";
-import { pdpChapterAnchorId } from "../pdp-section-chapters";
-import { pdpPressableClass, pdpType } from "../pdp-type";
-import { PDP_CHROME_HEADER_OFFSET } from "../use-pdp-chrome-mode";
+import {
+  pdpPillRadiusClass,
+  pdpPressableClass,
+  pdpType,
+} from "../pdp-type";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
+import { PdpV8Reviews } from "./pdp-v8-reviews";
 
 type PdpV5ReviewTeaserProps = {
   className?: string;
-  /** v7 meta strip — full-width row with trailing affordance */
-  metaStripRow?: boolean;
-  showDivider?: boolean;
+  onViewReviews: () => void;
 };
 
-function scrollToReviews(behavior: ScrollBehavior) {
-  const el = document.getElementById(pdpChapterAnchorId("reviews"));
-  if (!el) {
-    return;
-  }
-  const top =
-    el.getBoundingClientRect().top + window.scrollY - PDP_CHROME_HEADER_OFFSET;
-  window.scrollTo({ top: Math.max(0, top), behavior });
-}
+/** Soft insight tray — distinct from the plain store-pickup action row. */
+const reviewCardClass =
+  "overflow-hidden rounded-none border-0 bg-neutral-50 shadow-none outline-none";
+
+/** Short praise line — land teaser only (not pdp-data). */
+const PRAISE_LINE =
+  "Loved for its soft leather, roomy interior, and comfortable carry.";
 
 /**
- * Compact ratings summary under the hero land — full star row, score/count,
- * and a recommend line. Metadata module (not a muted text-link CTA); scrolls
- * to the reviews chapter.
+ * Reviews card — rating summary, compact praise line, then open highlights.
+ * v8 (`useCarouselReviews`): DoorDash-style horizontal carousel teaser.
  */
 export function PdpV5ReviewTeaser({
   className,
-  metaStripRow = false,
-  showDivider = false,
+  onViewReviews,
 }: PdpV5ReviewTeaserProps) {
-  const { showSubtleReviewTeaser } = getPdpVersionConfig(usePdpVersion());
-  const { average, count, recommendPercent } = PDP_REVIEWS_SUMMARY;
+  const { showSubtleReviewTeaser, squareButtonCorners, useCarouselReviews } =
+    getPdpVersionConfig(usePdpVersion());
+  const { average, count } = PDP_REVIEWS_SUMMARY;
 
   if (!showSubtleReviewTeaser) {
     return null;
   }
 
-  const handleClick = () => {
-    scrollToReviews("smooth");
-    // Lazy sections between here and reviews can mount mid-scroll and shift
-    // layout — re-resolve once it settles so we land precisely.
-    window.setTimeout(() => scrollToReviews("smooth"), 420);
-  };
+  if (useCarouselReviews) {
+    return (
+      <div className={cn("w-full bg-white", className)}>
+        <PdpV8Reviews onReadAll={onViewReviews} />
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        "flex justify-start",
-        metaStripRow && showDivider && "border-t border-neutral-200/80",
+        reviewCardClass,
+        "flex w-full flex-col gap-3 px-4 py-4 text-left",
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={handleClick}
-        aria-label={`${average.toFixed(1)} out of 5 stars, ${count} reviews, ${recommendPercent}% of owners recommend`}
-        className={cn(
-          metaStripRow
-            ? "flex min-h-[44px] w-full items-center justify-between gap-3 px-3 py-2.5 text-left active:bg-neutral-100/80"
-            : "flex w-full flex-col items-start gap-1 py-1 text-left",
-          "transition-opacity active:opacity-70",
-          pdpPressableClass,
-        )}
+      <div
+        className="flex flex-wrap items-center gap-x-1.5 gap-y-1"
+        aria-label={`${average.toFixed(1)} out of 5 stars, ${count} reviews`}
       >
+        <PdpStarRating rating={average} size={16} />
         <span
           className={cn(
-            metaStripRow
-              ? "flex min-w-0 flex-1 items-center gap-2"
-              : "flex flex-wrap items-center gap-x-2 gap-y-1",
+            pdpType.label,
+            "font-extended tabular-nums text-black",
           )}
         >
-          <PdpStarRating rating={average} size={16} />
-          <span
-            className={cn(
-              pdpType.label,
-              "font-extended tabular-nums text-neutral-900",
-            )}
-          >
-            {average.toFixed(1)} · {count} reviews
-          </span>
+          {average.toFixed(1)} · {count} Reviews
         </span>
-        {metaStripRow ? (
-          <span
-            className={cn(
-              pdpType.micro,
-              "shrink-0 font-extended text-neutral-600",
-            )}
-          >
-            View reviews
-          </span>
-        ) : (
-          <span className={cn(pdpType.micro, "text-neutral-500")}>
-            {recommendPercent}% of owners recommend
-          </span>
+      </div>
+
+      <p className={cn(pdpType.label, "m-0 text-pretty text-neutral-600")}>
+        {PRAISE_LINE}
+      </p>
+
+      <button
+        type="button"
+        onClick={onViewReviews}
+        aria-label={`See what customers say, ${count} reviews`}
+        className={cn(
+          "font-extended flex h-10 w-full items-center justify-center border border-neutral-200 bg-white px-4 text-center text-black transition-colors active:bg-neutral-50",
+          pdpPillRadiusClass(squareButtonCorners),
+          pdpPressableClass,
+          pdpType.label,
         )}
+      >
+        <span className="inline-block translate-y-px">See what customers say</span>
       </button>
     </div>
   );

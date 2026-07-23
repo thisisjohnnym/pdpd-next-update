@@ -14,7 +14,9 @@ import {
   HERO_NAV_PADDING_INLINE_V4_PX,
   HERO_NAV_PADDING_TOP_V4_PX,
 } from "./pdp-hero-tokens";
+import { PdpSiteSwitcherStrip } from "./pdp-site-switcher-strip";
 import { pdpPressableIconClass } from "./pdp-type";
+import { useScrollSnapshot } from "./use-coalesced-scroll";
 import { useScrollNavVisibility } from "./use-scroll-nav-visibility";
 import { useHeroRevealApplier } from "./use-pdp-hero-reveal";
 import { PdpIconSwap } from "./pdp-icon-swap";
@@ -25,7 +27,10 @@ import { usePdpVersion } from "./version/pdp-version-context";
 
 const HEADER_ICON_SIZE = 24;
 const HEADER_ROW_HEIGHT = 24;
+/** Site switcher only peeks when the page is effectively at the top. */
+const SITE_SWITCHER_TOP_THRESHOLD_PX = 12;
 
+// fallow-ignore-next-line complexity
 export function PdpOverlayHeader({
   bagCount = 0,
   menuOpen = false,
@@ -42,12 +47,17 @@ export function PdpOverlayHeader({
   const hugRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const visible = useScrollNavVisibility();
+  const { scrollY } = useScrollSnapshot();
   const contrastZones = useHeaderContrast(headerRef);
   const chromeTransitionClass = reducedMotion
     ? undefined
     : HERO_CHROME_COLOR_TRANSITION_CLASS;
-  const { useV4ModuleSpacing } = getPdpVersionConfig(usePdpVersion());
+  const { useV4ModuleSpacing, showSlimSiteSwitcher } = getPdpVersionConfig(
+    usePdpVersion(),
+  );
   const iconHit = useV4ModuleSpacing ? HERO_NAV_ICON_HIT_V4_PX : HEADER_ROW_HEIGHT;
+  const siteSwitcherExpanded =
+    showSlimSiteSwitcher && scrollY <= SITE_SWITCHER_TOP_THRESHOLD_PX;
 
   // Ride below the brand switcher while it is revealed, then sit at the top.
   useHeroRevealApplier((reveal) => {
@@ -138,6 +148,12 @@ export function PdpOverlayHeader({
     </div>
   );
 
+  // When the strip is expanded it owns safe-area; when tucked, the logo row does.
+  const headerRowPaddingTop =
+    showSlimSiteSwitcher && siteSwitcherExpanded
+      ? HERO_NAV_PADDING_TOP_V4_PX
+      : `calc(var(--pdp-safe-area-top) + ${HERO_NAV_PADDING_TOP_V4_PX}px)`;
+
   return (
     <header
       ref={headerRef}
@@ -155,15 +171,36 @@ export function PdpOverlayHeader({
           paddingRight: "var(--hero-inset, 0px)",
         }}
       >
+        {showSlimSiteSwitcher ? (
+          <div
+            className={cn(
+              "pointer-events-auto grid transition-[grid-template-rows] ease-out",
+              reducedMotion ? "duration-0" : "duration-300",
+              siteSwitcherExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+            )}
+            aria-hidden={!siteSwitcherExpanded}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <PdpSiteSwitcherStrip
+                includeSafeArea
+                inert={!siteSwitcherExpanded}
+              />
+            </div>
+          </div>
+        ) : null}
+
         {useV4ModuleSpacing ? (
           // Hero chrome is edge-to-edge with bespoke padding (docs/design-system/grid.md),
           // so v4 skips PageGrid and uses the Paper r5 `M15-0` inset directly.
           <div
-            className="pointer-events-auto relative"
+            className={cn(
+              "pointer-events-auto relative",
+              !reducedMotion && "transition-[padding-top] duration-300 ease-out",
+            )}
             style={{
               paddingLeft: HERO_NAV_PADDING_INLINE_V4_PX,
               paddingRight: HERO_NAV_PADDING_INLINE_V4_PX,
-              paddingTop: `calc(var(--pdp-safe-area-top) + ${HERO_NAV_PADDING_TOP_V4_PX}px)`,
+              paddingTop: headerRowPaddingTop,
             }}
           >
             {headerRow}
@@ -171,7 +208,12 @@ export function PdpOverlayHeader({
         ) : (
           <PageGrid
             fullWidth
-            className="pointer-events-auto relative pb-2.5 pt-[calc(var(--pdp-safe-area-top)+0.75rem)]"
+            className={cn(
+              "pointer-events-auto relative pb-2.5",
+              showSlimSiteSwitcher && siteSwitcherExpanded
+                ? "pt-3"
+                : "pt-[calc(var(--pdp-safe-area-top)+0.75rem)]",
+            )}
           >
             <GridItem mobile={12} desktop={24}>
               {headerRow}

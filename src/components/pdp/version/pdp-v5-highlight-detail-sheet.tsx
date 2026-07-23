@@ -16,7 +16,6 @@ import {
   pdpBottomSheetPanelClass,
 } from "../pdp-bottom-sheet";
 import { pdpSheetHeadingClass } from "../pdp-module-section";
-import { PDP_SHEET_PRESENCE_MS } from "../pdp-motion";
 import { pdpType } from "../pdp-type";
 import { useMountTransition } from "../use-mount-transition";
 import { useOverlayDismiss } from "../use-overlay-dismiss";
@@ -47,7 +46,6 @@ type PdpV5HighlightDetailSheetProps = {
 };
 
 /** Compact bottom tray — expanded copy for a highlight or closer-look feature. */
-// fallow-ignore-next-line complexity
 export function PdpV5HighlightDetailSheet({
   card,
   open,
@@ -58,10 +56,7 @@ export function PdpV5HighlightDetailSheet({
 }: PdpV5HighlightDetailSheetProps) {
   const titleId = useId();
   const overlayReady = useOverlayDismiss(open, onClose);
-  const transition = useMountTransition(open, PDP_SHEET_PRESENCE_MS);
-  // Drive CSS from transition.state (not the open prop) so the sheet mounts in
-  // the closed pose, then flips open after two frames — otherwise enter pops.
-  const sheetOpen = transition.state === "open";
+  const transition = useMountTransition(open, 300);
   const lastCardRef = useRef(card);
   if (card) {
     lastCardRef.current = card;
@@ -78,15 +73,15 @@ export function PdpV5HighlightDetailSheet({
 
   return createPortal(
     <div
-      className={pdpBottomSheetOverlayClass({ open: sheetOpen })}
-      aria-hidden={!sheetOpen}
+      className={pdpBottomSheetOverlayClass({ open })}
+      aria-hidden={!open}
     >
       <button
         type="button"
         aria-label="Close details"
-        className={pdpBottomSheetBackdropClass({ open: sheetOpen })}
+        className={pdpBottomSheetBackdropClass()}
         onClick={onClose}
-        tabIndex={sheetOpen ? 0 : -1}
+        tabIndex={open ? 0 : -1}
       />
 
       <div
@@ -95,7 +90,7 @@ export function PdpV5HighlightDetailSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         className={pdpBottomSheetPanelClass({
-          open: sheetOpen,
+          open,
           maxHeight: maxHeight ?? (hasExtraContent ? "88dvh" : undefined),
         })}
       >

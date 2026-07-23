@@ -4,27 +4,16 @@ type PdpBottomSheetOpen = {
   open: boolean;
 };
 
-/**
- * Full-viewport overlay — tray panels anchor to the bottom edge.
- * Pointer-events only (no opacity) so the white panel never ghost-fades.
- * Open/closed uses Tailwind utilities so drawers cannot stick if custom
- * CSS tokens fail to hot-reload.
- */
+/** Full-viewport overlay — tray panels anchor to the bottom edge */
 export function pdpBottomSheetOverlayClass({ open }: PdpBottomSheetOpen) {
   return cn(
-    "fixed inset-0 z-50 flex items-end overscroll-none",
-    open ? "pointer-events-auto" : "pointer-events-none",
+    "fixed inset-0 z-50 flex items-end overscroll-none transition-opacity duration-300",
+    open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
   );
 }
 
-/** Dim layer behind the tray — opacity only */
-export function pdpBottomSheetBackdropClass({ open }: PdpBottomSheetOpen) {
-  return cn(
-    "absolute inset-0 bg-black/45",
-    "transition-[opacity] duration-[var(--pdp-duration-backdrop,320ms)] ease-[var(--pdp-ease-emphasized,cubic-bezier(0.2,0,0,1))]",
-    "motion-reduce:transition-none",
-    open ? "opacity-100" : "opacity-0",
-  );
+export function pdpBottomSheetBackdropClass() {
+  return "absolute inset-0 bg-black/45 transition-opacity";
 }
 
 type PdpBottomSheetPanelOptions = PdpBottomSheetOpen & {
@@ -67,7 +56,7 @@ const PDP_BOTTOM_SHEET_VIEWPORT_FRAME_STABLE_HEIGHT_CLASS = {
 const PDP_BOTTOM_SHEET_PANEL_SHADOW =
   "shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_-12px_28px_-4px_rgba(0,0,0,0.08)]";
 
-/** Edge-to-edge on mobile; capped and centered from lg — translate only, always opaque */
+/** Edge-to-edge on mobile; capped and centered from lg */
 export function pdpBottomSheetPanelClass({
   open,
   maxHeight = "85dvh",
@@ -83,13 +72,10 @@ export function pdpBottomSheetPanelClass({
       : PDP_BOTTOM_SHEET_MAX_HEIGHT_CLASS[maxHeight];
 
   return cn(
-    "font-extended relative flex min-h-0 w-full max-w-none flex-col overflow-hidden rounded-t-[20px] bg-white lg:mx-auto lg:max-w-[430px]",
+    "font-extended relative flex min-h-0 w-full max-w-none flex-col overflow-hidden rounded-none bg-white transition-transform duration-300 ease-out lg:mx-auto lg:max-w-[430px]",
     PDP_BOTTOM_SHEET_PANEL_SHADOW,
     heightClass,
-    "transition-transform ease-[var(--pdp-ease-settle,cubic-bezier(0.16,1,0.3,1))] motion-reduce:transition-none",
-    open
-      ? "translate-y-0 duration-[var(--pdp-duration-sheet-enter,380ms)]"
-      : "translate-y-full duration-[var(--pdp-duration-sheet-exit,280ms)]",
+    open ? "translate-y-0" : "translate-y-full",
   );
 }
 

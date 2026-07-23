@@ -10,7 +10,12 @@ import { PDP_HERO_STUDIO_BG_CLASS } from "./pdp-hero-framing";
 import { PdpIconSwap } from "./pdp-icon-swap";
 import { pdpPillRadiusClass } from "./pdp-type";
 import { resolveVideoSources } from "./pdp-video-sources";
-import { PDP_HERO_GALLERY_CONTROL_PILL_CLASS, getHeroGalleryControlPositionClass } from "./pdp-hero-gallery-control-shell";
+import {
+  PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS,
+  PDP_HERO_GALLERY_CONTROL_ICON_SIZE,
+  PDP_HERO_GALLERY_CONTROL_PILL_CLASS,
+  getHeroGalleryControlPositionClass,
+} from "./pdp-hero-gallery-control-shell";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { useHeroVideoPlayback } from "./use-hero-video-playback";
@@ -199,6 +204,12 @@ export function PdpGalleryHeroVideo({
   const showControlChrome = showMuteControl || showPlaybackButton;
   const usePillControls = showControlChrome && !isHeroGalleryChrome;
   const showPlaybackInPill = usePillControls && (tapToTogglePlayback || showControls);
+  /** Solo control matches the square + / activate shell; multi-control stays a wide pill. */
+  const useSquareControlShell =
+    usePillControls && !(showPlaybackInPill && showMuteControl);
+  const pillShellClass = useSquareControlShell
+    ? PDP_HERO_GALLERY_CONTROL_ACTIVATE_CLASS
+    : PILL_CONTROL_SHELL_CLASS;
   const playbackOverlayIcon =
     playbackHint ??
     (showFrozenPlayOverlay || showTapPausedOverlay ? "play" : null);
@@ -431,7 +442,7 @@ export function PdpGalleryHeroVideo({
           >
             <div
               className={cn(
-                PILL_CONTROL_SHELL_CLASS,
+                pillShellClass,
                 resolvedControlShellClassName,
                 "pdp-video-controls-pop pdp-video-controls-stagger",
               )}
@@ -446,7 +457,9 @@ export function PdpGalleryHeroVideo({
                   }}
                   aria-label={isPlaying ? "Pause video" : "Play video"}
                   className={cn(
-                    PILL_CONTROL_BUTTON_CLASS,
+                    useSquareControlShell
+                      ? "flex size-full items-center justify-center text-white transition-opacity active:scale-[0.96] active:opacity-75"
+                      : PILL_CONTROL_BUTTON_CLASS,
                     playbackHint &&
                       "motion-safe:animate-[pdp-playback-hint_650ms_ease-out_both]",
                   )}
@@ -454,7 +467,7 @@ export function PdpGalleryHeroVideo({
                   {playbackHint ? (
                     <MaterialIcon
                       name={pillPlaybackIcon}
-                      size={18}
+                      size={PDP_HERO_GALLERY_CONTROL_ICON_SIZE}
                       className="text-white"
                     />
                   ) : (
@@ -463,14 +476,14 @@ export function PdpGalleryHeroVideo({
                       activeIcon={
                         <MaterialIcon
                           name="pause"
-                          size={18}
+                          size={PDP_HERO_GALLERY_CONTROL_ICON_SIZE}
                           className="text-white"
                         />
                       }
                       inactiveIcon={
                         <MaterialIcon
                           name="play_arrow"
-                          size={18}
+                          size={PDP_HERO_GALLERY_CONTROL_ICON_SIZE}
                           className="text-white"
                         />
                       }
@@ -487,11 +500,15 @@ export function PdpGalleryHeroVideo({
                   }}
                   aria-label={isMuted ? "Unmute video" : "Mute video"}
                   aria-pressed={!isMuted}
-                  className={PILL_CONTROL_BUTTON_CLASS}
+                  className={
+                    useSquareControlShell
+                      ? "flex size-full items-center justify-center text-white transition-opacity active:scale-[0.96] active:opacity-75"
+                      : PILL_CONTROL_BUTTON_CLASS
+                  }
                 >
                   <MaterialIcon
                     name={isMuted ? "volume_off" : "volume_up"}
-                    size={18}
+                    size={PDP_HERO_GALLERY_CONTROL_ICON_SIZE}
                     className="text-white"
                   />
                 </button>

@@ -55,11 +55,45 @@ function applyHeroShellLayout(
  * Hero land shell — Phone wrapper + animated hero frame per Paper `6AJ-0` / `64P-0`.
  * See docs/pdp-hero-chrome.md.
  */
-export function PdpHeroShell({ children }: { children: ReactNode }) {
+export function PdpHeroShell({
+  children,
+  /** Let the land grow past the viewport (e.g. expanded color kitchen sink). */
+  allowGrow = false,
+}: {
+  children: ReactNode;
+  allowGrow?: boolean;
+}) {
   const phoneRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
-  const { showBrandSwitcher, heroDockedBuyBar } = getPdpVersionConfig(usePdpVersion());
+  const {
+    showBrandSwitcher,
+    heroDockedBuyBar,
+    showFloatingBuyBar,
+    floatingBuyBarWhenHeroHidden,
+    useCompactBuyBarColorDots,
+  } = getPdpVersionConfig(usePdpVersion());
+  // Persistent floating ATB overlays the viewport bottom — shrink the land so
+  // name / price / color in the docked footer stay above the fold.
+  const clearPersistentAtb =
+    heroDockedBuyBar &&
+    showFloatingBuyBar &&
+    !floatingBuyBarWhenHeroHidden;
+  // Edge-to-edge ATB includes safe-area in --cta-bar-height — don't subtract it twice.
+  const edgeToEdgeAtb = clearPersistentAtb && useCompactBuyBarColorDots;
+
+  const dockedLandHeightClass = edgeToEdgeAtb
+    ? "min-h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px))]"
+    : clearPersistentAtb
+      ? "min-h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px)-var(--pdp-fixed-bottom-offset,0px))]"
+      : "min-h-[var(--pdp-immersive-height,100svh)]";
+
+  const dockedLandFixedClass = edgeToEdgeAtb
+    ? "h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px))] max-h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px))]"
+    : clearPersistentAtb
+      ? // Persistent ATB — land clears the measured bar so name/price/color stay above it.
+        "h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px)-var(--pdp-fixed-bottom-offset,0px))] max-h-[calc(var(--pdp-immersive-height,100svh)-var(--cta-bar-height,66px)-var(--pdp-fixed-bottom-offset,0px))]"
+      : "h-[var(--pdp-immersive-height,100svh)] max-h-[var(--pdp-immersive-height,100svh)]";
 
   useEffect(
     () => () => {
@@ -79,9 +113,12 @@ export function PdpHeroShell({ children }: { children: ReactNode }) {
     <div
       ref={phoneRef}
       className={cn(
-        "pdp-hero-shell relative flex flex-1 flex-col overflow-clip bg-white",
+        "relative flex flex-1 flex-col bg-white",
+        allowGrow ? "overflow-visible" : "overflow-clip",
         heroDockedBuyBar
-          ? "h-[var(--pdp-immersive-height,100svh)] max-h-[var(--pdp-immersive-height,100svh)]"
+          ? allowGrow
+            ? dockedLandHeightClass
+            : dockedLandFixedClass
           : "min-h-[var(--pdp-immersive-height,100svh)]",
       )}
     >

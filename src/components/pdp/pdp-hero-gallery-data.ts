@@ -2,16 +2,12 @@ import {
   PDP_GALLERY_IMMERSIVE_HERO_POSTER,
   PDP_GALLERY_IMMERSIVE_HERO_VIDEO,
 } from "./pdp-data";
-import type {
-  PdpHeroFraming,
-  PdpHeroLetterboxGround,
-  PdpHeroShotType,
-} from "./pdp-hero-framing";
+import type { PdpHeroFraming, PdpHeroShotType } from "./pdp-hero-framing";
 
 /**
  * Header chrome contrast per slide.
  * - `dark` surface → white nav (the cinematic lifestyle video)
- * - `light` surface → dark nav (studio stills + spins on grey / beige ground)
+ * - `light` surface → dark nav (studio stills + spins on the #f0f0f0 ground)
  *
  * Mirrors the `data-header-surface` convention sampled by `useHeaderContrast`.
  */
@@ -39,11 +35,6 @@ type PdpHeroGalleryBaseSlide = {
   galleryCategory?: PdpHeroGalleryCategory;
   /** Per-slide crop override — e.g. contain on-model on the studio grey ground */
   framing?: Partial<PdpHeroFraming>;
-  /**
-   * Letterbox fill behind `contain` media. Omit to use shotType/kind defaults
-   * (product/detail stills → beige; videos → grey; lifestyle → black).
-   */
-  ground?: PdpHeroLetterboxGround;
 };
 
 export type PdpHeroGalleryVideoSlide = PdpHeroGalleryBaseSlide & {
@@ -67,14 +58,9 @@ export type PdpHeroGallerySlide =
 
 const HERO_STILL_BASE = "/images/hero/tabby26";
 
-/** The A0 product still promoted to slide 0 in v4 (Paper r5). */
-const HERO_LEAD_PRODUCT_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
-
-/**
- * Legacy grey-ground three-quarter back view — superseded by the r7 beige
- * back-view still (a5), so v5/v6 drop it via `heroGalleryExcludeSlideSrcs`.
- */
-export const HERO_THREE_QUARTER_STILL_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a3.webp`;
+/** The campaign product still promoted to slide 0 in v4 (Paper r5). */
+const HERO_LEAD_PRODUCT_STILL_SRC =
+  "/images/gallery/tabby-product-still-red-gradient.avif";
 
 /** Stable key for deduping and React keys. */
 export function getHeroGallerySlideKey(slide: PdpHeroGallerySlide): string {
@@ -94,6 +80,18 @@ const HERO_STUDIO_DRAG_ZOOM_SLIDE: PdpHeroGalleryImageSlide = {
   dragZoom: true,
 };
 
+/** Official Coach.com A0 head-on product still — v5 product-photos block. */
+const HERO_PRODUCT_FRONT_A0_SRC = `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`;
+
+const HERO_PRODUCT_FRONT_A0_SLIDE: PdpHeroGalleryImageSlide = {
+  kind: "image",
+  src: HERO_PRODUCT_FRONT_A0_SRC,
+  alt: "Tabby Shoulder Bag 26 in black leather, front view with gold C turnlock clasp and dual straps",
+  shotType: "product",
+  headerSurface: "light",
+  galleryCategory: "product-photos",
+};
+
 /** The broken/too-small feature-callout still and its r5 replacement (Paper r5). */
 const HERO_FEATURE_CALLOUT_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`;
 const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101-r5.png`;
@@ -104,15 +102,24 @@ const HERO_FEATURE_CALLOUT_R5_SRC = `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk
  *   - Optionally lead with the studio drag-zoom product still (916) instead of
  *     the lifestyle land video — `heroGalleryStudioDragZoom`.
  *   - Otherwise lead with the A0 product still — `leadGalleryWithProductStill`.
+ *   - Keep A0 in the product block without promoting — `includeProductFrontStill`
+ *     (v5 logical category order).
  *   - Swap the broken/too-small feature-callout still for the crisp r5 diagram.
  */
+// fallow-ignore-next-line complexity
 function applyV4HeroGallery(
   slides: PdpHeroGallerySlide[],
   options: {
     leadGalleryWithProductStill?: boolean;
     heroGalleryStudioDragZoom?: boolean;
+    /** Keep the A0 front product still without promoting it to lead (v5). */
+    includeProductFrontStill?: boolean;
   } = {},
 ): PdpHeroGallerySlide[] {
+  const keepProductFront =
+    options.heroGalleryStudioDragZoom ||
+    options.leadGalleryWithProductStill ||
+    options.includeProductFrontStill;
   const swapped = slides
     .map((slide) =>
       slide.src === HERO_FEATURE_CALLOUT_SRC
@@ -120,10 +127,7 @@ function applyV4HeroGallery(
         : slide,
     )
     .filter(
-      (slide) =>
-        options.heroGalleryStudioDragZoom ||
-        options.leadGalleryWithProductStill ||
-        slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
+      (slide) => keepProductFront || slide.src !== HERO_LEAD_PRODUCT_STILL_SRC,
     );
 
   if (options.heroGalleryStudioDragZoom) {
@@ -131,6 +135,13 @@ function applyV4HeroGallery(
   }
 
   if (!options.leadGalleryWithProductStill) {
+    if (options.includeProductFrontStill) {
+      const withoutA0 = swapped.filter(
+        (slide) => slide.src !== HERO_PRODUCT_FRONT_A0_SRC,
+      );
+      // Lead the product-photos block with the official head-on A0 still.
+      return [HERO_PRODUCT_FRONT_A0_SLIDE, ...withoutA0];
+    }
     return swapped;
   }
 
@@ -149,13 +160,9 @@ function applyV4HeroGallery(
   ];
 }
 
-/** On-model still (black slip dress) — promoted to lead in v5 on the studio ground. */
-export const HERO_ON_MODEL_BLACK_DRESS_SRC =
-  "/images/gallery/tabby-on-model-black-dress.png";
-
-/** On-model still — utility jacket, plaid skirt, crossbody carry. */
-const HERO_ON_MODEL_BOMBER_PLAID_SRC =
-  "/images/gallery/tabby-on-model-bomber-plaid.jpg";
+/** On-model still — lifestyle mirror selfie, crossbody carry. */
+const HERO_ON_MODEL_MIRROR_SELFIE_SRC =
+  "/images/gallery/tabby-on-model-mirror-selfie.jpg";
 
 /** Move a slide to index 0 without mutating the frozen source array. */
 function promoteHeroGallerySlideToLead(
@@ -231,6 +238,7 @@ const HERO_GALLERY_CATEGORY_BLOCK_ORDER: PdpHeroGalleryCategory[] = [
   "ugc",
 ];
 
+// fallow-ignore-next-line complexity
 function resolveSlideGalleryCategory(
   slide: PdpHeroGallerySlide,
 ): PdpHeroGalleryCategory {
@@ -269,6 +277,7 @@ function sortHeroGallerySlidesByCategoryBlocks(
 
   const indexed = slides.map((slide, index) => ({ slide, index }));
 
+  // fallow-ignore-next-line complexity
   indexed.sort((a, b) => {
     const rankA = blockRank.get(resolveSlideGalleryCategory(a.slide)) ?? 99;
     const rankB = blockRank.get(resolveSlideGalleryCategory(b.slide)) ?? 99;
@@ -305,6 +314,10 @@ export type HeroGalleryOrderingOptions = {
   leadGalleryWithProductStill?: boolean;
   heroGalleryStudioDragZoom?: boolean;
   heroGalleryLeadSlideSrc?: string;
+  heroGalleryLastSlideSrc?: string;
+  heroGalleryExcludedSlideSrcs?: string[];
+  /** Version-specific slides merged before category ordering (deduped by `src`). */
+  heroGalleryAdditionalSlides?: PdpHeroGallerySlide[];
   heroGalleryPrependLeadSlide?: PdpHeroGallerySlide;
   heroGalleryUgcSlides?: PdpHeroGallerySlide[];
   /** Index after which UGC slides are inserted — defaults to 1 (after lead pair). */
@@ -314,48 +327,44 @@ export type HeroGalleryOrderingOptions = {
    * 360°, then community UGC appended last.
    */
   heroGalleryLogicalBlockOrder?: boolean;
-  /** Slide srcs dropped from the gallery — e.g. stills superseded by a reshoot. */
-  heroGalleryExcludeSlideSrcs?: string[];
-  /** Extra slides merged before ordering (v7 mirror selfie, etc.). */
-  heroGalleryExtraSlides?: PdpHeroGallerySlide[];
-  /**
-   * Fill product stills (`shotType: "product"`) with `object-fit: cover` so
-   * tall mobile frames do not letterbox. Studio spins / callouts stay contain.
-   */
-  heroProductSlidesFillFrame?: boolean;
 };
 
 /** Version-aware hero slide ordering — shared by mobile carousel + desktop rail. */
+// fallow-ignore-next-line complexity
 export function orderHeroGallerySlides(
   slides: PdpHeroGallerySlide[],
   options: HeroGalleryOrderingOptions = {},
 ): PdpHeroGallerySlide[] {
   const useLogicalBlocks = options.heroGalleryLogicalBlockOrder === true;
-
-  const excludeSrcs = options.heroGalleryExcludeSlideSrcs;
-  if (excludeSrcs?.length) {
-    slides = slides.filter((slide) => !excludeSrcs.includes(slide.src));
-  }
-
-  if (options.heroGalleryExtraSlides?.length) {
-    const existing = new Set(slides.map((slide) => slide.src));
-    const extras = options.heroGalleryExtraSlides.filter(
-      (slide) => !existing.has(slide.src),
-    );
-    slides = [...slides, ...extras];
-  }
+  const baseKeys = new Set(slides.map(getHeroGallerySlideKey));
+  const sourceSlides = options.heroGalleryAdditionalSlides?.length
+    ? [
+        ...slides,
+        ...options.heroGalleryAdditionalSlides.filter(
+          (slide) => !baseKeys.has(getHeroGallerySlideKey(slide)),
+        ),
+      ]
+    : slides;
+  const includedSlides = options.heroGalleryExcludedSlideSrcs?.length
+    ? sourceSlides.filter(
+        (slide) => !options.heroGalleryExcludedSlideSrcs!.includes(slide.src),
+      )
+    : sourceSlides;
 
   let result =
     options.leadGalleryWithProductStill ||
     options.heroGalleryStudioDragZoom ||
     useLogicalBlocks
-      ? applyV4HeroGallery(slides, {
+      ? applyV4HeroGallery(includedSlides, {
+          // Logical blocks own land order (on-model first) — keep A0 front
+          // still in the product block, but do not promote it to slide 0.
           leadGalleryWithProductStill: useLogicalBlocks
             ? false
             : options.leadGalleryWithProductStill,
           heroGalleryStudioDragZoom: options.heroGalleryStudioDragZoom,
+          includeProductFrontStill: useLogicalBlocks,
         })
-      : slides;
+      : includedSlides;
 
   if (!useLogicalBlocks && options.heroGalleryLeadSlideSrc) {
     result = promoteHeroGallerySlideToLead(
@@ -394,19 +403,18 @@ export function orderHeroGallerySlides(
     }
   }
 
-  if (options.heroProductSlidesFillFrame) {
-    result = result.map((slide) =>
-      slide.shotType === "product"
-        ? {
-            ...slide,
-            framing: {
-              ...slide.framing,
-              objectFit: "cover" as const,
-              objectPosition: slide.framing?.objectPosition ?? "center",
-            },
-          }
-        : slide,
+  if (options.heroGalleryLastSlideSrc) {
+    const lastSlideIndex = result.findIndex(
+      (slide) => slide.src === options.heroGalleryLastSlideSrc,
     );
+    if (lastSlideIndex >= 0 && lastSlideIndex < result.length - 1) {
+      const lastSlide = result[lastSlideIndex]!;
+      result = [
+        ...result.slice(0, lastSlideIndex),
+        ...result.slice(lastSlideIndex + 1),
+        lastSlide,
+      ];
+    }
   }
 
   return result;
@@ -416,8 +424,8 @@ export function orderHeroGallerySlides(
  * Side-scrolling hero gallery for Tabby Shoulder Bag 26.
  *
  * Slide 0 is the lifestyle land video (white nav). Every following slide is a
- * studio still or product video — letterbox ground is selective (beige stills vs
- * grey spins). Shot types drive cropping — see `pdp-hero-framing.ts`.
+ * studio still or product video on the #f0f0f0 ground and uses the dark nav.
+ * Shot types drive cropping — see `pdp-hero-framing.ts`.
  */
 export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
   {
@@ -432,28 +440,66 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a0.webp`,
-    alt: "Tabby Shoulder Bag 26 in black leather, front view with gold C turnlock and shoulder strap raised",
-    shotType: "product",
+    src: "/images/gallery/tabby-product-still-red-gradient.avif",
+    alt: "Red Tabby Shoulder Bag centered on a warm gradient studio backdrop",
+    shotType: "detail",
+    headerSurface: "dark",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-product-still-brown-cherry-crop.avif",
+    alt: "Cropped dark brown Tabby Shoulder Bag styled with a cherry charm",
+    shotType: "detail",
+    headerSurface: "dark",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-product-still-ivory-pedestal.avif",
+    alt: "Ivory Tabby Shoulder Bag arranged across black studio pedestals",
+    shotType: "detail",
     headerSurface: "light",
     galleryCategory: "product-photos",
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a3.webp`,
-    alt: "Tabby Shoulder Bag 26 in black leather, three-quarter angle showing the side zip pocket",
-    shotType: "product",
-    headerSurface: "light",
+    src: "/images/gallery/tabby-product-still-brown-studio.avif",
+    alt: "Dark brown Tabby Shoulder Bag centered on a tonal brown studio backdrop",
+    shotType: "detail",
+    headerSurface: "dark",
     galleryCategory: "product-photos",
-    // Legacy square still on cool #f0f0f0 — not the r7 warm beige ground
-    ground: "grey",
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a5.webp`,
-    alt: "Tabby Shoulder Bag 26 in black leather, back view with the exterior zip pocket",
-    shotType: "product",
+    src: "/images/gallery/tabby-product-still-black-cherry.avif",
+    alt: "Black Tabby Shoulder Bag styled with a cherry charm",
+    shotType: "detail",
     headerSurface: "light",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-product-still-russet-cherry.avif",
+    alt: "Russet brown Tabby Shoulder Bag styled with a sparkling cherry charm",
+    shotType: "detail",
+    headerSurface: "light",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-product-still-ivory-books.avif",
+    alt: "Ivory Tabby Shoulder Bag with a cherry charm displayed on a stack of books",
+    shotType: "detail",
+    headerSurface: "dark",
+    galleryCategory: "product-photos",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-product-still-brown-stone.avif",
+    alt: "Dark brown Tabby Shoulder Bag displayed on a stone architectural pedestal",
+    shotType: "detail",
+    headerSurface: "dark",
     galleryCategory: "product-photos",
   },
   {
@@ -473,32 +519,6 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
     shotType: "studio",
     headerSurface: "light",
     galleryCategory: "360",
-    // Square spin sits small in the land frame — nudge up 20% so the bag fills better.
-    framing: { scale: 1.2 },
-  },
-  {
-    kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a8.webp`,
-    alt: "Tabby Shoulder Bag 26 open from above showing the empty leather-lined interior",
-    shotType: "detail",
-    headerSurface: "light",
-    galleryCategory: "product-photos",
-  },
-  {
-    kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a10.webp`,
-    alt: "Close-up of the gusseted base and structured panels of Tabby Shoulder Bag 26",
-    shotType: "detail",
-    headerSurface: "light",
-    galleryCategory: "product-photos",
-  },
-  {
-    kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a21.webp`,
-    alt: "Tabby Shoulder Bag 26 in black leather with the long crossbody strap extended",
-    shotType: "product",
-    headerSurface: "light",
-    galleryCategory: "product-photos",
   },
   {
     kind: "video",
@@ -511,58 +531,67 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a88.webp`,
-    alt: "Tabby Shoulder Bag 26 in black leather styled with a cherry bag charm",
-    shotType: "product",
-    headerSurface: "light",
-    galleryCategory: "product-photos",
-  },
-  {
-    kind: "image",
-    src: "/images/gallery/tabby-hand-reach.png",
-    alt: "Hand reaching for the strap of Tabby Shoulder Bag 26 in black full-grain leather with gold C turnlock clasp",
-    shotType: "product",
-    headerSurface: "light",
-    galleryCategory: "product-photos",
-  },
-  {
-    kind: "image",
-    src: HERO_ON_MODEL_BLACK_DRESS_SRC,
-    alt: "Model in a black slip dress and sunglasses carrying Tabby Shoulder Bag 26 in black leather on the shoulder",
+    src: HERO_ON_MODEL_MIRROR_SELFIE_SRC,
+    alt: "Model in a black ribbed sweater and beige trousers with Tabby Shoulder Bag 26 in black leather worn crossbody",
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",
-    // Tall 430×840 still — cover crops the Tabby at the land gallery seam.
-    // Contain keeps the full bag in frame on the warm studio ground.
-    framing: { objectFit: "contain", objectPosition: "center" },
-    ground: "beige",
   },
   {
     kind: "image",
-    src: HERO_ON_MODEL_BOMBER_PLAID_SRC,
-    alt: "Model in a tan utility jacket and brown plaid mini skirt with Tabby Shoulder Bag 26 in black leather worn crossbody",
+    src: "/images/gallery/tabby-on-model-ivory-black-blazer.avif",
+    alt: "Model in a black blazer carrying an ivory Tabby Shoulder Bag crossbody",
     shotType: "on-model",
     headerSurface: "light",
     galleryCategory: "on-model",
-    // Tall 430×840 still — cover + center-top crops the Tabby out of the land frame.
-    framing: { objectFit: "contain", objectPosition: "center" },
-    ground: "beige",
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/ccx04_b4bk_a99.webp`,
-    alt: "Macro detail of the full-grain leather and gold snap on Tabby Shoulder Bag 26",
-    shotType: "detail",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-books.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag with a cherry charm",
+    shotType: "on-model",
     headerSurface: "light",
-    galleryCategory: "product-photos",
-    ground: "grey",
+    galleryCategory: "on-model",
   },
   {
     kind: "image",
-    src: `${HERO_STILL_BASE}/en_US-ToroImg_ccx04_b4bk_a101.webp`,
-    alt: "Feature callouts for Tabby Shoulder Bag 26: detachable straps, snap closure, zip pocket, and leather lining",
-    shotType: "studio",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-closeup.avif",
+    alt: "Close-up of an ivory Tabby Shoulder Bag with a cherry charm worn over a blue tweed suit",
+    shotType: "on-model",
     headerSurface: "light",
-    galleryCategory: "product-photos",
+    galleryCategory: "on-model",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-dog.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag while posing with a dog",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-bench.avif",
+    alt: "Model in a blue tweed suit wearing an ivory Tabby Shoulder Bag while seated with a dog",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+    framing: { objectPosition: "58% center" },
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-on-model-brown-signature-coat-detail.avif",
+    alt: "Close-up of a dark brown Tabby Shoulder Bag with a bow charm worn over a Signature coat",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
+  },
+  {
+    kind: "image",
+    src: "/images/gallery/tabby-on-model-brown-signature-coat-stairs.avif",
+    alt: "Model in a Signature coat carrying a dark brown Tabby Shoulder Bag while seated on stone steps",
+    shotType: "on-model",
+    headerSurface: "light",
+    galleryCategory: "on-model",
   },
 ];

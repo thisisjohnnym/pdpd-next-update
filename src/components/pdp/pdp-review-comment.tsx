@@ -25,7 +25,7 @@ import {
   type PdpReviewReply,
 } from "./pdp-data";
 
-type StarSize = 16 | 18 | 20;
+type StarSize = 14 | 16 | 18 | 20;
 
 export function PdpStarRating({
   rating,

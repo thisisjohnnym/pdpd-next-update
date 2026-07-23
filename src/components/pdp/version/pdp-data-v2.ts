@@ -1,9 +1,4 @@
-import {
-  PDP_GALLERY_SLIDES,
-  type PdpGalleryImmersiveSlide,
-  type PdpGallerySlide,
-  type PdpUgcVideo,
-} from "../pdp-data";
+import { PDP_GALLERY_SLIDES, type PdpGallerySlide, type PdpUgcVideo } from "../pdp-data";
 import type {
   PdpHeroGallerySlide,
   PdpHeroSurface,
@@ -31,7 +26,7 @@ export type PdpGalleryUgcCommunitySlide = {
   type: "ugc-community";
 };
 
-/** v5-only styling carousel — shoulder, crossbody, and on-model looks */
+/** v5-only leather aging wipe — New vs 2 years compare + care upsell */
 export type PdpGalleryWaysToWearSlide = {
   type: "ways-to-wear";
 };
@@ -41,16 +36,9 @@ export type PdpGalleryGetTheHighlightsSlide = {
   type: "get-the-highlights";
 };
 
-/** v4 immersive slide — optional headline/subtext copy above the frame (Paper KJY-0). */
-export type PdpGalleryImmersiveSlideV2 = PdpGalleryImmersiveSlide & {
-  headline?: string;
-  subtext?: string;
-};
-
 /** v2 slide union — every v1 slide plus v2-only slide types */
 export type PdpGallerySlideV2 =
-  | Exclude<PdpGallerySlide, PdpGalleryImmersiveSlide>
-  | PdpGalleryImmersiveSlideV2
+  | PdpGallerySlide
   | PdpGalleryEditorialCarouselSlide
   | PdpGalleryUgcCommunitySlide
   | PdpGalleryWaysToWearSlide
@@ -661,21 +649,7 @@ export function buildV2Slides(
 }
 
 /** Tabby v2 gallery — Details, studio product, ugc-community, then editorial carousel */
-export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = forceGallerySlidesAspect45(
-  buildV2Slides(PDP_GALLERY_SLIDES),
-);
-
-/** Force every portrait gallery slide to 4:5 (ignores legacy 9:16 slide data). */
-function forceGallerySlidesAspect45(
-  slides: PdpGallerySlideV2[],
-): PdpGallerySlideV2[] {
-  return slides.map((slide) => {
-    if (slide.type === "immersive" || slide.type === "video") {
-      return { ...slide, aspect: "4/5" as const };
-    }
-    return slide;
-  });
-}
+export const PDP_GALLERY_SLIDES_V2: PdpGallerySlideV2[] = buildV2Slides(PDP_GALLERY_SLIDES);
 
 /** v4 studio drag-zoom slide — 4:5 frame with copy above the image (Paper KJY-0). */
 const PDP_STUDIO_PRODUCT_SLIDE_V4 = {
@@ -713,8 +687,8 @@ export function applyV4GallerySlidePatches(
 }
 
 /** Tabby v4 gallery — same flow as v2 with the studio product slide reframed for r5. */
-export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = forceGallerySlidesAspect45(
-  applyV4GallerySlidePatches(buildV2Slides(PDP_GALLERY_SLIDES)),
+export const PDP_GALLERY_SLIDES_V4: PdpGallerySlideV2[] = applyV4GallerySlidePatches(
+  buildV2Slides(PDP_GALLERY_SLIDES),
 );
 
 /** Shared poster/video for the “An Icon, Reimagined” highlight card. */
@@ -734,13 +708,6 @@ export const PDP_V5_EDITORIAL_QUOTE = {
   alt: "PinkPantheress backstage wearing Tabby Shoulder Bag 26",
 } as const;
 export const PDP_WAYS_TO_WEAR_SECTION = {
-  headline: "Made to move",
-  body:
-    "Designed to adapt throughout the day. Adjust the strap to move effortlessly between shoulder and crossbody carry.",
-} as const;
-
-/** Skelly v7 — leather aging wipe copy */
-export const PDP_WAYS_TO_WEAR_SECTION_AGING = {
   headline: "Where wear becomes beauty",
   body:
     "Glovetanned full-grain leather develops character with daily carry — patina deepens, the hand softens, and wear tells your story.",
@@ -754,26 +721,11 @@ export type PdpWaysToWearStyle = {
   alt: string;
 };
 
-/** Shoulder and crossbody carry — large editorial stills for v5 */
+/**
+ * v5 leather-aging wipe endpoints — New vs 2 years (reuses frozen
+ * `PDP_LEATHER_AGING` stage stills; does not mutate `pdp-data.ts`).
+ */
 export const PDP_WAYS_TO_WEAR_STYLES = [
-  {
-    id: "shoulder",
-    label: "Shoulder carry",
-    caption: "Relaxed, elevated styling for everyday wear.",
-    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
-    alt: "Tabby Shoulder Bag 26 worn on the shoulder with a beige top and tailored trousers",
-  },
-  {
-    id: "crossbody",
-    label: "Crossbody",
-    caption: "Hands-free comfort for commuting and travel.",
-    src: "/images/gallery/tabby-crossbody-trench.jpg",
-    alt: "Tabby Shoulder Bag 26 worn crossbody with a tan trench coat",
-  },
-] satisfies PdpWaysToWearStyle[];
-
-/** v7 leather-aging wipe endpoints — New vs 2 years */
-export const PDP_WAYS_TO_WEAR_STYLES_AGING = [
   {
     id: "new",
     label: "New",
@@ -792,8 +744,8 @@ export const PDP_WAYS_TO_WEAR_STYLES_AGING = [
 ] satisfies [PdpWaysToWearStyle, PdpWaysToWearStyle];
 
 /**
- * v7 demo sale prices — compare-at remains the coach.com list price from
- * `summary.price`. ~20% off for prototype merchandising.
+ * v5 demo sale prices — compare-at remains the coach.com list price from
+ * `SIZE_PRICES` / `summary.price`. ~20% off for prototype merchandising.
  */
 export const PDP_V5_SALE_PRICES: Record<20 | 26 | 33 | 36, string> = {
   20: "$300",
@@ -879,8 +831,8 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
     title: "Crafted to Age Beautifully",
     caption: "Glovetanned full-grain leather that gets richer with every wear.",
     ...CRAFTED_TO_AGE_TRAY,
-    src: "/images/gallery/tabby-leather-full-grain-closeup.jpg",
-    alt: "Extreme close-up of Tabby's glovetanned full-grain leather grain",
+    src: "/images/gallery/tabby-leather-full-grain-back.jpg",
+    alt: "Back of the Tabby bag in full-grain leather with THE TABBY BAG stamp and gold Coach snap",
     objectPosition: "center",
   },
   {
@@ -950,9 +902,9 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
         objectPosition: "center 25%",
       },
     ],
-    src: "/images/gallery/tabby-on-model-black-dress.png",
-    alt: "Model wearing the Tabby Shoulder Bag 26 with a black dress",
-    objectPosition: "center 20%",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-dog.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag while posing with a dog",
+    objectPosition: "center top",
   },
   {
     id: "whats-inside",
@@ -1018,9 +970,9 @@ export const PDP_GET_THE_HIGHLIGHTS_CARDS: PdpGetTheHighlightsCard[] = [
         alt: "Tabby with shoulder and crossbody straps attached",
       },
     ],
-    src: "/images/gallery/tabby-shoulder-carry-beige.jpg",
-    alt: "Model wearing the Tabby Shoulder Bag 26 on the shoulder in a beige look",
-    objectPosition: "center 30%",
+    src: "/images/gallery/tabby-on-model-ivory-blue-tweed-books.avif",
+    alt: "Model in a blue tweed suit carrying an ivory Tabby Shoulder Bag with a cherry charm",
+    objectPosition: "center top",
   },
 ];
 
@@ -1141,18 +1093,17 @@ export const PDP_FIND_YOUR_TABBY_FAMILY: FindYourTabbyFamilyMember[] =
   });
 
 /**
- * Insert the v5 Ways to wear module immediately after Up close / editorial
- * carousel, and swap the Feel the leather studio slide for the Apple-style
- * "Get the highlights" rail.
+ * Insert the v5 leather-aging wipe module after Up close / editorial carousel,
+ * swap Feel the leather for Get the highlights, and drop the stage-rail
+ * leather-aging slide (care upsell lives under the wipe instead).
  */
 export function applyV5GallerySlidePatches(
   slides: PdpGallerySlideV2[],
-  options: { dropLeatherAgingSlide?: boolean } = {},
 ): PdpGallerySlideV2[] {
   const result: PdpGallerySlideV2[] = [];
 
   for (const slide of slides) {
-    if (options.dropLeatherAgingSlide && slide.type === "leather-aging") {
+    if (slide.type === "leather-aging") {
       continue;
     }
 
@@ -1214,7 +1165,7 @@ export const PDP_MORE_LIKE_THIS_COMPARE_CURRENT: PdpMoreLikeThisCompareProduct =
       { id: "material", label: "Material", value: "Full-grain leather" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1240,7 +1191,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Crochet yarn" },
       { id: "strap", label: "Strap", value: '20" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.7 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1260,7 +1211,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Suede" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.8 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1280,7 +1231,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Pebbled leather" },
       { id: "strap", label: "Strap", value: '21" chain', tabular: true },
       { id: "weight", label: "Weight", value: "0.6 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone, Cards, Keys" },
+      { id: "fits", label: "Fits", value: "Phone - Cards - Keys" },
       {
         id: "dimensions",
         label: "Dimensions",
@@ -1301,7 +1252,7 @@ const PDP_MORE_LIKE_THIS_COMPARE_BY_ID: Record<
       { id: "material", label: "Material", value: "Full-grain leather" },
       { id: "strap", label: "Strap", value: '22" drop', tabular: true },
       { id: "weight", label: "Weight", value: "0.9 lbs", tabular: true },
-      { id: "fits", label: "Fits", value: "Phone, Wallet, Keys" },
+      { id: "fits", label: "Fits", value: "Phone - Wallet - Keys" },
       {
         id: "dimensions",
         label: "Dimensions",

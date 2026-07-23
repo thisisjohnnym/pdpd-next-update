@@ -23,6 +23,7 @@ type PdpBottomActionsProps = {
 };
 
 /** Fixed floating CTA bar — Color + Add to bag (docs/pdp-hero-chrome.md). */
+// fallow-ignore-next-line complexity
 export function PdpBottomActions({
   selectedColorId,
   onColorSelect,
@@ -34,9 +35,17 @@ export function PdpBottomActions({
   const barRef = useRef<HTMLDivElement>(null);
   const playHeroEnter = useHeroEnterOnce();
 
-  const { showSectionJumpBar, inlineBuyBarColorSwatches, floatingBuyBarLandCta, hero360IntroEnabled } =
-    getPdpVersionConfig(usePdpVersion());
+  const {
+    showSectionJumpBar,
+    inlineBuyBarColorSwatches,
+    hideDockedBuyBarColor,
+    floatingBuyBarWhenHeroHidden,
+    desktopSplitLayout,
+    useCompactBuyBarColorDots,
+  } = getPdpVersionConfig(usePdpVersion());
   const { jumpBarActive } = usePdpChromeMode(mounted);
+  const persistentAtb = !floatingBuyBarWhenHeroHidden;
+  const edgeToEdgeCta = useCompactBuyBarColorDots;
 
   useCtaBarHeight(barRef, mounted);
 
@@ -57,24 +66,27 @@ export function PdpBottomActions({
       ref={barRef}
       data-floating-cta-bar
       className={cn(
-        "pointer-events-none fixed inset-x-0 z-40 bg-white transition-transform duration-300 ease-out",
-        floatingBuyBarLandCta && "pdp-v7-fixed-cta-dock",
-        hero360IntroEnabled && "pdp-hero-intro-chrome",
+        "pointer-events-none fixed inset-x-0 z-40 transition-transform duration-300 ease-out",
+        persistentAtb || edgeToEdgeCta ? "bg-transparent" : "bg-white",
         chromeHidden ? "translate-y-full" : "translate-y-0",
+        // Desktop split already has a sticky buy panel — hide the mobile float.
+        desktopSplitLayout && "lg:hidden",
       )}
-      style={{
-        // Even 8px tray inset — land swatches clear the dock via footer pad, not crop.
-        bottom: BOTTOM_CHROME_OFFSET,
-        paddingTop: CTA_BAR_PADDING_PX,
-        paddingBottom: `max(${CTA_BAR_PADDING_PX}px, env(safe-area-inset-bottom, 0px))`,
-        paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-        paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
-      }}
+      style={
+        edgeToEdgeCta
+          ? { bottom: 0, padding: 0 }
+          : {
+              bottom: BOTTOM_CHROME_OFFSET,
+              padding: CTA_BAR_PADDING_PX,
+              paddingLeft: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+              paddingRight: `calc(${CTA_BAR_PADDING_PX}px + var(--hero-inset, 0px))`,
+            }
+      }
     >
       <div
         className={cn(
           "pointer-events-auto w-full",
-          !hero360IntroEnabled && playHeroEnter && "pdp-hero-bottom-enter",
+          playHeroEnter && "pdp-hero-bottom-enter",
         )}
         style={{ gap: CTA_BAR_GAP_PX }}
       >
@@ -83,10 +95,11 @@ export function PdpBottomActions({
           onColorSelect={onColorSelect}
           onAddToBag={onAddToBag}
           onColorSheetOpenChange={setColorSheetOpen}
-          hideColor={inlineBuyBarColorSwatches}
+          hideColor={inlineBuyBarColorSwatches || hideDockedBuyBarColor}
           inlineColorSwatches={false}
-          landCta={floatingBuyBarLandCta}
-          className={cn("gap-2.5", floatingBuyBarLandCta && "px-0")}
+          landCta={useCompactBuyBarColorDots}
+          edgeToEdge={edgeToEdgeCta}
+          className="gap-2.5"
         />
       </div>
     </footer>,
