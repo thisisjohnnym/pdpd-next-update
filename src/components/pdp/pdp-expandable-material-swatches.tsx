@@ -126,8 +126,9 @@ function SwatchButton({
 
 /**
  * Color options with optional See more / See less, or a horizontal scroll rail.
- * seeMore + seeMoreInline: control sits after the last swatch (uxr2).
- * seeMore without inline: classic “See more colorways” below the row (uxr3).
+ * seeMore + seeMoreInline (uxr2): one row always; expand reveals the rest via
+ * horizontal scroll so height never jumps. Control sits after the last swatch.
+ * seeMore without inline (uxr3): classic “See more colorways” below a wrapping row.
  * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
@@ -163,10 +164,10 @@ export function PdpExpandableMaterialSwatches({
     [options, leadMaterial],
   );
   const horizontal = !seeMore;
-  // Inline: leave one flex slot so View less stays beside swatches, not alone below.
+  // Inline expand shows the full rail on one row (scroll); below expands wrap rows.
   const expandedCount = seeMore
     ? seeMoreInline
-      ? Math.max(previewCount, previewCount * Math.max(1, maxExpandedRows) - 1)
+      ? ordered.length
       : previewCount * Math.max(1, maxExpandedRows)
     : ordered.length;
   const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
@@ -229,8 +230,8 @@ export function PdpExpandableMaterialSwatches({
       onClick={() => setExpanded(!expanded)}
       aria-expanded={expanded}
       className={cn(
-        "group",
-        seeMoreInline ? "shrink-0 self-center" : "self-start",
+        "group shrink-0",
+        seeMoreInline ? "self-center" : "self-start",
         pdpTextLinkCtaMutedClass,
         pdpType.label,
         "leading-none",
@@ -269,13 +270,18 @@ export function PdpExpandableMaterialSwatches({
     );
   });
 
+  // uxr2: always one row — collapsed fits preview + See more; expanded scrolls.
   if (seeMoreInline) {
     return (
       <div
+        ref={scrollRef}
         role="listbox"
         aria-label="Choose color"
         className={cn(
-          "flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1",
+          "flex min-w-0 w-full max-w-full flex-nowrap items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-1",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           className,
         )}
       >

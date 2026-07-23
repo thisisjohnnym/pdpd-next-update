@@ -70,6 +70,7 @@ export function PdpV3HeroLayout({
     showFloatingBuyBar,
     floatingBuyBarWhenHeroHidden,
     materialSwatchSeeMore,
+    materialSwatchSeeMoreInline,
   } = getPdpVersionConfig(usePdpVersion());
   const usesPersistentAtb =
     showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
@@ -79,8 +80,12 @@ export function PdpV3HeroLayout({
     !heroColorTrayOverlay &&
     expandableMaterialSwatchGroups;
   const [swatchesExpanded, setSwatchesExpanded] = useState(false);
+  // Inline expand stays one row (horizontal scroll) — only below-link expand grows hero.
   const heroAllowGrow =
-    landExpandableColors && materialSwatchSeeMore && swatchesExpanded;
+    landExpandableColors &&
+    materialSwatchSeeMore &&
+    !materialSwatchSeeMoreInline &&
+    swatchesExpanded;
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
