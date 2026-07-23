@@ -30,8 +30,8 @@ Each **Paper / design round** maps to a **route version** on the same production
 
 | Field | Value |
 |-------|-------|
-| Date | — (update after UXR ship) |
-| Commit | — |
+| Date | 2026-07-23 |
+| Commit | `43f88b1` |
 | URL | https://pdp-next-sigma.vercel.app/uxr1 |
 
 Update this section after every `vercel --prod`.
