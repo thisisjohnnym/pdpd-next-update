@@ -53,6 +53,7 @@ export function PdpBuyBarCompactColor({
     compactBuyBarColorDotCount,
     expandableMaterialSwatchGroups,
     materialSwatchSeeMore,
+    materialSwatchSeeMoreInline,
     flatColorSheet,
     heroColorSwatchMoreCountOverride,
     heroColorTrayOverlay,
@@ -218,9 +219,10 @@ export function PdpBuyBarCompactColor({
           leadMaterial={railLeadMaterial}
           selectedId={activeColorId}
           onSelect={handleColorSelect}
-          // Collapsed row felt overwhelming at full rail — show 6 + inline See more.
+          // Collapsed row felt overwhelming at full rail — show 6 + See more.
           previewCount={materialSwatchSeeMore ? 6 : undefined}
           seeMore={materialSwatchSeeMore}
+          seeMoreInline={materialSwatchSeeMoreInline}
           expanded={swatchesExpanded}
           onExpandedChange={onSwatchesExpandedChange}
           className={className}

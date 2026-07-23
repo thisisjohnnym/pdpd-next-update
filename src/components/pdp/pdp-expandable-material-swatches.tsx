@@ -43,6 +43,10 @@ type PdpExpandableMaterialSwatchesProps = {
    * When false: one horizontal scroll rail (~7 visible left-to-right).
    */
   seeMore?: boolean;
+  /**
+   * Inline after the last swatch (uxr2). Off = classic link below the row (uxr3).
+   */
+  seeMoreInline?: boolean;
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
   className?: string;
@@ -122,8 +126,8 @@ function SwatchButton({
 
 /**
  * Color options with optional See more / See less, or a horizontal scroll rail.
- * With seeMore: collapsed ~one row; control sits inline after the last swatch.
- * Expanding fades new swatches in with a slight +x offset.
+ * seeMore + seeMoreInline: control sits after the last swatch (uxr2).
+ * seeMore without inline: classic “See more colorways” below the row (uxr3).
  * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
@@ -134,6 +138,7 @@ export function PdpExpandableMaterialSwatches({
   previewCount = DEFAULT_PREVIEW_COUNT,
   maxExpandedRows = DEFAULT_MAX_EXPANDED_ROWS,
   seeMore = true,
+  seeMoreInline = false,
   expanded: expandedProp,
   onExpandedChange,
   className,
@@ -158,14 +163,16 @@ export function PdpExpandableMaterialSwatches({
     [options, leadMaterial],
   );
   const horizontal = !seeMore;
-  // Leave one flex slot on the last row so See less stays beside swatches, not alone below.
+  // Inline: leave one flex slot so View less stays beside swatches, not alone below.
   const expandedCount = seeMore
-    ? Math.max(previewCount, previewCount * Math.max(1, maxExpandedRows) - 1)
+    ? seeMoreInline
+      ? Math.max(previewCount, previewCount * Math.max(1, maxExpandedRows) - 1)
+      : previewCount * Math.max(1, maxExpandedRows)
     : ordered.length;
   const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
   const canExpand = seeMore && ordered.length > previewCount;
 
-  /** Index from which newly revealed swatches should enter-animate. */
+  /** Index from which newly revealed swatches should enter-animate (inline only). */
   const [enterFromIndex, setEnterFromIndex] = useState<number | null>(null);
   const wasExpandedRef = useRef(expanded);
 
@@ -173,7 +180,7 @@ export function PdpExpandableMaterialSwatches({
     const wasExpanded = wasExpandedRef.current;
     wasExpandedRef.current = expanded;
 
-    if (!seeMore || wasExpanded || !expanded) {
+    if (!seeMore || !seeMoreInline || wasExpanded || !expanded) {
       return;
     }
 
@@ -184,7 +191,7 @@ export function PdpExpandableMaterialSwatches({
       40;
     const timer = window.setTimeout(() => setEnterFromIndex(null), clearAfter);
     return () => window.clearTimeout(timer);
-  }, [expanded, expandedCount, previewCount, seeMore]);
+  }, [expanded, expandedCount, previewCount, seeMore, seeMoreInline]);
 
   if (ordered.length === 0) {
     return null;
@@ -216,53 +223,78 @@ export function PdpExpandableMaterialSwatches({
     );
   }
 
-  return (
-    <div
-      role="listbox"
-      aria-label="Choose color"
+  const expandToggle = canExpand ? (
+    <button
+      type="button"
+      onClick={() => setExpanded(!expanded)}
+      aria-expanded={expanded}
       className={cn(
-        "flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1",
-        className,
+        "group",
+        seeMoreInline ? "shrink-0 self-center" : "self-start",
+        pdpTextLinkCtaMutedClass,
+        pdpType.label,
+        "leading-none",
       )}
     >
-      {visible.map((option, index) => {
-        const entering =
-          enterFromIndex != null && index >= enterFromIndex;
-        return (
-          <SwatchButton
-            key={option.selectionId}
-            option={option}
-            isSelected={option.selectionId === selectedId}
-            onSelect={onSelect}
-            className={entering ? "pdp-material-swatch-enter" : undefined}
-            style={
-              entering
-                ? {
-                    animationDelay: `${(index - enterFromIndex) * ENTER_STAGGER_MS}ms`,
-                  }
-                : undefined
-            }
-          />
-        );
-      })}
+      <span className={pdpTextLinkCtaMutedLabelClass}>
+        {seeMoreInline
+          ? expanded
+            ? "View less"
+            : "See more"
+          : expanded
+            ? "See less"
+            : "See more colorways"}
+      </span>
+    </button>
+  ) : null;
 
-      {canExpand ? (
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          className={cn(
-            "group shrink-0 self-center",
-            pdpTextLinkCtaMutedClass,
-            pdpType.label,
-            "leading-none",
-          )}
-        >
-          <span className={pdpTextLinkCtaMutedLabelClass}>
-            {expanded ? "View less" : "See more"}
-          </span>
-        </button>
-      ) : null}
+  const swatches = visible.map((option, index) => {
+    const entering =
+      seeMoreInline && enterFromIndex != null && index >= enterFromIndex;
+    return (
+      <SwatchButton
+        key={option.selectionId}
+        option={option}
+        isSelected={option.selectionId === selectedId}
+        onSelect={onSelect}
+        className={entering ? "pdp-material-swatch-enter" : undefined}
+        style={
+          entering
+            ? {
+                animationDelay: `${(index - enterFromIndex) * ENTER_STAGGER_MS}ms`,
+              }
+            : undefined
+        }
+      />
+    );
+  });
+
+  if (seeMoreInline) {
+    return (
+      <div
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1",
+          className,
+        )}
+      >
+        {swatches}
+        {expandToggle}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex min-w-0 w-full flex-col gap-2", className)}>
+      <div
+        role="listbox"
+        aria-label="Choose color"
+        className="flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1"
+      >
+        {swatches}
+      </div>
+      {expandToggle}
     </div>
   );
 }

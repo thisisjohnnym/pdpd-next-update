@@ -18,8 +18,8 @@
 UXR — Tabby 26 protos (same deploy):
 
 uxr1 (v5 baseline):              https://pdp-next-sigma.vercel.app/uxr1
-uxr2 (v6 — See more colorways):  https://pdp-next-sigma.vercel.app/uxr2
-uxr3 (v7 — See more colorways):  https://pdp-next-sigma.vercel.app/uxr3
+uxr2 (v6 — inline See more):           https://pdp-next-sigma.vercel.app/uxr2
+uxr3 (v7 — See more colorways below):  https://pdp-next-sigma.vercel.app/uxr3
 ```
 
 Soft-hidden compare routes (`/v1`…`/v8`, `/fc01`, `/fc01v`) remain on the deploy for internal use — they are not the share set.
@@ -36,7 +36,12 @@ Soft-hidden compare routes (`/v1`…`/v8`, `/fc01`, `/fc01v`) remain on the depl
 
 ## v6 / v7 swatches (overwhelming feedback)
 
-`/uxr2` and `/uxr3` collapse the dense material swatch row to **6** chips with an inline **See more** link (`materialSwatchSeeMore: true` on `V6_CONFIG` / `V7_CONFIG`).
+Both `/uxr2` and `/uxr3` collapse to **6** chips with See more (`materialSwatchSeeMore: true`):
+
+| Route | Control |
+|-------|---------|
+| `/uxr2` (v6) | **Inline** “See more” / “View less” after the last swatch (`materialSwatchSeeMoreInline: true`) |
+| `/uxr3` (v7) | Classic **“See more colorways” below** the row (`materialSwatchSeeMoreInline: false`) |
 
 ---
 
@@ -55,7 +60,7 @@ Soft-hidden compare routes (`/v1`…`/v8`, `/fc01`, `/fc01v`) remain on the depl
 
 - [x] `/uxr1` `/uxr2` `/uxr3` load Tabby default (prod build on `:3010`)
 - [x] Black ↔ chalk swaps hero packs (`/images/uxr/hero/{black,beige}`)
-- [x] `/uxr2` and `/uxr3` show 6 swatches + inline “See more”
+- [x] `/uxr2` shows 6 swatches + inline “See more”; `/uxr3` shows 6 + “See more colorways” below
 - [x] Soft-hidden `/v5` still resolves
 - [x] `pnpm build` passes · `ALLOW_V1_DATA_EDIT=1 pnpm check:versions` (Skelly touched `pdp-data.ts`)
 - [x] No console errors on UXR routes during smoke

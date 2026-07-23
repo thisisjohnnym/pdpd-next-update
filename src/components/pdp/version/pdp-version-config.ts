@@ -238,10 +238,16 @@ export type PdpVersionConfig = {
   expandableMaterialSwatchGroups: boolean;
   /**
    * When expandableMaterialSwatchGroups is on: collapse to ~1 row with
-   * “See more colorways” (max 2 rows). Off = horizontal scroll rail
+   * “See more” (max 2 rows). Off = horizontal scroll rail
    * (~7 swatches visible left-to-right). On for uxr2 / uxr3 (v6 / v7).
    */
   materialSwatchSeeMore: boolean;
+  /**
+   * When materialSwatchSeeMore is on: place the control inline after the
+   * last swatch (uxr2 / v6). Off = classic “See more colorways” link below
+   * the swatch row (uxr3 / v7).
+   */
+  materialSwatchSeeMoreInline: boolean;
   /**
    * Land review teaser as a horizontal carousel — rating gauge, AI
    * highlights, and review cards (DoorDash-style). v8 only; earlier
@@ -653,6 +659,7 @@ const V1_CONFIG: PdpVersionConfig = {
   heroColorTrayOverlay: false,
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
+  materialSwatchSeeMoreInline: false,
   useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
@@ -797,6 +804,7 @@ const V2_CONFIG: PdpVersionConfig = {
   heroColorTrayOverlay: false,
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
+  materialSwatchSeeMoreInline: false,
   useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
@@ -1087,20 +1095,22 @@ const V6_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
   // Material swatches on land (no compact tray chip).
   heroColorTrayOverlay: false,
-  // uxr2 — dense material rail felt overwhelming: collapse + See more colorways.
+  // uxr2 — collapse + inline “See more” / “View less” after the last swatch.
   expandableMaterialSwatchGroups: true,
   materialSwatchSeeMore: true,
+  materialSwatchSeeMoreInline: true,
   // Keep the original availability + store-name pickup card (not the quiet line).
   quietStorePickupLink: false,
 };
 
 /**
- * v7 / uxr3 — same collapsed material row + See more as v6 / uxr2
- * (dense rail felt overwhelming on both UXR protos).
+ * v7 / uxr3 — collapsed row with classic “See more colorways” below the
+ * swatches (intentional A/B vs uxr2’s inline control).
  */
 const V7_CONFIG: PdpVersionConfig = {
   ...V6_CONFIG,
   materialSwatchSeeMore: true,
+  materialSwatchSeeMoreInline: false,
 };
 
 /**
