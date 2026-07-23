@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MaterialIcon } from "@/components/icons/material-icon";
 import { cn } from "@/lib/cn";
@@ -14,8 +14,11 @@ import {
 } from "../pdp-hero-gallery-control-shell";
 import { PdpModuleHeading } from "../pdp-module-heading";
 import { PdpRevealItem } from "../pdp-reveal-item";
+import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "../pdp-type";
+import { getUxrGetTheHighlightsCards } from "../pdp-uxr-color-media";
+import { useIsUxrStudyRoute } from "../use-uxr-study-route";
 import {
   useCarouselSnapStartActiveIndex,
   useDragToScroll,
@@ -34,7 +37,6 @@ import { usePdpVersion } from "./pdp-version-context";
 
 const WATCH_THE_FILM_CARD_ID = "icon-reimagined";
 const HIGHLIGHT_DETAIL_SHEET_ID = "pdp-v5-highlight-detail-sheet";
-const HIGHLIGHT_CARD_COUNT = PDP_GET_THE_HIGHLIGHTS_CARDS.length;
 
 /**
  * v5 "Get the highlights" — Apple-style highlight rail. A light section with a
@@ -46,34 +48,46 @@ export function PdpV5GetTheHighlights() {
   const { headline, watchLabel } = PDP_GET_THE_HIGHLIGHTS_SECTION;
   const { leftAlignModuleHeadings, useV4ModuleSpacing } =
     getPdpVersionConfig(usePdpVersion());
+  const isUxrStudy = useIsUxrStudyRoute();
+  const tabby = useOptionalTabbyVariant();
+  const highlightCards = useMemo(
+    () =>
+      isUxrStudy
+        ? getUxrGetTheHighlightsCards(tabby?.selectedColorId)
+        : PDP_GET_THE_HIGHLIGHTS_CARDS,
+    [isUxrStudy, tabby?.selectedColorId],
+  );
+  const highlightCardCount = highlightCards.length;
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const activeCard =
-    PDP_GET_THE_HIGHLIGHTS_CARDS.find((card) => card.id === activeCardId) ??
-    null;
+    highlightCards.find((card) => card.id === activeCardId) ?? null;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeIndex = useCarouselSnapStartActiveIndex(scrollRef);
   useDragToScroll(scrollRef);
 
-  const scrollToIndex = useCallback((index: number) => {
-    const el = scrollRef.current;
-    if (!el) {
-      return;
-    }
-    const clamped = Math.min(Math.max(index, 0), HIGHLIGHT_CARD_COUNT - 1);
-    const child = el.children[clamped] as HTMLElement | undefined;
-    if (!child) {
-      return;
-    }
-    const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
-    el.scrollTo({
-      left: child.offsetLeft - paddingLeft,
-      behavior: "smooth",
-    });
-  }, []);
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const el = scrollRef.current;
+      if (!el) {
+        return;
+      }
+      const clamped = Math.min(Math.max(index, 0), highlightCardCount - 1);
+      const child = el.children[clamped] as HTMLElement | undefined;
+      if (!child) {
+        return;
+      }
+      const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+      el.scrollTo({
+        left: child.offsetLeft - paddingLeft,
+        behavior: "smooth",
+      });
+    },
+    [highlightCardCount],
+  );
 
   const atStart = activeIndex === 0;
-  const atEnd = activeIndex >= HIGHLIGHT_CARD_COUNT - 1;
+  const atEnd = activeIndex >= highlightCardCount - 1;
 
   return (
     <section
@@ -126,7 +140,7 @@ export function PdpV5GetTheHighlights() {
           )}
           aria-label={headline}
         >
-          {PDP_GET_THE_HIGHLIGHTS_CARDS.map((card, index) => (
+          {highlightCards.map((card, index) => (
             <PdpV5HighlightCard
               key={card.id}
               card={card}

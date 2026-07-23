@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -33,7 +39,7 @@ type PdpExpandableMaterialSwatchesProps = {
   /** Max rows when expanded (collapsed is always one preview row). */
   maxExpandedRows?: number;
   /**
-   * When true: collapse + See more colorways (wrap).
+   * When true: collapse + See more (wrap).
    * When false: one horizontal scroll rail (~7 visible left-to-right).
    */
   seeMore?: boolean;
@@ -46,6 +52,9 @@ type PdpExpandableMaterialSwatchesProps = {
 const DEFAULT_PREVIEW_COUNT = 8;
 /** See more reveals at most one more row (2 rows total). */
 const DEFAULT_MAX_EXPANDED_ROWS = 2;
+/** Stagger between newly revealed swatches on expand. */
+const ENTER_STAGGER_MS = 28;
+const ENTER_DURATION_MS = 280;
 
 function isSelectable(option: MaterialSwatchOption): boolean {
   const combinationOk =
@@ -71,10 +80,14 @@ function SwatchButton({
   option,
   isSelected,
   onSelect,
+  className,
+  style,
 }: {
   option: MaterialSwatchOption;
   isSelected: boolean;
   onSelect: (selectionId: string) => void;
+  className?: string;
+  style?: CSSProperties;
 }) {
   const selectable = isSelectable(option);
 
@@ -100,15 +113,17 @@ function SwatchButton({
         isSelected && "shadow-[0_0_0_2px_#fff,0_0_0_3px_#0a0a0a]",
         selectable && pdpPressableIconClass,
         !selectable && "cursor-not-allowed opacity-40",
+        className,
       )}
-      style={{ backgroundColor: option.chromeSample ?? "#d4d4d4" }}
+      style={{ backgroundColor: option.chromeSample ?? "#d4d4d4", ...style }}
     />
   );
 }
 
 /**
  * Color options with optional See more / See less, or a horizontal scroll rail.
- * With seeMore: collapsed ~one row, expanded at most two wrapping rows.
+ * With seeMore: collapsed ~one row; control sits inline after the last swatch.
+ * Expanding fades new swatches in with a slight +x offset.
  * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
@@ -143,11 +158,33 @@ export function PdpExpandableMaterialSwatches({
     [options, leadMaterial],
   );
   const horizontal = !seeMore;
+  // Leave one flex slot on the last row so See less stays beside swatches, not alone below.
   const expandedCount = seeMore
-    ? previewCount * Math.max(1, maxExpandedRows)
+    ? Math.max(previewCount, previewCount * Math.max(1, maxExpandedRows) - 1)
     : ordered.length;
   const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
   const canExpand = seeMore && ordered.length > previewCount;
+
+  /** Index from which newly revealed swatches should enter-animate. */
+  const [enterFromIndex, setEnterFromIndex] = useState<number | null>(null);
+  const wasExpandedRef = useRef(expanded);
+
+  useEffect(() => {
+    const wasExpanded = wasExpandedRef.current;
+    wasExpandedRef.current = expanded;
+
+    if (!seeMore || wasExpanded || !expanded) {
+      return;
+    }
+
+    setEnterFromIndex(previewCount);
+    const clearAfter =
+      ENTER_DURATION_MS +
+      Math.max(0, expandedCount - previewCount) * ENTER_STAGGER_MS +
+      40;
+    const timer = window.setTimeout(() => setEnterFromIndex(null), clearAfter);
+    return () => window.clearTimeout(timer);
+  }, [expanded, expandedCount, previewCount, seeMore]);
 
   if (ordered.length === 0) {
     return null;
@@ -180,21 +217,34 @@ export function PdpExpandableMaterialSwatches({
   }
 
   return (
-    <div className={cn("flex min-w-0 w-full flex-col gap-2", className)}>
-      <div
-        role="listbox"
-        aria-label="Choose color"
-        className="flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1"
-      >
-        {visible.map((option) => (
+    <div
+      role="listbox"
+      aria-label="Choose color"
+      className={cn(
+        "flex min-w-0 w-full flex-wrap items-center gap-2 py-1 pl-1",
+        className,
+      )}
+    >
+      {visible.map((option, index) => {
+        const entering =
+          enterFromIndex != null && index >= enterFromIndex;
+        return (
           <SwatchButton
             key={option.selectionId}
             option={option}
             isSelected={option.selectionId === selectedId}
             onSelect={onSelect}
+            className={entering ? "pdp-material-swatch-enter" : undefined}
+            style={
+              entering
+                ? {
+                    animationDelay: `${(index - enterFromIndex) * ENTER_STAGGER_MS}ms`,
+                  }
+                : undefined
+            }
           />
-        ))}
-      </div>
+        );
+      })}
 
       {canExpand ? (
         <button
@@ -202,14 +252,14 @@ export function PdpExpandableMaterialSwatches({
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
           className={cn(
-            "group self-start",
+            "group shrink-0 self-center",
             pdpTextLinkCtaMutedClass,
             pdpType.label,
             "leading-none",
           )}
         >
           <span className={pdpTextLinkCtaMutedLabelClass}>
-            {expanded ? "See less" : "See more colorways"}
+            {expanded ? "View less" : "See more"}
           </span>
         </button>
       ) : null}

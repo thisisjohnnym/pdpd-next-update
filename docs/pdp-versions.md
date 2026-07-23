@@ -6,9 +6,9 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 ## In short
 
-- **Active work is v8 only** (`/v8`). **v1–v7 are frozen** comparison baselines — do not change them unless explicitly fixing a cross-version bug.
-- **v1** frozen brand baseline · **v2** first stakeholder pivot · **v3** Paper r4 · **v4** Paper r5 · **v5** Sean polish · **v6** See more colorways · **v7** always-open swatches · **v8** carousel reviews (active).
-- Brand team compares them at **`/v1`** … **`/v8`** on the same deploy. Share **`/v8`** for the latest round.
+- **Active share set is UXR:** `/uxr1` (v5) · `/uxr2` (v6) · `/uxr3` (v7). See [rounds/uxr.md](rounds/uxr.md).
+- **Soft-hidden:** `/v1`…`/v8` and `/fc01`/`/fc01v` stay live for internal compare — do not lead stakeholders with them.
+- Design SoT for this ship: `skelly363/pdp-next` @ `9bf290b` (merged). **v5** Sean polish · **v6** / **uxr2** + **v7** / **uxr3** See more colorways (overwhelming feedback) · **v8** carousel reviews (soft-hidden).
 - Newer-version differences live in `src/components/pdp/version/` and behind flags in `pdp-version-config.ts` — never by rewriting older defaults.
 - v3 inherits the v2 module order and layers three r4 UX changes: a docked-buy-bar hero that scrolls with the page, a floating CTA that returns once the hero leaves view, and a progressive in-context color drawer. See section 8.
 - v4 inherits the full v3 baseline and layers the r5 feedback refinements: no trench portrait slide, five-up Details specs, and the A0 product still leading the hero gallery. See section 8.5.
@@ -44,14 +44,11 @@ Single source of truth for the PDP designs that ship from this codebase. Read th
 
 | Route | URL | Round doc |
 |-------|-----|-----------|
-| v1 (frozen baseline) | https://pdp-next-sigma.vercel.app/v1 | — |
-| v2 (first pivot) | https://pdp-next-sigma.vercel.app/v2 | [rounds/r3-v2.md](rounds/r3-v2.md) |
-| v3 (r4 hero/CTA) | https://pdp-next-sigma.vercel.app/v3 | [rounds/r4-v3.md](rounds/r4-v3.md) |
-| v4 (r5 — frozen) | https://pdp-next-sigma.vercel.app/v4 | [rounds/r5-v4.md](rounds/r5-v4.md) |
-| v5 (Sean polish) | https://pdp-next-sigma.vercel.app/v5 | [rounds/README.md](rounds/README.md) (r6) |
-| v6 (See more colorways) | https://pdp-next-sigma.vercel.app/v6 | [rounds/r7-v6.md](rounds/r7-v6.md) |
-| v7 (always-open swatches) | https://pdp-next-sigma.vercel.app/v7 | [rounds/r8-v7.md](rounds/r8-v7.md) |
-| v8 (active) | https://pdp-next-sigma.vercel.app/v8 | [rounds/r9-v8.md](rounds/r9-v8.md) |
+| **uxr1 (share — v5)** | https://pdp-next-sigma.vercel.app/uxr1 | [rounds/uxr.md](rounds/uxr.md) |
+| **uxr2 (share — v6)** | https://pdp-next-sigma.vercel.app/uxr2 | [rounds/uxr.md](rounds/uxr.md) |
+| **uxr3 (share — v7)** | https://pdp-next-sigma.vercel.app/uxr3 | [rounds/uxr.md](rounds/uxr.md) |
+| v1…v8 (soft-hidden compare) | `/v1` … `/v8` | [rounds/](rounds/) |
+| fc01 / fc01v (soft-hidden) | `/fc01` · `/fc01v` | [rounds/fc01.md](rounds/fc01.md) |
 
 Same slugs work under each, e.g. `/v1/products/tabby-shoulder-bag-26-black` vs `/v8/products/tabby-shoulder-bag-26-black`.
 

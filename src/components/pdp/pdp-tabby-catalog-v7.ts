@@ -98,6 +98,8 @@ const TABBY_FAMILY_CATALOG: TabbyFamilyStyleEntry[] = [
         size: 26,
         colorIds: [
           "brass-black",
+          // UXR black ↔ beige (chalk) study — keep chalk selectable on default SKU
+          "brass-chalk",
           "silver-soft-purple",
           "brass-maple",
           "brass-black-multi",

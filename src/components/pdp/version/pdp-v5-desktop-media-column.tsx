@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useMemo } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -11,12 +12,17 @@ import {
   orderHeroGallerySlides,
 } from "../pdp-hero-gallery-data";
 import { resolveHeroSlideFraming } from "../pdp-hero-framing";
+import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
+import { getUxrHeroGallerySlides } from "../pdp-uxr-color-media";
+import { useIsUxrStudyRoute } from "../use-uxr-study-route";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
 /** v5 desktop rail mirrors the mobile hero carousel ordering. */
 function usePdpV5DesktopMediaSlides() {
   const version = usePdpVersion();
+  const isUxrStudy = useIsUxrStudyRoute();
+  const tabby = useOptionalTabbyVariant();
   const {
     heroGalleryLeadSlideSrc,
     heroGalleryLastSlideSrc,
@@ -28,7 +34,24 @@ function usePdpV5DesktopMediaSlides() {
     heroGalleryLogicalBlockOrder,
   } = getPdpVersionConfig(version);
 
-  return orderHeroGallerySlides(PDP_HERO_GALLERY_SLIDES, {
+  return useMemo(() => {
+    if (isUxrStudy) {
+      return getUxrHeroGallerySlides(tabby?.selectedColorId);
+    }
+
+    return orderHeroGallerySlides(PDP_HERO_GALLERY_SLIDES, {
+      heroGalleryLeadSlideSrc,
+      heroGalleryLastSlideSrc,
+      heroGalleryExcludedSlideSrcs,
+      heroGalleryAdditionalSlides,
+      heroGalleryPrependLeadSlide,
+      heroGalleryUgcSlides,
+      heroGalleryUgcInsertAfterIndex,
+      heroGalleryLogicalBlockOrder,
+    });
+  }, [
+    isUxrStudy,
+    tabby?.selectedColorId,
     heroGalleryLeadSlideSrc,
     heroGalleryLastSlideSrc,
     heroGalleryExcludedSlideSrcs,
@@ -37,7 +60,7 @@ function usePdpV5DesktopMediaSlides() {
     heroGalleryUgcSlides,
     heroGalleryUgcInsertAfterIndex,
     heroGalleryLogicalBlockOrder,
-  });
+  ]);
 }
 
 /**

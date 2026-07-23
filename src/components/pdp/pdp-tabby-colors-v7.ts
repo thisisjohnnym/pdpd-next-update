@@ -109,6 +109,14 @@ const CLASSIC_26: TabbyColorSeed[] = [
     availability: "in_stock",
   },
   {
+    id: "brass-chalk",
+    name: "Brass/Chalk",
+    swatch: coachSwatch("brass-chalk"),
+    hero: coachSwatch("brass-chalk"),
+    chromeSample: "#e8e0d4",
+    availability: "in_stock",
+  },
+  {
     id: "brass-canyon",
     name: "Brass/Canyon",
     swatch: coachSwatch("soft-canyon"),
@@ -149,6 +157,14 @@ const QUILTED_26: TabbyColorSeed[] = [
     name: "Brass/Black",
     swatch: coachSwatch("brass-black"),
     chromeSample: "#1a1a1a",
+    availability: "in_stock",
+  },
+  {
+    id: "brass-chalk",
+    name: "Brass/Chalk",
+    swatch: coachSwatch("brass-chalk"),
+    hero: coachSwatch("brass-chalk"),
+    chromeSample: "#e8e0d4",
     availability: "in_stock",
   },
   {

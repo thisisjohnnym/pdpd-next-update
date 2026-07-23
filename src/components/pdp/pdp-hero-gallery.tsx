@@ -33,6 +33,9 @@ import {
 } from "./use-infinite-centered-carousel";
 import { HeroGalleryIdleProvider } from "./use-hero-gallery-idle-visible";
 import { useHeroGalleryTouchScrollPassthrough } from "./use-hero-gallery-touch-scroll";
+import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
+import { getUxrHeroGallerySlides } from "./pdp-uxr-color-media";
+import { useIsUxrStudyRoute } from "./use-uxr-study-route";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
@@ -129,6 +132,8 @@ export function PdpHeroGallery({
   fillFrame?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const isUxrStudy = useIsUxrStudyRoute();
+  const tabby = useOptionalTabbyVariant();
   const {
     useStableInfiniteCarousel,
     heroDockedBuyBar,
@@ -147,22 +152,13 @@ export function PdpHeroGallery({
   } = getPdpVersionConfig(usePdpVersion());
   const idleChromeEnabled =
     useHeroGalleryProgressBar || showHeroGalleryCategoryRail;
-  const orderedSlides = useMemo(
-    () =>
-      orderHeroGallerySlides(slides, {
-        leadGalleryWithProductStill,
-        heroGalleryStudioDragZoom,
-        heroGalleryLeadSlideSrc,
-        heroGalleryLastSlideSrc,
-        heroGalleryExcludedSlideSrcs,
-        heroGalleryAdditionalSlides,
-        heroGalleryPrependLeadSlide,
-        heroGalleryUgcSlides,
-        heroGalleryUgcInsertAfterIndex,
-        heroGalleryLogicalBlockOrder,
-      }),
-    [
-      slides,
+  const orderedSlides = useMemo(() => {
+    // UXR study — ordered black/beige packs; skip v5 reorder flags.
+    if (isUxrStudy) {
+      return getUxrHeroGallerySlides(tabby?.selectedColorId);
+    }
+
+    return orderHeroGallerySlides(slides, {
       leadGalleryWithProductStill,
       heroGalleryStudioDragZoom,
       heroGalleryLeadSlideSrc,
@@ -173,8 +169,22 @@ export function PdpHeroGallery({
       heroGalleryUgcSlides,
       heroGalleryUgcInsertAfterIndex,
       heroGalleryLogicalBlockOrder,
-    ],
-  );
+    });
+  }, [
+    isUxrStudy,
+    tabby?.selectedColorId,
+    slides,
+    leadGalleryWithProductStill,
+    heroGalleryStudioDragZoom,
+    heroGalleryLeadSlideSrc,
+    heroGalleryLastSlideSrc,
+    heroGalleryExcludedSlideSrcs,
+    heroGalleryAdditionalSlides,
+    heroGalleryPrependLeadSlide,
+    heroGalleryUgcSlides,
+    heroGalleryUgcInsertAfterIndex,
+    heroGalleryLogicalBlockOrder,
+  ]);
   const loopedSlides = useMemo(
     () => loopCarouselItems(orderedSlides),
     [orderedSlides],

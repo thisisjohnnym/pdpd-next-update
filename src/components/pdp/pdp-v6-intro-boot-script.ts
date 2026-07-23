@@ -47,9 +47,9 @@ export const PDP_V6_INTRO_BOOT_SCRIPT = `
 (function () {
   var path = location.pathname;
   var version = null;
-  if (/^\\/v5(\\/|$)/.test(path)) version = "v5";
-  else if (/^\\/v6(\\/|$)/.test(path)) version = "v6";
-  else if (/^\\/v7(\\/|$)/.test(path)) version = "v7";
+  if (/^\\/v5(\\/|$)/.test(path) || /^\\/uxr1(\\/|$)/.test(path)) version = "v5";
+  else if (/^\\/v6(\\/|$)/.test(path) || /^\\/uxr2(\\/|$)/.test(path)) version = "v6";
+  else if (/^\\/v7(\\/|$)/.test(path) || /^\\/uxr3(\\/|$)/.test(path)) version = "v7";
   else if (/^\\/fc01v(\\/|$)/.test(path)) version = "fc01v";
   else if (/^\\/fc01(\\/|$)/.test(path)) version = "fc01";
   if (!version) return;

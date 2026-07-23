@@ -1,4 +1,5 @@
 import type { PdpProductId } from "./pdp-products";
+import { getUxrStudyId } from "./pdp-uxr-study";
 import type { PdpVersion } from "./version/pdp-version-context";
 import {
   DEFAULT_TABBY_SLUG,
@@ -93,6 +94,16 @@ export function tabbyBrowserUrl(
   const currentPath =
     pathname ?? (typeof window !== "undefined" ? window.location.pathname : "");
   const query = colorId ? `?color=${encodeURIComponent(colorId)}` : "";
+
+  // UXR study aliases (`/uxr1`→v5, `/uxr2`→v6, `/uxr3`→v7) — keep the public prefix.
+  const uxrId = getUxrStudyId(currentPath);
+  if (uxrId) {
+    const onProduct = currentPath.includes("/products/");
+    if (!onProduct) {
+      return `/${uxrId}${query}`;
+    }
+    return `/${uxrId}/products/${slug}${query}`;
+  }
 
   if (isPdpVersionHomePathname(currentPath, version)) {
     const home = pdpVersionPrefix(version) || "/";

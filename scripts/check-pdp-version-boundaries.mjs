@@ -174,6 +174,10 @@ function checkRouteVersionProps() {
     { dir: "src/app/v6", expected: 'version="v6"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v7"', 'version="v8"'] },
     { dir: "src/app/v7", expected: 'version="v7"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v8"'] },
     { dir: "src/app/v8", expected: 'version="v8"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v7"'] },
+    // UXR study aliases — public routes that reuse underlying v5/v6/v7 configs
+    { dir: "src/app/uxr1", expected: 'version="v5"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v6"', 'version="v7"', 'version="v8"'] },
+    { dir: "src/app/uxr2", expected: 'version="v6"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v7"', 'version="v8"'] },
+    { dir: "src/app/uxr3", expected: 'version="v7"', forbidden: ['version="v1"', 'version="v2"', 'version="v3"', 'version="v4"', 'version="v5"', 'version="v6"', 'version="v8"'] },
   ];
   for (const { dir, expected, forbidden } of checks) {
     for (const file of walk(join(ROOT, dir))) {
@@ -226,8 +230,20 @@ function checkTabbyBrowserUrls() {
     return `${pdpVersionPrefix(version)}${path}`;
   }
 
+  function getUxrStudyId(pathname) {
+    const match = pathname.match(/^\/(uxr[123])(\/|$)/);
+    return match?.[1] ?? null;
+  }
+
   function tabbyBrowserUrl(version, slug, colorId, pathname) {
     const query = colorId ? `?color=${encodeURIComponent(colorId)}` : "";
+    const uxrId = getUxrStudyId(pathname);
+    if (uxrId) {
+      if (!pathname.includes("/products/")) {
+        return `/${uxrId}${query}`;
+      }
+      return `/${uxrId}/products/${slug}${query}`;
+    }
     if (isPdpVersionHomePathname(pathname, version)) {
       const home = pdpVersionPrefix(version) || "/";
       return `${home}${query}`;
@@ -257,6 +273,12 @@ function checkTabbyBrowserUrls() {
       tabbyBrowserUrl("v8", slug, "brass-black", "/v8/products/tabby-shoulder-bag-26-quilted"),
       "/v8/products/tabby-shoulder-bag-26-quilted?color=brass-black",
     ],
+    [tabbyBrowserUrl("v5", slug, "brass-chalk", "/uxr1"), "/uxr1?color=brass-chalk"],
+    [
+      tabbyBrowserUrl("v6", slug, "brass-black", "/uxr2/products/tabby-shoulder-bag-26-quilted"),
+      "/uxr2/products/tabby-shoulder-bag-26-quilted?color=brass-black",
+    ],
+    [tabbyBrowserUrl("v7", slug, "brass-chalk", "/uxr3"), "/uxr3?color=brass-chalk"],
     [tabbyBrowserUrl("v1", slug, "brass-black", "/"), "/?color=brass-black"],
     [
       tabbyBrowserUrl("v1", slug, "brass-black", "/products/tabby-shoulder-bag-26-quilted"),

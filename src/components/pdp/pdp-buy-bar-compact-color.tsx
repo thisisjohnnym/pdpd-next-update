@@ -218,6 +218,8 @@ export function PdpBuyBarCompactColor({
           leadMaterial={railLeadMaterial}
           selectedId={activeColorId}
           onSelect={handleColorSelect}
+          // Collapsed row felt overwhelming at full rail — show 6 + inline See more.
+          previewCount={materialSwatchSeeMore ? 6 : undefined}
           seeMore={materialSwatchSeeMore}
           expanded={swatchesExpanded}
           onExpandedChange={onSwatchesExpandedChange}
