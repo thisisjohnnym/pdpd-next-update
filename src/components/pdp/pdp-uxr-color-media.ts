@@ -18,16 +18,17 @@ function heroImage(
   pack: UxrColorPack,
   file: string,
   alt: string,
+  galleryCategory: PdpHeroGallerySlide["galleryCategory"] = "on-model",
 ): PdpHeroGallerySlide {
   return {
     kind: "image",
     src: `/images/uxr/hero/${pack}/${file}`,
     alt,
-    // on-model defaults to cover; framing lock stops contain fallbacks.
+    // Keep cover framing for every UXR still; category only drives the navigator.
     shotType: "on-model",
     framing: UXR_FILL_FRAME,
     headerSurface: "light",
-    galleryCategory: "on-model",
+    galleryCategory,
   };
 }
 
@@ -62,14 +63,45 @@ export function getUxrHeroGallerySlides(
     ? (["01-a0.png", "03.webp", "04.webp", "05.webp", "06.webp", "07.webp"] as const)
     : (["01-a0.png", "03.png", "04.png", "05.webp", "06.png", "07.webp"] as const);
 
+  // Categories feed the bottom-left gallery navigator (needs >1 section).
   return [
-    heroImage(pack, stillExt[0], `Tabby Shoulder Bag 26 in ${tone} — hero still 1`),
+    heroImage(
+      pack,
+      stillExt[0],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 1`,
+      "on-model",
+    ),
     heroSpin(pack),
-    heroImage(pack, stillExt[1], `Tabby Shoulder Bag 26 in ${tone} — hero still 3`),
-    heroImage(pack, stillExt[2], `Tabby Shoulder Bag 26 in ${tone} — hero still 4`),
-    heroImage(pack, stillExt[3], `Tabby Shoulder Bag 26 in ${tone} — hero still 5`),
-    heroImage(pack, stillExt[4], `Tabby Shoulder Bag 26 in ${tone} — hero still 6`),
-    heroImage(pack, stillExt[5], `Tabby Shoulder Bag 26 in ${tone} — hero still 7`),
+    heroImage(
+      pack,
+      stillExt[1],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 3`,
+      "product-photos",
+    ),
+    heroImage(
+      pack,
+      stillExt[2],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 4`,
+      "product-photos",
+    ),
+    heroImage(
+      pack,
+      stillExt[3],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 5`,
+      "product-photos",
+    ),
+    heroImage(
+      pack,
+      stillExt[4],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 6`,
+      "product-photos",
+    ),
+    heroImage(
+      pack,
+      stillExt[5],
+      `Tabby Shoulder Bag 26 in ${tone} — hero still 7`,
+      "product-photos",
+    ),
   ];
 }
 

@@ -14,6 +14,7 @@ export type PdpHeroGalleryCategoryDef = {
 
 export const PDP_HERO_GALLERY_CATEGORIES: PdpHeroGalleryCategoryDef[] = [
   { id: "on-model", label: "On Model", action: "scroll" },
+  { id: "360", label: "360°", action: "scroll" },
   { id: "video", label: "Video", action: "scroll" },
   { id: "product-photos", label: "Product Photos", action: "scroll" },
   { id: "fits-inside", label: "What's Inside", action: "scroll" },
