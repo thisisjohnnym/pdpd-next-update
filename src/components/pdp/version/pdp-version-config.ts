@@ -243,10 +243,17 @@ export type PdpVersionConfig = {
    */
   materialSwatchSeeMore: boolean;
   /**
-   * @deprecated See more is always inline on one horizontal scroll row.
-   * Kept so older configs typecheck; ignored at runtime.
+   * When materialSwatchSeeMore is on: place the control inline after the
+   * last swatch (uxr2 / v6). Off = classic “See more colorways” link below
+   * the swatch row (uxr3 / v7).
    */
   materialSwatchSeeMoreInline: boolean;
+  /**
+   * Use UXR Tabby media packs (black/beige hero + GTH) for this version.
+   * On for v5–v7 so `/uxr1`–`/uxr3` and their soft-hidden `/v5`–`/v7`
+   * aliases share the same high-res a0 stills.
+   */
+  useUxrStudyMedia: boolean;
   /**
    * Land review teaser as a horizontal carousel — rating gauge, AI
    * highlights, and review cards (DoorDash-style). v8 only; earlier
@@ -659,6 +666,7 @@ const V1_CONFIG: PdpVersionConfig = {
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
   materialSwatchSeeMoreInline: false,
+  useUxrStudyMedia: false,
   useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
@@ -804,6 +812,7 @@ const V2_CONFIG: PdpVersionConfig = {
   expandableMaterialSwatchGroups: false,
   materialSwatchSeeMore: false,
   materialSwatchSeeMoreInline: false,
+  useUxrStudyMedia: false,
   useCarouselReviews: false,
   showStorePickupLink: false,
   quietStorePickupLink: false,
@@ -954,6 +963,8 @@ const V4_CONFIG: PdpVersionConfig = {
  */
 const V5_CONFIG: PdpVersionConfig = {
   ...V4_CONFIG,
+  // UXR study media (black/beige packs) — shared by /uxr1 and soft-hidden /v5.
+  useUxrStudyMedia: true,
   // Sticky Add to bag — always fixed at the bottom (not only after hero scrolls away).
   showFloatingBuyBar: true,
   floatingBuyBarWhenHeroHidden: false,
@@ -1103,12 +1114,13 @@ const V6_CONFIG: PdpVersionConfig = {
 };
 
 /**
- * v7 / uxr3 — same single-row See more rail as v6 / uxr2 (no wrap / no grow).
+ * v7 / uxr3 — collapsed row with classic “See more colorways” below the
+ * swatches (intentional A/B vs uxr2’s inline control).
  */
 const V7_CONFIG: PdpVersionConfig = {
   ...V6_CONFIG,
   materialSwatchSeeMore: true,
-  materialSwatchSeeMoreInline: true,
+  materialSwatchSeeMoreInline: false,
 };
 
 /**
@@ -1118,6 +1130,7 @@ const V7_CONFIG: PdpVersionConfig = {
  */
 const V8_CONFIG: PdpVersionConfig = {
   ...V7_CONFIG,
+  useUxrStudyMedia: false,
   useCarouselReviews: true,
 };
 
@@ -1127,10 +1140,12 @@ const V8_CONFIG: PdpVersionConfig = {
  */
 const FC01_CONFIG: PdpVersionConfig = {
   ...V5_CONFIG,
+  useUxrStudyMedia: false,
 };
 
 const FC01V_CONFIG: PdpVersionConfig = {
   ...V6_CONFIG,
+  useUxrStudyMedia: false,
 };
 
 const CONFIG_BY_VERSION: Record<PdpVersion, PdpVersionConfig> = {

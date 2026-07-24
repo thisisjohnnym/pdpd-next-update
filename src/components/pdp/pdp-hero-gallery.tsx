@@ -35,7 +35,7 @@ import { HeroGalleryIdleProvider } from "./use-hero-gallery-idle-visible";
 import { useHeroGalleryTouchScrollPassthrough } from "./use-hero-gallery-touch-scroll";
 import { useOptionalTabbyVariant } from "./pdp-tabby-variant-context";
 import { getUxrHeroGallerySlides } from "./pdp-uxr-color-media";
-import { useIsUxrStudyRoute } from "./use-uxr-study-route";
+import { useUxrStudyMedia } from "./use-uxr-study-media";
 import { getPdpVersionConfig } from "./version/pdp-version-config";
 import { usePdpVersion } from "./version/pdp-version-context";
 import { PdpV3GalleryOverlay } from "./version/pdp-v3-gallery-overlay";
@@ -136,7 +136,7 @@ export function PdpHeroGallery({
   fillFrame?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const isUxrStudy = useIsUxrStudyRoute();
+  const useUxrMedia = useUxrStudyMedia();
   const tabby = useOptionalTabbyVariant();
   const {
     useStableInfiniteCarousel,
@@ -158,7 +158,7 @@ export function PdpHeroGallery({
     useHeroGalleryProgressBar || showHeroGalleryCategoryRail;
   const orderedSlides = useMemo(() => {
     // UXR study — ordered black/beige packs; skip v5 reorder flags.
-    if (isUxrStudy) {
+    if (useUxrMedia) {
       return getUxrHeroGallerySlides(tabby?.selectedColorId);
     }
 
@@ -175,7 +175,7 @@ export function PdpHeroGallery({
       heroGalleryLogicalBlockOrder,
     });
   }, [
-    isUxrStudy,
+    useUxrMedia,
     tabby?.selectedColorId,
     slides,
     leadGalleryWithProductStill,

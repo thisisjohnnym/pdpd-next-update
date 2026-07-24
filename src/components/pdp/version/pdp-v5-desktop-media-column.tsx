@@ -14,14 +14,14 @@ import {
 import { resolveHeroSlideFraming } from "../pdp-hero-framing";
 import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { getUxrHeroGallerySlides } from "../pdp-uxr-color-media";
-import { useIsUxrStudyRoute } from "../use-uxr-study-route";
+import { useUxrStudyMedia } from "../use-uxr-study-media";
 import { getPdpVersionConfig } from "./pdp-version-config";
 import { usePdpVersion } from "./pdp-version-context";
 
 /** v5 desktop rail mirrors the mobile hero carousel ordering. */
 function usePdpV5DesktopMediaSlides() {
   const version = usePdpVersion();
-  const isUxrStudy = useIsUxrStudyRoute();
+  const useUxrMedia = useUxrStudyMedia();
   const tabby = useOptionalTabbyVariant();
   const {
     heroGalleryLeadSlideSrc,
@@ -35,7 +35,7 @@ function usePdpV5DesktopMediaSlides() {
   } = getPdpVersionConfig(version);
 
   return useMemo(() => {
-    if (isUxrStudy) {
+    if (useUxrMedia) {
       return getUxrHeroGallerySlides(tabby?.selectedColorId);
     }
 
@@ -50,7 +50,7 @@ function usePdpV5DesktopMediaSlides() {
       heroGalleryLogicalBlockOrder,
     });
   }, [
-    isUxrStudy,
+    useUxrMedia,
     tabby?.selectedColorId,
     heroGalleryLeadSlideSrc,
     heroGalleryLastSlideSrc,

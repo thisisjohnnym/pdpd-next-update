@@ -57,9 +57,10 @@ export function getUxrHeroGallerySlides(
 ): PdpHeroGallerySlide[] {
   const pack = resolveUxrColorPack(colorId);
   const tone = pack === "beige" ? "beige" : "black";
+  // `01-a0` = high-res land still (cache-busted filename vs old 01.png).
   const stillExt = pack === "beige"
-    ? (["01.png", "03.webp", "04.webp", "05.webp", "06.webp", "07.webp"] as const)
-    : (["01.png", "03.png", "04.png", "05.webp", "06.png", "07.webp"] as const);
+    ? (["01-a0.png", "03.webp", "04.webp", "05.webp", "06.webp", "07.webp"] as const)
+    : (["01-a0.png", "03.png", "04.png", "05.webp", "06.png", "07.webp"] as const);
 
   return [
     heroImage(pack, stillExt[0], `Tabby Shoulder Bag 26 in ${tone} — hero still 1`),

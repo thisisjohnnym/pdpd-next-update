@@ -18,7 +18,7 @@ import { useOptionalTabbyVariant } from "../pdp-tabby-variant-context";
 import { PdpTextReveal } from "../pdp-text-reveal";
 import { pdpPressableClass, pdpPressableIconClass, pdpType } from "../pdp-type";
 import { getUxrGetTheHighlightsCards } from "../pdp-uxr-color-media";
-import { useIsUxrStudyRoute } from "../use-uxr-study-route";
+import { useUxrStudyMedia } from "../use-uxr-study-media";
 import {
   useCarouselSnapStartActiveIndex,
   useDragToScroll,
@@ -48,14 +48,14 @@ export function PdpV5GetTheHighlights() {
   const { headline, watchLabel } = PDP_GET_THE_HIGHLIGHTS_SECTION;
   const { leftAlignModuleHeadings, useV4ModuleSpacing } =
     getPdpVersionConfig(usePdpVersion());
-  const isUxrStudy = useIsUxrStudyRoute();
+  const useUxrMedia = useUxrStudyMedia();
   const tabby = useOptionalTabbyVariant();
   const highlightCards = useMemo(
     () =>
-      isUxrStudy
+      useUxrMedia
         ? getUxrGetTheHighlightsCards(tabby?.selectedColorId)
         : PDP_GET_THE_HIGHLIGHTS_CARDS,
-    [isUxrStudy, tabby?.selectedColorId],
+    [useUxrMedia, tabby?.selectedColorId],
   );
   const highlightCardCount = highlightCards.length;
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
