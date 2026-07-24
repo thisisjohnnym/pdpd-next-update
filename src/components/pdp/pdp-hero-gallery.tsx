@@ -69,6 +69,10 @@ function HeroSlideMedia({
         keepMounted={keepMounted}
         preload={isActive || keepMounted ? "auto" : "metadata"}
         priorityAutoplay={Boolean(slide.priority)}
+        // 360 spins should play immediately on slide-in — no land-hero blur flash.
+        blurReveal={
+          slide.galleryCategory === "360" ? false : undefined
+        }
         skeletonTone={slide.shotType === "lifestyle" ? "dark" : "light"}
         showMuteControl
         passThroughTouch

@@ -36,12 +36,15 @@ function heroSpin(pack: UxrColorPack): PdpHeroGallerySlide {
   return {
     kind: "video",
     src: `/videos/uxr/hero/${pack}/02-360.mp4`,
-    poster: `/images/uxr/hero/${pack}/01.png`,
+    // First decoded frame of the spin — never the a0 / hero still.
+    poster: `/images/uxr/hero/${pack}/02-360-poster.jpg`,
     alt: `Tabby Shoulder Bag 26 360° spin in ${label} leather`,
     shotType: "on-model",
     framing: UXR_FILL_FRAME,
     headerSurface: "light",
     galleryCategory: "360",
+    // Autoplay when this slide is active (same policy as land hero video).
+    priority: true,
   };
 }
 

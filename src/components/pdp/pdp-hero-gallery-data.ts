@@ -514,11 +514,14 @@ export const PDP_HERO_GALLERY_SLIDES: PdpHeroGallerySlide[] = [
   {
     kind: "video",
     src: "/videos/tabby26-spin.mp4",
+    // First frame of the spin clip (not the a0 product still).
     poster: "/images/posters/tabby26-spin.jpg",
     alt: "360-degree spin of Tabby Shoulder Bag 26 in black leather with both straps",
     shotType: "studio",
     headerSurface: "light",
     galleryCategory: "360",
+    // Autoplay when this slide is active.
+    priority: true,
   },
   {
     kind: "video",

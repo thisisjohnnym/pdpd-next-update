@@ -105,9 +105,13 @@ export function PdpV5DesktopMediaColumn() {
                 poster={slide.poster}
                 ariaLabel={slide.alt}
                 isActive
+                priorityAutoplay={
+                  Boolean(slide.priority) || slide.galleryCategory === "360"
+                }
+                blurReveal={false}
                 showControls
                 showMuteControl
-                preload="metadata"
+                preload="auto"
                 skeletonTone="light"
                 className={cn("size-full object-center", fitClass)}
                 style={{ objectPosition }}
