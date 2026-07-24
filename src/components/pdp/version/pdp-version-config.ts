@@ -243,9 +243,8 @@ export type PdpVersionConfig = {
    */
   materialSwatchSeeMore: boolean;
   /**
-   * When materialSwatchSeeMore is on: place the control inline after the
-   * last swatch (uxr2 / v6). Off = classic “See more colorways” link below
-   * the swatch row (uxr3 / v7).
+   * @deprecated See more is always inline on one horizontal scroll row.
+   * Kept so older configs typecheck; ignored at runtime.
    */
   materialSwatchSeeMoreInline: boolean;
   /**
@@ -1104,13 +1103,12 @@ const V6_CONFIG: PdpVersionConfig = {
 };
 
 /**
- * v7 / uxr3 — collapsed row with classic “See more colorways” below the
- * swatches (intentional A/B vs uxr2’s inline control).
+ * v7 / uxr3 — same single-row See more rail as v6 / uxr2 (no wrap / no grow).
  */
 const V7_CONFIG: PdpVersionConfig = {
   ...V6_CONFIG,
   materialSwatchSeeMore: true,
-  materialSwatchSeeMoreInline: false,
+  materialSwatchSeeMoreInline: true,
 };
 
 /**

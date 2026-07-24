@@ -75,7 +75,7 @@ Tabby 26 UXR protos (same deploy):
 
 uxr1 (v5): https://pdp-next-sigma.vercel.app/uxr1
 uxr2 (v6 — inline See more): https://pdp-next-sigma.vercel.app/uxr2
-uxr3 (v7 — See more colorways below): https://pdp-next-sigma.vercel.app/uxr3
+uxr3 (v7 — inline See more): https://pdp-next-sigma.vercel.app/uxr3
 
 Switch Brass/Black ↔ Brass/Chalk on each to swap hero + Get the highlights stills.
 ```

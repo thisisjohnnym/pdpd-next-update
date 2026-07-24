@@ -9,8 +9,8 @@ Each **Paper / design round** maps to a **route version** on the same production
 | Study | Route | Underlying version | Intent | Changelog |
 |-------|-------|--------------------|--------|-----------|
 | UXR 1 | `/uxr1` | v5 | Skelly baseline | [uxr.md](uxr.md) |
-| UXR 2 | `/uxr2` | v6 | Inline See more | [uxr.md](uxr.md) |
-| UXR 3 | `/uxr3` | v7 | See more colorways below | [uxr.md](uxr.md) |
+| UXR 2 | `/uxr2` | v6 | Inline See more (1-row scroll) | [uxr.md](uxr.md) |
+| UXR 3 | `/uxr3` | v7 | Inline See more (1-row scroll) | [uxr.md](uxr.md) |
 
 ## Soft-hidden compare routes
 
