@@ -56,8 +56,8 @@ type PdpExpandableMaterialSwatchesProps = {
 const DEFAULT_PREVIEW_COUNT = 8;
 /** See more reveals at most one more row (2 rows total). */
 const DEFAULT_MAX_EXPANDED_ROWS = 2;
-/** Inline expand (uxr2) — keep View less on-screen at the end of the row. */
-const INLINE_EXPANDED_COUNT = 8;
+/** Expanded See more — keep the rail to ~8 chips (uxr2 + uxr3). */
+const EXPANDED_SWATCH_COUNT = 8;
 /** Stagger between newly revealed swatches on expand. */
 const ENTER_STAGGER_MS = 28;
 const ENTER_DURATION_MS = 280;
@@ -166,11 +166,8 @@ export function PdpExpandableMaterialSwatches({
     [options, leadMaterial],
   );
   const horizontal = !seeMore;
-  // Inline (uxr2): cap at 8 so View less stays visible at the end.
-  // Below (uxr3): full rail on one scrollable row; link stays under it.
-  const expandedCount = seeMoreInline
-    ? Math.min(INLINE_EXPANDED_COUNT, ordered.length)
-    : ordered.length;
+  // Cap expanded chips at 8 (uxr2 inline + uxr3 below).
+  const expandedCount = Math.min(EXPANDED_SWATCH_COUNT, ordered.length);
   const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
   const canExpand = seeMore && ordered.length > previewCount;
 
