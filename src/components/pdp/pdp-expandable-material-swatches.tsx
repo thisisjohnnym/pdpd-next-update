@@ -36,14 +36,15 @@ type PdpExpandableMaterialSwatchesProps = {
   onSelect: (selectionId: string) => void;
   /** How many swatches show before “See more” (~one row). */
   previewCount?: number;
+  /** Max rows when expanded (collapsed is always one preview row). */
+  maxExpandedRows?: number;
   /**
-   * When true: collapse + See more on one horizontal row.
-   * Expand reveals the rest via horizontal scroll (height never grows).
-   * When false: one horizontal scroll rail of all swatches.
+   * When true: collapse + See more (wrap).
+   * When false: one horizontal scroll rail (~7 visible left-to-right).
    */
   seeMore?: boolean;
   /**
-   * @deprecated Always inline + horizontal scroll — kept for call-site compat.
+   * Inline after the last swatch (uxr2). Off = classic link below the row (uxr3).
    */
   seeMoreInline?: boolean;
   expanded?: boolean;
@@ -53,16 +54,11 @@ type PdpExpandableMaterialSwatchesProps = {
 
 /** ~one mobile row of size-7 swatches with gap-2. */
 const DEFAULT_PREVIEW_COUNT = 8;
+/** See more reveals at most one more row (2 rows total). */
+const DEFAULT_MAX_EXPANDED_ROWS = 2;
 /** Stagger between newly revealed swatches on expand. */
 const ENTER_STAGGER_MS = 28;
 const ENTER_DURATION_MS = 280;
-
-const SCROLL_ROW_CLASS = cn(
-  "flex min-w-0 w-full max-w-full flex-nowrap items-center gap-2",
-  "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
-  "pl-1 py-1",
-  "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-);
 
 function isSelectable(option: MaterialSwatchOption): boolean {
   const combinationOk =
@@ -129,10 +125,11 @@ function SwatchButton({
 }
 
 /**
- * Color options on a single horizontal row (never wraps / grows the layout).
- * With seeMore: collapsed preview + inline “See more”; expand scrolls the full rail
- * with “View less” after the last swatch.
- * Without seeMore: full rail, scroll for the rest.
+ * Color options with optional See more / See less, or a horizontal scroll rail.
+ * seeMore + seeMoreInline (uxr2): one row always; expand reveals the rest via
+ * horizontal scroll so height never jumps. Control sits after the last swatch.
+ * seeMore without inline (uxr3): classic “See more colorways” below a wrapping row.
+ * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
   options,
@@ -140,7 +137,9 @@ export function PdpExpandableMaterialSwatches({
   selectedId,
   onSelect,
   previewCount = DEFAULT_PREVIEW_COUNT,
+  maxExpandedRows = DEFAULT_MAX_EXPANDED_ROWS,
   seeMore = true,
+  seeMoreInline = false,
   expanded: expandedProp,
   onExpandedChange,
   className,
@@ -164,13 +163,14 @@ export function PdpExpandableMaterialSwatches({
     () => orderOptions(options, pinnedLeadRef.current || leadMaterial),
     [options, leadMaterial],
   );
-  const visible = ordered.slice(
-    0,
-    seeMore && !expanded ? previewCount : ordered.length,
-  );
+  const horizontal = !seeMore;
+  // Both expand modes stay on one swatch row (scroll). Inline puts the control
+  // in that row; below keeps “See more colorways” under the row.
+  const expandedCount = ordered.length;
+  const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
   const canExpand = seeMore && ordered.length > previewCount;
 
-  /** Index from which newly revealed swatches should enter-animate. */
+  /** Index from which newly revealed swatches should enter-animate (inline only). */
   const [enterFromIndex, setEnterFromIndex] = useState<number | null>(null);
   const wasExpandedRef = useRef(expanded);
 
@@ -178,68 +178,133 @@ export function PdpExpandableMaterialSwatches({
     const wasExpanded = wasExpandedRef.current;
     wasExpandedRef.current = expanded;
 
-    if (!seeMore || wasExpanded || !expanded) {
+    if (!seeMore || !seeMoreInline || wasExpanded || !expanded) {
       return;
     }
 
     setEnterFromIndex(previewCount);
     const clearAfter =
       ENTER_DURATION_MS +
-      Math.max(0, ordered.length - previewCount) * ENTER_STAGGER_MS +
+      Math.max(0, expandedCount - previewCount) * ENTER_STAGGER_MS +
       40;
     const timer = window.setTimeout(() => setEnterFromIndex(null), clearAfter);
     return () => window.clearTimeout(timer);
-  }, [expanded, ordered.length, previewCount, seeMore]);
+  }, [expanded, expandedCount, previewCount, seeMore, seeMoreInline]);
 
   if (ordered.length === 0) {
     return null;
   }
 
-  return (
-    <div
-      ref={scrollRef}
-      role="listbox"
-      aria-label="Choose color"
-      className={cn(SCROLL_ROW_CLASS, className)}
-    >
-      {visible.map((option, index) => {
-        const entering =
-          enterFromIndex != null && index >= enterFromIndex;
-        return (
+  if (horizontal) {
+    return (
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full max-w-full items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-1",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
+      >
+        {ordered.map((option) => (
           <SwatchButton
             key={option.selectionId}
             option={option}
             isSelected={option.selectionId === selectedId}
             onSelect={onSelect}
-            className={entering ? "pdp-material-swatch-enter" : undefined}
-            style={
-              entering
-                ? {
-                    animationDelay: `${(index - enterFromIndex) * ENTER_STAGGER_MS}ms`,
-                  }
-                : undefined
-            }
           />
-        );
-      })}
+        ))}
+      </div>
+    );
+  }
 
-      {canExpand ? (
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          className={cn(
-            "group shrink-0 self-center",
-            pdpTextLinkCtaMutedClass,
-            pdpType.label,
-            "leading-none",
-          )}
-        >
-          <span className={pdpTextLinkCtaMutedLabelClass}>
-            {expanded ? "View less" : "See more"}
-          </span>
-        </button>
-      ) : null}
+  const expandToggle = canExpand ? (
+    <button
+      type="button"
+      onClick={() => setExpanded(!expanded)}
+      aria-expanded={expanded}
+      className={cn(
+        "group shrink-0",
+        seeMoreInline ? "self-center" : "self-start",
+        pdpTextLinkCtaMutedClass,
+        pdpType.label,
+        "leading-none",
+      )}
+    >
+      <span className={pdpTextLinkCtaMutedLabelClass}>
+        {seeMoreInline
+          ? expanded
+            ? "View less"
+            : "See more"
+          : expanded
+            ? "See less"
+            : "See more colorways"}
+      </span>
+    </button>
+  ) : null;
+
+  const swatches = visible.map((option, index) => {
+    const entering =
+      seeMoreInline && enterFromIndex != null && index >= enterFromIndex;
+    return (
+      <SwatchButton
+        key={option.selectionId}
+        option={option}
+        isSelected={option.selectionId === selectedId}
+        onSelect={onSelect}
+        className={entering ? "pdp-material-swatch-enter" : undefined}
+        style={
+          entering
+            ? {
+                animationDelay: `${(index - enterFromIndex) * ENTER_STAGGER_MS}ms`,
+              }
+            : undefined
+        }
+      />
+    );
+  });
+
+  // uxr2: always one row — collapsed fits preview + See more; expanded scrolls.
+  if (seeMoreInline) {
+    return (
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full max-w-full flex-nowrap items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "pl-1 py-1",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
+      >
+        {swatches}
+        {expandToggle}
+      </div>
+    );
+  }
+
+  // uxr3: swatches always one row (scroll when expanded); link stays below.
+  return (
+    <div className={cn("flex min-w-0 w-full flex-col gap-2", className)}>
+      <div
+        ref={scrollRef}
+        role="listbox"
+        aria-label="Choose color"
+        className={cn(
+          "flex min-w-0 w-full max-w-full flex-nowrap items-center gap-2",
+          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
+          "py-1 pl-1",
+          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        )}
+      >
+        {swatches}
+      </div>
+      {expandToggle}
     </div>
   );
 }

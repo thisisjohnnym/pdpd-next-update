@@ -63,7 +63,6 @@ export function PdpV3HeroLayout({
     inlineBuyBarColorSwatches,
     useCompactBuyBarColorDots,
     heroColorTrayOverlay,
-    expandableMaterialSwatchGroups,
     playHeroLandIntro,
     showStorePickupLink,
     showSubtleReviewTeaser,
@@ -74,7 +73,7 @@ export function PdpV3HeroLayout({
     showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
   const placeAtbAfterPickup = showStorePickupLink && !showFloatingBuyBar;
   const [swatchesExpanded, setSwatchesExpanded] = useState(false);
-  // See more expands on one horizontal scroll row — never grow the hero height.
+  // Expand reveals more chips via horizontal scroll — buy-bar height stays put.
   const heroAllowGrow = false;
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
