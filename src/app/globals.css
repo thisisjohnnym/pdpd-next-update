@@ -1015,6 +1015,17 @@ html.pdp-panel-scroll {
   min-height: max-content;
 }
 
+/*
+ * Expanded wrap swatches (uxr3): content-size the gallery row (pinned via
+ * measured min-height on the media child) so the footer grows the land
+ * downward instead of stealing height via minmax(0, 1fr).
+ */
+.pdp-hero-media-frame--docked.pdp-hero-media-frame--allow-grow {
+  height: auto;
+  min-height: 100%;
+  grid-template-rows: auto auto auto;
+}
+
 .pdp-edge-to-edge__media,
 .pdp-hero-immersive__media {
   position: absolute;

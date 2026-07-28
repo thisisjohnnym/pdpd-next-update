@@ -9,6 +9,7 @@ import {
   resolveProductIdFromSlug,
   resolveTabbySlugFromRoute,
 } from "@/components/pdp/pdp-product-routes";
+import { PdpHeroIntroPhaseFailsafe } from "@/components/pdp/pdp-hero-intro-phase-failsafe";
 import {
   PdpVersionProvider,
   type PdpVersion,
@@ -34,6 +35,7 @@ export function PdpProductPageView({
 
   return (
     <PdpVersionProvider version={version}>
+      <PdpHeroIntroPhaseFailsafe />
       <Suspense fallback={null}>
         <PdpSocialView
           slug={tabbySlug}

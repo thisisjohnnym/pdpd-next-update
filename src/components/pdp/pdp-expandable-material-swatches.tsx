@@ -36,8 +36,12 @@ type PdpExpandableMaterialSwatchesProps = {
   onSelect: (selectionId: string) => void;
   /** How many swatches show before “See more” (~one row). */
   previewCount?: number;
-  /** Max rows when expanded (collapsed is always one preview row). */
-  maxExpandedRows?: number;
+  /**
+   * Wrap mode (uxr3): how many extra chips spill onto the next line after a
+   * full-width row. Default 3 — “jump one line below” without packing a second
+   * full row.
+   */
+  wrapOverflowCount?: number;
   /**
    * When true: collapse + See more (wrap).
    * When false: one horizontal scroll rail (~7 visible left-to-right).
@@ -54,13 +58,29 @@ type PdpExpandableMaterialSwatchesProps = {
 
 /** ~one mobile row of size-7 swatches with gap-2. */
 const DEFAULT_PREVIEW_COUNT = 8;
-/** See more reveals at most one more row (2 rows total). */
-const DEFAULT_MAX_EXPANDED_ROWS = 2;
-/** Expanded See more — uxr2 inline + uxr3 below. */
+/** Wrap expand: one full row + this many chips on the line below. */
+const DEFAULT_WRAP_OVERFLOW_COUNT = 3;
+/** Expanded See more — uxr2 inline horizontal scroll. */
 const EXPANDED_SWATCH_COUNT = 10;
 /** Stagger between newly revealed swatches on expand. */
 const ENTER_STAGGER_MS = 28;
 const ENTER_DURATION_MS = 280;
+
+/** How many swatches pack into a wrap row (1px safety for subpixel wrap). */
+function chipsThatFitWidth(
+  widthPx: number,
+  swatchPx: number,
+  gapPx: number,
+): number {
+  if (widthPx <= 0 || swatchPx <= 0) {
+    return DEFAULT_PREVIEW_COUNT;
+  }
+  // N*swatch + (N-1)*gap <= width - 1  →  N <= (width - 1 + gap) / (swatch + gap)
+  return Math.max(
+    1,
+    Math.floor((widthPx - 1 + gapPx) / (swatchPx + gapPx)),
+  );
+}
 
 function isSelectable(option: MaterialSwatchOption): boolean {
   const combinationOk =
@@ -130,7 +150,8 @@ function SwatchButton({
  * Color options with optional See more / See less, or a horizontal scroll rail.
  * seeMore + seeMoreInline (uxr2): one row always; expand reveals the rest via
  * horizontal scroll so height never jumps. Control sits after the last swatch.
- * seeMore without inline (uxr3): classic “See more colorways” below a wrapping row.
+ * seeMore without inline (uxr3): “See more colorways” below; expand fills one
+ * row, then a few chips (wrapOverflowCount) jump to the line below.
  * Without seeMore: single horizontal row (~7 visible), scroll for the rest.
  */
 export function PdpExpandableMaterialSwatches({
@@ -139,7 +160,7 @@ export function PdpExpandableMaterialSwatches({
   selectedId,
   onSelect,
   previewCount = DEFAULT_PREVIEW_COUNT,
-  maxExpandedRows = DEFAULT_MAX_EXPANDED_ROWS,
+  wrapOverflowCount = DEFAULT_WRAP_OVERFLOW_COUNT,
   seeMore = true,
   seeMoreInline = false,
   expanded: expandedProp,
@@ -153,7 +174,9 @@ export function PdpExpandableMaterialSwatches({
     else setUncontrolledExpanded(next);
   };
   const scrollRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   useDragToScroll(scrollRef);
+  const [chipsPerRow, setChipsPerRow] = useState(previewCount);
 
   /** Pin lead material once so picking Soft Leather doesn’t reshuffle the grid. */
   const pinnedLeadRef = useRef(leadMaterial);
@@ -166,11 +189,43 @@ export function PdpExpandableMaterialSwatches({
     [options, leadMaterial],
   );
   const horizontal = !seeMore;
-  const expandedCount = Math.min(EXPANDED_SWATCH_COUNT, ordered.length);
+  const wrapMode = seeMore && !seeMoreInline;
+
+  // Measure how many size-7 chips fill the wrap row so expand can pack the
+  // width before spilling to the next line (uxr3).
+  useEffect(() => {
+    if (!wrapMode) {
+      return;
+    }
+    const el = wrapRef.current;
+    if (!el) {
+      return;
+    }
+    const measure = () => {
+      const styles = getComputedStyle(el);
+      const padX =
+        (parseFloat(styles.paddingLeft) || 0) +
+        (parseFloat(styles.paddingRight) || 0);
+      const gap = parseFloat(styles.columnGap || styles.gap) || 8;
+      const first = el.querySelector<HTMLElement>('button[role="option"]');
+      const swatchPx = first?.getBoundingClientRect().width || 28;
+      setChipsPerRow(chipsThatFitWidth(el.clientWidth - padX, swatchPx, gap));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [wrapMode]);
+
+  // Inline (uxr2): fixed expand count + horizontal scroll.
+  // Wrap (uxr3): one full-width row + a short spill onto the next line.
+  const expandedCount = seeMoreInline
+    ? Math.min(EXPANDED_SWATCH_COUNT, ordered.length)
+    : Math.min(ordered.length, chipsPerRow + wrapOverflowCount);
   const visible = ordered.slice(0, expanded ? expandedCount : previewCount);
   const canExpand = seeMore && ordered.length > previewCount;
 
-  /** Index from which newly revealed swatches should enter-animate (inline only). */
+  /** Index from which newly revealed swatches should enter-animate. */
   const [enterFromIndex, setEnterFromIndex] = useState<number | null>(null);
   const wasExpandedRef = useRef(expanded);
 
@@ -178,7 +233,7 @@ export function PdpExpandableMaterialSwatches({
     const wasExpanded = wasExpandedRef.current;
     wasExpandedRef.current = expanded;
 
-    if (!seeMore || !seeMoreInline || wasExpanded || !expanded) {
+    if (!seeMore || wasExpanded || !expanded) {
       return;
     }
 
@@ -189,7 +244,7 @@ export function PdpExpandableMaterialSwatches({
       40;
     const timer = window.setTimeout(() => setEnterFromIndex(null), clearAfter);
     return () => window.clearTimeout(timer);
-  }, [expanded, expandedCount, previewCount, seeMore, seeMoreInline]);
+  }, [expanded, expandedCount, previewCount, seeMore]);
 
   if (ordered.length === 0) {
     return null;
@@ -246,9 +301,8 @@ export function PdpExpandableMaterialSwatches({
     </button>
   ) : null;
 
-  const swatches = visible.map((option, index) => {
-    const entering =
-      seeMoreInline && enterFromIndex != null && index >= enterFromIndex;
+  const renderSwatch = (option: MaterialSwatchOption, index: number) => {
+    const entering = enterFromIndex != null && index >= enterFromIndex;
     return (
       <SwatchButton
         key={option.selectionId}
@@ -265,7 +319,7 @@ export function PdpExpandableMaterialSwatches({
         }
       />
     );
-  });
+  };
 
   // uxr2: always one row — collapsed fits preview + See more; expanded scrolls.
   if (seeMoreInline) {
@@ -282,27 +336,22 @@ export function PdpExpandableMaterialSwatches({
           className,
         )}
       >
-        {swatches}
+        {visible.map((option, index) => renderSwatch(option, index))}
         {expandToggle}
       </div>
     );
   }
 
-  // uxr3: swatches always one row (scroll when expanded); link stays below.
+  // uxr3: wrapping grid — pack each row to the container width, then wrap.
   return (
     <div className={cn("flex min-w-0 w-full flex-col gap-2", className)}>
       <div
-        ref={scrollRef}
+        ref={wrapRef}
         role="listbox"
         aria-label="Choose color"
-        className={cn(
-          "flex min-w-0 w-full max-w-full flex-nowrap items-center gap-2",
-          "overflow-x-auto overflow-y-clip overscroll-x-contain overscroll-y-none touch-pan-x",
-          "py-1 pl-1",
-          "pdp-carousel-draggable [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        )}
+        className="flex min-w-0 w-full max-w-full flex-wrap items-center gap-2 py-1 pl-1"
       >
-        {swatches}
+        {visible.map((option, index) => renderSwatch(option, index))}
       </div>
       {expandToggle}
     </div>

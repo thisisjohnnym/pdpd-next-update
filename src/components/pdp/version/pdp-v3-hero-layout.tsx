@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useState, type RefObject } from "react";
+import {
+  useCallback,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -68,13 +74,34 @@ export function PdpV3HeroLayout({
     showSubtleReviewTeaser,
     showFloatingBuyBar,
     floatingBuyBarWhenHeroHidden,
+    materialSwatchSeeMoreInline,
   } = getPdpVersionConfig(usePdpVersion());
   const usesPersistentAtb =
     showFloatingBuyBar && !floatingBuyBarWhenHeroHidden;
   const placeAtbAfterPickup = showStorePickupLink && !showFloatingBuyBar;
   const [swatchesExpanded, setSwatchesExpanded] = useState(false);
-  // Expand reveals more chips via horizontal scroll — buy-bar height stays put.
-  const heroAllowGrow = false;
+  // Measured gallery height at expand time — pins the media row so wrap
+  // swatches grow the land down instead of compressing the gallery.
+  const [galleryFloorPx, setGalleryFloorPx] = useState<number | null>(null);
+  const galleryWrapRef = useRef<HTMLDivElement>(null);
+  // uxr2 (inline): expand scrolls horizontally — land height stays put.
+  // uxr3 (wrap): expand adds a second row — grow the land so the gallery
+  // keeps its height and content below is pushed down.
+  const heroAllowGrow = swatchesExpanded && !materialSwatchSeeMoreInline;
+  const handleSwatchesExpandedChange = useCallback(
+    (expanded: boolean) => {
+      if (expanded && !materialSwatchSeeMoreInline) {
+        const el = galleryWrapRef.current;
+        if (el) {
+          setGalleryFloorPx(Math.round(el.getBoundingClientRect().height));
+        }
+      } else {
+        setGalleryFloorPx(null);
+      }
+      setSwatchesExpanded(expanded);
+    },
+    [materialSwatchSeeMoreInline],
+  );
   const summary =
     productId === "tabby" && tabby ? tabby.summary : product.summary;
   const displayPrice = usePdpDisplayPrice(summary.price);
@@ -86,6 +113,9 @@ export function PdpV3HeroLayout({
   const trayRootRef = useCallback((node: HTMLDivElement | null) => {
     setTrayPortalRoot(node);
   }, []);
+  // Escape: measured px floor so docked-grid grow can't compress media.
+  const galleryFloorStyle: CSSProperties | undefined =
+    galleryFloorPx != null ? { minHeight: galleryFloorPx } : undefined;
 
   return (
     <>
@@ -97,7 +127,11 @@ export function PdpV3HeroLayout({
           aria-hidden
         />
 
-        <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+        <div
+          ref={galleryWrapRef}
+          className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden"
+          style={galleryFloorStyle}
+        >
           <PdpGalleryHero
             onOpenReviews={onOpenReviews}
             onOpenArTryOn={onOpenArTryOn}
@@ -163,7 +197,7 @@ export function PdpV3HeroLayout({
                     onColorSheetOpenChange={onColorSheetOpenChange}
                     variant="rail"
                     swatchesExpanded={swatchesExpanded}
-                    onSwatchesExpandedChange={setSwatchesExpanded}
+                    onSwatchesExpandedChange={handleSwatchesExpandedChange}
                     className="min-w-0"
                   />
                 </div>

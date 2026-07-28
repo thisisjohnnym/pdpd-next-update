@@ -65,9 +65,10 @@ export const PDP_V6_INTRO_BOOT_SCRIPT = `
     isMobile = window.matchMedia("(max-width: 1023px)").matches;
   } catch (e) {}
   if (!root.getAttribute("data-hero-intro-phase")) {
-    // Mobile only — desktop split would lock on a 0x0 video waiting for ended.
-    var playIntro = !reduce && isMobile;
-    root.setAttribute("data-hero-intro-phase", playIntro ? "playing" : "ready");
+    // The fall-in / 360 intro provider is not mounted on current v5–v7 / UXR
+    // routes. Stamping "playing" hid .pdp-hero-intro-chrome (gallery navigator)
+    // forever. Land chrome stagger still runs via playHeroLandIntro CSS once ready.
+    root.setAttribute("data-hero-intro-phase", "ready");
   }
   if (root.getAttribute("data-hero-intro-phase") === "playing") {
     root.style.backgroundColor = "#f0f0f0";

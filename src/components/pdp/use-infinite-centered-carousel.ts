@@ -830,21 +830,18 @@ export function useInfiniteFullBleedCarousel(
       updateActiveLoopedIndex();
     };
 
-    const scheduleIdleCheck = () => {
-      if (!stableLoop) {
-        updateActiveLoopedIndex();
+    // Keep the slide indicator / progress bar in lockstep with the finger —
+    // update on every scroll frame. Edge teleport stays settle-only so it
+    // never cancels an iOS momentum fling.
+    const onScroll = () => {
+      updateActiveLoopedIndex();
+      if (scrollEndSupported) {
+        return;
       }
       if (idleTimer) {
         window.clearTimeout(idleTimer);
       }
-      if (!scrollEndSupported) {
-        idleTimer = window.setTimeout(() => {
-          if (stableLoop) {
-            updateActiveLoopedIndex();
-          }
-          recenterIfAtEdge();
-        }, 90);
-      }
+      idleTimer = window.setTimeout(recenterIfAtEdge, 90);
     };
 
     const onScrollEnd = () => {
@@ -861,7 +858,7 @@ export function useInfiniteFullBleedCarousel(
       if (scrollEndSupported) {
         return;
       }
-      scheduleIdleCheck();
+      onScroll();
     };
 
     const onResize = () => {
@@ -890,10 +887,10 @@ export function useInfiniteFullBleedCarousel(
     ro.observe(el);
 
     measure();
+    el.addEventListener("scroll", onScroll, { passive: true });
     if (scrollEndSupported) {
       el.addEventListener("scrollend", onScrollEnd);
     } else {
-      el.addEventListener("scroll", scheduleIdleCheck, { passive: true });
       el.addEventListener("scrollend", recenterIfAtEdge);
     }
 
@@ -914,10 +911,10 @@ export function useInfiniteFullBleedCarousel(
       if (resizeGuardRaf) {
         window.cancelAnimationFrame(resizeGuardRaf);
       }
+      el.removeEventListener("scroll", onScroll);
       if (scrollEndSupported) {
         el.removeEventListener("scrollend", onScrollEnd);
       } else {
-        el.removeEventListener("scroll", scheduleIdleCheck);
         el.removeEventListener("scrollend", recenterIfAtEdge);
       }
       if (stableLoop) {

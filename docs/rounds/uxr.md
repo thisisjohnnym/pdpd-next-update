@@ -41,7 +41,7 @@ Both `/uxr2` and `/uxr3` collapse to **6** chips with See more (`materialSwatchS
 | Route | Control |
 |-------|---------|
 | `/uxr2` (v6) | **Inline** “See more” / “View less” in the swatch row; expand scrolls horizontally (`materialSwatchSeeMoreInline: true`) |
-| `/uxr3` (v7) | **“See more colorways” / “See less” below** the row; swatches stay **one line** and scroll when expanded (`materialSwatchSeeMoreInline: false`) |
+| `/uxr3` (v7) | **“See more colorways” / “See less” below**; expand fills one row, then **3 chips** wrap to the next line (`materialSwatchSeeMoreInline: false`) |
 
 ---
 

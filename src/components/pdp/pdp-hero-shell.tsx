@@ -123,13 +123,25 @@ export function PdpHeroShell({
       )}
     >
       {showBrandSwitcher ? <PdpBrandBarReveal /> : null}
-      <div ref={heroRef} className="flex min-h-0 flex-1 flex-col">
+      <div
+        ref={heroRef}
+        className={cn(
+          "flex flex-col",
+          // Growing land: size to content (footer expand) while still
+          // filling the viewport min-height when collapsed.
+          allowGrow ? "h-auto min-h-full flex-1" : "min-h-0 flex-1",
+        )}
+      >
         <div
           ref={mediaFrameRef}
           className={cn(
-            "relative min-h-0 flex-1",
+            "relative",
+            allowGrow ? "h-auto min-h-full flex-1" : "min-h-0 flex-1",
             heroDockedBuyBar
-              ? "pdp-hero-media-frame--docked grid"
+              ? cn(
+                  "pdp-hero-media-frame--docked grid",
+                  allowGrow && "pdp-hero-media-frame--allow-grow",
+                )
               : "flex flex-col",
           )}
         >
