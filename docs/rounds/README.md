@@ -30,8 +30,8 @@ Each **Paper / design round** maps to a **route version** on the same production
 
 | Field | Value |
 |-------|-------|
-| Date | 2026-07-27 |
-| Deploy | `dpl_8KdrnwYxhyLBPNqWx6M48amSphjJ` |
+| Date | 2026-07-28 |
+| Deploy | `dpl_9pxzcZD1h4E6TtoYCzuN9KGkBrNk` |
 | URL | https://pdp-next-sigma.vercel.app/uxr3 |
 
 Update this section after every `vercel --prod`.
